@@ -160,7 +160,7 @@ void test_ntype(void) {
 
     ntype_s* p = (ntype_s*)NULL;
 
-    while(1) {
+    for(uint32_t i = 0u; i < 1024u*1024u; i++) {
         p = mkNum(1024u);
         rmNum(&p);
     }
