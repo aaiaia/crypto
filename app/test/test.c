@@ -181,6 +181,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 8ul - 1ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -192,6 +193,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 8ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -203,6 +205,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 8ul + 1ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -214,6 +217,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 16ul - 1ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -225,6 +229,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 16ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -236,6 +241,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 16ul + 1ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -247,6 +253,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 512ul - 1ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -258,6 +265,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 512ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -269,6 +277,7 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 512ul + 1ul;
         test_alen = UIN_CEIL(test_blen, 8u);
@@ -280,9 +289,10 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
 
         test_blen = 1023ul;
-        test_alen = (test_blen >> 3ul) + 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
         p = mkNum(test_blen);
         if(test_blen == p->blen)    test_cmp_blen = 0;
         else                        test_cmp_blen = -1;
@@ -291,6 +301,26 @@ void test_ntype(void) {
         printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
             p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
             p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
+    }
+
+    for(uint32_t tmp_blen = 1ul; tmp_blen < 20480ul; tmp_blen++) {
+        test_blen = tmp_blen;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+        rmNum(&p);
+
+        if((test_cmp_blen != 0) || (test_cmp_alen != 0)) {
+            printf("config:bitLength=%u,arrayLength=%u\r\n", test_blen, test_alen);
+            break;
+        } else {}
     }
 }
 
