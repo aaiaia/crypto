@@ -6,11 +6,20 @@
 #include "common/util.h"
 #include "common/ntype.h"
 
+void _memChk(void) {
+    struct sysinfo info;
+
+    sysinfo(&info);
+
+    printf("load: %ld %ld %ld\n", info.loads[0], info.loads[1], info.loads[2]);
+    printf("mem : %ld %ld %ld\n", info.totalram, info.totalram-info.freeram, info.freeram);
+}
+
 void test_macro(void) {
     // test: UIN_CEIL(n, x)
     {
         uint32_t ref, r, n, m;
-        printf("UIN_CEIL\r\n");
+        printf("[TEST] UIN_CEIL\r\n");
 
         // test 1
         n = 6u; m = 14u;
@@ -59,7 +68,7 @@ void test_macro(void) {
     // test: INT_CEIL(n, x)
     {
         int32_t ref, r, n, m;
-        printf("INT_CEIL\r\n");
+        printf("[TEST] INT_CEIL\r\n");
 
         // test 1
         n = 6; m = 14;
@@ -105,69 +114,184 @@ void test_macro(void) {
 
     }
 
-    // test: BIN_CEIL(n, x)
+    // test: BIT2SIZE(bits)
     {
-        uint32_t ref, r, n, m;
-        printf("BIN_CEIL\r\n");
+        uint32_t ref, r, n;
+        printf("[TEST] BIT2SIZE\r\n");
 
         // test 1
-        n = 6u; m = 8u;
+        n = 6u;
         ref = 1u;
-        r = BIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("BIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        r = BIT2SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 2
-        n = 14u; m = 16u;
-        ref = 1u;
-        r = BIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("BIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        n = 14u;
+        ref = 2u;
+        r = BIT2SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 3
-        n = 1024u; m = 512u;
-        ref = 2u;
-        r = BIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("BIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        n = 1024u;
+        ref = 128u;
+        r = BIT2SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 4
-        n = 10240u; m = 2048u;
-        ref = 5u;
-        r = BIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("BIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        n = 10240u;
+        ref = 1280u;
+        r = BIT2SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 5
-        n = 10241u; m = 2048u;
-        ref = 6u;
-        r = BIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("BIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        n = 10241u;
+        ref = 1281u;
+        r = BIT2SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 6
-        n = 727u; m = 128u;
-        ref = 7u;
-        r = BIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("BIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        n = 727u;
+        ref = 91u;
+        r = BIT2SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
     }
 }
 
 void test_ntype(void) {
-    struct sysinfo info;
-
     ntype_s* p = (ntype_s*)NULL;
 
-    for(uint32_t i = 0u; i < 1024u*1024u; i++) {
-        p = mkNum(1024u);
-        rmNum(&p);
-    }
-    sysinfo(&info);
+    uint32_t test_blen, test_alen;
+    int test_cmp_blen, test_cmp_alen;
 
-    printf("load: %ld %ld %ld\n", info.loads[0], info.loads[1], info.loads[2]);
-    printf("mem : %ld %ld %ld\n", info.totalram, info.totalram-info.freeram, info.freeram);
+    {
+        test_blen = 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 8ul - 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 8ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 8ul + 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 16ul - 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 16ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 16ul + 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 512ul - 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 512ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 512ul + 1ul;
+        test_alen = UIN_CEIL(test_blen, 8u);
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+
+        test_blen = 1023ul;
+        test_alen = (test_blen >> 3ul) + 1ul;
+        p = mkNum(test_blen);
+        if(test_blen == p->blen)    test_cmp_blen = 0;
+        else                        test_cmp_blen = -1;
+        if(test_alen == p->alen)    test_cmp_alen = 0;
+        else                        test_cmp_alen = -1;
+        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
+            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
+            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
+    }
 }
 
 void test_sequence(void) {

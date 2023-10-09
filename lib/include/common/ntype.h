@@ -1,6 +1,7 @@
 #include <stdint.h>
 
-#define NTYPE   uint32_t
+#define NTYPE       uint32_t
+#define BITPERBYTE  8u
 
 typedef struct {
     NTYPE* array;
