@@ -1,3 +1,6 @@
+#ifndef BTYPE_H
+#define BTYPE_H
+
 #include <stdint.h>
 
 #define NTYPE       uint32_t
@@ -5,10 +8,11 @@
 
 typedef struct {
     NTYPE* array;
-    uint32_t blen;
-    uint32_t alen;
+    size_t bitLen;
+    size_t size;
 }ntype_s;
 
-ntype_s* mkNum(uint32_t blen);
+ntype_s* mkNum(size_t bitLen);
 int rmNum(ntype_s** p);
 
+#endif

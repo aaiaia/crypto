@@ -4,11 +4,11 @@
 #include "common/ntype.h"
 #include "common/util.h"
 
-ntype_s* mkNum(uint32_t blen) {
+ntype_s* mkNum(size_t bitLen) {
     ntype_s* p = (ntype_s*)malloc(sizeof(ntype_s));
-    p->blen = blen;
-    p->alen = BIT2SIZE(blen);
-    p->array = (NTYPE*)calloc(p->alen, sizeof(NTYPE));
+    p->bitLen = bitLen;
+    p->size = BIT2SIZE(bitLen);
+    p->array = (NTYPE*)calloc(p->size, sizeof(NTYPE));
     return p;
 }
 
