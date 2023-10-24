@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "arith/add.h"
+#include "arith/core.h"
 
 NTYPE add_u32(NTYPE* d, NTYPE* s1, NTYPE* s0, size_t len, NTYPE c) {
     for(size_t i=0ul; i<len; i++) {

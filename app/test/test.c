@@ -6,7 +6,7 @@
 
 #include "common/util.h"
 #include "common/ntype.h"
-#include "arith/add.h"
+#include "arith/core.h"
 
 void _memChk(void) {
     struct sysinfo info;
