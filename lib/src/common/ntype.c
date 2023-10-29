@@ -8,7 +8,7 @@ ntype_s* mkNum(size_t bitLen) {
     ntype_s* p = (ntype_s*)malloc(sizeof(ntype_s));
     p->bitLen = bitLen;
     p->size = BIT2SIZE(bitLen);
-    p->array = (NTYPE*)calloc(p->size, sizeof(NTYPE));
+    p->array = (NTYPE*)malloc(p->size);
     return p;
 }
 
