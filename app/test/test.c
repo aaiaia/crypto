@@ -337,7 +337,7 @@ void test_ntype(void) {
 }
 
 #define TEST_ARITH_BITS 127u    //16Bytes
-void test_arith_arrayLen(void) {
+void test_arith_add(void) {
     ntype_s* test_ref;
     ntype_s* test_dst;
     ntype_s* test_opA;
@@ -402,12 +402,77 @@ void test_arith_arrayLen(void) {
 
     test_cmp = memcmp(test_ref->array, test_dst->array, sizeof(NTYPE)*(test_ref->size));
     printf("add_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+
+    rmNum(&test_ref);
+    rmNum(&test_dst);
+    rmNum(&test_opA);
+    rmNum(&test_opB);
+}
+
+void test_arith_sub(void) {
+    ntype_s* test_ref;
+    ntype_s* test_dst;
+    ntype_s* test_opA;
+    ntype_s* test_opB;
+    int test_cmp;
+
+    test_ref = mkNum(TEST_ARITH_BITS);
+    test_dst = mkNum(TEST_ARITH_BITS);
+    test_opA = mkNum(TEST_ARITH_BITS);
+    test_opB = mkNum(TEST_ARITH_BITS);
+
+    /* Sum test */
+    memset(&test_ref->array[0], 0x0u, sizeof(NTYPE)*(test_opA->size));
+    memset(&test_opA->array[0], 0x0u, sizeof(NTYPE)*(test_opA->size));
+    memset(&test_opB->array[0], 0x0u, sizeof(NTYPE)*(test_opB->size));
+
+#if 1
+    memset(&test_ref->array[0], 0xffffffffUL, sizeof(NTYPE)*(test_opA->size));
+
+    test_opA->array[0] = 0x1UL;
+#endif
+
+    sub_u32(test_dst->array, test_opA->array, test_opB->array, test_dst->size, 0ul);
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->array, test_dst->array, sizeof(NTYPE)*(test_ref->size));
+    printf("sub_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+
+    /* Sum test */
+    memset(&test_ref->array[0], 0x0u, sizeof(NTYPE)*(test_opA->size));
+    memset(&test_opA->array[0], 0x0u, sizeof(NTYPE)*(test_opA->size));
+    memset(&test_opB->array[0], 0x0u, sizeof(NTYPE)*(test_opB->size));
+
+#if 1
+    memset(&test_ref->array[0], 0xffffffffUL, sizeof(NTYPE)*(test_opA->size));
+    test_ref->array[0] = 0xfffffffeUL;
+
+    test_opA->array[0] = 0x1;
+#endif
+
+    sub_u32(test_dst->array, test_opA->array, test_opB->array, test_dst->size, 1ul);
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->array, test_dst->array, sizeof(NTYPE)*(test_ref->size));
+    printf("sub_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+
+    rmNum(&test_ref);
+    rmNum(&test_dst);
+    rmNum(&test_opA);
+    rmNum(&test_opB);
 }
 
 void test_sequence(void) {
     test_macro();
     test_ntype();
-    test_arith_arrayLen();
+    test_arith_add();
+    test_arith_sub();
 }
 
 int main(int argc, char** argv) {
