@@ -20,8 +20,8 @@ void _memChk(void) {
 void test_print_ntype(ntype_s* p, const char* title) {
     printf("ntype addr:0x%p, NTYPE size:%lu\r\n", p, sizeof(NTYPE));
     printf("[%s]\r\n", title);
-    for(size_t i = p->size - 1u; i != ((size_t)-1); i--) {
-        printf("0x%08x", p->array[i]);
+    for(size_t i = p->length- 1u; i != ((size_t)-1); i--) {
+        printf("0x%08x", p->data[i]);
         if(i != 0u) printf(":");
         else        printf("\r\n");
     }
@@ -179,158 +179,158 @@ void test_macro(void) {
 void test_ntype(void) {
     ntype_s* p = (ntype_s*)NULL;
 
-    size_t test_bitLen, test_size;
-    int test_cmp_bitLen, test_cmp_size;
+    size_t test_bits, test_size;
+    int test_cmp_bits, test_cmp_size;
 
     {
-        test_bitLen = 1ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 8ul - 1ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 8ul - 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 8ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 8ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 8ul + 1ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 8ul + 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 16ul - 1ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 16ul - 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 16ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 16ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 16ul + 1ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 16ul + 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 512ul - 1ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 512ul - 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 512ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 512ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 512ul + 1ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 512ul + 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        test_bitLen = 1023ul;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = 1023ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
     }
 
     for(uint32_t tmp_bitLen = 1ul; tmp_bitLen < 20480ul; tmp_bitLen++) {
-        test_bitLen = tmp_bitLen;
-        test_size = UIN_CEIL(test_bitLen, 8u);
-        p = mkNum(test_bitLen);
-        if(test_bitLen == p->bitLen)    test_cmp_bitLen = 0;
-        else                        test_cmp_bitLen = -1;
+        test_bits = tmp_bitLen;
+        test_size = UIN_CEIL(test_bits, 8u);
+        p = mkNum(test_bits);
+        if(test_bits == p->bits)    test_cmp_bits = 0;
+        else                        test_cmp_bits = -1;
         if(test_size == p->size)    test_cmp_size = 0;
         else                        test_cmp_size = -1;
         printf("(ntype_s*):0x%p, bitLen:%lu[bit]:%s, size:%lu[Bytes]:%s\r\n", p,
-            p->bitLen, (test_cmp_bitLen == 0)?"PASS":"FAIL", \
+            p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
 
-        if((test_cmp_bitLen != 0) || (test_cmp_size != 0)) {
-            printf("config:bitLength=%lu,arrayLength=%lu\r\n", test_bitLen, test_size);
+        if((test_cmp_bits != 0) || (test_cmp_size != 0)) {
+            printf("config:bitLength=%lu,arrayLength=%lu\r\n", test_bits, test_size);
             break;
         } else {}
     }
@@ -350,57 +350,57 @@ void test_arith_add(void) {
     test_opB = mkNum(TEST_ARITH_BITS);
 
     /* Sum test */
-    memset(&test_ref->array[0], 0x0u, (test_opA->size));
-    memset(&test_opA->array[0], 0x0u, (test_opA->size));
-    memset(&test_opB->array[0], 0x0u, (test_opB->size));
+    memset(&test_ref->data[0], 0x0u, (test_opA->size));
+    memset(&test_opA->data[0], 0x0u, (test_opA->size));
+    memset(&test_opB->data[0], 0x0u, (test_opB->size));
 
-    test_ref->array[0] = 0x00000000ul;
-    test_ref->array[1] = 0x00000000ul;
-    test_ref->array[2] = 0x00000000ul;
-    test_ref->array[3] = 0x00000001ul;
+    test_ref->data[0] = 0x00000000ul;
+    test_ref->data[1] = 0x00000000ul;
+    test_ref->data[2] = 0x00000000ul;
+    test_ref->data[3] = 0x00000001ul;
 
-    test_opA->array[0] = 0xFFFFFFFFul;
-    test_opB->array[0] = 0x00000001ul;
-    test_opA->array[1] = 0xFFFFFFFFul;
-    test_opB->array[1] = 0x00000000ul;
-    test_opA->array[2] = 0xFFFFFFFEul;
-    test_opB->array[2] = 0x00000001ul;
+    test_opA->data[0] = 0xFFFFFFFFul;
+    test_opB->data[0] = 0x00000001ul;
+    test_opA->data[1] = 0xFFFFFFFFul;
+    test_opB->data[1] = 0x00000000ul;
+    test_opA->data[2] = 0xFFFFFFFEul;
+    test_opB->data[2] = 0x00000001ul;
 
-    add_u32(test_dst->array, test_opA->array, test_opB->array, test_dst->size, 0ul);
+    add_u32(test_dst, test_opA, test_opB, 0ul);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
-    test_cmp = memcmp(test_ref->array, test_dst->array, (test_ref->size));
+    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("add_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /* Sum test */
-    memset(&test_ref->array[0], 0x0u, (test_opA->size));
-    memset(&test_opA->array[0], 0x0u, (test_opA->size));
-    memset(&test_opB->array[0], 0x0u, (test_opB->size));
+    memset(&test_ref->data[0], 0x0u, (test_opA->size));
+    memset(&test_opA->data[0], 0x0u, (test_opA->size));
+    memset(&test_opB->data[0], 0x0u, (test_opB->size));
 
-    test_ref->array[0] = 0xFFFFFFFEul;
-    test_ref->array[1] = 0xFFFFFFFFul;
-    test_ref->array[2] = 0xFFFFFFFFul;
-    test_ref->array[3] = 0x00000001ul;
+    test_ref->data[0] = 0xFFFFFFFEul;
+    test_ref->data[1] = 0xFFFFFFFFul;
+    test_ref->data[2] = 0xFFFFFFFFul;
+    test_ref->data[3] = 0x00000001ul;
 
-    test_opA->array[0] = 0xFFFFFFFFul;
-    test_opB->array[0] = 0xFFFFFFFFul;
-    test_opA->array[1] = 0xFFFFFFFFul;
-    test_opB->array[1] = 0xFFFFFFFFul;
-    test_opA->array[2] = 0xFFFFFFFFul;
-    test_opB->array[2] = 0xFFFFFFFFul;
-    test_opA->array[3] = 0x0ul;
-    test_opB->array[3] = 0x0ul;
+    test_opA->data[0] = 0xFFFFFFFFul;
+    test_opB->data[0] = 0xFFFFFFFFul;
+    test_opA->data[1] = 0xFFFFFFFFul;
+    test_opB->data[1] = 0xFFFFFFFFul;
+    test_opA->data[2] = 0xFFFFFFFFul;
+    test_opB->data[2] = 0xFFFFFFFFul;
+    test_opA->data[3] = 0x0ul;
+    test_opB->data[3] = 0x0ul;
 
-    add_u32(test_dst->array, test_opA->array, test_opB->array, test_dst->size, 0ul);
+    add_u32(test_dst, test_opA, test_opB, 0ul);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
-    test_cmp = memcmp(test_ref->array, test_dst->array, (test_ref->size));
+    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("add_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
@@ -422,44 +422,44 @@ void test_arith_sub(void) {
     test_opB = mkNum(TEST_ARITH_BITS);
 
     /* Sum test */
-    memset(&test_ref->array[0], 0x0u, (test_opA->size));
-    memset(&test_opA->array[0], 0x0u, (test_opA->size));
-    memset(&test_opB->array[0], 0x0u, (test_opB->size));
+    memset(&test_ref->data[0], 0x0u, (test_opA->size));
+    memset(&test_opA->data[0], 0x0u, (test_opA->size));
+    memset(&test_opB->data[0], 0x0u, (test_opB->size));
 
 #if 1
-    memset(&test_ref->array[0], 0xffffffffUL, (test_opA->size));
+    memset(&test_ref->data[0], 0xffffffffUL, (test_opA->size));
 
-    test_opA->array[0] = 0x1UL;
+    test_opA->data[0] = 0x1UL;
 #endif
 
-    sub_u32(test_dst->array, test_opA->array, test_opB->array, test_dst->size, 0ul);
+    sub_u32(test_dst, test_opA, test_opB, 0ul);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
-    test_cmp = memcmp(test_ref->array, test_dst->array, (test_ref->size));
+    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("sub_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /* Sum test */
-    memset(&test_ref->array[0], 0x0u, (test_opA->size));
-    memset(&test_opA->array[0], 0x0u, (test_opA->size));
-    memset(&test_opB->array[0], 0x0u, (test_opB->size));
+    memset(&test_ref->data[0], 0x0u, (test_opA->size));
+    memset(&test_opA->data[0], 0x0u, (test_opA->size));
+    memset(&test_opB->data[0], 0x0u, (test_opB->size));
 
 #if 1
-    memset(&test_ref->array[0], 0xffffffffUL, (test_opA->size));
-    test_ref->array[0] = 0xfffffffeUL;
+    memset(&test_ref->data[0], 0xffffffffUL, (test_opA->size));
+    test_ref->data[0] = 0xfffffffeUL;
 
-    test_opA->array[0] = 0x1;
+    test_opA->data[0] = 0x1;
 #endif
 
-    sub_u32(test_dst->array, test_opA->array, test_opB->array, test_dst->size, 1ul);
+    sub_u32(test_dst, test_opA, test_opB, 1ul);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
-    test_cmp = memcmp(test_ref->array, test_dst->array, (test_ref->size));
+    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("sub_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
