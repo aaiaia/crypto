@@ -4,11 +4,12 @@
 #include "common/ntype.h"
 #include "common/util.h"
 
-ntype_s* mkNum(size_t bitLen) {
+ntype_s* mkNum(size_t bits) {
     ntype_s* p = (ntype_s*)malloc(sizeof(ntype_s));
-    p->bitLen = bitLen;
-    p->size = BIT2SIZE(bitLen);
-    p->array = (NTYPE*)malloc(p->size);
+    p->bits = bits;
+    p->size = BIT2SIZE(bits);
+    p->length= p->size/sizeof(NTYPE);
+    p->data = (NTYPE*)malloc(p->size);
     return p;
 }
 
@@ -16,7 +17,7 @@ int rmNum(ntype_s** p) {
     int fs = 0;
     if((void*)p!=NULL) {
         if((void*)(*p)!=NULL) {
-            free((*p)->array);
+            free((*p)->data);
             free((*p));
             (*p) = (ntype_s*)NULL;
         }
