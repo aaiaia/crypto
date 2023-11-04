@@ -8,6 +8,7 @@
 
 typedef struct {
     NTYPE* data;
+    NTYPE  lastMask;
     size_t bits;
     size_t length;
     size_t size;

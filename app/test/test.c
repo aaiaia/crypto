@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include <sys/sysinfo.h>
@@ -28,6 +29,7 @@ void test_print_ntype(ntype_s* p, const char* title) {
 }
 
 void test_macro(void) {
+    bool cmp_result;
     // test: UIN_CEIL(n, x)
     {
         uint32_t ref, r, n, m;
@@ -173,6 +175,205 @@ void test_macro(void) {
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
+    }
+
+    // test: LASTBITMASK(bits, TYPE)
+    {
+        // uint32_t
+        uint32_t test_tmp_u32_bits;
+        uint32_t test_tmp_u32_mask;
+        uint32_t test_tmp_u32_ref;
+
+        test_tmp_u32_bits = 127UL;
+        test_tmp_u32_ref = 0x7FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 126UL;
+        test_tmp_u32_ref = 0x3FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 125UL;
+        test_tmp_u32_ref = 0x1FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 124UL;
+        test_tmp_u32_ref = 0x0FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 105UL;
+        test_tmp_u32_ref = 0x000001FFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 104UL;
+        test_tmp_u32_ref = 0x000000FFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 103UL;
+        test_tmp_u32_ref = 0x0000007FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 102UL;
+        test_tmp_u32_ref = 0x0000003FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 101UL;
+        test_tmp_u32_ref = 0x0000001FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 100UL;
+        test_tmp_u32_ref = 0x0000000FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 99UL;
+        test_tmp_u32_ref = 0x00000007UL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 98UL;
+        test_tmp_u32_ref = 0x00000003UL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u32_bits = 97UL;
+        test_tmp_u32_ref = 0x00000001UL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        // uint64_t
+        uint64_t test_tmp_u64_bits;
+        uint64_t test_tmp_u64_mask;
+        uint64_t test_tmp_u64_ref;
+
+        test_tmp_u64_bits = 127UL;
+        test_tmp_u64_ref = 0x7FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 126UL;
+        test_tmp_u64_ref = 0x3FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 125UL;
+        test_tmp_u64_ref = 0x1FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 124UL;
+        test_tmp_u64_ref = 0x0FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 105UL;
+        test_tmp_u64_ref = 0x000001FFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 104UL;
+        test_tmp_u64_ref = 0x000000FFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 103UL;
+        test_tmp_u64_ref = 0x0000007FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 102UL;
+        test_tmp_u64_ref = 0x0000003FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 101UL;
+        test_tmp_u64_ref = 0x0000001FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 100UL;
+        test_tmp_u64_ref = 0x0000000FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 99UL;
+        test_tmp_u64_ref = 0x00000007FFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 98UL;
+        test_tmp_u64_ref = 0x00000003FFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 97UL;
+        test_tmp_u64_ref = 0x00000001FFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 69UL;
+        test_tmp_u64_ref = 0x000000000000001FUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 68UL;
+        test_tmp_u64_ref = 0x000000000000000FUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 67UL;
+        test_tmp_u64_ref = 0x0000000000000007UL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 66UL;
+        test_tmp_u64_ref = 0x0000000000000003UL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+
+        test_tmp_u64_bits = 65UL;
+        test_tmp_u64_ref = 0x0000000000000001UL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
     }
 }
 
