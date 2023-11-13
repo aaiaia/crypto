@@ -7,7 +7,10 @@
 
 #include "common/util.h"
 #include "common/ntype.h"
+#include "common/returnType.h"
+
 #include "arith/arith_core.h"
+#include "logic/logic_core.h"
 
 void _memChk(void) {
     struct sysinfo info;
@@ -539,11 +542,12 @@ void test_ntype(void) {
 
 #define TEST_ARITH_BITS 127u    //16Bytes
 void test_arith_add(void) {
+    int test_cmp;
+
     ntype_s* test_ref;
     ntype_s* test_dst;
     ntype_s* test_opA;
     ntype_s* test_opB;
-    int test_cmp;
 
     test_ref = mkNum(TEST_ARITH_BITS);
     test_dst = mkNum(TEST_ARITH_BITS);
@@ -611,11 +615,12 @@ void test_arith_add(void) {
 }
 
 void test_arith_sub(void) {
+    int test_cmp;
+
     ntype_s* test_ref;
     ntype_s* test_dst;
     ntype_s* test_opA;
     ntype_s* test_opB;
-    int test_cmp;
 
     test_ref = mkNum(TEST_ARITH_BITS);
     test_dst = mkNum(TEST_ARITH_BITS);
@@ -669,11 +674,52 @@ void test_arith_sub(void) {
     rmNum(&test_opB);
 }
 
+#define TEST_LOGIC_SHIFT_ONE_BIT    1024U
+#define TEST_LOGIC_SHIFT_REF        0x08108051U
+#define TEST_LOGIC_SHIFT_VAL        0x84084028U
+
+void test_logic_shft(void) {
+    int test_cmp;
+    ReturnType fr;
+
+    ntype_s* test_refer;
+    ntype_s* test_sft1b;
+    NTYPE test_ovf;
+
+    test_refer = mkNum(TEST_LOGIC_SHIFT_ONE_BIT);
+    test_sft1b = mkNum(TEST_LOGIC_SHIFT_ONE_BIT);
+    (void)memset(test_refer->data, 0x0U, test_refer->size);
+    (void)memset(test_sft1b->data, 0x0U, test_sft1b->size);
+
+    // set reference
+    for(size_t i = 0U; i < test_refer->length; i++) {
+        test_refer->data[i] = TEST_LOGIC_SHIFT_REF;
+    }
+
+    // set init vector
+    for(size_t i = 0U; i < test_sft1b->length; i++) {
+        test_sft1b->data[i] = TEST_LOGIC_SHIFT_VAL;
+    }
+
+    // run test function
+    if(fr = sftL1b(test_sft1b, &test_ovf, 1U)) {
+        printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+    }
+
+    test_cmp = memcmp(test_refer->data, test_sft1b->data, (test_refer->size));
+    test_print_ntype(test_refer, "refer");
+    test_print_ntype(test_sft1b, "sft1b");
+    printf("sftL1b() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+
+}
+
 void test_sequence(void) {
     test_macro();
     test_ntype();
     test_arith_add();
     test_arith_sub();
+
+    test_logic_shft();
 }
 
 int main(int argc, char** argv) {
