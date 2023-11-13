@@ -4,7 +4,8 @@
 #include <stdint.h>
 
 #define NTYPE       uint32_t
-#define BITPERBYTE  8u
+#define NTYPE_SIZE  8U
+#define NTYPE_BITS  32U
 
 typedef struct {
     NTYPE* data;
