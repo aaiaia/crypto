@@ -9,6 +9,6 @@
 
 NTYPE add_u32(ntype_s* d, ntype_s* s1, ntype_s* s0, NTYPE c);
 NTYPE sub_u32(ntype_s* d, ntype_s* s1, ntype_s* s0, NTYPE c);
-ReturnType mul_u31(ntype_s* d, ntype_s* s1, ntype_s* s0);
+ReturnType mul_u32(ntype_s* d, ntype_s* s1, ntype_s* s0);
 
 #endif
