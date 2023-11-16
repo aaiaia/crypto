@@ -7,4 +7,6 @@ typedef enum {
     E_ERROR_NULL,
     E_ERROR_RUNTIME,
 } ReturnType;
+
+void printReturnType(ReturnType T);
 #endif
