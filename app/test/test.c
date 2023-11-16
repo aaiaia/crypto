@@ -849,6 +849,49 @@ void test_arith_mul(void) {
     rmNum(&test_dst);
 }
 
+#define TEST_ARITH_MUL_NN_BIT       512U
+void test_arith_mul_nn(void) {
+    int test_cmp;
+    ReturnType fr;
+
+    ntype_s* test_ref = mkNum(TEST_ARITH_MUL_NN_BIT);
+    ntype_s* test_opA = mkNum(TEST_ARITH_MUL_NN_BIT);
+    ntype_s* test_opB = mkNum(TEST_ARITH_MUL_NN_BIT);
+    ntype_s* test_dst = mkNum(TEST_ARITH_MUL_NN_BIT);
+
+    /****************/
+    /* TestVector 1, Negative x Negative */
+    (void)memset(test_ref->data, 0U,    test_ref->size);
+    (void)memset(test_opA->data, 0xffU, test_opA->size);
+    (void)memset(test_opB->data, 0xffU, test_opB->size);
+    (void)memset(test_dst->data, 0U,    test_dst->size);
+
+    // set operand A -> -1
+    //test_opA->data[0];
+
+    // set operand B
+    //test_opB->data[0];
+
+    // set reference
+    test_ref->data[0]  = 0x00000001U;
+
+    if(fr = mul_u32_ext(test_dst, test_opA, test_opB, false)) {
+        printReturnType(fr);
+    } else { /* Do nothing */ }
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
+    printf("mul_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+
+    rmNum(&test_ref);
+    rmNum(&test_opA);
+    rmNum(&test_opB);
+    rmNum(&test_dst);
+}
+
 #define TEST_LOGIC_SHIFT_ONE_BIT    1024U
 #define TEST_LOGIC_SHIFT_REF        0x08108051U
 #define TEST_LOGIC_SHIFT_VAL        0x84084028U
@@ -863,6 +906,29 @@ void test_logic_shft(void) {
 
     test_refer = mkNum(TEST_LOGIC_SHIFT_ONE_BIT);
     test_sft1b = mkNum(TEST_LOGIC_SHIFT_ONE_BIT);
+
+    /* Shift sequence 1 */
+    (void)memset(test_refer->data, 0x0U, test_refer->size);
+    (void)memset(test_sft1b->data, 0x0U, test_sft1b->size);
+
+    // set reference
+    test_refer->data[0] = 0x2U;
+
+    // set init vector
+    test_sft1b->data[0] = 0x1U;
+
+    test_print_ntype(test_sft1b, "sft1b(before)");
+    // run test function
+    if(fr = sftL1b(test_sft1b, &test_ovf, 0U)) {
+        printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+    }
+
+    test_cmp = memcmp(test_refer->data, test_sft1b->data, (test_refer->size));
+    test_print_ntype(test_refer, "refer");
+    test_print_ntype(test_sft1b, "sft1b(after)");
+    printf("sftL1b() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+
+    /* Shift sequence 2 */
     (void)memset(test_refer->data, 0x0U, test_refer->size);
     (void)memset(test_sft1b->data, 0x0U, test_sft1b->size);
 
@@ -876,6 +942,7 @@ void test_logic_shft(void) {
         test_sft1b->data[i] = TEST_LOGIC_SHIFT_VAL;
     }
 
+    test_print_ntype(test_sft1b, "sft1b(before)");
     // run test function
     if(fr = sftL1b(test_sft1b, &test_ovf, 1U)) {
         printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
@@ -883,7 +950,7 @@ void test_logic_shft(void) {
 
     test_cmp = memcmp(test_refer->data, test_sft1b->data, (test_refer->size));
     test_print_ntype(test_refer, "refer");
-    test_print_ntype(test_sft1b, "sft1b");
+    test_print_ntype(test_sft1b, "sft1b(after)");
     printf("sftL1b() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
 }
@@ -909,6 +976,10 @@ void test_sequence(void) {
     printf("[test start: test_arith_mul()]\r\n");
     test_arith_mul();
     printf("[test   end: test_arith_mul()]\r\n");
+
+    printf("[test start: test_arith_mul_nn()]\r\n");
+    test_arith_mul_nn();
+    printf("[test   end: test_arith_mul_nn()]\r\n");
 
     /******************************/
     printf("[test start: test_logic_shft()]\r\n");
