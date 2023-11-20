@@ -44,8 +44,10 @@ static bool g_clkOvf;
 }
 
 void test_print_ntype(ntype_s* p, const char* title) {
-    printf("ntype addr:0x%p, NTYPE size:%lu\r\n", p, sizeof(NTYPE));
     printf("[%s]\r\n", title);
+    printf("addr:0x%p, NTYPE size:%lu\r\n", p, sizeof(NTYPE));
+    printf("p->data:0x%p, p->lastMask:0x%x\r\np->bits=%ld, p->length=%ld, p->size=%ld\r\n", \
+            p->data, p->lastMask, p->bits, p->length, p->size);
     for(size_t i = p->length- 1u; i != ((size_t)-1); i--) {
         printf("0x%08x", p->data[i]);
         if(i != 0u) printf(":");
