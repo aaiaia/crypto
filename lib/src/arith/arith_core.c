@@ -52,7 +52,7 @@ ReturnType mul_u32_bs_ext(ntype_s* d, ntype_s* s1, ntype_s* s0, bool guard) {
                 } else { /* Do nothing */}
                 sftL1b(tmp, NULL, 0U);
             }
-            nSftBit=-sftBit;
+            nSftBit-=sftBit;
         }
         rmNum(&tmp);
 
