@@ -706,14 +706,14 @@ void test_arith_sub(void) {
     rmNum(&test_opB);
 }
 
-#define TEST_ARITH_MUL_BIT  1024U
+#define TEST_ARITH_MUL_U32_BS_BIT  1024U
 void test_arith_mul_u32_bs(void) {
     int test_cmp;
 
-    ntype_s* test_ref = mkNum(TEST_ARITH_MUL_BIT<<1U);
-    ntype_s* test_opA = mkNum(TEST_ARITH_MUL_BIT<<0U);
-    ntype_s* test_opB = mkNum(TEST_ARITH_MUL_BIT<<0U);
-    ntype_s* test_dst = mkNum(TEST_ARITH_MUL_BIT<<1U);
+    ntype_s* test_ref = mkNum(TEST_ARITH_MUL_U32_BS_BIT<<1U);
+    ntype_s* test_opA = mkNum(TEST_ARITH_MUL_U32_BS_BIT<<0U);
+    ntype_s* test_opB = mkNum(TEST_ARITH_MUL_U32_BS_BIT<<0U);
+    ntype_s* test_dst = mkNum(TEST_ARITH_MUL_U32_BS_BIT<<1U);
 
     /****************/
     /* TestVector 1 */
@@ -889,15 +889,15 @@ void test_arith_mul_u32_bs(void) {
     rmNum(&test_dst);
 }
 
-#define TEST_ARITH_MUL_NN_BIT       512U
+#define TEST_ARITH_MUL_u32_bs_NN_BIT       512U
 void test_arith_mul_u32_bs_nn(void) {
     int test_cmp;
     ReturnType fr;
 
-    ntype_s* test_ref = mkNum(TEST_ARITH_MUL_NN_BIT);
-    ntype_s* test_opA = mkNum(TEST_ARITH_MUL_NN_BIT);
-    ntype_s* test_opB = mkNum(TEST_ARITH_MUL_NN_BIT);
-    ntype_s* test_dst = mkNum(TEST_ARITH_MUL_NN_BIT);
+    ntype_s* test_ref = mkNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+    ntype_s* test_opA = mkNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+    ntype_s* test_opB = mkNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+    ntype_s* test_dst = mkNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
 
     /****************/
     /* TestVector 1, Negative x Negative */
