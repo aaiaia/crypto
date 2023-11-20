@@ -675,7 +675,7 @@ void test_arith_sub(void) {
 }
 
 #define TEST_ARITH_MUL_BIT  1024U
-void test_arith_mul(void) {
+void test_arith_mul_u32_bs(void) {
     int test_cmp;
 
     ntype_s* test_ref = mkNum(TEST_ARITH_MUL_BIT<<1U);
@@ -704,14 +704,14 @@ void test_arith_mul(void) {
     test_ref->data[2] = 0xfffffffeU;
     test_ref->data[3] = 0xffffffffU;
 
-    mul_u32(test_dst, test_opA, test_opB);
+    mul_u32_bs(test_dst, test_opA, test_opB);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /****************/
     /* TestVector 2 */
@@ -742,14 +742,14 @@ void test_arith_mul(void) {
     test_ref->data[6] = 0xffffffffU;
     test_ref->data[7] = 0xffffffffU;
 
-    mul_u32(test_dst, test_opA, test_opB);
+    mul_u32_bs(test_dst, test_opA, test_opB);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /****************/
     /* TestVector 3 */
@@ -786,14 +786,14 @@ void test_arith_mul(void) {
     test_ref->data[9]  = 0xffffffffU;
     test_ref->data[10] = 0xffffffffU;
 
-    mul_u32(test_dst, test_opA, test_opB);
+    mul_u32_bs(test_dst, test_opA, test_opB);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /****************/
     /* TestVector 4 */
@@ -834,14 +834,14 @@ void test_arith_mul(void) {
     test_ref->data[11] = 0xffffffffU;
     test_ref->data[12] = 0x0fffffffU;
 
-    mul_u32(test_dst, test_opA, test_opB);
+    mul_u32_bs(test_dst, test_opA, test_opB);
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
     rmNum(&test_opA);
@@ -850,7 +850,7 @@ void test_arith_mul(void) {
 }
 
 #define TEST_ARITH_MUL_NN_BIT       512U
-void test_arith_mul_nn(void) {
+void test_arith_mul_u32_bs_nn(void) {
     int test_cmp;
     ReturnType fr;
 
@@ -875,7 +875,7 @@ void test_arith_mul_nn(void) {
     // set reference
     test_ref->data[0]  = 0x00000001U;
 
-    if(fr = mul_u32_ext(test_dst, test_opA, test_opB, false)) {
+    if(fr = mul_u32_bs_ext(test_dst, test_opA, test_opB, false)) {
         printReturnType(fr);
     } else { /* Do nothing */ }
     test_print_ntype(test_opA, "opA");
@@ -884,7 +884,7 @@ void test_arith_mul_nn(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
     rmNum(&test_opA);
@@ -973,13 +973,13 @@ void test_sequence(void) {
     test_arith_sub();
     printf("[test   end: test_arith_sub()]\r\n");
 
-    printf("[test start: test_arith_mul()]\r\n");
-    test_arith_mul();
-    printf("[test   end: test_arith_mul()]\r\n");
+    printf("[test start: test_arith_mul_u32_bs()]\r\n");
+    test_arith_mul_u32_bs();
+    printf("[test   end: test_arith_mul_u32_bs()]\r\n");
 
-    printf("[test start: test_arith_mul_nn()]\r\n");
-    test_arith_mul_nn();
-    printf("[test   end: test_arith_mul_nn()]\r\n");
+    printf("[test start: test_arith_mul_u32_bs_nn()]\r\n");
+    test_arith_mul_u32_bs_nn();
+    printf("[test   end: test_arith_mul_u32_bs_nn()]\r\n");
 
     /******************************/
     printf("[test start: test_logic_shft()]\r\n");

@@ -32,7 +32,7 @@ NTYPE sub_u32(ntype_s* d, ntype_s* s1, ntype_s* s0, NTYPE c) {
 // idea notes.
 // s0 accumulates then shift left
 // s1 checks inclease data index and shift likes bit witth
-ReturnType mul_u32_ext(ntype_s* d, ntype_s* s1, ntype_s* s0, bool guard) {
+ReturnType mul_u32_bs_ext(ntype_s* d, ntype_s* s1, ntype_s* s0, bool guard) {
     if((d->length) >= (s1->length + s0->length) || (!guard)) {
         // clear destination 'd'
         (void)memset(d->data, 0x0U, d->size);
