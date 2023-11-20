@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -19,6 +21,26 @@ void _memChk(void) {
 
     printf("load: %ld %ld %ld\n", info.loads[0], info.loads[1], info.loads[2]);
     printf("mem : %ld %ld %ld\n", info.totalram, info.totalram-info.freeram, info.freeram);
+}
+
+static char* g_tTimeTitle;
+static clock_t g_tic, g_toc;
+static double g_pTime;
+static bool g_clkOvf;
+#define TICK_TIME_START(TITLE) {    \
+    g_tTimeTitle = (TITLE);         \
+    g_tic = clock();                \
+}
+#define TICK_TIME_END   {                                                                   \
+    g_toc = clock();                                                                        \
+    if(g_toc > g_tic) {                                                                     \
+        g_clkOvf = false;                                                                   \
+        g_pTime = ((double)(g_toc - g_tic)) / CLOCKS_PER_SEC;                               \
+    } else {                                                                                \
+        g_clkOvf = true;                                                                    \
+    }                                                                                       \
+    if(!g_clkOvf)   printf("Process Time(%s): %lf\r\n", g_tTimeTitle ,g_pTime);             \
+    else            printf("Process Time(%s): clock tick overflow!!!\r\n", g_tTimeTitle);   \
 }
 
 void test_print_ntype(ntype_s* p, const char* title) {
@@ -571,7 +593,9 @@ void test_arith_add(void) {
     test_opA->data[2] = 0xFFFFFFFEul;
     test_opB->data[2] = 0x00000001ul;
 
+    TICK_TIME_START("add_u32");
     add_u32(test_dst, test_opA, test_opB, 0ul);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -599,7 +623,9 @@ void test_arith_add(void) {
     test_opA->data[3] = 0x0ul;
     test_opB->data[3] = 0x0ul;
 
+    TICK_TIME_START("add_u32");
     add_u32(test_dst, test_opA, test_opB, 0ul);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -638,7 +664,9 @@ void test_arith_sub(void) {
     test_opA->data[0] = 0x1UL;
 #endif
 
+    TICK_TIME_START("sub_u32");
     sub_u32(test_dst, test_opA, test_opB, 0ul);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -659,7 +687,9 @@ void test_arith_sub(void) {
     test_opA->data[0] = 0x1;
 #endif
 
+    TICK_TIME_START("sub_u32");
     sub_u32(test_dst, test_opA, test_opB, 1ul);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -704,7 +734,9 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[2] = 0xfffffffeU;
     test_ref->data[3] = 0xffffffffU;
 
+    TICK_TIME_START("mul_u32_bs");
     mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -742,7 +774,9 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[6] = 0xffffffffU;
     test_ref->data[7] = 0xffffffffU;
 
+    TICK_TIME_START("mul_u32_bs");
     mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -786,7 +820,9 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[9]  = 0xffffffffU;
     test_ref->data[10] = 0xffffffffU;
 
+    TICK_TIME_START("mul_u32_bs");
     mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -834,7 +870,9 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[11] = 0xffffffffU;
     test_ref->data[12] = 0x0fffffffU;
 
+    TICK_TIME_START("mul_u32_bs");
     mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
     test_print_ntype(test_dst, "dst");
@@ -919,8 +957,12 @@ void test_logic_shft(void) {
 
     test_print_ntype(test_sft1b, "sft1b(before)");
     // run test function
+    TICK_TIME_START("sftL1b");
     if(fr = sftL1b(test_sft1b, &test_ovf, 0U)) {
+        TICK_TIME_END;
         printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+    } else {
+        TICK_TIME_END;
     }
 
     test_cmp = memcmp(test_refer->data, test_sft1b->data, (test_refer->size));
@@ -944,8 +986,12 @@ void test_logic_shft(void) {
 
     test_print_ntype(test_sft1b, "sft1b(before)");
     // run test function
+    TICK_TIME_START("sftL1b");
     if(fr = sftL1b(test_sft1b, &test_ovf, 1U)) {
+        TICK_TIME_END;
         printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+    } else {
+        TICK_TIME_END;
     }
 
     test_cmp = memcmp(test_refer->data, test_sft1b->data, (test_refer->size));
