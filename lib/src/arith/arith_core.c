@@ -68,29 +68,3 @@ ReturnType mul_u32_bs_ext(ntype_s* d, ntype_s* s1, ntype_s* s0, bool guard) {
     }
     return E_OK;
 }
-
-ReturnType mul_u4(ntype_s* d, ntype_s* s1, ntype_s* s0, NTYPE* ovf) {
-    if((d != NULL) && (s1 != NULL) && (s0 != NULL)) {
-        if((s1->length == s0->length) && (s1->length == d->length)) {
-            uint8_t ou4 = 0U;
-            uint8_t tu4;
-            uint8_t* a = (uint8_t*)(s0->data);
-            uint8_t* b = (uint8_t*)(s1->data);
-            for(size_t i = 0U; i < d->size; i++) {
-                tu4 = ((((a[i] >> 0U) & 0xfU) * ((b[i] >> 0U) & 0xfU)) + ou4);
-                ou4 = ((tu4 >> 4U) & 0xfU);
-                tu4 = ((((a[i] >> 4U) & 0xfU) * ((b[i] >> 4U) & 0xfU)) + ou4);
-                ou4 = ((tu4 >> 4U) & 0xfU);
-            }
-
-            if(ovf != NULL) {
-                *ovf = ou4;
-            }
-        } else {
-            return E_ERROR_ARGS;
-        }
-    } else {
-        return E_ERROR_NULL;
-    }
-    return E_OK;
-}
