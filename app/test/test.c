@@ -736,8 +736,8 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[2] = 0xfffffffeU;
     test_ref->data[3] = 0xffffffffU;
 
-    TICK_TIME_START("mul_u32_bs");
-    mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -745,7 +745,7 @@ void test_arith_mul_u32_bs(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /****************/
     /* TestVector 2 */
@@ -776,8 +776,8 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[6] = 0xffffffffU;
     test_ref->data[7] = 0xffffffffU;
 
-    TICK_TIME_START("mul_u32_bs");
-    mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -785,7 +785,7 @@ void test_arith_mul_u32_bs(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /****************/
     /* TestVector 3 */
@@ -822,8 +822,8 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[9]  = 0xffffffffU;
     test_ref->data[10] = 0xffffffffU;
 
-    TICK_TIME_START("mul_u32_bs");
-    mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -831,7 +831,7 @@ void test_arith_mul_u32_bs(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /****************/
     /* TestVector 4 */
@@ -872,8 +872,8 @@ void test_arith_mul_u32_bs(void) {
     test_ref->data[11] = 0xffffffffU;
     test_ref->data[12] = 0x0fffffffU;
 
-    TICK_TIME_START("mul_u32_bs");
-    mul_u32_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -881,7 +881,7 @@ void test_arith_mul_u32_bs(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
     rmNum(&test_opA);
@@ -915,7 +915,7 @@ void test_arith_mul_u32_bs_nn(void) {
     // set reference
     test_ref->data[0]  = 0x00000001U;
 
-    if(fr = mul_u32_bs_ext(test_dst, test_opA, test_opB, false)) {
+    if(fr = mul_NTYPE_bs_ext(test_dst, test_opA, test_opB, false)) {
         printReturnType(fr);
     } else { /* Do nothing */ }
     test_print_ntype(test_opA, "opA");
@@ -924,7 +924,7 @@ void test_arith_mul_u32_bs_nn(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("mul_u32_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
     rmNum(&test_opA);
