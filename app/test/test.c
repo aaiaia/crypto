@@ -595,8 +595,8 @@ void test_arith_add(void) {
     test_opA->data[2] = 0xFFFFFFFEul;
     test_opB->data[2] = 0x00000001ul;
 
-    TICK_TIME_START("add_u32");
-    add_u32(test_dst, test_opA, test_opB, 0ul);
+    TICK_TIME_START("add_NTYPE");
+    add_NTYPE(test_dst, test_opA, test_opB, 0ul);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -604,7 +604,7 @@ void test_arith_add(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("add_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /* Sum test */
     memset(&test_ref->data[0], 0x0u, (test_opA->size));
@@ -625,8 +625,8 @@ void test_arith_add(void) {
     test_opA->data[3] = 0x0ul;
     test_opB->data[3] = 0x0ul;
 
-    TICK_TIME_START("add_u32");
-    add_u32(test_dst, test_opA, test_opB, 0ul);
+    TICK_TIME_START("add_NTYPE");
+    add_NTYPE(test_dst, test_opA, test_opB, 0ul);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -634,7 +634,7 @@ void test_arith_add(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("add_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
     rmNum(&test_dst);
@@ -666,8 +666,8 @@ void test_arith_sub(void) {
     test_opA->data[0] = 0x1UL;
 #endif
 
-    TICK_TIME_START("sub_u32");
-    sub_u32(test_dst, test_opA, test_opB, 0ul);
+    TICK_TIME_START("sub_NTYPE");
+    sub_NTYPE(test_dst, test_opA, test_opB, 0ul);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -675,7 +675,7 @@ void test_arith_sub(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("sub_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     /* Sum test */
     memset(&test_ref->data[0], 0x0u, (test_opA->size));
@@ -689,8 +689,8 @@ void test_arith_sub(void) {
     test_opA->data[0] = 0x1;
 #endif
 
-    TICK_TIME_START("sub_u32");
-    sub_u32(test_dst, test_opA, test_opB, 1ul);
+    TICK_TIME_START("sub_NTYPE");
+    sub_NTYPE(test_dst, test_opA, test_opB, 1ul);
     TICK_TIME_END;
     test_print_ntype(test_opA, "opA");
     test_print_ntype(test_opB, "opB");
@@ -698,7 +698,7 @@ void test_arith_sub(void) {
     test_print_ntype(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("sub_u32() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
 
     rmNum(&test_ref);
     rmNum(&test_dst);
