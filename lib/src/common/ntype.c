@@ -8,7 +8,7 @@ ntype_s* mkNum(size_t bits) {
     ntype_s* p = (ntype_s*)malloc(sizeof(ntype_s));
     p->bits = bits;
     p->lastMask = LASTBITMASK(bits, NTYPE);
-    p->size = BIT2SIZE(bits);
+    p->size = BIT_SIZE(bits);
     p->length= p->size/sizeof(NTYPE);
     p->data = (NTYPE*)malloc(p->size);
     return p;
