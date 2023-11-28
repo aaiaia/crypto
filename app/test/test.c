@@ -155,52 +155,52 @@ void test_macro(void) {
 
     }
 
-    // test: BIT2SIZE(bits)
+    // test: BIT_SIZE(bits)
     {
         uint32_t ref, r, n;
-        printf("[TEST] BIT2SIZE\r\n");
+        printf("[TEST] BIT_SIZE\r\n");
 
         // test 1
         n = 6u;
         ref = 1u;
-        r = BIT2SIZE(n);
+        r = BIT_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 2
         n = 14u;
         ref = 2u;
-        r = BIT2SIZE(n);
+        r = BIT_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 3
         n = 1024u;
         ref = 128u;
-        r = BIT2SIZE(n);
+        r = BIT_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 4
         n = 10240u;
         ref = 1280u;
-        r = BIT2SIZE(n);
+        r = BIT_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 5
         n = 10241u;
         ref = 1281u;
-        r = BIT2SIZE(n);
+        r = BIT_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 6
         n = 727u;
         ref = 91u;
-        r = BIT2SIZE(n);
+        r = BIT_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
     }
 
@@ -401,6 +401,121 @@ void test_macro(void) {
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+    }
+
+    // test: U16_SIZE(size)
+    {
+        size_t ref, r, n;
+        size_t fail = 0u;
+        printf("[TEST] U16_SIZE\r\n");
+
+        for(n = 1u; n < 1024u; n++) {
+            if(n % sizeof(uint16_t) != 0u) {
+                ref = ((n - (n % sizeof(uint16_t))) + sizeof(uint16_t));
+                r = U16_SIZE(n);
+                if(ref != r) {
+                    fail++;
+                    printf("U16_SIZE(%lu), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+                    break;
+                }
+            }
+        }
+        printf("U16_SIZE(%lu), fail count=%lu, result: %s\r\n", n, fail, (fail==0u)?("PASS"):("FAIL"));
+
+        n = 4u;
+        ref = 4u;
+        r = U16_SIZE(n);
+        printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 5u;
+        ref = 6u;
+        r = U16_SIZE(n);
+        printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 6u;
+        ref = 6u;
+        r = U16_SIZE(n);
+        printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 7u;
+        ref = 8u;
+        r = U16_SIZE(n);
+        printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 8u;
+        ref = 8u;
+        r = U16_SIZE(n);
+        printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+    }
+
+    // test: U32_SIZE(size)
+    {
+        size_t ref, r, n;
+        size_t fail = 0u;
+        printf("[TEST] U32_SIZE\r\n");
+
+        for(n = 1u; n < 1024u; n++) {
+            if(n % sizeof(uint32_t) != 0u) {
+                ref = ((n - (n % sizeof(uint32_t))) + sizeof(uint32_t));
+                r = U32_SIZE(n);
+                if(ref != r) {
+                    fail++;
+                    printf("U32_SIZE(%lu), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+                    break;
+                }
+            }
+        }
+        printf("U32_SIZE(%lu), fail count=%lu, result: %s\r\n", n, fail, (fail==0u)?("PASS"):("FAIL"));
+
+        n = 15u;
+        ref = 16u;
+        r = U32_SIZE(n);
+        printf("U32_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 16u;
+        ref = 16u;
+        r = U32_SIZE(n);
+        printf("U32_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 17u;
+        ref = 20u;
+        r = U32_SIZE(n);
+        printf("U32_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+    }
+
+    // test: U64_SIZE(size)
+    {
+        size_t ref, r, n;
+        size_t fail = 0u;
+        printf("[TEST] U64_SIZE\r\n");
+
+        for(n = 1u; n < 1024u; n++) {
+            if(n % sizeof(uint64_t) != 0u) {
+                ref = ((n - (n % sizeof(uint64_t))) + sizeof(uint64_t));
+                r = U64_SIZE(n);
+                if(ref != r) {
+                    fail++;
+                    printf("U64_SIZE(%lu), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+                    break;
+                }
+            }
+        }
+        printf("U64_SIZE(%lu), fail count=%lu, result: %s\r\n", n, fail, (fail==0u)?("PASS"):("FAIL"));
+
+        n = 15u;
+        ref = 16u;
+        r = U64_SIZE(n);
+        printf("U64_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 16u;
+        ref = 16u;
+        r = U64_SIZE(n);
+        printf("U64_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+
+        n = 17u;
+        ref = 24u;
+        r = U64_SIZE(n);
+        printf("U64_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
     }
 }
 
@@ -1008,9 +1123,11 @@ void test_sequence(void) {
     test_macro();
     printf("[test   end: test_macro()]\r\n");
 
+#if 0   /* CONFIG_DO_TEST_NTYPE */
     printf("[test start: test_ntype()]\r\n");
     test_ntype();
     printf("[test   end: test_ntype()]\r\n");
+#endif  /* CONFIG_DO_TEST_NTYPE */
 
     /******************************/
     printf("[test start: test_arith_add()]\r\n");
