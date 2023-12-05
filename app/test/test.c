@@ -155,52 +155,52 @@ void test_macro(void) {
 
     }
 
-    // test: BIT_SIZE(bits)
+    // test: BIT_U8_SIZE(bits)
     {
         uint32_t ref, r, n;
-        printf("[TEST] BIT_SIZE\r\n");
+        printf("[TEST] BIT_U8_SIZE\r\n");
 
         // test 1
         n = 6u;
         ref = 1u;
-        r = BIT_SIZE(n);
+        r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 2
         n = 14u;
         ref = 2u;
-        r = BIT_SIZE(n);
+        r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 3
         n = 1024u;
         ref = 128u;
-        r = BIT_SIZE(n);
+        r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 4
         n = 10240u;
         ref = 1280u;
-        r = BIT_SIZE(n);
+        r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 5
         n = 10241u;
         ref = 1281u;
-        r = BIT_SIZE(n);
+        r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 6
         n = 727u;
         ref = 91u;
-        r = BIT_SIZE(n);
+        r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
     }
 
