@@ -303,7 +303,7 @@ void test_macro(void) {
 
         // test 2
         n = 14u;
-        ref = 2u;
+        ref = 1u;
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
@@ -319,7 +319,7 @@ void test_macro(void) {
 
         // test 4
         n = 10240u;
-        ref = 3200u;
+        ref = 320u;
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
@@ -327,7 +327,7 @@ void test_macro(void) {
 
         // test 5
         n = 10241u;
-        ref = 3211u;
+        ref = 321u;
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
