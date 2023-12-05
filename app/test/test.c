@@ -204,6 +204,153 @@ void test_macro(void) {
 
     }
 
+    // test: BIT_U16_SIZE(bits)
+    {
+        uint32_t ref, r, n;
+        printf("[TEST] BIT_U16_SIZE\r\n");
+
+        // test 1
+        n = 6u;
+        ref = 1u;
+        r = BIT_U16_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 2
+        n = 14u;
+        ref = 1u;
+        r = BIT_U16_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 3
+        n = 1024u;
+        ref = 64u;
+        r = BIT_U16_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 4
+        n = 10240u;
+        ref = 640u;
+        r = BIT_U16_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 5
+        n = 10241u;
+        ref = 641u;
+        r = BIT_U16_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 6
+        n = 727u;
+        ref = 46u;
+        r = BIT_U16_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+    }
+
+    // test: BIT_U32_SIZE(bits)
+    {
+        uint32_t ref, r, n;
+        printf("[TEST] BIT_U32_SIZE\r\n");
+
+        // test 1
+        n = 6u;
+        ref = 1u;
+        r = BIT_U32_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 2
+        n = 14u;
+        ref = 2u;
+        r = BIT_U32_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 3
+        n = 1024u;
+        ref = 32u;
+        r = BIT_U32_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 4
+        n = 10240u;
+        ref = 3200u;
+        r = BIT_U32_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 5
+        n = 10241u;
+        ref = 3211u;
+        r = BIT_U32_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 6
+        n = 727u;
+        ref = 23u;
+        r = BIT_U32_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+    }
+
+    // test: BIT_U64_SIZE(bits)
+    {
+        uint32_t ref, r, n;
+        printf("[TEST] BIT_U64_SIZE\r\n");
+
+        // test 1
+        n = 6u;
+        ref = 1u;
+        r = BIT_U64_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 2
+        n = 14u;
+        ref = 1u;
+        r = BIT_U64_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 3
+        n = 1024u;
+        ref = 16u;
+        r = BIT_U64_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 4
+        n = 10240u;
+        ref = 160u;
+        r = BIT_U64_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 5
+        n = 10241u;
+        ref = 161u;
+        r = BIT_U64_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+        // test 6
+        n = 727u;
+        ref = 12u;
+        r = BIT_U64_SIZE(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+
+    }
+
     // test: LASTBITMASK(bits, TYPE)
     {
         // uint32_t
