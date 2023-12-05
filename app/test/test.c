@@ -1363,6 +1363,29 @@ void test_sequence(void) {
     test_logic_shft();
 }
 
+#define TEST_MUL_COUNT_TIME_LOOPS   102400000UL
+void test_u32_u64_mul_time(void) {
+    uint32_t x32, a32, b32;
+    uint64_t x64, a64, b64;
+    size_t loopCnt;
+
+    a32 = 0x1111ffffU;
+    b32 = 0x0000ffffU;
+    TICK_TIME_START("uint32_t mul time test");
+    for(loopCnt = 0UL; loopCnt < TEST_MUL_COUNT_TIME_LOOPS; loopCnt++) {
+        x32 = a32 * b32;
+    }
+    TICK_TIME_END;
+
+    a64 = 0x11111111ffffffffU;
+    b64 = 0x00000000ffffffffU;
+    TICK_TIME_START("uint64_t mul time test");
+    for(loopCnt = 0UL; loopCnt < TEST_MUL_COUNT_TIME_LOOPS; loopCnt++) {
+        x64 = a64 * b64;
+    }
+    TICK_TIME_END;
+}
+
 int main(int argc, char** argv) {
     printf("arg:%d, ",argc);
     for(unsigned int i=0; i<argc; i++) {
@@ -1371,4 +1394,6 @@ int main(int argc, char** argv) {
     printf("\r\n");
 
     test_sequence();
+
+    test_u32_u64_mul_time();
 }
