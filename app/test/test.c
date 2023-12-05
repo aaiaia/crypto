@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <unistd.h>
+
 #include <sys/sysinfo.h>
 
 #include "common/util.h"
@@ -15,6 +17,13 @@
 #include "logic/logic_core.h"
 
 #include "test/vector.h"
+
+#define TEST_ASSERT(CONDITION) {        \
+    if(!(CONDITION)) {                  \
+        printf("Assert: Fail\r\n");     \
+        while(!(CONDITION)) sleep(1);   \
+    }                                   \
+}
 
 void _memChk(void) {
     struct sysinfo info;
@@ -70,6 +79,7 @@ void test_macro(void) {
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14u; m = 14u;
@@ -77,6 +87,7 @@ void test_macro(void) {
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024u; m = 1023u;
@@ -84,6 +95,7 @@ void test_macro(void) {
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 34u + 7u; m = 17u;
@@ -91,6 +103,7 @@ void test_macro(void) {
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 60u + 14u; m = 37u;
@@ -98,6 +111,7 @@ void test_macro(void) {
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 35u + 6u; m = 7u;
@@ -105,6 +119,7 @@ void test_macro(void) {
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -119,6 +134,7 @@ void test_macro(void) {
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14; m = 14;
@@ -126,6 +142,7 @@ void test_macro(void) {
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024; m = 1023;
@@ -133,6 +150,7 @@ void test_macro(void) {
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 34u + 7; m = 17;
@@ -140,6 +158,7 @@ void test_macro(void) {
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 60u + 14; m = 37;
@@ -147,6 +166,7 @@ void test_macro(void) {
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 35u + 6; m = 7;
@@ -154,6 +174,7 @@ void test_macro(void) {
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
         printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -168,6 +189,7 @@ void test_macro(void) {
         r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14u;
@@ -175,6 +197,7 @@ void test_macro(void) {
         r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024u;
@@ -182,6 +205,7 @@ void test_macro(void) {
         r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 10240u;
@@ -189,6 +213,7 @@ void test_macro(void) {
         r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 10241u;
@@ -196,6 +221,7 @@ void test_macro(void) {
         r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 727u;
@@ -203,6 +229,7 @@ void test_macro(void) {
         r = BIT_U8_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U8_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -217,6 +244,7 @@ void test_macro(void) {
         r = BIT_U16_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14u;
@@ -224,6 +252,7 @@ void test_macro(void) {
         r = BIT_U16_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024u;
@@ -231,6 +260,7 @@ void test_macro(void) {
         r = BIT_U16_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 10240u;
@@ -238,6 +268,7 @@ void test_macro(void) {
         r = BIT_U16_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 10241u;
@@ -245,6 +276,7 @@ void test_macro(void) {
         r = BIT_U16_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 727u;
@@ -252,6 +284,7 @@ void test_macro(void) {
         r = BIT_U16_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U16_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -266,6 +299,7 @@ void test_macro(void) {
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14u;
@@ -273,6 +307,7 @@ void test_macro(void) {
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024u;
@@ -280,6 +315,7 @@ void test_macro(void) {
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 10240u;
@@ -287,6 +323,7 @@ void test_macro(void) {
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 10241u;
@@ -294,6 +331,7 @@ void test_macro(void) {
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 727u;
@@ -301,6 +339,7 @@ void test_macro(void) {
         r = BIT_U32_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U32_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -315,6 +354,7 @@ void test_macro(void) {
         r = BIT_U64_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14u;
@@ -322,6 +362,7 @@ void test_macro(void) {
         r = BIT_U64_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024u;
@@ -329,6 +370,7 @@ void test_macro(void) {
         r = BIT_U64_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 10240u;
@@ -336,6 +378,7 @@ void test_macro(void) {
         r = BIT_U64_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 10241u;
@@ -343,6 +386,7 @@ void test_macro(void) {
         r = BIT_U64_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 727u;
@@ -350,6 +394,7 @@ void test_macro(void) {
         r = BIT_U64_SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT_U64_SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -365,78 +410,91 @@ void test_macro(void) {
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 126UL;
         test_tmp_u32_ref = 0x3FFFFFFFUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 125UL;
         test_tmp_u32_ref = 0x1FFFFFFFUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 124UL;
         test_tmp_u32_ref = 0x0FFFFFFFUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 105UL;
         test_tmp_u32_ref = 0x000001FFUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 104UL;
         test_tmp_u32_ref = 0x000000FFUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 103UL;
         test_tmp_u32_ref = 0x0000007FUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 102UL;
         test_tmp_u32_ref = 0x0000003FUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 101UL;
         test_tmp_u32_ref = 0x0000001FUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 100UL;
         test_tmp_u32_ref = 0x0000000FUL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 99UL;
         test_tmp_u32_ref = 0x00000007UL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 98UL;
         test_tmp_u32_ref = 0x00000003UL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u32_bits = 97UL;
         test_tmp_u32_ref = 0x00000001UL;
         test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
         cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
         printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         // uint64_t
         uint64_t test_tmp_u64_bits;
@@ -448,108 +506,126 @@ void test_macro(void) {
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 126UL;
         test_tmp_u64_ref = 0x3FFFFFFFFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 125UL;
         test_tmp_u64_ref = 0x1FFFFFFFFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 124UL;
         test_tmp_u64_ref = 0x0FFFFFFFFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 105UL;
         test_tmp_u64_ref = 0x000001FFFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 104UL;
         test_tmp_u64_ref = 0x000000FFFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 103UL;
         test_tmp_u64_ref = 0x0000007FFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 102UL;
         test_tmp_u64_ref = 0x0000003FFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 101UL;
         test_tmp_u64_ref = 0x0000001FFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 100UL;
         test_tmp_u64_ref = 0x0000000FFFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 99UL;
         test_tmp_u64_ref = 0x00000007FFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 98UL;
         test_tmp_u64_ref = 0x00000003FFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 97UL;
         test_tmp_u64_ref = 0x00000001FFFFFFFFUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 69UL;
         test_tmp_u64_ref = 0x000000000000001FUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 68UL;
         test_tmp_u64_ref = 0x000000000000000FUL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 67UL;
         test_tmp_u64_ref = 0x0000000000000007UL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 66UL;
         test_tmp_u64_ref = 0x0000000000000003UL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
 
         test_tmp_u64_bits = 65UL;
         test_tmp_u64_ref = 0x0000000000000001UL;
         test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
         cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?("PASS"):("FAIL"));
+        TEST_ASSERT(cmp_result);
     }
 
     // test: U16_SIZE(size)
@@ -575,26 +651,31 @@ void test_macro(void) {
         ref = 4u;
         r = U16_SIZE(n);
         printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 5u;
         ref = 6u;
         r = U16_SIZE(n);
         printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 6u;
         ref = 6u;
         r = U16_SIZE(n);
         printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 7u;
         ref = 8u;
         r = U16_SIZE(n);
         printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 8u;
         ref = 8u;
         r = U16_SIZE(n);
         printf("U16_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
     }
 
     // test: U32_SIZE(size)
@@ -620,16 +701,19 @@ void test_macro(void) {
         ref = 16u;
         r = U32_SIZE(n);
         printf("U32_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 16u;
         ref = 16u;
         r = U32_SIZE(n);
         printf("U32_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 17u;
         ref = 20u;
         r = U32_SIZE(n);
         printf("U32_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
     }
 
     // test: U64_SIZE(size)
@@ -655,16 +739,19 @@ void test_macro(void) {
         ref = 16u;
         r = U64_SIZE(n);
         printf("U64_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 16u;
         ref = 16u;
         r = U64_SIZE(n);
         printf("U64_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
 
         n = 17u;
         ref = 24u;
         r = U64_SIZE(n);
         printf("U64_SIZE(%lu)=%lu, result: %s\r\n", n, r, (ref==r)?("PASS"):("FAIL"));
+        TEST_ASSERT(ref==r);
     }
 }
 
@@ -686,6 +773,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 8ul - 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -698,6 +787,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 8ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -710,6 +801,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 8ul + 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -722,6 +815,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 16ul - 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -734,6 +829,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 16ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -746,6 +843,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 16ul + 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -758,6 +857,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 512ul - 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -770,6 +871,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 512ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -782,6 +885,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 512ul + 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -794,6 +899,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         test_bits = 1023ul;
         test_size = UIN_CEIL(test_bits, 8u);
@@ -806,6 +913,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
     }
 
     for(uint32_t tmp_bitLen = 1ul; tmp_bitLen < 20480ul; tmp_bitLen++) {
@@ -820,6 +929,8 @@ void test_ntype(void) {
             p->bits, (test_cmp_bits == 0)?"PASS":"FAIL", \
             p->size, (test_cmp_size == 0)?"PASS":"FAIL");
         rmNum(&p);
+        TEST_ASSERT(test_cmp_bits == 0);
+        TEST_ASSERT(test_cmp_size == 0);
 
         if((test_cmp_bits != 0) || (test_cmp_size != 0)) {
             printf("config:bitLength=%lu,arrayLength=%lu\r\n", test_bits, test_size);
@@ -863,6 +974,7 @@ void test_arith_add(void) {
 
         test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
         printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+        TEST_ASSERT(test_cmp == 0);
     }
 
     rmNum(&test_ref);
@@ -905,6 +1017,7 @@ void test_arith_sub(void) {
 
         test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
         printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+        TEST_ASSERT(test_cmp == 0);
     }
 
     rmNum(&test_ref);
@@ -953,6 +1066,7 @@ void test_arith_mul_u32_bs(void) {
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    TEST_ASSERT(test_cmp == 0);
 
     /****************/
     /* TestVector 2 */
@@ -993,6 +1107,7 @@ void test_arith_mul_u32_bs(void) {
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    TEST_ASSERT(test_cmp == 0);
 
     /****************/
     /* TestVector 3 */
@@ -1039,6 +1154,7 @@ void test_arith_mul_u32_bs(void) {
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    TEST_ASSERT(test_cmp == 0);
 
     /****************/
     /* TestVector 4 */
@@ -1089,6 +1205,7 @@ void test_arith_mul_u32_bs(void) {
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    TEST_ASSERT(test_cmp == 0);
 
     rmNum(&test_ref);
     rmNum(&test_opA);
@@ -1132,6 +1249,7 @@ void test_arith_mul_u32_bs_nn(void) {
 
     test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
     printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    TEST_ASSERT(test_cmp == 0);
 
     rmNum(&test_ref);
     rmNum(&test_opA);
@@ -1178,6 +1296,7 @@ void test_logic_shft(void) {
     test_print_ntype(test_refer, "refer");
     test_print_ntype(test_sft1b, "sft1b(after)");
     printf("sftL1b() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    TEST_ASSERT(test_cmp == 0);
 
     /* Shift sequence 2 */
     (void)memset(test_refer->data, 0x0U, test_refer->size);
