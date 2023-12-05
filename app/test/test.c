@@ -14,6 +14,8 @@
 #include "arith/arith_core.h"
 #include "logic/logic_core.h"
 
+#include "test/vector.h"
+
 void _memChk(void) {
     struct sysinfo info;
 
@@ -841,62 +843,27 @@ void test_arith_add(void) {
     test_opB = mkNum(TEST_ARITH_BITS);
 
     /* Sum test */
-    memset(&test_ref->data[0], 0x0u, (test_opA->size));
-    memset(&test_opA->data[0], 0x0u, (test_opA->size));
-    memset(&test_opB->data[0], 0x0u, (test_opB->size));
+    for(unsigned int i = 0u; i < TV_U32_ADD_NUM; i++) {
+        memset(test_ref->data, 0x0u, (test_ref->size));
+        memset(test_opA->data, 0x0u, (test_opA->size));
+        memset(test_opB->data, 0x0u, (test_opB->size));
 
-    test_ref->data[0] = 0x00000000ul;
-    test_ref->data[1] = 0x00000000ul;
-    test_ref->data[2] = 0x00000000ul;
-    test_ref->data[3] = 0x00000001ul;
+        memcpy(test_ref->data, TV_u32_add_refList[i], TV_u32_add_lenList[i]);
+        memcpy(test_opA->data, TV_u32_add_opAList[i], TV_u32_add_lenList[i]);
+        memcpy(test_opB->data, TV_u32_add_opBList[i], TV_u32_add_lenList[i]);
 
-    test_opA->data[0] = 0xFFFFFFFFul;
-    test_opB->data[0] = 0x00000001ul;
-    test_opA->data[1] = 0xFFFFFFFFul;
-    test_opB->data[1] = 0x00000000ul;
-    test_opA->data[2] = 0xFFFFFFFEul;
-    test_opB->data[2] = 0x00000001ul;
+        TICK_TIME_START("add_NTYPE");
+        add_NTYPE(test_dst, test_opA, test_opB, TV_u32_add_carryList[i]);
+        TICK_TIME_END;
+        test_print_ntype(test_opA, "opA");
+        test_print_ntype(test_opB, "opB");
+        test_print_ntype(test_dst, "dst");
+        test_print_ntype(test_ref, "ref");
+        printf("[carry]\r\nc=0x%08x\r\n", TV_u32_add_carryList[i]);
 
-    TICK_TIME_START("add_NTYPE");
-    add_NTYPE(test_dst, test_opA, test_opB, 0ul);
-    TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
-
-    /* Sum test */
-    memset(&test_ref->data[0], 0x0u, (test_opA->size));
-    memset(&test_opA->data[0], 0x0u, (test_opA->size));
-    memset(&test_opB->data[0], 0x0u, (test_opB->size));
-
-    test_ref->data[0] = 0xFFFFFFFEul;
-    test_ref->data[1] = 0xFFFFFFFFul;
-    test_ref->data[2] = 0xFFFFFFFFul;
-    test_ref->data[3] = 0x00000001ul;
-
-    test_opA->data[0] = 0xFFFFFFFFul;
-    test_opB->data[0] = 0xFFFFFFFFul;
-    test_opA->data[1] = 0xFFFFFFFFul;
-    test_opB->data[1] = 0xFFFFFFFFul;
-    test_opA->data[2] = 0xFFFFFFFFul;
-    test_opB->data[2] = 0xFFFFFFFFul;
-    test_opA->data[3] = 0x0ul;
-    test_opB->data[3] = 0x0ul;
-
-    TICK_TIME_START("add_NTYPE");
-    add_NTYPE(test_dst, test_opA, test_opB, 0ul);
-    TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+        test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
+        printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    }
 
     rmNum(&test_ref);
     rmNum(&test_dst);
@@ -918,49 +885,27 @@ void test_arith_sub(void) {
     test_opB = mkNum(TEST_ARITH_BITS);
 
     /* Sum test */
-    memset(&test_ref->data[0], 0x0u, (test_opA->size));
-    memset(&test_opA->data[0], 0x0u, (test_opA->size));
-    memset(&test_opB->data[0], 0x0u, (test_opB->size));
+    for(unsigned int i = 0u; i < TV_U32_SUB_NUM; i++) {
+        memset(test_ref->data, 0x0u, (test_ref->size));
+        memset(test_opA->data, 0x0u, (test_opA->size));
+        memset(test_opB->data, 0x0u, (test_opB->size));
 
-#if 1
-    memset(&test_ref->data[0], 0xffffffffUL, (test_opA->size));
+        memcpy(test_ref->data, TV_u32_sub_refList[i], TV_u32_sub_lenList[i]);
+        memcpy(test_opA->data, TV_u32_sub_opAList[i], TV_u32_sub_lenList[i]);
+        memcpy(test_opB->data, TV_u32_sub_opBList[i], TV_u32_sub_lenList[i]);
 
-    test_opA->data[0] = 0x1UL;
-#endif
+        TICK_TIME_START("sub_NTYPE");
+        sub_NTYPE(test_dst, test_opA, test_opB, TV_u32_sub_carryList[i]);
+        TICK_TIME_END;
+        test_print_ntype(test_opA, "opA");
+        test_print_ntype(test_opB, "opB");
+        test_print_ntype(test_dst, "dst");
+        test_print_ntype(test_ref, "ref");
+        printf("[carry]\r\nc=0x%08x\r\n", TV_u32_sub_carryList[i]);
 
-    TICK_TIME_START("sub_NTYPE");
-    sub_NTYPE(test_dst, test_opA, test_opB, 0ul);
-    TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
-
-    /* Sum test */
-    memset(&test_ref->data[0], 0x0u, (test_opA->size));
-    memset(&test_opA->data[0], 0x0u, (test_opA->size));
-    memset(&test_opB->data[0], 0x0u, (test_opB->size));
-
-#if 1
-    memset(&test_ref->data[0], 0xffffffffUL, (test_opA->size));
-    test_ref->data[0] = 0xfffffffeUL;
-
-    test_opA->data[0] = 0x1;
-#endif
-
-    TICK_TIME_START("sub_NTYPE");
-    sub_NTYPE(test_dst, test_opA, test_opB, 1ul);
-    TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
-    printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+        test_cmp = memcmp(test_ref->data, test_dst->data, (test_ref->size));
+        printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?"PASS":"FAIL"));
+    }
 
     rmNum(&test_ref);
     rmNum(&test_dst);
