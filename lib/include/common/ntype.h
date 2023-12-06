@@ -1,14 +1,21 @@
+#ifndef NTYPE_H
+#define NTYPE_H
+
 #include <stdint.h>
 
 #define NTYPE       uint32_t
-#define BITPERBYTE  8u
+#define NTYPE_SIZE  8U
+#define NTYPE_BITS  32U
 
 typedef struct {
-    NTYPE* array;
-    uint32_t blen;
-    uint32_t alen;
+    NTYPE* data;
+    NTYPE  lastMask;
+    size_t bits;
+    size_t length;
+    size_t size;
 }ntype_s;
 
-ntype_s* mkNum(uint32_t blen);
+ntype_s* mkNum(size_t bits);
 int rmNum(ntype_s** p);
 
+#endif
