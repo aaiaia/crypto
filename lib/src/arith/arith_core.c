@@ -29,21 +29,28 @@ NTYPE sub_NTYPE(ntype_s* d, ntype_s* s1, ntype_s* s0, NTYPE c) {
     return c;
 }
 
+#define MACRO_MULTIPLIER_COMMON_OPEN(D, S1, S0, T) {                            \
+    /* clear destination */                                                     \
+    (void)memset((D)->data, 0x0U, (D)->size);                                   \
+    (T) = mkNum((D)->bits);                                                     \
+    /* clear temp '(T)' */                                                      \
+    (void)memset(((T)->data + (S0)->length), 0x0U, ((T)->size - (S0)->size));   \
+    (void)memcpy((T)->data, (S0)->data, s0->size);                              \
+}
+
+#define MACRO_MULTIPLIER_COMMON_CLOSE(D, S1, S0, T) {   \
+    rmNum(&(T));                                        \
+}
 // idea notes.
 // s0 accumulates then shift left
 // s1 checks inclease data index and shift likes bit witth
 ReturnType mul_NTYPE_bs_ext(ntype_s* d, ntype_s* s1, ntype_s* s0, bool guard) {
     if((d != NULL) && (s1 != NULL) && (s0 != NULL)) {
         if((d->length) >= (s1->length + s0->length) || (!guard)) {
-            // clear destination 'd'
-            (void)memset(d->data, 0x0U, d->size);
+            ntype_s* tmp;
+            MACRO_MULTIPLIER_COMMON_OPEN(d, s1, s0, tmp);
 
-            ntype_s* tmp = mkNum(d->bits);
-
-            // clear temp 'tmp'
-            (void)memset((tmp->data + s0->length), 0x0U, (tmp->size - s0->size));
-            (void)memcpy(tmp->data, s0->data, s0->size);
-
+#if 1   /* IMPL_BIT_SHIFT_MULTIPLIER */
             size_t nSftBit = s0->bits;
             for(size_t i = 0U; i < s1->length; i++) {
                 size_t sftBit = (nSftBit >= NTYPE_BITS)?(NTYPE_BITS):(nSftBit);
@@ -55,11 +62,14 @@ ReturnType mul_NTYPE_bs_ext(ntype_s* d, ntype_s* s1, ntype_s* s0, bool guard) {
                 }
                 nSftBit-=sftBit;
             }
-            rmNum(&tmp);
+#endif  /* IMPL_BIT_SHIFT_MULTIPLIER */
+            MACRO_MULTIPLIER_COMMON_CLOSE(d, s1, s0, tmp);
 
+#if 1   /* IMPL_BIT_SHIFT_MULTIPLIER */
             if(nSftBit != 0U) {
                 return E_ERROR_RUNTIME;
             } else { /* Do nothing */ }
+#endif  /* IMPL_BIT_SHIFT_MULTIPLIER */
         } else {
             return E_ERROR_ARGS;
         }
