@@ -79,7 +79,7 @@ ReturnType mul_NTYPE_bs_ext(ntype_s* d, ntype_s* s1, ntype_s* s0, bool guard) {
     return E_OK;
 }
 
-NYPE add_NTYPE_loc(ntype_s* d, NTYPE v, size_t loc) {
+NTYPE add_NTYPE_loc(ntype_s* d, NTYPE v, size_t loc) {
     NTYPE s;
     NTYPE c = v;
     for(size_t i = loc; i < d->length; i++) {
