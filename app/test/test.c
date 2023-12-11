@@ -1213,6 +1213,56 @@ void test_arith_mul_u32_bs(void) {
     rmNum(&test_dst);
 }
 
+#define TEST_ARITH_NTYPE_ADD_LOC_BIT        1024U
+void test_arith_add_loc(void) {
+    ntype_s* test_opA;
+    NTYPE test_opB;
+
+    test_opA = mkNum(TEST_ARITH_NTYPE_ADD_LOC_BIT);
+    (void)memset(test_opA->data, 0x0U, test_opA->size);
+    test_print_ntype(test_opA, "cleared opA");
+
+    /* Set first stage 1 */
+    test_opB = 0x12345678U;
+    for(size_t i = 0UL; i < test_opA->length; i++) {
+        NTYPE tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    test_print_ntype(test_opA, "add loc result of opA");
+
+    /* Set first stage 2 */
+    test_opB = 0x87654321U;
+    for(size_t i = 0UL; i < test_opA->length; i++) {
+        NTYPE tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    test_print_ntype(test_opA, "add loc result of opA");
+
+    /* Set first stage 3 */
+    test_opB = 0x66666666U;
+    for(size_t i = 0UL; i < test_opA->length; i++) {
+        NTYPE tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    test_print_ntype(test_opA, "add loc result of opA");
+
+    /* Set first stage 4 */
+    test_opB = 0x00800000U;
+    NTYPE tmp = add_NTYPE_loc(test_opA, test_opB, 3);
+    if(tmp) {
+        printf("carry = %u \r\n", tmp);
+    }
+    test_print_ntype(test_opA, "Final Stage, add loc result of opA");
+
+    rmNum(&test_opA);
+}
+
 #define TEST_ARITH_MUL_u32_bs_NN_BIT       512U
 void test_arith_mul_u32_bs_nn(void) {
     int test_cmp;
@@ -1352,6 +1402,10 @@ void test_sequence(void) {
     printf("[test start: test_arith_mul_u32_bs()]\r\n");
     test_arith_mul_u32_bs();
     printf("[test   end: test_arith_mul_u32_bs()]\r\n");
+
+    printf("[test start: test_arith_add_loc()]\r\n");
+    test_arith_add_loc();
+    printf("[test   end: test_arith_add_loc()]\r\n");
 
     printf("[test start: test_arith_mul_u32_bs_nn()]\r\n");
     test_arith_mul_u32_bs_nn();
