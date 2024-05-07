@@ -10,6 +10,7 @@ extern "C"{
 // Number is count of word(32bits)
 // AES COMMON
 #define AES_Nb      4U
+#define AES_Nr_BASE 6U
 #define AES_S_SIZE  16U // bytes
 // AES128
 #define AES128_Nk   4U
@@ -76,6 +77,8 @@ int shiftColumn(uint32_t* w, size_t wLen);
 int shiftRows(uint8_t* s, size_t size);
 
 int mixColumns(uint8_t* s, size_t size);
+
+int aesEnc(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize);
 
 #ifdef __cplusplus
 }

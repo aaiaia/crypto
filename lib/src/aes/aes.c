@@ -354,6 +354,20 @@ int mixColumns(uint8_t* s, size_t size)
     return fs;
 }
 
+
+int aesEnc(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
+{
+    int fs = 0;
+
+    size_t Nk = (kSize>>2UL);
+    size_t Nr = (((size_t)AES_Nr_BASE)+(kSize>>2UL));
+
+    if(fs == 0) fs = keyExpansion(key, Nk, Nr);
+    if(fs == 0) fs = doCipher(out, in, Nr, (uint32_t*)g_extKey);
+
+    return fs;
+}
+
 #ifdef SELFTEST
 #define RUN_TEST(STATEMENTS, FRTN)                  \
 {                                                   \
