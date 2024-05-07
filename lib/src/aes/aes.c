@@ -471,6 +471,7 @@ int main(int argc, char* argv[])
     RUN_TEST(rotWord((*((uint32_t*)u8a_p))), fRtn);
     printHex((void*)(u8a_p), sizeof(u8a_p), "u8a_p(result)", 0UL);
 
+#ifdef DEBUG
     printf("[TEST: AES128 keyExpansion]\r\n");
     RUN_TEST(keyExpansion(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
 
@@ -479,6 +480,7 @@ int main(int argc, char* argv[])
 
     printf("[TEST: AES256 keyExpansion]\r\n");
     RUN_TEST(keyExpansion(tv_AES256_key, AES256_Nk, AES256_Nr), fRtn);
+#endif /* DEBUG */
 
     test_doCipher();
 
