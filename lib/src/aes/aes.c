@@ -794,6 +794,18 @@ void test_doCipher(void)
             "NIST, FIPS197, AES128 TestVector");
 }
 
+void test_doCipherInv(void)
+{
+    int fRtn;
+    (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
+
+    RUN_TEST(keyExpansionEIC(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
+    RUN_TEST(doCipherInv(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
+    DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Inv Cipher Example(AES128)", 4UL);
+    EXAM_TEST(memcmp(test_AES_out, tv_AES128_FIPS197_pTxt_ref, sizeof(tv_AES128_FIPS197_pTxt_ref)) == 0, \
+            "NIST, FIPS197, AES128 TestVector");
+}
+
 void test_aesEnc(void)
 {
     int fRtn;
@@ -832,6 +844,45 @@ void test_aesEnc(void)
     }
 }
 
+void test_aesDec(void)
+{
+    int fRtn;
+
+    printf("[AES128 Decryption]\r\n");
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES128_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        RUN_TEST(aesDec(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        printf("[tvi=%02ld]", tvi);
+        EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
+                "NIST, FIPS197, AES128 Example values");
+        printHex(test_AES_out, sizeof(test_AES_out), "Decrypt Values", AES_S_SIZE);
+    }
+
+    printf("[AES192 Decryption]\r\n");
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        RUN_TEST(aesDec(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        printf("[tvi=%02ld]", tvi);
+        EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
+                "NIST, FIPS197, AES192 Example values");
+        printHex(test_AES_out, sizeof(test_AES_out), "Decrypt Values", AES_S_SIZE);
+    }
+
+    printf("[AES256 Decryption]\r\n");
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        RUN_TEST(aesDec(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        printf("[tvi=%02ld]", tvi);
+        EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
+                "NIST, FIPS197, AES256 Example values");
+        printHex(test_AES_out, sizeof(test_AES_out), "Decrypt Values", AES_S_SIZE);
+    }
+
+}
+
 int main(int argc, char* argv[])
 {
     int fRtn;
@@ -863,6 +914,10 @@ int main(int argc, char* argv[])
     test_doCipher();
 
     test_aesEnc();
+
+    test_doCipherInv();
+
+    test_aesDec();
 
     return 0;
 }
