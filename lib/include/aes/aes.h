@@ -51,6 +51,7 @@ extern "C"{
  *
  ******************************************************************************/
 int keyExpansion(uint8_t* key, size_t Nk, size_t Nr);
+int keyExpansionEIC(uint8_t* key, size_t Nk, size_t Nr);
 
 /*******************************************************************************
  * A brief AES CIPHER
@@ -65,20 +66,25 @@ int keyExpansion(uint8_t* key, size_t Nk, size_t Nr);
  *
  ******************************************************************************/
 int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w);
+int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw);
 
 int addRoundKey(uint32_t* s, uint32_t* w);
 
 #define subWord(w)  subByte((uint8_t*)(&(w)), sizeof(w))
 int subByte(uint8_t* w, size_t size);
+int subByteInv(uint8_t* w, size_t size);
 
 #define rotWord(w) shiftColumn(&(w), sizeof(w)/sizeof(uint32_t))
 int shiftColumn(uint32_t* w, size_t wLen);
 
 int shiftRows(uint8_t* s, size_t size);
+int shiftRowsInv(uint8_t* s, size_t size);
 
 int mixColumns(uint8_t* s, size_t size);
+int mixColumnsInv(uint8_t* s, size_t size);
 
 int aesEnc(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize);
+int aesDec(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize);
 
 #ifdef __cplusplus
 }
