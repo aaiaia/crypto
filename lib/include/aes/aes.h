@@ -67,6 +67,7 @@ int keyExpansionEIC(uint8_t* key, size_t Nk, size_t Nr);
  ******************************************************************************/
 int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w);
 int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw);
+int doCipherInv2(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w);
 
 int addRoundKey(uint32_t* s, uint32_t* w);
 
@@ -85,6 +86,7 @@ int mixColumnsInv(uint8_t* s, size_t size);
 
 int aesEnc(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize);
 int aesDec(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize);
+int aesDec2(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize);
 
 #ifdef __cplusplus
 }

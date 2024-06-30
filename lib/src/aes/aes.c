@@ -264,12 +264,10 @@ int keyExpansionEIC(uint8_t* key, size_t Nk, size_t Nr)
         dw[wi] = dw[wi-Nk] ^ dwTemp;
         wi++;
     }
-#if 0
     for(size_t round = 1; round <= Nr - 1UL; round++)
     {
         (void)mixColumnsInv((uint8_t*)(&dw[(round<<2UL)]), AES_S_SIZE);
     }
-#endif
     DBG_PRINT_ARRAY(g_extKey, sizeof(g_extKey), "EXPANSION_KEY_EIC", 4UL);
 
     return 0;
@@ -288,8 +286,13 @@ int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
         DBG_PRINT_4X4_MATRIX(g_state, "input");
 
         round = 0UL;
+#ifdef DEBUG
+        printf("Round Number = %ld\r\n", round);
+#endif /* DEBUG */
+
         if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
         DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
+        DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
 
         if(fs == 0)
         {
@@ -299,23 +302,31 @@ int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
                 printf("Round Number = %ld\r\n", round);
 #endif /* DEBUG */
                 DBG_PRINT_4X4_MATRIX(g_state, "Start of Round");
+
                 if(fs == 0) fs = subByte((uint8_t*)g_state, sizeof(g_state));
                 DBG_PRINT_4X4_MATRIX(g_state, "After SubBytes");
+
                 if(fs == 0) fs = shiftRows((uint8_t*)g_state, sizeof(g_state));
                 DBG_PRINT_4X4_MATRIX(g_state, "After ShiftRows");
+
                 if(fs == 0) fs = mixColumns((uint8_t*)g_state, sizeof(g_state));
                 DBG_PRINT_4X4_MATRIX(g_state, "After MixColumns");
-                if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
+
                 DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
+                if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
+                DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
             }
 #ifdef DEBUG
             printf("Round Number = %ld\r\n", round);
 #endif /* DEBUG */
-            DBG_PRINT_4X4_MATRIX(g_state, "Start of Round");
+            DBG_PRINT_4X4_MATRIX(g_state, "End of Round");
+
             if(fs == 0) fs = subByte((uint8_t*)g_state, sizeof(g_state));
             DBG_PRINT_4X4_MATRIX(g_state, "After SubBytes");
+
             if(fs == 0) fs = shiftRows((uint8_t*)g_state, sizeof(g_state));
             DBG_PRINT_4X4_MATRIX(g_state, "After ShiftRows");
+
             if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*Nr]);
             DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
         }
@@ -346,13 +357,13 @@ int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw)
         DBG_PRINT_4X4_MATRIX(g_state, "input");
 
         round = Nr;
-        DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Round Key Value");
+#ifdef DEBUG
+        printf("Inv Round Number = %ld\r\n", round);
+#endif /* DEBUG */
+
         if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &dw[AES_Nb*round]);
-        DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
-        if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
-        DBG_PRINT_4X4_MATRIX(g_state, "Inv SubBytes");
-        if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
-        DBG_PRINT_4X4_MATRIX(g_state, "Inv ShiftRows");
+        DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Inv Round Key Value");
+        DBG_PRINT_4X4_MATRIX(g_state, "After Inv addRoundKey");
 
         if(fs == 0)
         {
@@ -363,8 +374,86 @@ int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw)
 #endif /* DEBUG */
                 DBG_PRINT_4X4_MATRIX(g_state, "Start of Inv Round");
 
-                DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Round Key Value");
+                if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
+                DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
+
+                if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
+                DBG_PRINT_4X4_MATRIX(g_state, "After Inv ShiftRows");
+
+                if(fs == 0) fs = mixColumnsInv((uint8_t*)g_state, sizeof(g_state));
+                DBG_PRINT_4X4_MATRIX(g_state, "After Inv MixColumns");
+
+                DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Inv Round Key Value");
                 if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &dw[AES_Nb*round]);
+                DBG_PRINT_4X4_MATRIX(g_state, "After Inv addRoundKey");
+
+            }
+#ifdef DEBUG
+            printf("Inv Round Number = %ld\r\n", round);
+#endif /* DEBUG */
+            DBG_PRINT_4X4_MATRIX(g_state, "End of Round");
+
+            if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
+            DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
+
+            if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
+            DBG_PRINT_4X4_MATRIX(g_state, "After Inv ShiftRows");
+
+            if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &dw[AES_Nb*0U]);
+            DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Inv Round Key Value");
+        }
+#ifdef DEBUG
+        printf("Output\r\n");
+#endif /* DEBUG */
+        (void)memcpy(out, g_state, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(g_state, "output");
+    }
+    else
+    {
+        fs = -1;
+    }
+
+    return fs;
+}
+
+int doCipherInv2(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
+{
+    int fs = 0;
+    if((out != NULL) && (in != NULL) && (w != NULL))
+    {
+        size_t round;
+#ifdef DEBUG
+        printf("Input\r\n");
+#endif /* DEBUG */
+        (void)memcpy(g_state, in, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(g_state, "input");
+
+        round = Nr;
+#ifdef DEBUG
+        printf("Inv Round Number = %ld\r\n", round);
+#endif /* DEBUG */
+
+        if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
+        DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
+        DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
+
+        if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
+        DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
+
+        if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
+        DBG_PRINT_4X4_MATRIX(g_state, "After Inv ShiftRows");
+
+        if(fs == 0)
+        {
+            for(round = (size_t)(Nr - 1U); round > 0UL; round--)
+            {
+#ifdef DEBUG
+                printf("Inv Round Number = %ld\r\n", round);
+#endif /* DEBUG */
+                DBG_PRINT_4X4_MATRIX(g_state, "Start of Inv Round");
+
+                DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
+                if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
                 DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
 
                 if(fs == 0) fs = mixColumnsInv((uint8_t*)g_state, sizeof(g_state));
@@ -375,14 +464,13 @@ int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw)
 
                 if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
                 DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
-
             }
 #ifdef DEBUG
             printf("Inv Round Number = %ld\r\n", round);
 #endif /* DEBUG */
             DBG_PRINT_4X4_MATRIX(g_state, "End of Round");
-            if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &dw[AES_Nb*0U]);
-            DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Round Key Value");
+            if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*0U]);
+            DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
         }
 #ifdef DEBUG
         printf("Output\r\n");
@@ -658,6 +746,19 @@ int aesDec(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
 
     return fs;
 }
+
+int aesDec2(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
+{
+    int fs = 0;
+
+    size_t Nk = (kSize>>2UL);
+    size_t Nr = (((size_t)AES_Nr_BASE)+(kSize>>2UL));
+
+    if(fs == 0) fs = keyExpansion(key, Nk, Nr);
+    if(fs == 0) fs = doCipherInv2(out, in, Nr, (uint32_t*)g_extKey);
+
+    return fs;
+}
 #ifdef SELFTEST
 #define RUN_TEST(STATEMENTS, FRTN)                  \
 {                                                   \
@@ -784,6 +885,8 @@ uint8_t test_AES_out[AES_S_SIZE];
 
 void test_doCipher(void)
 {
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
     int fRtn;
     (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
 
@@ -796,6 +899,8 @@ void test_doCipher(void)
 
 void test_doCipherInv(void)
 {
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
     int fRtn;
     (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
 
@@ -806,8 +911,24 @@ void test_doCipherInv(void)
             "NIST, FIPS197, AES128 TestVector");
 }
 
+void test_doCipherInv2(void)
+{
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
+    int fRtn;
+    (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
+
+    RUN_TEST(keyExpansion(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
+    RUN_TEST(doCipherInv2(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
+    DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Inv Cipher Example(AES128)", 4UL);
+    EXAM_TEST(memcmp(test_AES_out, tv_AES128_FIPS197_pTxt_ref, sizeof(tv_AES128_FIPS197_pTxt_ref)) == 0, \
+            "NIST, FIPS197, AES128 TestVector");
+}
+
 void test_aesEnc(void)
 {
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
     int fRtn;
 
     printf("[AES128 Encryption]\r\n");
@@ -846,6 +967,8 @@ void test_aesEnc(void)
 
 void test_aesDec(void)
 {
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
     int fRtn;
 
     printf("[AES128 Decryption]\r\n");
@@ -883,6 +1006,47 @@ void test_aesDec(void)
 
 }
 
+void test_aesDec2(void)
+{
+    int fRtn;
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
+    printf("[AES128 Decryption]\r\n");
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES128_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        RUN_TEST(aesDec2(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        printf("[tvi=%02ld]", tvi);
+        EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
+                "NIST, FIPS197, AES128 Example values");
+        printHex(test_AES_out, sizeof(test_AES_out), "Decrypt Values", AES_S_SIZE);
+    }
+
+    printf("[AES192 Decryption]\r\n");
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        RUN_TEST(aesDec2(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        printf("[tvi=%02ld]", tvi);
+        EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
+                "NIST, FIPS197, AES192 Example values");
+        printHex(test_AES_out, sizeof(test_AES_out), "Decrypt Values", AES_S_SIZE);
+    }
+
+    printf("[AES256 Decryption]\r\n");
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        RUN_TEST(aesDec2(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        printf("[tvi=%02ld]", tvi);
+        EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
+                "NIST, FIPS197, AES256 Example values");
+        printHex(test_AES_out, sizeof(test_AES_out), "Decrypt Values", AES_S_SIZE);
+    }
+
+}
+
+
 int main(int argc, char* argv[])
 {
     int fRtn;
@@ -918,6 +1082,10 @@ int main(int argc, char* argv[])
     test_doCipherInv();
 
     test_aesDec();
+
+    test_doCipherInv2();
+
+    test_aesDec2();
 
     return 0;
 }
