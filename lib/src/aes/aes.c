@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "aes.h"
+#include "aes/aes.h"
 
 #ifdef DEBUG
 #define TEST_PRINT_U32_VALUE
