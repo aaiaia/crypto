@@ -169,10 +169,10 @@ const uint32_t g_Rcon[11] =
     0x00000036U,
 };
 
-uint8_t g_state[4][4] = {0};
+static uint8_t g_state[4][4] = {0};
 
 #define EXP_KEY_MAX_SIZE    (60U*4U)
-uint8_t g_extKey[EXP_KEY_MAX_SIZE];
+static uint8_t g_extKey[EXP_KEY_MAX_SIZE];
 
 int keyExpansion(uint8_t* key, size_t Nk, size_t Nr)
 {
@@ -1046,6 +1046,18 @@ void test_aesDec2(void)
 
 }
 
+void test_aes_blanks(void)
+{
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
+    uint8_t test_allZero[AES_S_SIZE];
+    uint8_t test_gcm211_key[] = { 0xAD, 0x7A, 0x2B, 0xD0, 0x3E, 0xAC, 0x83, 0x5A, 0x6F, 0x62, 0x0F, 0xDC, 0xB5, 0x06, 0xB3, 0x45 };
+
+    (void)memset(test_allZero, 0x0, AES_S_SIZE);
+    (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+    aesEnc(test_AES_out, test_allZero, test_gcm211_key, sizeof(test_gcm211_key));
+    printHex(test_AES_out, sizeof(test_AES_out), "2.1.1. GCM, H", AES_S_SIZE);
+}
 
 int main(int argc, char* argv[])
 {
@@ -1086,6 +1098,8 @@ int main(int argc, char* argv[])
     test_doCipherInv2();
 
     test_aesDec2();
+
+    test_aes_blanks(); // calcaulates AES-GCM H
 
     return 0;
 }
