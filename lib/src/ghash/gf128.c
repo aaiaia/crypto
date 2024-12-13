@@ -156,33 +156,40 @@ int gf128_ghash(uint8_t* ghash, uint8_t* H, uint8_t* data, size_t size)
 
     if(ghash != NULL && H != NULL && data != NULL)
     {
-        uint8_t xor_x[GHASH_SIZE];
-        uint8_t mul_y[GHASH_SIZE];
+        uint8_t buf_X[GHASH_SIZE];
+        uint8_t reg_Y[GHASH_SIZE];
         size_t iter;
         size_t prcSize, remSize;
 
-        memset(xor_x, 0, sizeof(xor_x));
-        memset(mul_y, 0, sizeof(mul_y));
+        //memset(buf_X, 0, sizeof(buf_X)); // Not required
+        memcpy(reg_Y, ghash, sizeof(reg_Y));
         iter = size >> 4UL;// divide by 16(=GHASH_SIZE)
         prcSize = 0UL;
         remSize = size;
         for(size_t i = 0UL; i < iter; i++)
         {
-            xor_u32((uint32_t*)xor_x, (uint32_t*)mul_y, (uint32_t*)(&data[prcSize]), GHASH_U32_LEN);
-            gf128_mul_sftr_u32_byte_swap((uint32_t*)mul_y, (uint32_t*)xor_x, (uint32_t*)H);
+            xor_u32((uint32_t*)buf_X, (uint32_t*)reg_Y, (uint32_t*)(&data[prcSize]), GHASH_U32_LEN);
+            gf128_mul_sftr_u32_byte_swap((uint32_t*)reg_Y, (uint32_t*)buf_X, (uint32_t*)H);
             prcSize += GHASH_SIZE;
             remSize -= GHASH_SIZE;
         }
 
         if(remSize != 0UL)
         {
-            xor_u8(xor_x, mul_y, &data[prcSize], remSize);
-            gf128_mul_sftr_u32_byte_swap((uint32_t*)mul_y, (uint32_t*)xor_x, (uint32_t*)H);
+#if 1
+            /* calculating aad tail method 1 */
+            xor_u8(buf_X, reg_Y, &data[prcSize], remSize);
+            memcpy(&buf_X[remSize], &reg_Y[remSize], (GHASH_SIZE - remSize));
+#else
+            /* calculating aad tail method 2, is equavalent with method 1 */
+            xor_u8(reg_Y, reg_Y, &data[prcSize], remSize);
+#endif
+            gf128_mul_sftr_u32_byte_swap((uint32_t*)reg_Y, (uint32_t*)buf_X, (uint32_t*)H);
             prcSize += remSize;
             remSize -= remSize;
         }
 
-        memcpy(ghash, mul_y, GHASH_SIZE);
+        memcpy(ghash, reg_Y, GHASH_SIZE);
     }
     else
     {
