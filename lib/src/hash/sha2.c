@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "hash/sha256.h"
+#include "hash/sha2.h"
 
 #define SHA256_BLEN_SIZE    8U  // bytes
 #define SHA_END_SIZE        1U

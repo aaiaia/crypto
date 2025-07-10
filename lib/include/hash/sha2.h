@@ -1,5 +1,5 @@
-#ifndef SHA256_H
-#define SHA256_H
+#ifndef SHA2_H
+#define SHA2_H
 
 /* SHA256 */
 #define SHA256_BLOCK_SIZE   64U
@@ -33,4 +33,4 @@ void testSha256_environments(void);
 #define testSha256_environments()
 #endif /* DEBUG */
 
-#endif /* SHA256_H */
+#endif /* SHA2_H */

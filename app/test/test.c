@@ -638,7 +638,7 @@ int test_ghash(void)
 #include <string.h>
 #include <stdlib.h> // exit()
 
-#include "hash/sha256.h"
+#include "hash/sha2.h"
 
 uint32_t g_sha256Dg32bSym[SHA256_DIGEST_NUM];
 uint8_t  g_sha256Dg_8bStm[SHA256_DIGEST_SIZE];
