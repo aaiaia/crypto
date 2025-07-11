@@ -640,8 +640,22 @@ int test_ghash(void)
 
 #include "hash/sha2.h"
 
-uint32_t g_sha256Dg32bSym[SHA256_DIGEST_NUM];
-uint8_t  g_sha256Dg_8bStm[SHA256_DIGEST_SIZE];
+typedef union {
+    uint32_t sha256DgSym[SHA2_DIGEST_NUM];
+    uint64_t sha512DgSym[SHA2_DIGEST_NUM];
+} sha2DgSym_t;
+typedef union {
+    uint8_t sha256DgStm[SHA256_DIGEST_SIZE];
+    uint8_t sha512DgStm[SHA512_DIGEST_SIZE];
+} sha2DgStm_t;
+
+sha2DgSym_t g_sha2DgSym;
+sha2DgStm_t g_sha2DgStm;
+
+#define g_sha256Dg32bSym    g_sha2DgSym.sha256DgSym
+#define g_sha256Dg_8bStm    g_sha2DgStm.sha256DgStm
+#define g_sha512Dg64bSym    g_sha2DgSym.sha512DgSym
+#define g_sha512Dg_8bStm    g_sha2DgStm.sha512DgStm
 
 const char ref_test_CAVP[] = "[REFERENCES]\nCryptographic Algorithm Validation Program CAVP\n[Link] https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/secure-hashing\nSHA Test Vectors for Hashing Byte-Oriented Messages\n[Link] https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Algorithm-Validation-Program/documents/shs/shabytetestvectors.zip";
 void test_CAVP(void)
@@ -666,7 +680,7 @@ void test_CAVP(void)
         convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2LEN256(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -683,12 +697,12 @@ void test_CAVP(void)
 }
 
 const char ref_test_FIPS_180_2_imVal[] = "[REFERENCES]\nCryptographic Standards and Guidelines\n[Link] https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines/example-values\nFIPS 180-2 - Secure Hash Standard, SHA256 Intermediate Value\n[Link] https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/SHA256.pdf";
-void test_FIPS_180_2_imVal(void)
+void test_FIPS_180_2_imVal_sha256(void)
 {
     printf("%s\n", ref_test_FIPS_180_2_imVal);
 
     {
-        const uint32_t ref_mes_abc_pad[SHA256_BLOCK_NUM] = {
+        const uint32_t ref_mes_abc_pad[SHA2_BLOCK_NUM] = {
             0x61626380u, 0x00000000u, 0x00000000u, 0x00000000u, 
             0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 
             0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 
@@ -696,7 +710,7 @@ void test_FIPS_180_2_imVal(void)
         };
         {
             printf("(ref_mes_abc_pad 32bit)\n0x ");
-            for(size_t si = 0UL; si < SIZE2LEN256(sizeof(ref_mes_abc_pad)); si++)
+            for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(ref_mes_abc_pad)); si++)
             {
                 printf("%08x ", ref_mes_abc_pad[si]);
                 if((si&0x7U)==0x7U) printf("\n");
@@ -710,7 +724,7 @@ void test_FIPS_180_2_imVal(void)
     {
         printf("--------------------------------------------------------------------------------\n");
 
-        uint32_t mes_abc_32b_symbol[SHA256_BLOCK_NUM] = {
+        uint32_t mes_abc_32b_symbol[SHA2_BLOCK_NUM] = {
             0x616263ffu, 0xffffffffu, 0xffffffffu, 0xffffffffu, 
             0xffffffffu, 0xffffffffu, 0xffffffffu, 0xffffffffu, 
             0xffffffffu, 0xffffffffu, 0xffffffffu, 0xffffffffu, 
@@ -719,7 +733,7 @@ void test_FIPS_180_2_imVal(void)
         const size_t mes_abc_size = 3UL;
         {
             printf("(mes_abc_32b_symbol 32bit)\n0x ");
-            for(size_t si = 0UL; si < SIZE2LEN256(sizeof(mes_abc_32b_symbol)); si++)
+            for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(mes_abc_32b_symbol)); si++)
             {
                 printf("%08x ", mes_abc_32b_symbol[si]);
                 if((si&0x7U)==0x7U) printf("\n");
@@ -738,7 +752,7 @@ void test_FIPS_180_2_imVal(void)
         convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2LEN256(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -778,7 +792,7 @@ void test_FIPS_180_2_imVal(void)
         convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2LEN256(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -813,7 +827,7 @@ void test_FIPS_180_2_imVal(void)
         convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2LEN256(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -843,10 +857,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 1U;
+            size_t tv_num = 1UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE] = { 0xbdu, };
             const size_t tv_sz = 1UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0x68325720U, 0xaabd7c82U, 0xf30f554bU, 0x313d0570U, 0xc95accbbU, 0x7dc4b5aaU, 0xe11204c0U, 0x8ffe732bU,
             };
 
@@ -858,7 +872,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
 
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -867,10 +881,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 2U;
+            size_t tv_num = 2UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE] = { 0xc9u, 0x8cu, 0x8eu, 0x55u, };
             const size_t tv_sz = 4UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0x7abc22c0U, 0xae5af26cU, 0xe93dbb94U, 0x433a0e0bU, 0x2e119d01U, 0x4f8e7f65U, 0xbd56c61cU, 0xcccd9504U,
             };
 
@@ -882,7 +896,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
 
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -891,10 +905,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 3U;
+            size_t tv_num = 3UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE] = { 0x0u, };
             const size_t tv_sz = 55UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0x02779466U, 0xcdec1638U, 0x11d07881U, 0x5c633f21U, 0x90141308U, 0x1449002fU, 0x24aa3e80U, 0xf0b88ef7U,
             };
 
@@ -906,7 +920,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
 
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -915,10 +929,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 4U;
+            size_t tv_num = 4UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE] = { 0x0u, };
             const size_t tv_sz = 56UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0xd4817aa5U, 0x497628e7U, 0xc77e6b60U, 0x6107042bU, 0xbba31308U, 0x88c5f47aU, 0x375e6179U, 0xbe789fbbU,
             };
 
@@ -930,7 +944,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
 
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -939,10 +953,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 5U;
+            size_t tv_num = 5UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE] = { 0x0u, };
             const size_t tv_sz = 57UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0x65a16cb7U, 0x861335d5U, 0xace3c607U, 0x18b5052eU, 0x44660726U, 0xda4cd13bU, 0xb745381bU, 0x235a1785U,
             };
 
@@ -954,7 +968,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
 
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -963,10 +977,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 6U;
+            size_t tv_num = 6UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE] = { 0x0u, };
             const size_t tv_sz = 64UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0xf5a5fd42U, 0xd16a2030U, 0x2798ef6eU, 0xd309979bU, 0x43003d23U, 0x20d9f0e8U, 0xea9831a9U, 0x2759fb4bU,
             };
 
@@ -978,7 +992,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
 
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -987,14 +1001,14 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 7U;
+            size_t tv_num = 7UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE];
             const size_t tv_sz = 1000UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0x541b3e9dU, 0xaa09b20bU, 0xf85fa273U, 0xe5cbd3e8U, 0x0185aa4eU, 0xc298e765U, 0xdb87742bU, 0x70138a53U,
             };
             size_t tv_chSz, tv_remSz, tv_prcSz;
-            (void)memset(tv_mesStm, 0, SHA256_BLOCK_SIZE);
+            (void)memset(tv_mesStm, 0x0, SHA256_BLOCK_SIZE);
 
             convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
@@ -1018,7 +1032,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 exit(1);
             }
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -1027,10 +1041,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 8U;
+            size_t tv_num = 8UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE];
             const size_t tv_sz = 1000UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0xc2e68682U, 0x3489ced2U, 0x017f6059U, 0xb8b23931U, 0x8b6364f6U, 0xdcd835d0U, 0xa519105aU, 0x1eadd6e4U,
             };
             size_t tv_chSz, tv_remSz, tv_prcSz;
@@ -1058,7 +1072,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 exit(1);
             }
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -1067,10 +1081,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 9U;
+            size_t tv_num = 9UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE];
             const size_t tv_sz = 1005UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0xf4d62ddeU, 0xc0f3dd90U, 0xea1380faU, 0x16a5ff8dU, 0xc4c54b21U, 0x740650f2U, 0x4afc4120U, 0x903552b0U,
             };
             size_t tv_chSz, tv_remSz, tv_prcSz;
@@ -1098,7 +1112,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 exit(1);
             }
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -1107,10 +1121,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 10U;
+            size_t tv_num = 10UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE];
             const size_t tv_sz = 1000000UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0xd29751f2U, 0x649b32ffU, 0x572b5e0aU, 0x9f541ea6U, 0x60a50f94U, 0xff0beedfU, 0xb0b692b9U, 0x24cc8025U,
             };
             size_t tv_chSz, tv_remSz, tv_prcSz;
@@ -1138,7 +1152,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 exit(1);
             }
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -1147,10 +1161,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 11U;
+            size_t tv_num = 11UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE];
             const size_t tv_sz = 536870912UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0x15a1868cU, 0x12cc5395U, 0x1e182344U, 0x277447cdU, 0x0979536bU, 0xadcc512aU, 0xd24c67e9U, 0xb2d4f3ddU,
             };
             size_t tv_chSz, tv_remSz, tv_prcSz;
@@ -1178,7 +1192,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 exit(1);
             }
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -1187,10 +1201,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 12U;
+            size_t tv_num = 12UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE];
             const size_t tv_sz = 1090519040UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0x461c19a9U, 0x3bd4344fU, 0x9215f5ecU, 0x64357090U, 0x342bc66bU, 0x15a14831U, 0x7d276e31U, 0xcbc20b53U,
             };
             size_t tv_chSz, tv_remSz, tv_prcSz;
@@ -1218,7 +1232,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 exit(1);
             }
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
@@ -1227,10 +1241,10 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
         {
             printf("--------------------------------------------------------------------------------\n");
 
-            uint32_t tv_num = 13U;
+            size_t tv_num = 13UL;
             uint8_t tv_mesStm[SHA256_BLOCK_SIZE];
             const size_t tv_sz = 1610612798UL;
-            const uint32_t ref_dgSym[SHA256_DIGEST_SIZE] = {
+            const uint32_t ref_dgSym[SHA2_DIGEST_NUM] = {
                 0xc23ce8a7U, 0x895f4b21U, 0xec0daf37U, 0x920ac0a2U, 0x62a22004U, 0x5a03eb2dU, 0xfed48ef9U, 0xb05aabeaU,
             };
             size_t tv_chSz, tv_remSz, tv_prcSz;
@@ -1258,15 +1272,432 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 exit(1);
             }
 
-            printf("SHA-256 #%u: ", tv_num);
+            printf("SHA-256 #%lu: ", tv_num);
             printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+    }
+
+    /* SHA-512 Test Data */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        printf("[SHA-512 Test Data]\n");
+        printf("================================================================================\n");
+        /* #1) 0 byte (null message) */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 1UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE] = { };
+            const size_t tv_sz = 0UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0xcf83e1357eefb8bdU, 0xf1542850d66d8007U, 0xd620e4050b5715dcU, 0x83f4a921d36ce9ce,
+                0x47d0d13c5d85f2b0U, 0xff8318d2877eec2fU, 0x63b931bd47417a81U, 0xa538327af927da3e,
+            };
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_sz);
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #2) 111 bytes of zeros */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 2UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 111UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0x77ddd3a542e530fdU, 0x047b8977c657ba6cU, 0xe72f1492e360b2b2U, 0x212cd264e75ec038,
+                0x82e4ff0525517ab4U, 0x207d14c70c2259baU, 0x88d4d335ee0e7e20U, 0x543d22102ab1788c,
+            };
+            (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_sz);
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #3) 112 bytes of zeros */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 3UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 112UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0x2be2e788c8a8adeaU, 0xa9c89a7f78904cacU, 0xea6e39297d75e057U, 0x3a73c756234534d6,
+                0x627ab4156b48a665U, 0x7b29ab8beb733340U, 0x40ad39ead81446bbU, 0x09c70704ec707952,
+            };
+            (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_sz);
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #4) 113 bytes of zeros */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 4UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 113UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0x0e67910bcf0f9ccdU, 0xe5464c63b9c850a1U, 0x2a759227d16b040dU, 0x98986d54253f9f34,
+                0x322318e56b8feb86U, 0xc5fb2270ed87f312U, 0x52f7f68493ee7597U, 0x43909bd75e4bb544,
+            };
+            (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_sz);
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #5) 122 bytes of zeros */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 5UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 122UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0x4f3f095d015be4a7U, 0xa7cc0b8c04da4aa0U, 0x9e74351e3a97651fU, 0x744c23716ebd9b3e,
+                0x822e5077a01baa5cU, 0xc0ed45b9249e88abU, 0x343d4333539df21eU, 0xd229da6f4a514e0f,
+            };
+            (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_sz);
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #6) 1000 bytes of zeros */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 6UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE] = { 0x0u, };
+            const size_t tv_sz = 1000UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0xca3dff61bb23477aU, 0xa6087b27508264a6U, 0xf9126ee3a004f53cU, 0xb8db942ed345f2f2,
+                0xd229b4b59c859220U, 0xa1cf1913f34248e3U, 0x803bab650e849a3dU, 0x9a709edc09ae4a76,
+            };
+            size_t tv_chSz, tv_remSz, tv_prcSz;
+            (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            tv_remSz = tv_sz;
+            for(tv_prcSz = 0UL; tv_prcSz < tv_sz; tv_prcSz += SHA512_BLOCK_SIZE)
+            {
+                tv_chSz = ((SHA512_BLOCK_SIZE<=tv_remSz)?(SHA512_BLOCK_SIZE):(tv_remSz));
+
+                updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_chSz);
+
+                tv_remSz -= tv_chSz;
+            }
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #7) 1000 bytes of 0x41 ‘A’ */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 7UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 1000UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0x329c52ac62d1fe73U, 0x1151f2b895a00475U, 0x445ef74f50b979c6U, 0xf7bb7cae349328c1,
+                0xd4cb4f7261a0ab43U, 0xf936a24b000651d4U, 0xa824fcdd577f211aU, 0xef8f806b16afe8af,
+            };
+            size_t tv_chSz, tv_remSz, tv_prcSz;
+            (void)memset(tv_mesStm, 0x41, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            tv_remSz = tv_sz;
+            for(tv_prcSz = 0UL; tv_prcSz < tv_sz; tv_prcSz += SHA512_BLOCK_SIZE)
+            {
+                tv_chSz = ((SHA512_BLOCK_SIZE<=tv_remSz)?(SHA512_BLOCK_SIZE):(tv_remSz));
+
+                updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_chSz);
+
+                tv_remSz -= tv_chSz;
+            }
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            if(tv_remSz != 0UL)
+            {
+                printf("[ERROR!] Chunk Size Error] Remain Size: %lu\n", tv_remSz);
+                exit(1);
+            }
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #8) 1005 bytes of 0x55 ‘U’ */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 8UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 1005UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0x59f5e54fe299c6a8U, 0x764c6b199e44924aU, 0x37f59e2b56c3ebadU, 0x939b7289210dc8e4,
+                0xc21b9720165b0f4dU, 0x4374c90f1bf4fb4aU, 0x5ace17a116179801U, 0x5052893a48c3d161,
+            };
+            size_t tv_chSz, tv_remSz, tv_prcSz;
+            (void)memset(tv_mesStm, 0x55, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            tv_remSz = tv_sz;
+            for(tv_prcSz = 0UL; tv_prcSz < tv_sz; tv_prcSz += SHA512_BLOCK_SIZE)
+            {
+                tv_chSz = ((SHA512_BLOCK_SIZE<=tv_remSz)?(SHA512_BLOCK_SIZE):(tv_remSz));
+
+                updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_chSz);
+
+                tv_remSz -= tv_chSz;
+            }
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            if(tv_remSz != 0UL)
+            {
+                printf("[ERROR!] Chunk Size Error] Remain Size: %lu\n", tv_remSz);
+                exit(1);
+            }
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #9) 1000000 bytes of zeros */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 9UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 1000000UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0xce044bc9fd43269dU, 0x5bbc946cbebc3bb7U, 0x11341115cc4abdf2U, 0xedbc3ff2c57ad4b1,
+                0x5deb699bda257feaU, 0x5aef9c6e55fcf4cfU, 0x9dc25a8c3ce25f2eU, 0xfe90908379bff7ed,
+            };
+            size_t tv_chSz, tv_remSz, tv_prcSz;
+            (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            tv_remSz = tv_sz;
+            for(tv_prcSz = 0UL; tv_prcSz < tv_sz; tv_prcSz += SHA512_BLOCK_SIZE)
+            {
+                tv_chSz = ((SHA512_BLOCK_SIZE<=tv_remSz)?(SHA512_BLOCK_SIZE):(tv_remSz));
+
+                updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_chSz);
+
+                tv_remSz -= tv_chSz;
+            }
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            if(tv_remSz != 0UL)
+            {
+                printf("[ERROR!] Chunk Size Error] Remain Size: %lu\n", tv_remSz);
+                exit(1);
+            }
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #10) 0x20000000 (536870912) bytes of 0x5a ‘Z’ */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 10UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 536870912UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0xda172279f3ebbda9U, 0x5f6b6e1e5f0ebec6U, 0x82c25d3d93561a16U, 0x24c2fa9009d64c7e,
+                0x9923f3b46bcaf11dU, 0x39a531f43297992bU, 0xa4155c7e827bd0f1U, 0xe194ae7ed6de4cac,
+            };
+            size_t tv_chSz, tv_remSz, tv_prcSz;
+            (void)memset(tv_mesStm, 0x5a, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            tv_remSz = tv_sz;
+            for(tv_prcSz = 0UL; tv_prcSz < tv_sz; tv_prcSz += SHA512_BLOCK_SIZE)
+            {
+                tv_chSz = ((SHA512_BLOCK_SIZE<=tv_remSz)?(SHA512_BLOCK_SIZE):(tv_remSz));
+
+                updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_chSz);
+
+                tv_remSz -= tv_chSz;
+            }
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            if(tv_remSz != 0UL)
+            {
+                printf("[ERROR!] Chunk Size Error] Remain Size: %lu\n", tv_remSz);
+                exit(1);
+            }
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #11) 0x41000000 (1090519040) bytes of zeros */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 11UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 1090519040UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0x14b1be901cb43549U, 0xb4d831e61e5f9df1U, 0xc791c85b50e85f9dU, 0x6bc64135804ad43c,
+                0xe8402750edbe4e5cU, 0x0fc170b99cf78b9fU, 0x4ecb9c7e02a15791U, 0x1d1bd1832d76784f,
+            };
+            size_t tv_chSz, tv_remSz, tv_prcSz;
+            (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            tv_remSz = tv_sz;
+            for(tv_prcSz = 0UL; tv_prcSz < tv_sz; tv_prcSz += SHA512_BLOCK_SIZE)
+            {
+                tv_chSz = ((SHA512_BLOCK_SIZE<=tv_remSz)?(SHA512_BLOCK_SIZE):(tv_remSz));
+
+                updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_chSz);
+
+                tv_remSz -= tv_chSz;
+            }
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            if(tv_remSz != 0UL)
+            {
+                printf("[ERROR!] Chunk Size Error] Remain Size: %lu\n", tv_remSz);
+                exit(1);
+            }
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+            printf("================================================================================\n");
+        }
+        /* #12) 0x6000003e (1610612798) bytes of 0x42 ‘B’ */
+        {
+            printf("--------------------------------------------------------------------------------\n");
+
+            size_t tv_num = 12UL;
+            uint8_t tv_mesStm[SHA512_BLOCK_SIZE];
+            const size_t tv_sz = 1610612798UL;
+            const uint64_t ref_dgSym[SHA2_DIGEST_NUM] = {
+                0xfd05e13eb771f051U, 0x90bd97d62647157eU, 0xa8f1f6949a52bb6dU, 0xaaedbad5f578ec59,
+                0xb1b8d6c4a7ecb2feU, 0xca6892b4dc138771U, 0x670a0f3bd577eea3U, 0x26aed40ab7dd58b1,
+            };
+            size_t tv_chSz, tv_remSz, tv_prcSz;
+            (void)memset(tv_mesStm, 0x42, SHA512_BLOCK_SIZE);
+
+            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+
+            startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
+
+            tv_remSz = tv_sz;
+            for(tv_prcSz = 0UL; tv_prcSz < tv_sz; tv_prcSz += SHA512_BLOCK_SIZE)
+            {
+                tv_chSz = ((SHA512_BLOCK_SIZE<=tv_remSz)?(SHA512_BLOCK_SIZE):(tv_remSz));
+
+                updateSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym), (uint64_t*)tv_mesStm, tv_chSz);
+
+                tv_remSz -= tv_chSz;
+            }
+
+            finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
+
+            if(tv_remSz != 0UL)
+            {
+                printf("[ERROR!] Chunk Size Error] Remain Size: %lu\n", tv_remSz);
+                exit(1);
+            }
+
+            printf("SHA-512 #%lu: ", tv_num);
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
 
             printf("================================================================================\n");
         }
     }
 }
 
-void test_sha256(void)
+void test_sha2(void)
 {
     const uint64_t ref_endian_64b = 0x0123456789abcdefUL;
     const uint8_t ref_mes_8b_stream_all_0_pad[SHA256_BLOCK_SIZE] = { 0x80u, 0x0, };
@@ -1286,30 +1717,10 @@ void test_sha256(void)
         printf("================================================================================\n");
     }
 
-    /* Print init Hash and Const Value */
-    {
-        printf("--------------------------------------------------------------------------------\n");
-
-        for(size_t i = 0; i < sizeof(H0_256)/sizeof(uint32_t); i++)
-        {
-            printf("H[%2lu] = 0x%08x ", i, ((uint32_t*)H0_256)[i]);
-            if((i != 0U) && ((i&0x3U) == 0x03)) printf("\n");
-        }
-        printf("\n");
-
-        for(size_t i = 0; i < sizeof(K256)/sizeof(uint32_t); i++)
-        {
-            printf("K[%2lu] = 0x%08x ", i, ((uint32_t*)K256)[i]);
-            if((i != 0U) && ((i&0x3U) == 0x03)) printf("\n");
-        }
-        printf("\n");
-
-        printf("================================================================================\n");
-    }
-    testSha256_environments();
+    test_sha2_environments();
 
     test_CAVP();
-    test_FIPS_180_2_imVal();
+    test_FIPS_180_2_imVal_sha256();
     test_FIPS_180_2_example_SHA2_Additional();
 }
 #endif /* TEST_SHA */
@@ -1320,7 +1731,7 @@ void test_sequence(void) {
     test_ghash();
 
 #ifdef TEST_SHA
-    test_sha256();
+    test_sha2();
 #endif /* TEST_SHA */
 }
 
