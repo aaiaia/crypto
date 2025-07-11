@@ -2060,6 +2060,281 @@ void test_sha2(void)
 }
 #endif /* TEST_SHA */
 
+#ifdef TEST_HMAC
+#include "hash/sha2.h"
+#include "mac/hmac.h"
+
+typedef union {
+    uint32_t mac256[SHA2_DIGEST_NUM];
+    uint64_t mac512[SHA2_DIGEST_NUM];
+} hmacSym_t;
+typedef union {
+    uint8_t mac256[SHA256_DIGEST_SIZE];
+    uint8_t mac512[SHA512_DIGEST_SIZE];
+} hmacStm_t;
+
+hmacSym_t g_hashSym;
+hmacStm_t g_hashStm;
+
+#define g_hmac256Sym    g_hashSym.mac256
+#define g_hmac256Stm    g_hashStm.mac256
+#define g_hmac512Sym    g_hashSym.mac512
+#define g_hmac512Stm    g_hashStm.mac512
+
+const char ref_test_FIPS_198_imVal[] = "[REFERENCES]\nCryptographic Standards and Guidelines\n[Link] https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines/example-values\nFIPS 198 - The Keyed-Hash Message Authentication Code (HMAC)\n[Link] https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/HMAC_SHA256.pdf";
+void test_FIPS_198_imVal(void)
+{
+    printf("%s\n", ref_test_FIPS_198_imVal);
+
+    /*
+     * Key length = 64
+     * Tag length = 32
+     * Input Date: "Sample message for keylen=blocklen"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 1UL;
+        const uint32_t keySym[] = {
+            0x00010203U,0x04050607U,0x08090A0BU,0x0C0D0E0FU,
+            0x10111213U,0x14151617U,0x18191A1BU,0x1C1D1E1FU,
+            0x20212223U,0x24252627U,0x28292A2BU,0x2C2D2E2FU,
+            0x30313233U,0x34353637U,0x38393A3BU,0x3C3D3E3FU,
+        };
+        const size_t keySize = sizeof(keySym);
+
+        uint8_t textStm[SHA256_BLOCK_SIZE] = "Sample message for keylen=blocklen";
+        const size_t textLen = strlen(textStm);
+
+        const uint32_t ref_mac[] = {
+            0x8BB9A1DBU,0x9806F20DU,0xF7F77B82U,0x138C7914U,
+            0xD174D59EU,0x13DC4D01U,0x69C9057BU,0x133E1D62U,
+        };
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint32_t); i++)
+        {
+            printf("%08x", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac256_key(keySym, keySize);
+
+        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        startHmac256(SHA256_DIGEST_SIZE);
+        updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
+        finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
+
+        printf("[HMAC256]\n");
+        printf("(32bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac256Sym)); si++)
+        {
+            printf("%08x", g_hmac256Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-256: ", testNum);
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+    /*
+     * Key length = 32
+     * Tag length = 32
+     * Input Date: "Sample message for keylen<blocklen"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 2UL;
+        const uint32_t keySym[] = {
+            0x00010203U,0x04050607U,0x08090A0BU,0x0C0D0E0FU,
+            0x10111213U,0x14151617U,0x18191A1BU,0x1C1D1E1FU,
+        };
+        const size_t keySize = sizeof(keySym);
+
+        uint8_t textStm[SHA256_BLOCK_SIZE] = "Sample message for keylen<blocklen";
+        const size_t textLen = strlen(textStm);
+
+        const uint32_t ref_mac[] = {
+            0xA28CF431U, 0x30EE696AU, 0x98F14A37U, 0x678B56BCU, 
+            0xFCBDD9E5U, 0xCF69717FU, 0xECF5480FU, 0x0EBDF790U, 
+        };
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint32_t); i++)
+        {
+            printf("%08x", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac256_key(keySym, keySize);
+
+        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        startHmac256(SHA256_DIGEST_SIZE);
+        updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
+        finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
+
+        printf("[HMAC256]\n");
+        printf("(32bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac256Sym)); si++)
+        {
+            printf("%08x", g_hmac256Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-256: ", testNum);
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+    /*
+     * Key length = 100
+     * Tag length = 32
+     * Input Date: "Sample message for keylen=blocklen"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 3UL;
+        const uint32_t keySym[] = {
+            0x00010203U, 0x04050607U, 0x08090A0BU, 0x0C0D0E0FU, 
+            0x10111213U, 0x14151617U, 0x18191A1BU, 0x1C1D1E1FU, 
+            0x20212223U, 0x24252627U, 0x28292A2BU, 0x2C2D2E2FU, 
+            0x30313233U, 0x34353637U, 0x38393A3BU, 0x3C3D3E3FU, 
+            0x40414243U, 0x44454647U, 0x48494A4BU, 0x4C4D4E4FU, 
+            0x50515253U, 0x54555657U, 0x58595A5BU, 0x5C5D5E5FU, 
+            0x60616263U, 
+        };
+        const size_t keySize = sizeof(keySym);
+
+        uint8_t textStm[SHA256_BLOCK_SIZE] = "Sample message for keylen=blocklen";
+        const size_t textLen = strlen(textStm);
+
+        const uint32_t ref_mac[] = {
+            0xBDCCB6C7U, 0x2DDEADB5U, 0x00AE7683U, 0x86CB38CCU, 
+            0x41C63DBBU, 0x0878DDB9U, 0xC7A38A43U, 0x1B78378DU, 
+        };
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint32_t); i++)
+        {
+            printf("%08x", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac256_key(keySym, keySize);
+
+        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        startHmac256(SHA256_DIGEST_SIZE);
+        updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
+        finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
+
+        printf("[HMAC256]\n");
+        printf("(32bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac256Sym)); si++)
+        {
+            printf("%08x", g_hmac256Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-256: ", testNum);
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+    /*
+     * Key length = 49
+     * Tag length = 16
+     * Input Date: "Sample message for keylen<blocklen, with truncated tag"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 4UL;
+        const uint32_t keySym[] = {
+            0x00010203U, 0x04050607U, 0x08090A0BU, 0x0C0D0E0FU, 
+            0x10111213U, 0x14151617U, 0x18191A1BU, 0x1C1D1E1FU, 
+            0x20212223U, 0x24252627U, 0x28292A2BU, 0x2C2D2E2FU, 
+            0x30000000U, 
+        };
+        const size_t keySize = 49U;
+
+        uint8_t textStm[SHA256_BLOCK_SIZE] = "Sample message for keylen<blocklen, with truncated tag";
+        const size_t textLen = strlen(textStm);
+
+        const uint32_t ref_mac[] = {
+            0x27A8B157U, 0x839EFEACU, 0x98DF070BU, 0x331D5936U, 
+            0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+        };
+		const size_t ref_mac_truncated_size = 16UL;
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint32_t); i++)
+        {
+            printf("%08x", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac256_key(keySym, keySize);
+
+        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        startHmac256(SHA256_DIGEST_SIZE);
+        updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
+        finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
+
+        printf("[HMAC256]\n");
+        printf("(32bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(ref_mac_truncated_size); si++)
+        {
+            printf("%08x", g_hmac256Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-256(truncated to %lu Bytes): ", testNum, ref_mac_truncated_size);
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, ref_mac_truncated_size) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+}
+#endif /* TEST_HMAC */
+
 void test_sequence(void) {
     test_macro();
     test_ntype();
@@ -2070,6 +2345,9 @@ void test_sequence(void) {
 #ifdef TEST_SHA
     test_sha2();
 #endif /* TEST_SHA */
+#ifdef TEST_HMAC
+    test_FIPS_198_imVal();
+#endif /* TEST_HMAC */
 }
 
 int main(int argc, char** argv) {

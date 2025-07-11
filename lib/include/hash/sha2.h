@@ -11,7 +11,8 @@
 #define SHA256_DIGEST_SIZE  32U
 #define SHA256_ROUND_NUM    64U
 
-#define SIZE2UI32LEN(SIZE)   ((SIZE)>>2U)    // /4
+#define SIZE2UI32LEN(SIZE)  ((SIZE)>>2U)    // /4
+#define UI32LEN2SIZE(LEN)   ((LEN)<<2U)    // /4
 
 /* SHA512 */
 #define SHA512_SYMBOL_SIZE  8U
@@ -20,6 +21,7 @@
 #define SHA512_ROUND_NUM    80U
 
 #define SIZE2UI64LEN(SIZE)   ((SIZE)>>3U)    // /8
+#define UI64LEN2SIZE(LEN)    ((LEN)<<3U)    // /8
 
 /* SHA256 */
 extern const uint32_t H0_224[SHA2_DIGEST_NUM];
