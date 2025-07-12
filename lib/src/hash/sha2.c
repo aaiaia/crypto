@@ -61,7 +61,7 @@
 #define EDCIDX(TYPD, IDX, MSK)  (IDX)
 #define EDCIDX32(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x03U)
 #define EDCIDX64(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x07U)
-#endif
+#endif /* LITTLE_ENDIAN */
 
 /* SHA2 constant values */
 const uint32_t H0_224[SHA2_DIGEST_NUM] = {
@@ -915,34 +915,34 @@ void test_sha2_environments(void)
     {
         printf("--------------------------------------------------------------------------------\n");
 
-        for(size_t i = 0; i < sizeof(H0_384)/sizeof(uint32_t); i++)
+        for(size_t i = 0; i < sizeof(H0_384)/sizeof(uint64_t); i++)
         {
-            printf("H0_384[%2lu] = 0x%016lx ", i, ((uint32_t*)H0_384)[i]);
+            printf("H0_384[%2lu] = 0x%016lx ", i, ((uint64_t*)H0_384)[i]);
             if((i != 0U) && ((i&0x3U) == 0x03)) printf("\n");
         }
         printf("\n");
-        for(size_t i = 0; i < sizeof(H0_512)/sizeof(uint32_t); i++)
+        for(size_t i = 0; i < sizeof(H0_512)/sizeof(uint64_t); i++)
         {
-            printf("H0_512[%2lu] = 0x%016lx ", i, ((uint32_t*)H0_512)[i]);
+            printf("H0_512[%2lu] = 0x%016lx ", i, ((uint64_t*)H0_512)[i]);
             if((i != 0U) && ((i&0x3U) == 0x03)) printf("\n");
         }
         printf("\n");
-        for(size_t i = 0; i < sizeof(H0_512_224)/sizeof(uint32_t); i++)
+        for(size_t i = 0; i < sizeof(H0_512_224)/sizeof(uint64_t); i++)
         {
-            printf("H0_512_224[%2lu] = 0x%016lx ", i, ((uint32_t*)H0_512_224)[i]);
+            printf("H0_512_224[%2lu] = 0x%016lx ", i, ((uint64_t*)H0_512_224)[i]);
             if((i != 0U) && ((i&0x3U) == 0x03)) printf("\n");
         }
         printf("\n");
-        for(size_t i = 0; i < sizeof(H0_512_256)/sizeof(uint32_t); i++)
+        for(size_t i = 0; i < sizeof(H0_512_256)/sizeof(uint64_t); i++)
         {
-            printf("H0_512_256[%2lu] = 0x%016lx ", i, ((uint32_t*)H0_512_256)[i]);
+            printf("H0_512_256[%2lu] = 0x%016lx ", i, ((uint64_t*)H0_512_256)[i]);
             if((i != 0U) && ((i&0x3U) == 0x03)) printf("\n");
         }
         printf("\n");
 
-        for(size_t i = 0; i < sizeof(K512)/sizeof(uint32_t); i++)
+        for(size_t i = 0; i < sizeof(K512)/sizeof(uint64_t); i++)
         {
-            printf("K[%2lu] = 0x%016lx ", i, ((uint32_t*)K512)[i]);
+            printf("K[%2lu] = 0x%016lx ", i, ((uint64_t*)K512)[i]);
             if((i != 0U) && ((i&0x3U) == 0x03)) printf("\n");
         }
         printf("\n");

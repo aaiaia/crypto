@@ -4,7 +4,8 @@
 # ============================================================
 # default C language make environment
 CC = gcc
-CFLAGS = -fPIC -DTEST_AES -DTEST_SHA	# gcc compile flags, when use compile and linking
+CFLAGS = -fPIC -DTEST_AES -DTEST_SHA -DTEST_HMAC			# gcc compile flags, when use compile and linking
+#CFLAGS = -fPIC -DTEST_AES -DTEST_SHA -DTEST_HMAC -DDEBUG	# gcc compile flags, when use compile and linking
 # default C++ language make environment
 CXX = g++
 CXXFLAGS =		# g++ compile flags
