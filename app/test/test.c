@@ -2127,10 +2127,9 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        initHmac256_key(keySym, keySize);
-
         convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
-        startHmac256(SHA256_DIGEST_SIZE);
+
+        startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
         finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
 
@@ -2186,10 +2185,9 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        initHmac256_key(keySym, keySize);
-
         convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
-        startHmac256(SHA256_DIGEST_SIZE);
+
+        startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
         finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
 
@@ -2250,10 +2248,9 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        initHmac256_key(keySym, keySize);
-
         convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
-        startHmac256(SHA256_DIGEST_SIZE);
+
+        startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
         finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
 
@@ -2312,10 +2309,9 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        initHmac256_key(keySym, keySize);
-
         convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
-        startHmac256(SHA256_DIGEST_SIZE);
+
+        startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
         finishHmac256(g_hmac256Sym, SHA256_DIGEST_SIZE);
 
@@ -2380,10 +2376,9 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        initHmac512_key(keySym, keySize);
-
         convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
-        startHmac512(SHA512_DIGEST_SIZE);
+
+        startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
         finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
 
@@ -2439,10 +2434,9 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        initHmac512_key(keySym, keySize);
-
         convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
-        startHmac512(SHA512_DIGEST_SIZE);
+
+        startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
         finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
 
@@ -2503,10 +2497,9 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        initHmac512_key(keySym, keySize);
-
         convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
-        startHmac512(SHA512_DIGEST_SIZE);
+
+        startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
         finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
 
@@ -2564,10 +2557,9 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        initHmac512_key(keySym, keySize);
-
         convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
-        startHmac512(SHA512_DIGEST_SIZE);
+
+        startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
         finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
 

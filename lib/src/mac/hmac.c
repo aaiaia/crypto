@@ -95,6 +95,9 @@ static hmac_hash_t l_hash;
 static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySize);
 static void keycpyHmac512(uint64_t* blk, const uint64_t* key, const size_t keySize);
 
+static void initHmac256_key(const uint32_t* key, const size_t keySize);
+static void initHmac512_key(const uint64_t* key, const size_t keySize);
+
 static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySize)
 {
     const size_t u32Len = SIZE2UI32LEN(keySize);
@@ -145,7 +148,7 @@ static void keycpyHmac512(uint64_t* blk, const uint64_t* key, const size_t keySi
     }
 }
 
-void initHmac256_key(const uint32_t* key, const size_t keySize)
+static void initHmac256_key(const uint32_t* key, const size_t keySize)
 {
     size_t k0prcSize, k0remSize, k0chkSize;
 
@@ -178,7 +181,7 @@ void initHmac256_key(const uint32_t* key, const size_t keySize)
     dprint_hmac256_blk(l_hmac256_k0, "K0_256");
 }
 
-void initHmac512_key(const uint64_t* key, const size_t keySize)
+static void initHmac512_key(const uint64_t* key, const size_t keySize)
 {
     size_t k0prcSize, k0remSize, k0chkSize;
 
@@ -211,8 +214,10 @@ void initHmac512_key(const uint64_t* key, const size_t keySize)
     dprint_hmac512_blk(l_hmac512_k0, "K0_512");
 }
 
-void startHmac256(const size_t macSize)
+void startHmac256(const uint32_t* key, const size_t keySize, const size_t macSize)
 {
+    initHmac256_key(key, keySize);
+
     for(size_t i = 0UL; i < SHA2_BLOCK_NUM; i++)
     {
         l_hmac256_k0[i] ^= HMAC_IPAD_256;
@@ -223,8 +228,10 @@ void startHmac256(const size_t macSize)
     updateSha256(l_hash256, macSize, l_hmac256_k0, sizeof(l_hmac256_k0));
 }
 
-void startHmac512(const size_t macSize)
+void startHmac512(const uint64_t* key, const size_t keySize, const size_t macSize)
 {
+    initHmac512_key(key, keySize);
+
     for(size_t i = 0UL; i < SHA2_BLOCK_NUM; i++)
     {
         l_hmac512_k0[i] ^= HMAC_IPAD_512;
