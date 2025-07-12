@@ -92,6 +92,9 @@ static hmac_hash_t l_hash;
 #define l_hash256   l_hash.sha256
 #define l_hash512   l_hash.sha512
 
+static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySize);
+static void keycpyHmac512(uint64_t* blk, const uint64_t* key, const size_t keySize);
+
 static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySize)
 {
     const size_t u32Len = SIZE2UI32LEN(keySize);
@@ -113,6 +116,31 @@ static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySi
         for(size_t idx_32 = u32Len + 1UL; idx_32 < SHA2_BLOCK_NUM; idx_32++)
         {
             blk[idx_32] = 0x0U;
+        }
+    }
+}
+
+static void keycpyHmac512(uint64_t* blk, const uint64_t* key, const size_t keySize)
+{
+    const size_t u64Len = SIZE2UI64LEN(keySize);
+
+    if(u64Len <= SHA2_BLOCK_NUM)
+    {
+        for(size_t idx_64 = 0UL; idx_64 < u64Len; idx_64++)
+        {
+            blk[idx_64] = key[idx_64];
+        }
+    }
+    if(keySize <= SHA512_BLOCK_SIZE)
+    {
+        blk[u64Len] = 0x0U;
+        for(size_t idx_8 = UI64LEN2SIZE(u64Len); idx_8 < keySize; idx_8++)
+        {
+            ((uint8_t*)blk)[EDCIDX64(size_t, idx_8)] = ((uint8_t*)key)[EDCIDX64(size_t, idx_8)];
+        }
+        for(size_t idx_64 = u64Len + 1UL; idx_64 < SHA2_BLOCK_NUM; idx_64++)
+        {
+            blk[idx_64] = 0x0U;
         }
     }
 }
@@ -150,6 +178,39 @@ void initHmac256_key(const uint32_t* key, const size_t keySize)
     dprint_hmac256_blk(l_hmac256_k0, "K0_256");
 }
 
+void initHmac512_key(const uint64_t* key, const size_t keySize)
+{
+    size_t k0prcSize, k0remSize, k0chkSize;
+
+    if(keySize <= SHA512_BLOCK_SIZE)
+    {
+        keycpyHmac512(l_hmac512_k0, key, keySize);
+    }
+    else
+    {
+        startSha512(l_hash512, H0_512, SHA512_DIGEST_SIZE);
+        k0remSize = keySize;
+        for(k0prcSize = 0UL; k0prcSize < keySize; k0prcSize += SHA512_BLOCK_SIZE)
+        {
+            if(k0remSize >= SHA512_BLOCK_SIZE)
+            {
+                k0chkSize = SHA512_BLOCK_SIZE;
+                updateSha512(l_hash512, SHA512_DIGEST_SIZE, &key[SIZE2UI64LEN(k0prcSize)], k0chkSize);
+            }
+            else
+            {
+                k0chkSize = k0remSize;
+                keycpyHmac512(l_hmac512_k0, &key[SIZE2UI64LEN(k0prcSize)], k0chkSize);
+                updateSha512(l_hash512, SHA512_DIGEST_SIZE, l_hmac512_k0, k0chkSize);
+            }
+            k0remSize -= k0chkSize;
+        }
+        finishSha512(l_hash512, SHA512_DIGEST_SIZE);
+        keycpyHmac512(l_hmac512_k0, l_hash512, SHA512_DIGEST_SIZE);
+    }
+    dprint_hmac512_blk(l_hmac512_k0, "K0_512");
+}
+
 void startHmac256(const size_t macSize)
 {
     for(size_t i = 0UL; i < SHA2_BLOCK_NUM; i++)
@@ -162,9 +223,26 @@ void startHmac256(const size_t macSize)
     updateSha256(l_hash256, macSize, l_hmac256_k0, sizeof(l_hmac256_k0));
 }
 
+void startHmac512(const size_t macSize)
+{
+    for(size_t i = 0UL; i < SHA2_BLOCK_NUM; i++)
+    {
+        l_hmac512_k0[i] ^= HMAC_IPAD_512;
+    }
+    dprint_hmac512_blk(l_hmac512_k0, "K0_512 ^ ipad");
+
+    startSha512(l_hash512, H0_512, macSize);
+    updateSha512(l_hash512, macSize, l_hmac512_k0, sizeof(l_hmac512_k0));
+}
+
 void updateHmac256(const size_t macSize, const uint32_t* text, const size_t textSize)
 {
     updateSha256(l_hash256, macSize, text, textSize);
+}
+
+void updateHmac512(const size_t macSize, const uint64_t* text, const size_t textSize)
+{
+    updateSha512(l_hash512, macSize, text, textSize);
 }
 
 void finishHmac256(uint32_t* mac, const size_t macSize)
@@ -183,4 +261,22 @@ void finishHmac256(uint32_t* mac, const size_t macSize)
     updateSha256(mac, macSize, l_hash256, macSize);
     finishSha256(mac, macSize);
     dprint_hmac256_mac(mac, "Hash((K0^opad)||Hash((K0^ipad)||text))");
+}
+
+void finishHmac512(uint64_t* mac, const size_t macSize)
+{
+    finishSha512(l_hash512, macSize);
+    dprint_hmac512_mac(l_hash512, "Hash((K0_512^ipad)||text)");
+
+    for(size_t i = 0UL; i < SHA2_BLOCK_NUM; i++)
+    {
+        l_hmac512_k0[i] ^= (HMAC_IPAD_512 ^ HMAC_OPAD_512);
+    }
+    dprint_hmac512_blk(l_hmac512_k0, "K0_512 ^ opad");
+
+    startSha512(mac, H0_512, macSize);
+    updateSha512(mac, macSize, l_hmac512_k0, sizeof(l_hmac512_k0));
+    updateSha512(mac, macSize, l_hash512, macSize);
+    finishSha512(mac, macSize);
+    dprint_hmac512_mac(mac, "Hash((K0^opad)||Hash((K0^ipad)||text))");
 }

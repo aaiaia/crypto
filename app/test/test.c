@@ -2081,10 +2081,10 @@ hmacStm_t g_hashStm;
 #define g_hmac512Sym    g_hashSym.mac512
 #define g_hmac512Stm    g_hashStm.mac512
 
-const char ref_test_FIPS_198_imVal[] = "[REFERENCES]\nCryptographic Standards and Guidelines\n[Link] https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines/example-values\nFIPS 198 - The Keyed-Hash Message Authentication Code (HMAC)\n[Link] https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/HMAC_SHA256.pdf";
-void test_FIPS_198_imVal(void)
+const char ref_test_FIPS_198_hamc256_imVal[] = "[REFERENCES]\nCryptographic Standards and Guidelines\n[Link] https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines/example-values\nFIPS 198 - The Keyed-Hash Message Authentication Code (HMAC)\n[Link] https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/HMAC_SHA256.pdf";
+void test_FIPS_198_hamc256_imVal(void)
 {
-    printf("%s\n", ref_test_FIPS_198_imVal);
+    printf("%s\n", ref_test_FIPS_198_hamc256_imVal);
 
     /*
      * Key length = 64
@@ -2333,6 +2333,258 @@ void test_FIPS_198_imVal(void)
         printf("--------------------------------------------------------------------------------\n");
     }
 }
+
+const char ref_test_FIPS_198_hamc512_imVal[] = "[REFERENCES]\nCryptographic Standards and Guidelines\n[Link] https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines/example-values\nFIPS 198 - The Keyed-Hash Message Authentication Code (HMAC)\n[Link] https://csrc.nist.gov/csrc/media/projects/cryptographic-standards-and-guidelines/documents/examples/hmac_sha512.pdf";
+void test_FIPS_198_hamc512_imVal(void)
+{
+    printf("%s\n", ref_test_FIPS_198_hamc512_imVal);
+
+    /*
+     * Key length = 128
+     * Tag length = 64
+     * Input Date: "Sample message for keylen=blocklen"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 1UL;
+        const uint64_t keySym[] = {
+            0x0001020304050607U, 0x08090A0B0C0D0E0FU, 0x1011121314151617U, 0x18191A1B1C1D1E1FU, 
+            0x2021222324252627U, 0x28292A2B2C2D2E2FU, 0x3031323334353637U, 0x38393A3B3C3D3E3FU, 
+            0x4041424344454647U, 0x48494A4B4C4D4E4FU, 0x5051525354555657U, 0x58595A5B5C5D5E5FU, 
+            0x6061626364656667U, 0x68696A6B6C6D6E6FU, 0x7071727374757677U, 0x78797A7B7C7D7E7FU, 
+        };
+        const size_t keySize = sizeof(keySym);
+
+        uint8_t textStm[SHA512_BLOCK_SIZE] = "Sample message for keylen=blocklen";
+        const size_t textLen = strlen(textStm);
+
+        const uint64_t ref_mac[] = {
+            0xFC25E240658CA785U, 0xB7A811A8D3F7B4CAU, 0x48CFA26A8A366BF2U, 0xCD1F836B05FCB024U, 
+            0xBD36853081811D6CU, 0xEA4216EBAD79DA1CU, 0xFCB95EA4586B8A0CU, 0xE356596A55FB1347U, 
+        };
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint64_t); i++)
+        {
+            printf("%016lx", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac512_key(keySym, keySize);
+
+        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        startHmac512(SHA512_DIGEST_SIZE);
+        updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
+        finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
+
+        printf("[HMAC512]\n");
+        printf("(64bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac512Sym)); si++)
+        {
+            printf("%016lx", g_hmac512Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-512: ", testNum);
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+    /*
+     * Key length = 64
+     * Tag length = 64
+     * Input Date: "Sample message for keylen<blocklen"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 2UL;
+        const uint64_t keySym[] = {
+            0x0001020304050607U, 0x08090A0B0C0D0E0FU, 0x1011121314151617U, 0x18191A1B1C1D1E1FU, 
+            0x2021222324252627U, 0x28292A2B2C2D2E2FU, 0x3031323334353637U, 0x38393A3B3C3D3E3FU, 
+        };
+        const size_t keySize = sizeof(keySym);
+
+        uint8_t textStm[SHA512_BLOCK_SIZE] = "Sample message for keylen<blocklen";
+        const size_t textLen = strlen(textStm);
+
+        const uint64_t ref_mac[] = {
+            0xFD44C18BDA0BB0A6U, 0xCE0E82B031BF2818U, 0xF6539BD56EC00BDCU, 0x10A8A2D730B3634DU, 
+            0xE2545D639B0F2CF7U, 0x10D0692C72A1896FU, 0x1F211C2B922D1A96U, 0xC392E07E7EA9FEDCU, 
+        };
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint64_t); i++)
+        {
+            printf("%016lx", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac512_key(keySym, keySize);
+
+        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        startHmac512(SHA512_DIGEST_SIZE);
+        updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
+        finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
+
+        printf("[HMAC512]\n");
+        printf("(64bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac512Sym)); si++)
+        {
+            printf("%016lx", g_hmac512Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-512: ", testNum);
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+    /*
+     * Key length = 200
+     * Tag length = 64
+     * Input Date: "Sample message for keylen=blocklen"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 3UL;
+        const uint64_t keySym[] = {
+            0x0001020304050607U, 0x08090A0B0C0D0E0FU, 0x1011121314151617U, 0x18191A1B1C1D1E1FU, 
+            0x2021222324252627U, 0x28292A2B2C2D2E2FU, 0x3031323334353637U, 0x38393A3B3C3D3E3FU, 
+            0x4041424344454647U, 0x48494A4B4C4D4E4FU, 0x5051525354555657U, 0x58595A5B5C5D5E5FU, 
+            0x6061626364656667U, 0x68696A6B6C6D6E6FU, 0x7071727374757677U, 0x78797A7B7C7D7E7FU, 
+            0x8081828384858687U, 0x88898A8B8C8D8E8FU, 0x9091929394959697U, 0x98999A9B9C9D9E9FU, 
+            0xA0A1A2A3A4A5A6A7U, 0xA8A9AAABACADAEAFU, 0xB0B1B2B3B4B5B6B7U, 0xB8B9BABBBCBDBEBFU, 
+            0xC0C1C2C3C4C5C6C7U, 
+        };
+        const size_t keySize = sizeof(keySym);
+
+        uint8_t textStm[SHA512_BLOCK_SIZE] = "Sample message for keylen=blocklen";
+        const size_t textLen = strlen(textStm);
+
+        const uint64_t ref_mac[] = {
+            0xD93EC8D2DE1AD2A9U, 0x957CB9B83F14E76AU, 0xD6B5E0CCE285079AU, 0x127D3B14BCCB7AA7U, 
+            0x286D4AC0D4CE6421U, 0x5F2BC9E6870B33D9U, 0x7438BE4AAA20CDA5U, 0xC5A912B48B8E27F3U, 
+        };
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint64_t); i++)
+        {
+            printf("%016lx", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac512_key(keySym, keySize);
+
+        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        startHmac512(SHA512_DIGEST_SIZE);
+        updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
+        finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
+
+        printf("[HMAC512]\n");
+        printf("(64bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac512Sym)); si++)
+        {
+            printf("%016lx", g_hmac512Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-512: ", testNum);
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+    /*
+     * Key length = 49
+     * Tag length = 32
+     * Input Date: "Sample message for keylen<blocklen, with truncated tag"
+     */
+    {
+        printf("--------------------------------------------------------------------------------\n");
+        const size_t testNum = 4UL;
+        const uint64_t keySym[] = {
+            0x0001020304050607U, 0x08090A0B0C0D0E0FU, 0x1011121314151617U, 0x18191A1B1C1D1E1FU, 
+            0x2021222324252627U, 0x28292A2B2C2D2E2FU, 0x3000000000000000U, 0x0000000000000000U, 
+            0x0000000000000000U, 0x0000000000000000U, 0x0000000000000000U, 0x0000000000000000U, 
+            0x0000000000000000U, 0x0000000000000000U, 0x0000000000000000U, 0x0000000000000000U, 
+        };
+        const size_t keySize = 49U;
+
+        uint8_t textStm[SHA512_BLOCK_SIZE] = "Sample message for keylen<blocklen, with truncated tag";
+        const size_t textLen = strlen(textStm);
+
+        const uint64_t ref_mac[] = {
+            0x00F3E9A77BB0F06DU, 0xE15F160603E42B50U, 0x28758808596664C0U, 0x3E1AB8FB2B076778U, 
+        };
+		const size_t ref_mac_truncated_size = 32UL;
+
+        printf("Key length = %lu\n", keySize);
+        printf("Key Value: 0x");
+        for(size_t i = 0UL; i < keySize / sizeof(uint64_t); i++)
+        {
+            printf("%016lx", keySym[i]);
+        }
+        printf("\n");
+
+        printf("Text length = %lu\n", textLen);
+        printf("Text: %s\n", textStm);
+        printf("Text Val: 0x");
+        for(size_t i = 0UL; i < textLen; i++)
+        {
+            printf("%02x", textStm[i]);
+        }
+        printf("\n");
+
+        initHmac512_key(keySym, keySize);
+
+        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        startHmac512(SHA512_DIGEST_SIZE);
+        updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
+        finishHmac512(g_hmac512Sym, SHA512_DIGEST_SIZE);
+
+        printf("[HMAC512]\n");
+        printf("(64bit) 0x ");
+        for(size_t si = 0UL; si < SIZE2UI32LEN(ref_mac_truncated_size); si++)
+        {
+            printf("%016lx", g_hmac512Sym[si]);
+        }
+        printf("\n");
+
+        printf("[%2lu]HMAC-512(truncated to %lu Bytes): ", testNum, ref_mac_truncated_size);
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, ref_mac_truncated_size) == 0)?"PASS":"FAIL"));
+
+        printf("--------------------------------------------------------------------------------\n");
+    }
+}
 #endif /* TEST_HMAC */
 
 void test_sequence(void) {
@@ -2346,7 +2598,8 @@ void test_sequence(void) {
     test_sha2();
 #endif /* TEST_SHA */
 #ifdef TEST_HMAC
-    test_FIPS_198_imVal();
+    test_FIPS_198_hamc256_imVal();
+    test_FIPS_198_hamc512_imVal();
 #endif /* TEST_HMAC */
 }
 
