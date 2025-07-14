@@ -21,7 +21,7 @@ int gf128_mul_sftl_u32(uint32_t* z, uint32_t* x, uint32_t* y)
         (void)memset((void*)u32_z, 0, ((size_t)GHASH_SIZE));
         (void)memcpy((void*)u32_v, (void*)x, ((size_t)GHASH_SIZE));
 
-        for(size_t i = 0UL; i < BYTE2BIT(GHASH_SIZE); i++)
+        for(size_t i = 0UL; i < BYTE2BITS(GHASH_SIZE); i++)
         {
             if(TMP_Yi_is_1_cond(i, y))
             {
@@ -68,7 +68,7 @@ int gf128_mul_sftr_u32(uint32_t* z, uint32_t* x, uint32_t* y)
         (void)memset((void*)u32_z, 0, ((size_t)GHASH_SIZE));
         (void)memcpy((void*)u32_v, (void*)x, ((size_t)GHASH_SIZE));
 
-        for(size_t i = BYTE2BIT(GHASH_SIZE) - 1UL; i != SIZE_MAX; i--)
+        for(size_t i = BYTE2BITS(GHASH_SIZE) - 1UL; i != SIZE_MAX; i--)
         {
             if(TMP_Yi_is_1_cond(i, y))
             {
