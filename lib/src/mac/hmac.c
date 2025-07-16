@@ -39,32 +39,12 @@ void _dprint_ui64_array_(const uint64_t* blk, const size_t len, const char* titl
 #define dprint_hmac512_blk(UI64_PTR, TITLE)
 #define dprint_hmac512_mac(UI64_PTR, TITLE)
 #endif /* DEBUG */
-#include <stdlib.h> // defines 'LITTLE_ENDIAN'
 #include <stdint.h>
 #include <string.h>
 
+#include "endian/endian.h"
 #include "mac/hmac.h"
 #include "hash/sha2.h"
-
-#if defined(LITTLE_ENDIAN)
-#define EDCVAL32(X32) \
-    ( (((X32)&0x000000ffU)<<24U)|(((X32)&0xff000000U)>>24U) \
-     |(((X32)&0x0000ff00U)<< 8U)|(((X32)&0x00ff0000U)>> 8U) )
-#define EDCVAL64(X64) \
-    ( (((X64)&0x00000000000000ffUL)<<56UL)|(((X64)&0xff00000000000000UL)>>56UL) \
-     |(((X64)&0x000000000000ff00UL)<<40UL)|(((X64)&0x00ff000000000000UL)>>40UL) \
-     |(((X64)&0x0000000000ff0000UL)<<24UL)|(((X64)&0x0000ff0000000000UL)>>24UL) \
-     |(((X64)&0x00000000ff000000UL)<< 8UL)|(((X64)&0x000000ff00000000UL)>> 8UL))
-#define EDCIDX(TYPE, IDX, MSK)  (((IDX)&(~((TYPE)(MSK))))|(((TYPE)(MSK))-((IDX)&((TYPE)(MSK)))))
-#define EDCIDX32(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x03U)
-#define EDCIDX64(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x07U)
-#else
-#define EDCVAL32(X32)
-#define EDCVAL64(X64)
-#define EDCIDX(TYPD, IDX, MSK)  (IDX)
-#define EDCIDX32(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x03U)
-#define EDCIDX64(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x07U)
-#endif /* LITTLE_ENDIAN */
 
 #define HMAC_IPAD_BYTE  0x36
 #define HMAC_OPAD_BYTE  0x5c
@@ -100,7 +80,7 @@ static void initHmac512_key(const uint64_t* key, const size_t keySize);
 
 static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySize)
 {
-    const size_t u32Len = SIZE2UI32LEN(keySize);
+    const size_t u32Len = EDCSIZE2W32LEN(keySize);
 
     if(u32Len <= SHA2_BLOCK_NUM)
     {
@@ -112,7 +92,7 @@ static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySi
     if(keySize <= SHA256_BLOCK_SIZE)
     {
         blk[u32Len] = 0x0U;
-        for(size_t idx_8 = UI32LEN2SIZE(u32Len); idx_8 < keySize; idx_8++)
+        for(size_t idx_8 = EDCW32LEN2SIZE(u32Len); idx_8 < keySize; idx_8++)
         {
             ((uint8_t*)blk)[EDCIDX32(size_t, idx_8)] = ((uint8_t*)key)[EDCIDX32(size_t, idx_8)];
         }
@@ -125,7 +105,7 @@ static void keycpyHmac256(uint32_t* blk, const uint32_t* key, const size_t keySi
 
 static void keycpyHmac512(uint64_t* blk, const uint64_t* key, const size_t keySize)
 {
-    const size_t u64Len = SIZE2UI64LEN(keySize);
+    const size_t u64Len = EDCSIZE2W64LEN(keySize);
 
     if(u64Len <= SHA2_BLOCK_NUM)
     {
@@ -137,7 +117,7 @@ static void keycpyHmac512(uint64_t* blk, const uint64_t* key, const size_t keySi
     if(keySize <= SHA512_BLOCK_SIZE)
     {
         blk[u64Len] = 0x0U;
-        for(size_t idx_8 = UI64LEN2SIZE(u64Len); idx_8 < keySize; idx_8++)
+        for(size_t idx_8 = EDCW64LEN2SIZE(u64Len); idx_8 < keySize; idx_8++)
         {
             ((uint8_t*)blk)[EDCIDX64(size_t, idx_8)] = ((uint8_t*)key)[EDCIDX64(size_t, idx_8)];
         }
@@ -165,12 +145,12 @@ static void initHmac256_key(const uint32_t* key, const size_t keySize)
             if(k0remSize >= SHA256_BLOCK_SIZE)
             {
                 k0chkSize = SHA256_BLOCK_SIZE;
-                updateSha256(l_hash256, SHA256_DIGEST_SIZE, &key[SIZE2UI32LEN(k0prcSize)], k0chkSize);
+                updateSha256(l_hash256, SHA256_DIGEST_SIZE, &key[EDCSIZE2W32LEN(k0prcSize)], k0chkSize);
             }
             else
             {
                 k0chkSize = k0remSize;
-                keycpyHmac256(l_hmac256_k0, &key[SIZE2UI32LEN(k0prcSize)], k0chkSize);
+                keycpyHmac256(l_hmac256_k0, &key[EDCSIZE2W32LEN(k0prcSize)], k0chkSize);
                 updateSha256(l_hash256, SHA256_DIGEST_SIZE, l_hmac256_k0, k0chkSize);
             }
             k0remSize -= k0chkSize;
@@ -198,12 +178,12 @@ static void initHmac512_key(const uint64_t* key, const size_t keySize)
             if(k0remSize >= SHA512_BLOCK_SIZE)
             {
                 k0chkSize = SHA512_BLOCK_SIZE;
-                updateSha512(l_hash512, SHA512_DIGEST_SIZE, &key[SIZE2UI64LEN(k0prcSize)], k0chkSize);
+                updateSha512(l_hash512, SHA512_DIGEST_SIZE, &key[EDCSIZE2W64LEN(k0prcSize)], k0chkSize);
             }
             else
             {
                 k0chkSize = k0remSize;
-                keycpyHmac512(l_hmac512_k0, &key[SIZE2UI64LEN(k0prcSize)], k0chkSize);
+                keycpyHmac512(l_hmac512_k0, &key[EDCSIZE2W64LEN(k0prcSize)], k0chkSize);
                 updateSha512(l_hash512, SHA512_DIGEST_SIZE, l_hmac512_k0, k0chkSize);
             }
             k0remSize -= k0chkSize;

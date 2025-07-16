@@ -154,214 +154,228 @@ void test_macro(void) {
 
     }
 
-    // test: BIT2SIZE(bits)
+    // test: BITS2SIZE(bits)
     {
         uint32_t ref, r, n;
-        printf("[TEST] BIT2SIZE\r\n");
+        printf("[TEST] BITS2SIZE\r\n");
 
         // test 1
         n = 6u;
         ref = 1u;
-        r = BIT2SIZE(n);
+        r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 2
         n = 14u;
         ref = 2u;
-        r = BIT2SIZE(n);
+        r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 3
         n = 1024u;
         ref = 128u;
-        r = BIT2SIZE(n);
+        r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 4
         n = 10240u;
         ref = 1280u;
-        r = BIT2SIZE(n);
+        r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 5
         n = 10241u;
         ref = 1281u;
-        r = BIT2SIZE(n);
+        r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
         // test 6
         n = 727u;
         ref = 91u;
-        r = BIT2SIZE(n);
+        r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
 
     }
 }
 
 void test_ntype(void) {
-    ntype_s* p = (ntype_s*)NULL;
+#define _CMP_TRUE_  1
+    bigNumU32s_s* p = (bigNumU32s_s*)NULL;
 
-    uint32_t test_blen, test_alen;
-    int test_cmp_blen, test_cmp_alen;
+    size_t test_bits, test_size, test_nlen;
+    int test_cmp_bits, test_cmp_size, test_cmp_nlen;
 
     {
-        test_blen = 1ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 8ul - 1ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 8ul - 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 8ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 8ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 8ul + 1ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 8ul + 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 16ul - 1ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 16ul - 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 16ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 16ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 16ul + 1ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 16ul + 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 512ul - 1ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 512ul - 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 512ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 512ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 512ul + 1ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 512ul + 1ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        test_blen = 1023ul;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+        test_bits = 1023ul;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
     }
 
-    for(uint32_t tmp_blen = 1ul; tmp_blen < 20480ul; tmp_blen++) {
-        test_blen = tmp_blen;
-        test_alen = UIN_CEIL(test_blen, 8u);
-        p = mkNum(test_blen);
-        if(test_blen == p->blen)    test_cmp_blen = 0;
-        else                        test_cmp_blen = -1;
-        if(test_alen == p->alen)    test_cmp_alen = 0;
-        else                        test_cmp_alen = -1;
-        printf("(ntype_s*):0x%p, blen:%u[bit]:%s, alen:%u[Bytes]:%s\r\n", p,
-            p->blen, (test_cmp_blen == 0)?"PASS":"FAIL", \
-            p->alen, (test_cmp_alen == 0)?"PASS":"FAIL");
-        rmNum(&p);
+    for(uint32_t tmp_bits = 1ul; tmp_bits < 20480ul; tmp_bits++) {
+        test_bits = tmp_bits;
+        test_size = UIN_CEIL(test_bits, 8u);
+        test_nlen = BYTE2U32L(test_size);
+        p = mkBigNumU32s(test_bits);
+        test_cmp_bits = (test_bits == p->bits);
+        test_cmp_size = (test_size == p->size);
+        test_cmp_nlen = (test_nlen == p->nlen);
+        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
+        rmBitNumU32s(&p);
 
-        if((test_cmp_blen != 0) || (test_cmp_alen != 0)) {
-            printf("config:bitLength=%u,arrayLength=%u\r\n", test_blen, test_alen);
+        if((test_cmp_bits != 0) || (test_cmp_size != 0)) {
+            printf("config:, bits:%8lu[bit], size:%6lu[Bytes], nlen:%4lu[length]\r\n", test_bits, test_size, test_nlen);
             break;
         } else {}
     }
+#undef _CMP_TRUE_
 }
 
 #include "common/bitwise.h"
@@ -967,6 +981,14 @@ void test_aes(void)
 }
 #endif /* TEST_AES */
 
+#ifdef TEST_ENDIAN
+#include "endian/endian.h"
+void test_endian(void)
+{
+    test_endian_environments();
+}
+#endif /* TEST_ENDIAN */
+
 #ifdef TEST_SHA
 #include <stdio.h>
 #include <stdint.h>
@@ -1012,10 +1034,10 @@ void test_CAVP(void)
 
         finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-        convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
+        convSymbolToStreamSha256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -1045,7 +1067,7 @@ void test_FIPS_180_2_imVal_sha256(void)
         };
         {
             printf("(ref_mes_abc_pad 32bit)\n0x ");
-            for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(ref_mes_abc_pad)); si++)
+            for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(ref_mes_abc_pad)); si++)
             {
                 printf("%08x ", ref_mes_abc_pad[si]);
                 if((si&0x7U)==0x7U) printf("\n");
@@ -1068,7 +1090,7 @@ void test_FIPS_180_2_imVal_sha256(void)
         const size_t mes_abc_size = 3UL;
         {
             printf("(mes_abc_32b_symbol 32bit)\n0x ");
-            for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(mes_abc_32b_symbol)); si++)
+            for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(mes_abc_32b_symbol)); si++)
             {
                 printf("%08x ", mes_abc_32b_symbol[si]);
                 if((si&0x7U)==0x7U) printf("\n");
@@ -1084,10 +1106,10 @@ void test_FIPS_180_2_imVal_sha256(void)
 
         finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-        convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
+        convSymbolToStreamSha256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -1116,7 +1138,7 @@ void test_FIPS_180_2_imVal_sha256(void)
 
         printf("MESSAGE IS 8BIT STREAM\n");
 
-        convStreamToSymbol256((uint32_t*)mes_abc_8b_stream, (const uint32_t*)mes_abc_8b_stream, sizeof(mes_abc_8b_stream));
+        convStreamToSymbolSha256((uint32_t*)mes_abc_8b_stream, (const uint32_t*)mes_abc_8b_stream, sizeof(mes_abc_8b_stream));
 
         startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1124,10 +1146,10 @@ void test_FIPS_180_2_imVal_sha256(void)
 
         finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-        convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
+        convSymbolToStreamSha256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -1151,7 +1173,7 @@ void test_FIPS_180_2_imVal_sha256(void)
 
         printf("MESSAGE IS 8BIT STRING\n");
 
-        convStreamToSymbol256((uint32_t*)mes_string_8b_stream, (const uint32_t*)mes_string_8b_stream, sizeof(mes_string_8b_stream));
+        convStreamToSymbolSha256((uint32_t*)mes_string_8b_stream, (const uint32_t*)mes_string_8b_stream, sizeof(mes_string_8b_stream));
 
         startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1159,10 +1181,10 @@ void test_FIPS_180_2_imVal_sha256(void)
 
         finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
-        convSymbolToStream256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
+        convSymbolToStreamSha256((uint32_t*)g_sha256Dg_8bStm, (const uint32_t*)g_sha256Dg32bSym, SHA256_DIGEST_SIZE);
         printf("[DIGEST]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_sha256Dg32bSym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_sha256Dg32bSym)); si++)
         {
             printf("%08x", g_sha256Dg32bSym[si]);
         }
@@ -1199,7 +1221,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 0x68325720U, 0xaabd7c82U, 0xf30f554bU, 0x313d0570U, 0xc95accbbU, 0x7dc4b5aaU, 0xe11204c0U, 0x8ffe732bU,
             };
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1223,7 +1245,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 0x7abc22c0U, 0xae5af26cU, 0xe93dbb94U, 0x433a0e0bU, 0x2e119d01U, 0x4f8e7f65U, 0xbd56c61cU, 0xcccd9504U,
             };
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1247,7 +1269,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 0x02779466U, 0xcdec1638U, 0x11d07881U, 0x5c633f21U, 0x90141308U, 0x1449002fU, 0x24aa3e80U, 0xf0b88ef7U,
             };
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1271,7 +1293,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 0xd4817aa5U, 0x497628e7U, 0xc77e6b60U, 0x6107042bU, 0xbba31308U, 0x88c5f47aU, 0x375e6179U, 0xbe789fbbU,
             };
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1295,7 +1317,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 0x65a16cb7U, 0x861335d5U, 0xace3c607U, 0x18b5052eU, 0x44660726U, 0xda4cd13bU, 0xb745381bU, 0x235a1785U,
             };
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1319,7 +1341,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 0xf5a5fd42U, 0xd16a2030U, 0x2798ef6eU, 0xd309979bU, 0x43003d23U, 0x20d9f0e8U, 0xea9831a9U, 0x2759fb4bU,
             };
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1345,7 +1367,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x0, SHA256_BLOCK_SIZE);
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1385,7 +1407,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x41, SHA256_BLOCK_SIZE);
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1425,7 +1447,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x55, SHA256_BLOCK_SIZE);
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1465,7 +1487,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x0, SHA256_BLOCK_SIZE);
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1505,7 +1527,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x5a, SHA256_BLOCK_SIZE);
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1545,7 +1567,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x0, SHA256_BLOCK_SIZE);
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1585,7 +1607,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x42, SHA256_BLOCK_SIZE);
 
-            convStreamToSymbol256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha256((uint32_t*)tv_mesStm, (const uint32_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha256(g_sha256Dg32bSym, (const uint32_t*)H0_256, sizeof(H0_256));
 
@@ -1631,7 +1653,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
                 0x47d0d13c5d85f2b0U, 0xff8318d2877eec2fU, 0x63b931bd47417a81U, 0xa538327af927da3e,
             };
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1657,7 +1679,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             };
             (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1683,7 +1705,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             };
             (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1709,7 +1731,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             };
             (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1735,7 +1757,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             };
             (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1762,7 +1784,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1797,7 +1819,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x41, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1838,7 +1860,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x55, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1879,7 +1901,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1920,7 +1942,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x5a, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -1961,7 +1983,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x0, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -2002,7 +2024,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             size_t tv_chSz, tv_remSz, tv_prcSz;
             (void)memset(tv_mesStm, 0x42, SHA512_BLOCK_SIZE);
 
-            convStreamToSymbol512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
+            convStreamToSymbolSha512((uint64_t*)tv_mesStm, (const uint64_t*)tv_mesStm, sizeof(tv_mesStm));
 
             startSha512(g_sha512Dg64bSym, (const uint64_t*)H0_512, sizeof(H0_512));
 
@@ -2127,7 +2149,7 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
 
         startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
@@ -2135,7 +2157,7 @@ void test_FIPS_198_hamc256_imVal(void)
 
         printf("[HMAC256]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac256Sym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_hmac256Sym)); si++)
         {
             printf("%08x", g_hmac256Sym[si]);
         }
@@ -2185,7 +2207,7 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
 
         startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
@@ -2193,7 +2215,7 @@ void test_FIPS_198_hamc256_imVal(void)
 
         printf("[HMAC256]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac256Sym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_hmac256Sym)); si++)
         {
             printf("%08x", g_hmac256Sym[si]);
         }
@@ -2248,7 +2270,7 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
 
         startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
@@ -2256,7 +2278,7 @@ void test_FIPS_198_hamc256_imVal(void)
 
         printf("[HMAC256]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac256Sym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_hmac256Sym)); si++)
         {
             printf("%08x", g_hmac256Sym[si]);
         }
@@ -2309,7 +2331,7 @@ void test_FIPS_198_hamc256_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha256((uint32_t*)textStm, (const uint32_t*)textStm, sizeof(textStm));
 
         startHmac256(keySym, keySize, SHA256_DIGEST_SIZE);
         updateHmac256(SHA256_DIGEST_SIZE, (const uint32_t*)textStm, textLen);
@@ -2317,7 +2339,7 @@ void test_FIPS_198_hamc256_imVal(void)
 
         printf("[HMAC256]\n");
         printf("(32bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(ref_mac_truncated_size); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(ref_mac_truncated_size); si++)
         {
             printf("%08x", g_hmac256Sym[si]);
         }
@@ -2376,7 +2398,7 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
 
         startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
@@ -2384,7 +2406,7 @@ void test_FIPS_198_hamc512_imVal(void)
 
         printf("[HMAC512]\n");
         printf("(64bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac512Sym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_hmac512Sym)); si++)
         {
             printf("%016lx", g_hmac512Sym[si]);
         }
@@ -2434,7 +2456,7 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
 
         startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
@@ -2442,7 +2464,7 @@ void test_FIPS_198_hamc512_imVal(void)
 
         printf("[HMAC512]\n");
         printf("(64bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac512Sym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_hmac512Sym)); si++)
         {
             printf("%016lx", g_hmac512Sym[si]);
         }
@@ -2497,7 +2519,7 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
 
         startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
@@ -2505,7 +2527,7 @@ void test_FIPS_198_hamc512_imVal(void)
 
         printf("[HMAC512]\n");
         printf("(64bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(sizeof(g_hmac512Sym)); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(sizeof(g_hmac512Sym)); si++)
         {
             printf("%016lx", g_hmac512Sym[si]);
         }
@@ -2557,7 +2579,7 @@ void test_FIPS_198_hamc512_imVal(void)
         }
         printf("\n");
 
-        convStreamToSymbol512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
+        convStreamToSymbolSha512((uint64_t*)textStm, (const uint64_t*)textStm, sizeof(textStm));
 
         startHmac512(keySym, keySize, SHA512_DIGEST_SIZE);
         updateHmac512(SHA512_DIGEST_SIZE, (const uint64_t*)textStm, textLen);
@@ -2565,7 +2587,7 @@ void test_FIPS_198_hamc512_imVal(void)
 
         printf("[HMAC512]\n");
         printf("(64bit) 0x ");
-        for(size_t si = 0UL; si < SIZE2UI32LEN(ref_mac_truncated_size); si++)
+        for(size_t si = 0UL; si < EDCSIZE2W32LEN(ref_mac_truncated_size); si++)
         {
             printf("%016lx", g_hmac512Sym[si]);
         }
@@ -2586,9 +2608,15 @@ void test_sequence(void) {
 #ifdef TEST_AES
     test_aes();
 #endif /* TEST_AES */
+
+#ifdef TEST_ENDIAN
+    test_endian();
+#endif /* TEST_ENDIAN */
+
 #ifdef TEST_SHA
     test_sha2();
 #endif /* TEST_SHA */
+
 #ifdef TEST_HMAC
     test_FIPS_198_hamc256_imVal();
     test_FIPS_198_hamc512_imVal();

@@ -1,6 +1,11 @@
 #ifndef SHA2_H
 #define SHA2_H
 
+#include <stdint.h>
+#include <stddef.h> // size_t, NULL
+
+#include "endian/endian.h"  // Endian converting
+
 /* SHA2(SHA256, SHA512) Commons */
 #define SHA2_BLOCK_NUM      16U // length of symbol
 #define SHA2_DIGEST_NUM     8U  // length of symbol
@@ -11,17 +16,11 @@
 #define SHA256_DIGEST_SIZE  32U
 #define SHA256_ROUND_NUM    64U
 
-#define SIZE2UI32LEN(SIZE)  ((SIZE)>>2U)    // /4
-#define UI32LEN2SIZE(LEN)   ((LEN)<<2U)    // /4
-
 /* SHA512 */
 #define SHA512_SYMBOL_SIZE  8U
 #define SHA512_BLOCK_SIZE   128U
 #define SHA512_DIGEST_SIZE  64U
 #define SHA512_ROUND_NUM    80U
-
-#define SIZE2UI64LEN(SIZE)   ((SIZE)>>3U)    // /8
-#define UI64LEN2SIZE(LEN)    ((LEN)<<3U)    // /8
 
 /* SHA256 */
 extern const uint32_t H0_224[SHA2_DIGEST_NUM];
@@ -33,24 +32,23 @@ extern const uint64_t H0_512[SHA2_DIGEST_NUM];
 extern const uint64_t H0_512_224[SHA2_DIGEST_NUM];
 extern const uint64_t H0_512_256[SHA2_DIGEST_NUM];
 
+/* Data Convertion */
 /* SHA256 */
-void conv32bitEndian(uint32_t* dst, const uint32_t* src, const size_t size);
-static inline void convStreamToSymbol256(uint32_t* dst, const uint32_t* src, const size_t size)
+static inline void convStreamToSymbolSha256(uint32_t* dst, const uint32_t* src, const size_t size)
 {
     conv32bitEndian(dst, src, size);
 };
-static inline void convSymbolToStream256(uint32_t* dst, const uint32_t* src, const size_t size)
+static inline void convSymbolToStreamSha256(uint32_t* dst, const uint32_t* src, const size_t size)
 {
     conv32bitEndian(dst, src, size);
 };
 
 /* SHA512 */
-void conv64bitEndian(uint64_t* dst, const uint64_t* src, const size_t size);
-static inline void convStreamToSymbol512(uint64_t* dst, const uint64_t* src, const size_t size)
+static inline void convStreamToSymbolSha512(uint64_t* dst, const uint64_t* src, const size_t size)
 {
     conv64bitEndian(dst, src, size);
 };
-static inline void convSymbolToStream512(uint64_t* dst, const uint64_t* src, const size_t size)
+static inline void convSymbolToStreamSHA512(uint64_t* dst, const uint64_t* src, const size_t size)
 {
     conv64bitEndian(dst, src, size);
 };

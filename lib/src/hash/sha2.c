@@ -4,8 +4,8 @@
 #else
 #define dprintf(...)
 #endif /* DEBUG */
-#include <stdlib.h> // defines 'LITTLE_ENDIAN'
 #include <stdint.h>
+#include <stddef.h> //  size_t, NULL
 #include <string.h>
 
 #include "hash/sha2.h"
@@ -42,26 +42,6 @@
 #define SGM1_512(X)         (ROTR(64U, 19U, X) ^ ROTR(64U, 61U, X) ^  SHR(      6U, X))
 
 #define MOD16(X)            ((X)&0xfU)
-
-#if defined(LITTLE_ENDIAN)
-#define EDCVAL32(X32) \
-    ( (((X32)&0x000000ffU)<<24U)|(((X32)&0xff000000U)>>24U) \
-     |(((X32)&0x0000ff00U)<< 8U)|(((X32)&0x00ff0000U)>> 8U) )
-#define EDCVAL64(X64) \
-    ( (((X64)&0x00000000000000ffUL)<<56UL)|(((X64)&0xff00000000000000UL)>>56UL) \
-     |(((X64)&0x000000000000ff00UL)<<40UL)|(((X64)&0x00ff000000000000UL)>>40UL) \
-     |(((X64)&0x0000000000ff0000UL)<<24UL)|(((X64)&0x0000ff0000000000UL)>>24UL) \
-     |(((X64)&0x00000000ff000000UL)<< 8UL)|(((X64)&0x000000ff00000000UL)>> 8UL))
-#define EDCIDX(TYPE, IDX, MSK)  (((IDX)&(~((TYPE)(MSK))))|(((TYPE)(MSK))-((IDX)&((TYPE)(MSK)))))
-#define EDCIDX32(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x03U)
-#define EDCIDX64(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x07U)
-#else
-#define EDCVAL32(X32)
-#define EDCVAL64(X64)
-#define EDCIDX(TYPD, IDX, MSK)  (IDX)
-#define EDCIDX32(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x03U)
-#define EDCIDX64(TYPE, IDX)     EDCIDX(TYPE, IDX, 0x07U)
-#endif /* LITTLE_ENDIAN */
 
 /* SHA2 constant values */
 const uint32_t H0_224[SHA2_DIGEST_NUM] = {
@@ -189,40 +169,6 @@ static void compSha256_W_mod16(uint32_t* hash);
 static void compSha512_W_mod16(uint64_t* hash);
 
 /* Implements Functions */
-void conv32bitEndian(uint32_t* dst, const uint32_t* src, const size_t size)
-{
-#define _MEM_ALIGN_MSK_ 0x3UL   // Bytes
-    if((size & _MEM_ALIGN_MSK_) == 0UL)
-    {
-        for(size_t i = 0UL; i < SIZE2UI32LEN(size); i++)
-        {
-            dst[i] = EDCVAL32(src[i]);
-        }
-    }
-    else
-    {
-        // align error
-    }
-#undef _MEM_ALIGN_MSK_
-}
-
-void conv64bitEndian(uint64_t* dst, const uint64_t* src, const size_t size)
-{
-#define _MEM_ALIGN_MSK_ 0x7UL   // Bytes
-    if((size & _MEM_ALIGN_MSK_) == 0UL)
-    {
-        for(size_t i = 0UL; i < SIZE2UI64LEN(size); i++)
-        {
-            dst[i] = EDCVAL64(src[i]);
-        }
-    }
-    else
-    {
-        // align error
-    }
-#undef _MEM_ALIGN_MSK_
-}
-
 static size_t addSize256(const size_t mesSize)
 {
 #define _shrLEN_    32UL
@@ -233,7 +179,7 @@ static size_t addSize256(const size_t mesSize)
     c_i = 0UL, c_o = 0UL;
     t_msz = mesSize;
 
-    for(size_t i = 0UL; i < SIZE2UI32LEN(sizeof(mesSize)); i++)
+    for(size_t i = 0UL; i < EDCSIZE2W32LEN(sizeof(mesSize)); i++)
     {
         c_i = c_o;
         c_o = 0UL;
@@ -266,7 +212,7 @@ static size_t addSize512(const size_t mesSize)
     c_i = 0UL, c_o = 0UL;
     t_msz = mesSize;
 
-    for(size_t i = 0UL; i < SIZE2UI64LEN(sizeof(mesSize)); i++)
+    for(size_t i = 0UL; i < EDCSIZE2W64LEN(sizeof(mesSize)); i++)
     {
         c_i = c_o;
         c_o = 0UL;
@@ -813,73 +759,6 @@ void test_sha2_environments(void)
         for(size_t i = 0U; i <= 32U; i++)
         {
             dprintf("rotl(%02lu, 0x%08x) = 0x%08x\n", i, rotl, ROTL(32U, i, rotl));
-        }
-        dprintf("\n");
-
-        dprintf("================================================================================\n");
-    }
-    /* Endian Value Convert Test */
-    {
-        dprintf("--------------------------------------------------------------------------------\n");
-
-        uint32_t ui32_symbol = 0x428a2f98u;
-        uint8_t ui8_arr_4B[] = { 0x42u, 0x8au, 0x2fu, 0x98u };
-        uint32_t ui32_endian = EDCVAL32(*((uint32_t*)ui8_arr_4B));
-
-        dprintf("32bit symbol = 0x%08x\n", ui32_symbol);
-        dprintf("4 Byte Array = 0x%02x%02x%02x%02x\n", 
-                ui8_arr_4B[0], ui8_arr_4B[1], 
-                ui8_arr_4B[2], ui8_arr_4B[3]
-        );
-        dprintf("4Byte->32bit = 0x%08x\n", *((uint32_t*)ui8_arr_4B));
-        dprintf("4Byte->BigEd = 0x%08x\n", ui32_endian);
-        dprintf("\n");
-
-        dprintf("================================================================================\n");
-    }
-    /* Endian Index Convert Test */
-    {
-        dprintf("--------------------------------------------------------------------------------\n");
-
-        dprintf("MACRO EDCIDX32() TEST\n");
-        for(size_t idx = 0UL; idx < SHA256_BLOCK_SIZE; idx++)
-        {
-            dprintf("%2lu -> %2lu, ", idx, EDCIDX32(size_t, idx));
-            if((idx != 0U) && ((idx&0x3U) == 0x03)) dprintf("\n");
-        }
-        dprintf("\n");
-
-        dprintf("================================================================================\n");
-    }
-
-    /* Endian Value Convert Test */
-    {
-        dprintf("--------------------------------------------------------------------------------\n");
-
-        uint64_t ui64_symbol = 0x428a2f981234abcdu;
-        uint8_t ui8_arr_8B[] = { 0x42u, 0x8au, 0x2fu, 0x98u, 0x12u, 0x34u, 0xabu, 0xcdu, };
-        uint64_t ui64_endian = EDCVAL64(*((uint64_t*)ui8_arr_8B));
-
-        dprintf("64bit symbol = 0x%016lx\n", ui64_symbol);
-        dprintf("8 Byte Array = 0x%02x%02x%02x%02x%02x%02x%02x%02x\n", 
-                ui8_arr_8B[0], ui8_arr_8B[1], ui8_arr_8B[2], ui8_arr_8B[3], 
-                ui8_arr_8B[4], ui8_arr_8B[5], ui8_arr_8B[6], ui8_arr_8B[7]
-        );
-        dprintf("8Byte->64bit = 0x%016lx\n", *((uint64_t*)ui8_arr_8B));
-        dprintf("8Byte->BigEd = 0x%016lx\n", ui64_endian);
-        dprintf("\n");
-
-        dprintf("================================================================================\n");
-    }
-    /* Endian Index Convert Test */
-    {
-        dprintf("--------------------------------------------------------------------------------\n");
-
-        dprintf("MACRO EDCIDX64() TEST\n");
-        for(size_t idx = 0UL; idx < SHA512_BLOCK_SIZE; idx++)
-        {
-            dprintf("%2lu -> %2lu, ", idx, EDCIDX64(size_t, idx));
-            if((idx != 0U) && ((idx&0x7U) == 0x07)) dprintf("\n");
         }
         dprintf("\n");
 
