@@ -2601,6 +2601,466 @@ void test_FIPS_198_hamc512_imVal(void)
 }
 #endif /* TEST_HMAC */
 
+#ifdef TEST_CMAC
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "mac/cmac.h"
+
+const char ref_test_RFC4493_aes128_cmac[] = "[REFERENCES]\nRFC4493, The AES-CMAC Algorithm, IETF, 2006. June\n[Link] https://datatracker.ietf.org/doc/html/rfc4493\n[Chapter] 4. Test Vectors\n[Link] https://datatracker.ietf.org/doc/html/rfc4493#section-4";
+void test_RFC4493_aes128_cmac(void)
+{
+    printf("%s\n", ref_test_RFC4493_aes128_cmac);
+    {
+        /* Commonly used */
+        /* Subkey Generation */
+        const uint8_t tv_key[] = {
+            0x2bU, 0x7eU, 0x15U, 0x16U, 0x28U, 0xaeU, 0xd2U, 0xa6U, 0xabU, 0xf7U, 0x15U, 0x88U, 0x09U, 0xcfU, 0x4fU, 0x3cU, 
+        };
+        const size_t tv_kSize = sizeof(tv_key);
+
+        /* Example 1: len = 0 */
+        {
+            const size_t testNum = 1UL;
+            const uint8_t tv_mes[] = "";
+            const size_t tv_mSize = strlen(tv_mes);
+            const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                0xbbU, 0x1dU, 0x69U, 0x29U, 0xe9U, 0x59U, 0x37U, 0x28U, 0x7fU, 0xa3U, 0x7dU, 0x12U, 0x9bU, 0x75U, 0x67U, 0x46U, 
+            };
+            uint8_t tv_tag[CMAC_TAG128b_SIZE];
+            size_t rSize, pSize;
+
+            startCmac(tv_key, tv_kSize);
+
+            for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+            {
+                updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+            }
+            finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+        }
+        /* Example 2: len = 16 */
+        {
+            const size_t testNum = 2UL;
+            const uint8_t tv_mes[] = {
+                0x6bU, 0xc1U, 0xbeU, 0xe2U, 0x2eU, 0x40U, 0x9fU, 0x96U, 0xe9U, 0x3dU, 0x7eU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2aU,
+            };
+            const size_t tv_mSize = sizeof(tv_mes);
+            const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                0x07U, 0x0aU, 0x16U, 0xb4U, 0x6bU, 0x4dU, 0x41U, 0x44U, 0xf7U, 0x9bU, 0xddU, 0x9dU, 0xd0U, 0x4aU, 0x28U, 0x7cU,
+            };
+            uint8_t tv_tag[CMAC_TAG128b_SIZE];
+            size_t rSize, pSize;
+
+            startCmac(tv_key, tv_kSize);
+
+            for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+            {
+                updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+            }
+            finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+        }
+        /* Example 3: len = 40 */
+        {
+            const size_t testNum = 3UL;
+            const uint8_t tv_mes[] = {
+                0x6bU, 0xc1U, 0xbeU, 0xe2U, 0x2eU, 0x40U, 0x9fU, 0x96U, 0xe9U, 0x3dU, 0x7eU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2aU, 
+                0xaeU, 0x2dU, 0x8aU, 0x57U, 0x1eU, 0x03U, 0xacU, 0x9cU, 0x9eU, 0xb7U, 0x6fU, 0xacU, 0x45U, 0xafU, 0x8eU, 0x51U, 
+                0x30U, 0xc8U, 0x1cU, 0x46U, 0xa3U, 0x5cU, 0xe4U, 0x11U, 
+            };
+            const size_t tv_mSize = sizeof(tv_mes);
+            const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                0xdfU, 0xa6U, 0x67U, 0x47U, 0xdeU, 0x9aU, 0xe6U, 0x30U, 0x30U, 0xcaU, 0x32U, 0x61U, 0x14U, 0x97U, 0xc8U, 0x27U, 
+            };
+            uint8_t tv_tag[CMAC_TAG128b_SIZE];
+            size_t rSize, pSize;
+
+            startCmac(tv_key, tv_kSize);
+
+            for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+            {
+                updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+            }
+            finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+        }
+        /* Example 4: len = 64 */
+        {
+            const size_t testNum = 4UL;
+            const uint8_t tv_mes[] = {
+                0x6bU, 0xc1U, 0xbeU, 0xe2U, 0x2eU, 0x40U, 0x9fU, 0x96U, 0xe9U, 0x3dU, 0x7eU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2aU, 
+                0xaeU, 0x2dU, 0x8aU, 0x57U, 0x1eU, 0x03U, 0xacU, 0x9cU, 0x9eU, 0xb7U, 0x6fU, 0xacU, 0x45U, 0xafU, 0x8eU, 0x51U, 
+                0x30U, 0xc8U, 0x1cU, 0x46U, 0xa3U, 0x5cU, 0xe4U, 0x11U, 0xe5U, 0xfbU, 0xc1U, 0x19U, 0x1aU, 0x0aU, 0x52U, 0xefU, 
+                0xf6U, 0x9fU, 0x24U, 0x45U, 0xdfU, 0x4fU, 0x9bU, 0x17U, 0xadU, 0x2bU, 0x41U, 0x7bU, 0xe6U, 0x6cU, 0x37U, 0x10U, 
+            };
+            const size_t tv_mSize = sizeof(tv_mes);
+            const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                0x51U, 0xf0U, 0xbeU, 0xbfU, 0x7eU, 0x3bU, 0x9dU, 0x92U, 0xfcU, 0x49U, 0x74U, 0x17U, 0x79U, 0x36U, 0x3cU, 0xfeU, 
+            };
+            uint8_t tv_tag[CMAC_TAG128b_SIZE];
+            size_t rSize, pSize;
+
+            startCmac(tv_key, tv_kSize);
+
+            for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+            {
+                updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+            }
+            finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+        }
+    }
+}
+
+const char ref_test_SP800_38B_cmac_aes_imVal[] = "[REFERENCES]\nCryptographic Standards and Guidelines\n[Link] https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines/example-values\nSP 800-38B - Recommendation for Block Cipher Modes of Operation: The CMAC Mode for Authentication (CMAC-AES)\n[Link] https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_CMAC.pdf";
+void test_SP800_38B_cmac_aes_imVal(void)
+{
+    printf("%s\n", ref_test_SP800_38B_cmac_aes_imVal);
+    {
+        /* CMAC-AES128 */
+        {
+            /* Commonly used CMAC-AES128 */
+            const uint8_t tv_key[] = {
+                0x2BU, 0x7EU, 0x15U, 0x16U, 0x28U, 0xAEU, 0xD2U, 0xA6U, 0xABU, 0xF7U, 0x15U, 0x88U, 0x09U, 0xCFU, 0x4FU, 0x3CU,
+            };
+            const size_t tv_kSize = sizeof(tv_key);
+
+            /* CMAC-AES128, Example #1 */
+            {
+                const size_t testNum = 1UL;
+                const uint8_t tv_mes[] = "";
+                const size_t tv_mSize = strlen(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0xBBU, 0x1DU, 0x69U, 0x29U, 0xE9U, 0x59U, 0x37U, 0x28U, 0x7FU, 0xA3U, 0x7DU, 0x12U, 0x9BU, 0x75U, 0x67U, 0x46U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES128, Example #2 */
+            {
+                const size_t testNum = 2UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x07U, 0x0AU, 0x16U, 0xB4U, 0x6BU, 0x4DU, 0x41U, 0x44U, 0xF7U, 0x9BU, 0xDDU, 0x9DU, 0xD0U, 0x4AU, 0x28U, 0x7CU,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES128, Example #3 */
+            {
+                const size_t testNum = 3UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                    0xAEU, 0x2DU, 0x8AU, 0x57U,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x7DU, 0x85U, 0x44U, 0x9EU, 0xA6U, 0xEAU, 0x19U, 0xC8U, 0x23U, 0xA7U, 0xBFU, 0x78U, 0x83U, 0x7DU, 0xFAU, 0xDEU,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES128, Example #4 */
+            {
+                const size_t testNum = 4UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                    0xAEU, 0x2DU, 0x8AU, 0x57U, 0x1EU, 0x03U, 0xACU, 0x9CU, 0x9EU, 0xB7U, 0x6FU, 0xACU, 0x45U, 0xAFU, 0x8EU, 0x51U,
+                    0x30U, 0xC8U, 0x1CU, 0x46U, 0xA3U, 0x5CU, 0xE4U, 0x11U, 0xE5U, 0xFBU, 0xC1U, 0x19U, 0x1AU, 0x0AU, 0x52U, 0xEFU,
+                    0xF6U, 0x9FU, 0x24U, 0x45U, 0xDFU, 0x4FU, 0x9BU, 0x17U, 0xADU, 0x2BU, 0x41U, 0x7BU, 0xE6U, 0x6CU, 0x37U, 0x10U,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x51U, 0xF0U, 0xBEU, 0xBFU, 0x7EU, 0x3BU, 0x9DU, 0x92U, 0xFCU, 0x49U, 0x74U, 0x17U, 0x79U, 0x36U, 0x3CU, 0xFEU,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+        }
+        /* CMAC-AES192 */
+        {
+            /* Commonly used CMAC-AES192 */
+            const uint8_t tv_key[] = {
+                0x8EU, 0x73U, 0xB0U, 0xF7U, 0xDAU, 0x0EU, 0x64U, 0x52U, 0xC8U, 0x10U, 0xF3U, 0x2BU, 0x80U, 0x90U, 0x79U, 0xE5U,
+                0x62U, 0xF8U, 0xEAU, 0xD2U, 0x52U, 0x2CU, 0x6BU, 0x7BU,
+            };
+            const size_t tv_kSize = sizeof(tv_key);
+
+            /* CMAC-AES192, Example #1 */
+            {
+                const size_t testNum = 1UL;
+                const uint8_t tv_mes[] = "";
+                const size_t tv_mSize = strlen(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0xD1U, 0x7DU, 0xDFU, 0x46U, 0xADU, 0xAAU, 0xCDU, 0xE5U, 0x31U, 0xCAU, 0xC4U, 0x83U, 0xDEU, 0x7AU, 0x93U, 0x67U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES192, Example #2 */
+            {
+                const size_t testNum = 2UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x9EU, 0x99U, 0xA7U, 0xBFU, 0x31U, 0xE7U, 0x10U, 0x90U, 0x06U, 0x62U, 0xF6U, 0x5EU, 0x61U, 0x7CU, 0x51U, 0x84U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES192, Example #3 */
+            {
+                const size_t testNum = 3UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                    0xAEU, 0x2DU, 0x8AU, 0x57U,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x3DU, 0x75U, 0xC1U, 0x94U, 0xEDU, 0x96U, 0x07U, 0x04U, 0x44U, 0xA9U, 0xFAU, 0x7EU, 0xC7U, 0x40U, 0xECU, 0xF8U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES192, Example #4 */
+            {
+                const size_t testNum = 4UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                    0xAEU, 0x2DU, 0x8AU, 0x57U, 0x1EU, 0x03U, 0xACU, 0x9CU, 0x9EU, 0xB7U, 0x6FU, 0xACU, 0x45U, 0xAFU, 0x8EU, 0x51U,
+                    0x30U, 0xC8U, 0x1CU, 0x46U, 0xA3U, 0x5CU, 0xE4U, 0x11U, 0xE5U, 0xFBU, 0xC1U, 0x19U, 0x1AU, 0x0AU, 0x52U, 0xEFU,
+                    0xF6U, 0x9FU, 0x24U, 0x45U, 0xDFU, 0x4FU, 0x9BU, 0x17U, 0xADU, 0x2BU, 0x41U, 0x7BU, 0xE6U, 0x6CU, 0x37U, 0x10U,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0xA1U, 0xD5U, 0xDFU, 0x0EU, 0xEDU, 0x79U, 0x0FU, 0x79U, 0x4DU, 0x77U, 0x58U, 0x96U, 0x59U, 0xF3U, 0x9AU, 0x11U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+        }
+        /* CMAC-AES256 */
+        {
+            /* Commonly used CMAC-AES256 */
+            const uint8_t tv_key[] = {
+                0x60U, 0x3DU, 0xEBU, 0x10U, 0x15U, 0xCAU, 0x71U, 0xBEU, 0x2BU, 0x73U, 0xAEU, 0xF0U, 0x85U, 0x7DU, 0x77U, 0x81U,
+                0x1FU, 0x35U, 0x2CU, 0x07U, 0x3BU, 0x61U, 0x08U, 0xD7U, 0x2DU, 0x98U, 0x10U, 0xA3U, 0x09U, 0x14U, 0xDFU, 0xF4U,
+            };
+            const size_t tv_kSize = sizeof(tv_key);
+
+            /* CMAC-AES256, Example #1 */
+            {
+                const size_t testNum = 1UL;
+                const uint8_t tv_mes[] = "";
+                const size_t tv_mSize = strlen(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x02U, 0x89U, 0x62U, 0xF6U, 0x1BU, 0x7BU, 0xF8U, 0x9EU, 0xFCU, 0x6BU, 0x55U, 0x1FU, 0x46U, 0x67U, 0xD9U, 0x83U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES256, Example #2 */
+            {
+                const size_t testNum = 2UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x28U, 0xA7U, 0x02U, 0x3FU, 0x45U, 0x2EU, 0x8FU, 0x82U, 0xBDU, 0x4BU, 0xF2U, 0x8DU, 0x8CU, 0x37U, 0xC3U, 0x5CU,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES256, Example #3 */
+            {
+                const size_t testNum = 3UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                    0xAEU, 0x2DU, 0x8AU, 0x57U,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0x15U, 0x67U, 0x27U, 0xDCU, 0x08U, 0x78U, 0x94U, 0x4AU, 0x02U, 0x3CU, 0x1FU, 0xE0U, 0x3BU, 0xADU, 0x6DU, 0x93U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+            /* CMAC-AES256, Example #4 */
+            {
+                const size_t testNum = 4UL;
+                const uint8_t tv_mes[] = {
+                    /* INSERT INPUT MESSAGE VALUES */
+                    0x6BU, 0xC1U, 0xBEU, 0xE2U, 0x2EU, 0x40U, 0x9FU, 0x96U, 0xE9U, 0x3DU, 0x7EU, 0x11U, 0x73U, 0x93U, 0x17U, 0x2AU,
+                    0xAEU, 0x2DU, 0x8AU, 0x57U, 0x1EU, 0x03U, 0xACU, 0x9CU, 0x9EU, 0xB7U, 0x6FU, 0xACU, 0x45U, 0xAFU, 0x8EU, 0x51U,
+                    0x30U, 0xC8U, 0x1CU, 0x46U, 0xA3U, 0x5CU, 0xE4U, 0x11U, 0xE5U, 0xFBU, 0xC1U, 0x19U, 0x1AU, 0x0AU, 0x52U, 0xEFU,
+                    0xF6U, 0x9FU, 0x24U, 0x45U, 0xDFU, 0x4FU, 0x9BU, 0x17U, 0xADU, 0x2BU, 0x41U, 0x7BU, 0xE6U, 0x6CU, 0x37U, 0x10U,
+                };
+                const size_t tv_mSize = sizeof(tv_mes);
+                const uint8_t ref_tag[CMAC_TAG128b_SIZE] = {
+                    /* INSERT REFERENCE TAG VALUES */
+                    0xE1U, 0x99U, 0x21U, 0x90U, 0x54U, 0x9FU, 0x6EU, 0xD5U, 0x69U, 0x6AU, 0x2CU, 0x05U, 0x6CU, 0x31U, 0x54U, 0x10U,
+                };
+                uint8_t tv_tag[CMAC_TAG128b_SIZE];
+                size_t rSize, pSize;
+
+                startCmac(tv_key, tv_kSize);
+
+                for(pSize = 0UL, rSize = tv_mSize; CMAC_TAG128b_SIZE < rSize; pSize += CMAC_TAG128b_SIZE, rSize -= CMAC_TAG128b_SIZE)
+                {
+                    updateCmac(&tv_mes[pSize], CMAC_TAG128b_SIZE);
+                }
+                finishCmac(tv_tag, &tv_mes[pSize], rSize);
+
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            }
+        }
+    }
+}
+#endif /* TEST_CMAC */
+
 void test_sequence(void) {
     test_macro();
     test_ntype();
@@ -2621,6 +3081,11 @@ void test_sequence(void) {
     test_FIPS_198_hamc256_imVal();
     test_FIPS_198_hamc512_imVal();
 #endif /* TEST_HMAC */
+
+#ifdef TEST_CMAC
+    test_RFC4493_aes128_cmac();
+    test_SP800_38B_cmac_aes_imVal();
+#endif /* TEST_CMAC */
 }
 
 int main(int argc, char** argv) {
