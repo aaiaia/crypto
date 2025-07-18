@@ -53,25 +53,119 @@
 #define DBG_PRINT_4X4_MATRIX(ARRAY, TITLE)
 #endif /* TEST_PRINT_ARRAY_VALUE */
 
-#define GF_X8   0x1bU
-#define GF_X9   0x36U
-#define GF_X10  0x6cU
-uint8_t gf8_mul2(uint8_t v)
+/* Define AES Specifications */
+// Number is count of word(32bits)
+// AES COMMON
+#define AES_Nb      4U
+#define AES_Nr_BASE 6U
+
+// AES128
+#define AES128_Nk   4U
+#define AES128_Nb   4U
+#define AES128_Nr   10U
+// AES192
+#define AES192_Nk   6U
+#define AES192_Nb   4U
+#define AES192_Nr   12U
+// AES256
+#define AES256_Nk   8U
+#define AES256_Nb   4U
+#define AES256_Nr   14U
+
+#define EXP_KEY_MAX_SIZE    (60U*4U)
+
+/* Decalre Types */
+typedef int (*fn_aesCipher)(uint8_t*, const uint8_t*, const uint8_t, const uint32_t*);
+
+/* Declare Internal Variables */
+static size_t l_Nr;
+static uint8_t l_extKey[EXP_KEY_MAX_SIZE];
+static uint8_t l_state[4][4] = {0};
+static fn_aesCipher l_fp_cipher = NULL;
+
+/* Declare Internal Function */
+/* Galois Field */
+static uint8_t gf8_mul2(const uint8_t v);
+static uint8_t gf8_mulInv(const uint8_t v, const uint8_t c);
+/*******************************************************************************
+ * A brief AES Key Expansion
+ *
+ * AES key Expansion
+ *
+ * @param w     [out]   Word array for the key schedule
+ *                      (Words = 32bits, Round(=Nr) per proc block size = 16B)
+ *                      Initial: round = 0
+ *                      Process: 0 < round < Nr
+ *                      Finish : round = Nr
+ *                      AES128(Nr=d10): 40-Words + 4-Word(Last round key) = 44Word
+ *                      AES192(Nr=d12): 48-Words + 4-Word(Last round key) = 52Word
+ *                      AES256(Nr=d14): 56-Words + 4-Word(Last round key) = 64Word
+ * @param key   [in]    AES key(Bytes array)
+ * @param Nk    [in]    Number of key for word
+ *                      AES128(Nk=d4)
+ *                      AES192(Nk=d6) : using index 0~7
+ *                      AES256(Nk=d8) : using index 0~6
+ * @param Nr    [in]    Number of round
+ *                      AES128(Nr=d10)
+ *                      AES192(Nr=d12)
+ *                      AES256(Nr=d14)
+ * @return              Result of function call
+ *
+ ******************************************************************************/
+static int keyExpansion(const uint8_t* key, const size_t Nk, const size_t Nr);
+static int keyExpansionEIC(const uint8_t* key, const size_t Nk, const size_t Nr);
+
+/*******************************************************************************
+ * A brief AES CIPHER
+ *
+ * AES CIPHER
+ *
+ * @param out   [out]   Output Data(Bytes array, 128bits -> 16Bytes)
+ * @param in    [in]    Input Data(Bytes array, 128bits -> 16Bytes)
+ * @param Nr    [in]    The number of rounds
+ * @param w     [in]    Word array for the key schedule
+ * @return              Result of function call
+ *
+ ******************************************************************************/
+static int doCipher(uint8_t* out, const uint8_t* in, const uint8_t Nr, const uint32_t* w);
+static int doCipherInv(uint8_t* out, const uint8_t* in, const uint8_t Nr, const uint32_t* dw);
+static int doCipherInv2(uint8_t* out, const uint8_t* in, const uint8_t Nr, const uint32_t* w);
+
+static int addRoundKey(uint32_t* s, const uint32_t* w);
+
+#define subWord(w)  subByte((uint8_t*)(&(w)), sizeof(w))
+static int subByte(uint8_t* w, const size_t size);
+static int subByteInv(uint8_t* w, const size_t size);
+
+#define rotWord(w) shiftColumn(&(w), sizeof(w)/sizeof(uint32_t))
+static int shiftColumn(uint32_t* w, const size_t wLen);
+
+static int shiftRows(uint8_t* s, const size_t size);
+static int shiftRowsInv(uint8_t* s, const size_t size);
+
+static int mixColumns(uint8_t* s, const size_t size);
+static int mixColumnsInv(uint8_t* s, const size_t size);
+
+/* Implement Function */
+static uint8_t gf8_mul2(const uint8_t v)
 {
+#define _GF_X8_   0x1bU
     if(v&0x80)
     {
-        v = (v<<1U) ^ 0x1bU;
+        return ((v<<1U) ^ _GF_X8_);
     }
     else
     {
-        v = (v<<1U);
+        return (v<<1U);
     }
-
-    return v;
+#undef _GF_X8_
 }
 
-uint8_t gf8_mulInv(uint8_t v, uint8_t c)
+static uint8_t gf8_mulInv(const uint8_t v, const uint8_t c)
 {
+#define _GF_X8_   0x1bU
+#define _GF_X9_   0x36U
+#define _GF_X10_  0x6cU
     uint16_t tmp = (((uint16_t)v)<<3U);
     uint8_t r;
 
@@ -95,15 +189,15 @@ uint8_t gf8_mulInv(uint8_t v, uint8_t c)
         break;
     }
     r = (uint8_t)(tmp & 0xffU);
-    if((tmp & 0x100U) != 0x0U)  r ^= GF_X8;
-    if((tmp & 0x200U) != 0x0U)  r ^= GF_X9;
-    if((tmp & 0x400U) != 0x0U)  r ^= GF_X10;
+    if((tmp & 0x100U) != 0x0U)  r ^= _GF_X8_;
+    if((tmp & 0x200U) != 0x0U)  r ^= _GF_X9_;
+    if((tmp & 0x400U) != 0x0U)  r ^= _GF_X10_;
 
     return r;
+#undef _GF_X8_
+#undef _GF_X9_
+#undef _GF_X10_
 }
-#undef GF_X8
-#undef GF_X9
-#undef GF_X10
 
 const uint8_t g_SBOX[0x10U * 0x10U] = 
 {
@@ -169,18 +263,13 @@ const uint32_t g_Rcon[11] =
     0x00000036U,
 };
 
-static uint8_t g_state[4][4] = {0};
-
-#define EXP_KEY_MAX_SIZE    (60U*4U)
-static uint8_t g_extKey[EXP_KEY_MAX_SIZE];
-
-int keyExpansion(uint8_t* key, size_t Nk, size_t Nr)
+static int keyExpansion(const uint8_t* key, const size_t Nk, const size_t Nr)
 {
     uint32_t wTemp;
-    uint32_t* wKey = (uint32_t*)key;         // w:word
-    uint32_t* w = (uint32_t*)g_extKey;    // w:word
+    const uint32_t* wKey = (const uint32_t*)key;         // w:word
+    uint32_t* w = (uint32_t*)l_extKey;    // w:word
     size_t wi;
-    (void)memset(w, 0x0, sizeof(g_extKey));
+    (void)memset(w, 0x0, sizeof(l_extKey));
 
     // Set word index
     wi = 0UL;
@@ -217,17 +306,17 @@ int keyExpansion(uint8_t* key, size_t Nk, size_t Nr)
         w[wi] = w[wi-Nk] ^ wTemp;
         wi++;
     }
-    DBG_PRINT_ARRAY(g_extKey, sizeof(g_extKey), "EXPANSION_KEY", 4UL);
+    DBG_PRINT_ARRAY(l_extKey, sizeof(l_extKey), "EXPANSION_KEY", 4UL);
     return 0;
 }
 
-int keyExpansionEIC(uint8_t* key, size_t Nk, size_t Nr)
+static int keyExpansionEIC(const uint8_t* key, const size_t Nk, const size_t Nr)
 {
     uint32_t dwTemp;
-    uint32_t* wKey = (uint32_t*)key;        // dw:word
-    uint32_t* dw = (uint32_t*)g_extKey;     // dw:word
+    const uint32_t* wKey = (const uint32_t*)key;        // dw:word
+    uint32_t* dw = (uint32_t*)l_extKey;     // dw:word
     size_t wi;
-    (void)memset(dw, 0x0, sizeof(g_extKey));
+    (void)memset(dw, 0x0, sizeof(l_extKey));
 
     // Set word index
     wi = 0UL;
@@ -268,12 +357,12 @@ int keyExpansionEIC(uint8_t* key, size_t Nk, size_t Nr)
     {
         (void)mixColumnsInv((uint8_t*)(&dw[(round<<2UL)]), AES_S_SIZE);
     }
-    DBG_PRINT_ARRAY(g_extKey, sizeof(g_extKey), "EXPANSION_KEY_EIC", 4UL);
+    DBG_PRINT_ARRAY(l_extKey, sizeof(l_extKey), "EXPANSION_KEY_EIC", 4UL);
 
     return 0;
 }
 
-int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
+static int doCipher(uint8_t* out, const uint8_t* in, const uint8_t Nr, const uint32_t* w)
 {
     int fs = 0;
     if((out != NULL) && (in != NULL) && (w != NULL))
@@ -282,17 +371,17 @@ int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
 #ifdef DEBUG
         printf("Input\r\n");
 #endif /* DEBUG */
-        (void)memcpy(g_state, in, (sizeof(uint32_t)*AES_Nb));
-        DBG_PRINT_4X4_MATRIX(g_state, "input");
+        (void)memcpy(l_state, in, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(l_state, "input");
 
         round = 0UL;
 #ifdef DEBUG
         printf("Round Number = %ld\r\n", round);
 #endif /* DEBUG */
 
-        if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
+        if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &w[AES_Nb*round]);
         DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
-        DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
+        DBG_PRINT_4X4_MATRIX(l_state, "After addRoundKey");
 
         if(fs == 0)
         {
@@ -301,40 +390,40 @@ int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
 #ifdef DEBUG
                 printf("Round Number = %ld\r\n", round);
 #endif /* DEBUG */
-                DBG_PRINT_4X4_MATRIX(g_state, "Start of Round");
+                DBG_PRINT_4X4_MATRIX(l_state, "Start of Round");
 
-                if(fs == 0) fs = subByte((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After SubBytes");
+                if(fs == 0) fs = subByte((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After SubBytes");
 
-                if(fs == 0) fs = shiftRows((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After ShiftRows");
+                if(fs == 0) fs = shiftRows((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After ShiftRows");
 
-                if(fs == 0) fs = mixColumns((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After MixColumns");
+                if(fs == 0) fs = mixColumns((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After MixColumns");
 
                 DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
-                if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
-                DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
+                if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &w[AES_Nb*round]);
+                DBG_PRINT_4X4_MATRIX(l_state, "After addRoundKey");
             }
 #ifdef DEBUG
             printf("Round Number = %ld\r\n", round);
 #endif /* DEBUG */
-            DBG_PRINT_4X4_MATRIX(g_state, "End of Round");
+            DBG_PRINT_4X4_MATRIX(l_state, "End of Round");
 
-            if(fs == 0) fs = subByte((uint8_t*)g_state, sizeof(g_state));
-            DBG_PRINT_4X4_MATRIX(g_state, "After SubBytes");
+            if(fs == 0) fs = subByte((uint8_t*)l_state, sizeof(l_state));
+            DBG_PRINT_4X4_MATRIX(l_state, "After SubBytes");
 
-            if(fs == 0) fs = shiftRows((uint8_t*)g_state, sizeof(g_state));
-            DBG_PRINT_4X4_MATRIX(g_state, "After ShiftRows");
+            if(fs == 0) fs = shiftRows((uint8_t*)l_state, sizeof(l_state));
+            DBG_PRINT_4X4_MATRIX(l_state, "After ShiftRows");
 
-            if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*Nr]);
+            if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &w[AES_Nb*Nr]);
             DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
         }
 #ifdef DEBUG
         printf("Output\r\n");
 #endif /* DEBUG */
-        (void)memcpy(out, g_state, (sizeof(uint32_t)*AES_Nb));
-        DBG_PRINT_4X4_MATRIX(g_state, "output");
+        (void)memcpy(out, l_state, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(l_state, "output");
     }
     else
     {
@@ -344,7 +433,7 @@ int doCipher(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
     return fs;
 }
 
-int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw)
+static int doCipherInv(uint8_t* out, const uint8_t* in, const uint8_t Nr, const uint32_t* dw)
 {
     int fs = 0;
     if((out != NULL) && (in != NULL) && (dw != NULL))
@@ -353,17 +442,17 @@ int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw)
 #ifdef DEBUG
         printf("Input\r\n");
 #endif /* DEBUG */
-        (void)memcpy(g_state, in, (sizeof(uint32_t)*AES_Nb));
-        DBG_PRINT_4X4_MATRIX(g_state, "input");
+        (void)memcpy(l_state, in, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(l_state, "input");
 
         round = Nr;
 #ifdef DEBUG
         printf("Inv Round Number = %ld\r\n", round);
 #endif /* DEBUG */
 
-        if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &dw[AES_Nb*round]);
+        if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &dw[AES_Nb*round]);
         DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Inv Round Key Value");
-        DBG_PRINT_4X4_MATRIX(g_state, "After Inv addRoundKey");
+        DBG_PRINT_4X4_MATRIX(l_state, "After Inv addRoundKey");
 
         if(fs == 0)
         {
@@ -372,41 +461,41 @@ int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw)
 #ifdef DEBUG
                 printf("Inv Round Number = %ld\r\n", round);
 #endif /* DEBUG */
-                DBG_PRINT_4X4_MATRIX(g_state, "Start of Inv Round");
+                DBG_PRINT_4X4_MATRIX(l_state, "Start of Inv Round");
 
-                if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
+                if(fs == 0) fs = subByteInv((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After Inv SubBytes");
 
-                if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After Inv ShiftRows");
+                if(fs == 0) fs = shiftRowsInv((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After Inv ShiftRows");
 
-                if(fs == 0) fs = mixColumnsInv((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After Inv MixColumns");
+                if(fs == 0) fs = mixColumnsInv((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After Inv MixColumns");
 
                 DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Inv Round Key Value");
-                if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &dw[AES_Nb*round]);
-                DBG_PRINT_4X4_MATRIX(g_state, "After Inv addRoundKey");
+                if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &dw[AES_Nb*round]);
+                DBG_PRINT_4X4_MATRIX(l_state, "After Inv addRoundKey");
 
             }
 #ifdef DEBUG
             printf("Inv Round Number = %ld\r\n", round);
 #endif /* DEBUG */
-            DBG_PRINT_4X4_MATRIX(g_state, "End of Round");
+            DBG_PRINT_4X4_MATRIX(l_state, "End of Round");
 
-            if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
-            DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
+            if(fs == 0) fs = subByteInv((uint8_t*)l_state, sizeof(l_state));
+            DBG_PRINT_4X4_MATRIX(l_state, "After Inv SubBytes");
 
-            if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
-            DBG_PRINT_4X4_MATRIX(g_state, "After Inv ShiftRows");
+            if(fs == 0) fs = shiftRowsInv((uint8_t*)l_state, sizeof(l_state));
+            DBG_PRINT_4X4_MATRIX(l_state, "After Inv ShiftRows");
 
-            if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &dw[AES_Nb*0U]);
+            if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &dw[AES_Nb*0U]);
             DBG_PRINT_4X4_MATRIX(dw[AES_Nb*round], "Inv Round Key Value");
         }
 #ifdef DEBUG
         printf("Output\r\n");
 #endif /* DEBUG */
-        (void)memcpy(out, g_state, (sizeof(uint32_t)*AES_Nb));
-        DBG_PRINT_4X4_MATRIX(g_state, "output");
+        (void)memcpy(out, l_state, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(l_state, "output");
     }
     else
     {
@@ -416,7 +505,7 @@ int doCipherInv(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* dw)
     return fs;
 }
 
-int doCipherInv2(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
+static int doCipherInv2(uint8_t* out, const uint8_t* in, const uint8_t Nr, const uint32_t* w)
 {
     int fs = 0;
     if((out != NULL) && (in != NULL) && (w != NULL))
@@ -425,23 +514,23 @@ int doCipherInv2(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
 #ifdef DEBUG
         printf("Input\r\n");
 #endif /* DEBUG */
-        (void)memcpy(g_state, in, (sizeof(uint32_t)*AES_Nb));
-        DBG_PRINT_4X4_MATRIX(g_state, "input");
+        (void)memcpy(l_state, in, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(l_state, "input");
 
         round = Nr;
 #ifdef DEBUG
         printf("Inv Round Number = %ld\r\n", round);
 #endif /* DEBUG */
 
-        if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
+        if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &w[AES_Nb*round]);
         DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
-        DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
+        DBG_PRINT_4X4_MATRIX(l_state, "After addRoundKey");
 
-        if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
-        DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
+        if(fs == 0) fs = subByteInv((uint8_t*)l_state, sizeof(l_state));
+        DBG_PRINT_4X4_MATRIX(l_state, "After Inv SubBytes");
 
-        if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
-        DBG_PRINT_4X4_MATRIX(g_state, "After Inv ShiftRows");
+        if(fs == 0) fs = shiftRowsInv((uint8_t*)l_state, sizeof(l_state));
+        DBG_PRINT_4X4_MATRIX(l_state, "After Inv ShiftRows");
 
         if(fs == 0)
         {
@@ -450,33 +539,33 @@ int doCipherInv2(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
 #ifdef DEBUG
                 printf("Inv Round Number = %ld\r\n", round);
 #endif /* DEBUG */
-                DBG_PRINT_4X4_MATRIX(g_state, "Start of Inv Round");
+                DBG_PRINT_4X4_MATRIX(l_state, "Start of Inv Round");
 
                 DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
-                if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*round]);
-                DBG_PRINT_4X4_MATRIX(g_state, "After addRoundKey");
+                if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &w[AES_Nb*round]);
+                DBG_PRINT_4X4_MATRIX(l_state, "After addRoundKey");
 
-                if(fs == 0) fs = mixColumnsInv((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After Inv MixColumns");
+                if(fs == 0) fs = mixColumnsInv((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After Inv MixColumns");
 
-                if(fs == 0) fs = shiftRowsInv((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After Inv ShiftRows");
+                if(fs == 0) fs = shiftRowsInv((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After Inv ShiftRows");
 
-                if(fs == 0) fs = subByteInv((uint8_t*)g_state, sizeof(g_state));
-                DBG_PRINT_4X4_MATRIX(g_state, "After Inv SubBytes");
+                if(fs == 0) fs = subByteInv((uint8_t*)l_state, sizeof(l_state));
+                DBG_PRINT_4X4_MATRIX(l_state, "After Inv SubBytes");
             }
 #ifdef DEBUG
             printf("Inv Round Number = %ld\r\n", round);
 #endif /* DEBUG */
-            DBG_PRINT_4X4_MATRIX(g_state, "End of Round");
-            if(fs == 0) fs = addRoundKey((uint32_t*)g_state, &w[AES_Nb*0U]);
+            DBG_PRINT_4X4_MATRIX(l_state, "End of Round");
+            if(fs == 0) fs = addRoundKey((uint32_t*)l_state, &w[AES_Nb*0U]);
             DBG_PRINT_4X4_MATRIX(w[AES_Nb*round], "Round Key Value");
         }
 #ifdef DEBUG
         printf("Output\r\n");
 #endif /* DEBUG */
-        (void)memcpy(out, g_state, (sizeof(uint32_t)*AES_Nb));
-        DBG_PRINT_4X4_MATRIX(g_state, "output");
+        (void)memcpy(out, l_state, (sizeof(uint32_t)*AES_Nb));
+        DBG_PRINT_4X4_MATRIX(l_state, "output");
     }
     else
     {
@@ -486,11 +575,11 @@ int doCipherInv2(uint8_t* out, uint8_t* in, uint8_t Nr, uint32_t* w)
     return fs;
 }
 
-int addRoundKey(uint32_t* s, uint32_t* w)
+static int addRoundKey(uint32_t* s, const uint32_t* w)
 {
     int fs = 0;
 
-    if(w != NULL)
+    if((s != NULL) && (w != NULL))
     {
         for(size_t c = 0UL; c < AES_Nb; c++)
         {
@@ -505,7 +594,7 @@ int addRoundKey(uint32_t* s, uint32_t* w)
     return fs;
 }
 
-int subByte(uint8_t* w, size_t size)
+static int subByte(uint8_t* w, const size_t size)
 {
     int fs = 0;
 
@@ -524,7 +613,7 @@ int subByte(uint8_t* w, size_t size)
     return fs;
 }
 
-int subByteInv(uint8_t* w, size_t size)
+static int subByteInv(uint8_t* w, const size_t size)
 {
     int fs = 0;
 
@@ -543,7 +632,7 @@ int subByteInv(uint8_t* w, size_t size)
     return fs;
 }
 
-int shiftColumn(uint32_t* w, size_t wLen)
+static int shiftColumn(uint32_t* w, const size_t wLen)
 {
     int fs = 0;
 
@@ -561,7 +650,7 @@ int shiftColumn(uint32_t* w, size_t wLen)
     return fs;
 }
 
-int shiftRows(uint8_t* s, size_t size)
+static int shiftRows(uint8_t* s, const size_t size)
 {
     int fs = 0;
 
@@ -594,7 +683,7 @@ int shiftRows(uint8_t* s, size_t size)
     return fs;
 }
 
-int shiftRowsInv(uint8_t* s, size_t size)
+static int shiftRowsInv(uint8_t* s, const size_t size)
 {
     int fs = 0;
 
@@ -627,11 +716,11 @@ int shiftRowsInv(uint8_t* s, size_t size)
     return fs;
 }
 
-int mixColumns(uint8_t* s, size_t size)
+static int mixColumns(uint8_t* s, const size_t size)
 {
-#define GF8_MUL1(v) (v)
-#define GF8_MUL2(v) (gf8_mul2(v))
-#define GF8_MUL3(v) (gf8_mul2(v) ^ (v))
+#define _GF8_MUL1_(v)   (v)
+#define _GF8_MUL2_(v)   (gf8_mul2(v))
+#define _GF8_MUL3_(v)   (gf8_mul2(v) ^ (v))
 
     int fs = 0;
 
@@ -642,43 +731,43 @@ int mixColumns(uint8_t* s, size_t size)
     // r = 0
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][0] = GF8_MUL2(sb[c][0]) ^ GF8_MUL3(sb[c][1])
-                      ^ GF8_MUL1(sb[c][2]) ^ GF8_MUL1(sb[c][3]);
+        sp[c][0] = _GF8_MUL2_(sb[c][0]) ^ _GF8_MUL3_(sb[c][1])
+                      ^ _GF8_MUL1_(sb[c][2]) ^ _GF8_MUL1_(sb[c][3]);
     }
     // r = 1
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][1] = GF8_MUL1(sb[c][0]) ^ GF8_MUL2(sb[c][1])
-                      ^ GF8_MUL3(sb[c][2]) ^ GF8_MUL1(sb[c][3]);
+        sp[c][1] = _GF8_MUL1_(sb[c][0]) ^ _GF8_MUL2_(sb[c][1])
+                      ^ _GF8_MUL3_(sb[c][2]) ^ _GF8_MUL1_(sb[c][3]);
     }
     // r = 2
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][2] = GF8_MUL1(sb[c][0]) ^ GF8_MUL1(sb[c][1])
-                      ^ GF8_MUL2(sb[c][2]) ^ GF8_MUL3(sb[c][3]);
+        sp[c][2] = _GF8_MUL1_(sb[c][0]) ^ _GF8_MUL1_(sb[c][1])
+                      ^ _GF8_MUL2_(sb[c][2]) ^ _GF8_MUL3_(sb[c][3]);
     }
     // r = 3
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][3] = GF8_MUL3(sb[c][0]) ^ GF8_MUL1(sb[c][1])
-                      ^ GF8_MUL1(sb[c][2]) ^ GF8_MUL2(sb[c][3]);
+        sp[c][3] = _GF8_MUL3_(sb[c][0]) ^ _GF8_MUL1_(sb[c][1])
+                      ^ _GF8_MUL1_(sb[c][2]) ^ _GF8_MUL2_(sb[c][3]);
     }
 
     (void)memcpy(s, sp, size);
 
     return fs;
-#undef GF8_MUL1
-#undef GF8_MUL2
-#undef GF8_MUL3
+#undef _GF8_MUL1_
+#undef _GF8_MUL2_
+#undef _GF8_MUL3_
     return fs;
 }
 
-int mixColumnsInv(uint8_t* s, size_t size)
+static int mixColumnsInv(uint8_t* s, const size_t size)
 {
-#define GF8_MULe(v) gf8_mulInv(v, 0xeU)
-#define GF8_MULb(v) gf8_mulInv(v, 0xbU)
-#define GF8_MULd(v) gf8_mulInv(v, 0xdU)
-#define GF8_MUL9(v) gf8_mulInv(v, 0x9U)
+#define _GF8_MULe_(v)   gf8_mulInv(v, 0xeU)
+#define _GF8_MULb_(v)   gf8_mulInv(v, 0xbU)
+#define _GF8_MULd_(v)   gf8_mulInv(v, 0xdU)
+#define _GF8_MUL9_(v)   gf8_mulInv(v, 0x9U)
 
     int fs = 0;
 
@@ -689,39 +778,38 @@ int mixColumnsInv(uint8_t* s, size_t size)
     // r = 0
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][0] = GF8_MULe(sb[c][0]) ^ GF8_MULb(sb[c][1])
-                      ^ GF8_MULd(sb[c][2]) ^ GF8_MUL9(sb[c][3]);
+        sp[c][0] = _GF8_MULe_(sb[c][0]) ^ _GF8_MULb_(sb[c][1])
+                      ^ _GF8_MULd_(sb[c][2]) ^ _GF8_MUL9_(sb[c][3]);
     }
     // r = 1
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][1] = GF8_MUL9(sb[c][0]) ^ GF8_MULe(sb[c][1])
-                      ^ GF8_MULb(sb[c][2]) ^ GF8_MULd(sb[c][3]);
+        sp[c][1] = _GF8_MUL9_(sb[c][0]) ^ _GF8_MULe_(sb[c][1])
+                      ^ _GF8_MULb_(sb[c][2]) ^ _GF8_MULd_(sb[c][3]);
     }
     // r = 2
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][2] = GF8_MULd(sb[c][0]) ^ GF8_MUL9(sb[c][1])
-                      ^ GF8_MULe(sb[c][2]) ^ GF8_MULb(sb[c][3]);
+        sp[c][2] = _GF8_MULd_(sb[c][0]) ^ _GF8_MUL9_(sb[c][1])
+                      ^ _GF8_MULe_(sb[c][2]) ^ _GF8_MULb_(sb[c][3]);
     }
     // r = 3
     for(unsigned int c = 0; c < 4; c++)
     {
-        sp[c][3] = GF8_MULb(sb[c][0]) ^ GF8_MULd(sb[c][1])
-                      ^ GF8_MUL9(sb[c][2]) ^ GF8_MULe(sb[c][3]);
+        sp[c][3] = _GF8_MULb_(sb[c][0]) ^ _GF8_MULd_(sb[c][1])
+                      ^ _GF8_MUL9_(sb[c][2]) ^ _GF8_MULe_(sb[c][3]);
     }
 
     (void)memcpy(s, sp, size);
 
     return fs;
-#undef GF8_MULe
-#undef GF8_MULb
-#undef GF8_MULd
-#undef GF8_MUL9
-    return fs;
+#undef _GF8_MULe_
+#undef _GF8_MULb_
+#undef _GF8_MULd_
+#undef _GF8_MUL9_
 }
 
-int aesEnc(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
+int aesEncV1(uint8_t* out, const uint8_t* in, const uint8_t* key, const size_t kSize)
 {
     int fs = 0;
 
@@ -729,12 +817,12 @@ int aesEnc(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
     size_t Nr = (((size_t)AES_Nr_BASE)+(kSize>>2UL));
 
     if(fs == 0) fs = keyExpansion(key, Nk, Nr);
-    if(fs == 0) fs = doCipher(out, in, Nr, (uint32_t*)g_extKey);
+    if(fs == 0) fs = doCipher(out, in, Nr, (uint32_t*)l_extKey);
 
     return fs;
 }
 
-int aesDec(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
+int aesDecV1(uint8_t* out, const uint8_t* in, const uint8_t* key, const size_t kSize)
 {
     int fs = 0;
 
@@ -742,12 +830,12 @@ int aesDec(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
     size_t Nr = (((size_t)AES_Nr_BASE)+(kSize>>2UL));
 
     if(fs == 0) fs = keyExpansionEIC(key, Nk, Nr);
-    if(fs == 0) fs = doCipherInv(out, in, Nr, (uint32_t*)g_extKey);
+    if(fs == 0) fs = doCipherInv(out, in, Nr, (uint32_t*)l_extKey);
 
     return fs;
 }
 
-int aesDec2(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
+int aesDecV2(uint8_t* out, const uint8_t* in, const uint8_t* key, const size_t kSize)
 {
     int fs = 0;
 
@@ -755,10 +843,53 @@ int aesDec2(uint8_t* out, uint8_t* in, uint8_t* key, size_t kSize)
     size_t Nr = (((size_t)AES_Nr_BASE)+(kSize>>2UL));
 
     if(fs == 0) fs = keyExpansion(key, Nk, Nr);
-    if(fs == 0) fs = doCipherInv2(out, in, Nr, (uint32_t*)g_extKey);
+    if(fs == 0) fs = doCipherInv2(out, in, Nr, (uint32_t*)l_extKey);
 
     return fs;
 }
+
+int startAes(const uint8_t* key, const size_t kSize, const bool decrypt)
+{
+    int fs = 0;
+
+    size_t Nk = (kSize>>2UL);
+
+    l_Nr = (((size_t)AES_Nr_BASE)+(kSize>>2UL));
+
+    if(fs == 0) fs = keyExpansion(key, Nk, l_Nr);
+    if(!decrypt)l_fp_cipher = doCipher;
+    else        l_fp_cipher = doCipherInv2;
+
+    return fs;
+}
+
+int updateAes(uint8_t* out, const uint8_t* in, const size_t size)
+{
+#define _SIZE_MASK_ (AES_S_SIZE - 1U)
+    int fs = 0;
+
+    if((size & _SIZE_MASK_) == 0UL)
+    {
+        for(size_t i = 0UL; i < size; i+=AES_S_SIZE)
+        {
+            fs = l_fp_cipher(&out[i], &in[i], l_Nr, (uint32_t*)l_extKey);
+            if(fs != 0) break;
+        }
+    }
+    else
+    {
+        fs = -1;
+    }
+
+    return fs;
+#undef _SIZE_MASK_
+}
+
+int finishAes(void)
+{
+    return 0;
+}
+
 #ifdef SELFTEST
 #define RUN_TEST(STATEMENTS, FRTN)                  \
 {                                                   \
@@ -891,7 +1022,7 @@ void test_doCipher(void)
     (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
 
     RUN_TEST(keyExpansion(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
-    RUN_TEST(doCipher(test_AES_out, tv_AES128_FIPS197_pTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
+    RUN_TEST(doCipher(test_AES_out, tv_AES128_FIPS197_pTxt_ref, AES128_Nr, (uint32_t*)l_extKey), fRtn);
     DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Cipher Example(AES128)", 4UL);
     EXAM_TEST(memcmp(test_AES_out, tv_AES128_FIPS197_cTxt_ref, sizeof(tv_AES128_FIPS197_cTxt_ref)) == 0, \
             "NIST, FIPS197, AES128 TestVector");
@@ -905,7 +1036,7 @@ void test_doCipherInv(void)
     (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
 
     RUN_TEST(keyExpansionEIC(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
-    RUN_TEST(doCipherInv(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
+    RUN_TEST(doCipherInv(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)l_extKey), fRtn);
     DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Inv Cipher Example(AES128)", 4UL);
     EXAM_TEST(memcmp(test_AES_out, tv_AES128_FIPS197_pTxt_ref, sizeof(tv_AES128_FIPS197_pTxt_ref)) == 0, \
             "NIST, FIPS197, AES128 TestVector");
@@ -919,13 +1050,13 @@ void test_doCipherInv2(void)
     (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
 
     RUN_TEST(keyExpansion(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
-    RUN_TEST(doCipherInv2(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
+    RUN_TEST(doCipherInv2(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)l_extKey), fRtn);
     DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Inv Cipher Example(AES128)", 4UL);
     EXAM_TEST(memcmp(test_AES_out, tv_AES128_FIPS197_pTxt_ref, sizeof(tv_AES128_FIPS197_pTxt_ref)) == 0, \
             "NIST, FIPS197, AES128 TestVector");
 }
 
-void test_aesEnc(void)
+void test_aesEncV1(void)
 {
     printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
 
@@ -935,7 +1066,7 @@ void test_aesEnc(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesEnc(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        RUN_TEST(aesEncV1(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES128 Example values");
@@ -946,7 +1077,7 @@ void test_aesEnc(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesEnc(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        RUN_TEST(aesEncV1(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES192 Example values");
@@ -957,7 +1088,7 @@ void test_aesEnc(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesEnc(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        RUN_TEST(aesEncV1(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES256 Example values");
@@ -965,7 +1096,7 @@ void test_aesEnc(void)
     }
 }
 
-void test_aesDec(void)
+void test_aesDecV1(void)
 {
     printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
 
@@ -975,7 +1106,7 @@ void test_aesDec(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES128_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesDec(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        RUN_TEST(aesDecV1(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES128 Example values");
@@ -986,7 +1117,7 @@ void test_aesDec(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesDec(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        RUN_TEST(aesDecV1(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES192 Example values");
@@ -997,7 +1128,7 @@ void test_aesDec(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesDec(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        RUN_TEST(aesDecV1(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES256 Example values");
@@ -1006,7 +1137,7 @@ void test_aesDec(void)
 
 }
 
-void test_aesDec2(void)
+void test_aesDecV2(void)
 {
     int fRtn;
     printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
@@ -1015,7 +1146,7 @@ void test_aesDec2(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES128_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesDec2(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        RUN_TEST(aesDecV2(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES128 Example values");
@@ -1026,7 +1157,7 @@ void test_aesDec2(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesDec2(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        RUN_TEST(aesDecV2(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES192 Example values");
@@ -1037,7 +1168,7 @@ void test_aesDec2(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        RUN_TEST(aesDec2(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        RUN_TEST(aesDecV2(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         EXAM_TEST(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES256 Example values");
@@ -1055,7 +1186,7 @@ void test_aes_blanks(void)
 
     (void)memset(test_allZero, 0x0, AES_S_SIZE);
     (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-    aesEnc(test_AES_out, test_allZero, test_gcm211_key, sizeof(test_gcm211_key));
+    aesEncV1(test_AES_out, test_allZero, test_gcm211_key, sizeof(test_gcm211_key));
     printHex(test_AES_out, sizeof(test_AES_out), "2.1.1. GCM, H", AES_S_SIZE);
 }
 
@@ -1089,15 +1220,15 @@ int main(int argc, char* argv[])
 
     test_doCipher();
 
-    test_aesEnc();
+    test_aesEncV1();
 
     test_doCipherInv();
 
-    test_aesDec();
+    test_aesDecV1();
 
     test_doCipherInv2();
 
-    test_aesDec2();
+    test_aesDecV2();
 
     test_aes_blanks(); // calcaulates AES-GCM H
 
