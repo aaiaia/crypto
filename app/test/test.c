@@ -750,60 +750,7 @@ uint8_t tv_AES256_NIST_Ex_cTxt_ref[4U][AES_S_SIZE] = {
 
 uint8_t test_AES_out[AES_S_SIZE];
 
-#if 0 /* DISABLED:test_doCipher call static vars */
-void test_doCipher(void)
-{
-    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
-
-    int fRtn;
-    (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
-
-    TEST_AES_RUN(keyExpansion(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
-    TEST_AES_RUN(doCipher(test_AES_out, tv_AES128_FIPS197_pTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
-    DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Cipher Example(AES128)", 4UL);
-    TEST_AES_EXAM(memcmp(test_AES_out, tv_AES128_FIPS197_cTxt_ref, sizeof(tv_AES128_FIPS197_cTxt_ref)) == 0, \
-            "NIST, FIPS197, AES128 TestVector");
-}
-#else
-#define test_doCipher()
-#endif/* DISABLED:test_doCipher call static vars */
-#if 0 /* DISABLED:test_doCipherInv call static vars */
-void test_doCipherInv(void)
-{
-    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
-
-    int fRtn;
-    (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
-
-    TEST_AES_RUN(keyExpansionEIC(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
-    TEST_AES_RUN(doCipherInv(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
-    DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Inv Cipher Example(AES128)", 4UL);
-    TEST_AES_EXAM(memcmp(test_AES_out, tv_AES128_FIPS197_pTxt_ref, sizeof(tv_AES128_FIPS197_pTxt_ref)) == 0, \
-            "NIST, FIPS197, AES128 TestVector");
-}
-#else
-#define test_doCipherInv()
-#endif/* DISABLED:test_doCipherInv call static vars */
-
-#if 0 /* DISABLED:test_doCipherInv2 call static vars */
-void test_doCipherInv2(void)
-{
-    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
-
-    int fRtn;
-    (void)memset(test_AES_out, 0x0, sizeof(test_AES_out));
-
-    TEST_AES_RUN(keyExpansion(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
-    TEST_AES_RUN(doCipherInv2(test_AES_out, tv_AES128_FIPS197_cTxt_ref, AES128_Nr, (uint32_t*)g_extKey), fRtn);
-    DBG_PRINT_ARRAY(test_AES_out, sizeof(test_AES_out), "NIST, FIPS197, May 9, 2023, Appendix B - Inv Cipher Example(AES128)", 4UL);
-    TEST_AES_EXAM(memcmp(test_AES_out, tv_AES128_FIPS197_pTxt_ref, sizeof(tv_AES128_FIPS197_pTxt_ref)) == 0, \
-            "NIST, FIPS197, AES128 TestVector");
-}
-#else
-#define test_doCipherInv2()
-#endif/* DISABLED:test_doCipherInv2 call static vars */
-
-void test_aesEnc(void)
+void test_aesEncV1(void)
 {
     printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
 
@@ -813,7 +760,7 @@ void test_aesEnc(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesEnc(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        TEST_AES_RUN(aesEncV1(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES128 Example values");
@@ -824,7 +771,7 @@ void test_aesEnc(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesEnc(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        TEST_AES_RUN(aesEncV1(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES192 Example values");
@@ -835,7 +782,7 @@ void test_aesEnc(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesEnc(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        TEST_AES_RUN(aesEncV1(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES256 Example values");
@@ -843,7 +790,7 @@ void test_aesEnc(void)
     }
 }
 
-void test_aesDec(void)
+void test_aesDecV1(void)
 {
     printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
 
@@ -853,7 +800,7 @@ void test_aesDec(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES128_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesDec(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        TEST_AES_RUN(aesDecV1(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES128 Example values");
@@ -864,7 +811,7 @@ void test_aesDec(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesDec(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        TEST_AES_RUN(aesDecV1(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES192 Example values");
@@ -875,16 +822,15 @@ void test_aesDec(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesDec(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        TEST_AES_RUN(aesDecV1(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES256 Example values");
         printHex(test_AES_out, sizeof(test_AES_out), "Decrypt Values", AES_S_SIZE);
     }
-
 }
 
-void test_aesDec2(void)
+void test_aesDecV2(void)
 {
     int fRtn;
     printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
@@ -893,7 +839,7 @@ void test_aesDec2(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES128_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesDec2(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
+        TEST_AES_RUN(aesDecV2(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], tv_AES128_key, sizeof(tv_AES128_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES128 Example values");
@@ -904,7 +850,7 @@ void test_aesDec2(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesDec2(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
+        TEST_AES_RUN(aesDecV2(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], tv_AES192_key, sizeof(tv_AES192_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES192 Example values");
@@ -915,7 +861,7 @@ void test_aesDec2(void)
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
     {
         (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-        TEST_AES_RUN(aesDec2(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
+        TEST_AES_RUN(aesDecV2(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], tv_AES256_key, sizeof(tv_AES256_key)), fRtn);
         printf("[tvi=%02ld]", tvi);
         TEST_AES_EXAM(memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0, \
                 "NIST, FIPS197, AES256 Example values");
@@ -933,51 +879,95 @@ void test_aes_blanks(void)
 
     (void)memset(test_allZero, 0x0, AES_S_SIZE);
     (void)memset(test_AES_out, 0x0, AES_S_SIZE);
-    aesEnc(test_AES_out, test_allZero, test_gcm211_key, sizeof(test_gcm211_key));
+    aesEncV1(test_AES_out, test_allZero, test_gcm211_key, sizeof(test_gcm211_key));
     printHex(test_AES_out, sizeof(test_AES_out), "2.1.1. GCM, H", AES_S_SIZE);
+}
+
+void test_aesEncSUP(void)
+{
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
+    int fRtn;
+
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        TEST_AES_RUN(startAes(tv_AES128_key, sizeof(tv_AES128_key), AES_ENCRYPT), fRtn);
+        TEST_AES_RUN(updateAes(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], sizeof(tv_AES_NIST_Ex_pTxt_ref[tvi])), fRtn);
+        TEST_AES_RUN(finishAes(), fRtn);
+        printf("AES128-ECB Encrypt#%2ld: %s\n", tvi, \
+            ((memcmp(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+    }
+
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        TEST_AES_RUN(startAes(tv_AES192_key, sizeof(tv_AES192_key), AES_ENCRYPT), fRtn);
+        TEST_AES_RUN(updateAes(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], sizeof(tv_AES_NIST_Ex_pTxt_ref[tvi])), fRtn);
+        TEST_AES_RUN(finishAes(), fRtn);
+        printf("AES192-ECB Encrypt#%2ld: %s\n", tvi, \
+            ((memcmp(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+    }
+
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        TEST_AES_RUN(startAes(tv_AES256_key, sizeof(tv_AES256_key), AES_ENCRYPT), fRtn);
+        TEST_AES_RUN(updateAes(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], sizeof(tv_AES_NIST_Ex_pTxt_ref[tvi])), fRtn);
+        TEST_AES_RUN(finishAes(), fRtn);
+        printf("AES256-ECB Encrypt#%2ld: %s\n", tvi, \
+            ((memcmp(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+    }
+}
+
+void test_aesDecSUP(void)
+{
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
+    int fRtn;
+
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES128_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        TEST_AES_RUN(startAes(tv_AES128_key, sizeof(tv_AES128_key), AES_DECRYPT), fRtn);
+        TEST_AES_RUN(updateAes(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], sizeof(tv_AES128_NIST_Ex_cTxt_ref[tvi])), fRtn);
+        TEST_AES_RUN(finishAes(), fRtn);
+        printf("AES128-ECB Decrypt#%2ld: %s\n", tvi, \
+            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+    }
+
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        TEST_AES_RUN(startAes(tv_AES192_key, sizeof(tv_AES192_key), AES_DECRYPT), fRtn);
+        TEST_AES_RUN(updateAes(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], sizeof(tv_AES192_NIST_Ex_cTxt_ref[tvi])), fRtn);
+        TEST_AES_RUN(finishAes(), fRtn);
+        printf("AES192-ECB Decrypt#%2ld: %s\n", tvi, \
+            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+    }
+
+    for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
+    {
+        (void)memset(test_AES_out, 0x0, AES_S_SIZE);
+        TEST_AES_RUN(startAes(tv_AES256_key, sizeof(tv_AES256_key), AES_DECRYPT), fRtn);
+        TEST_AES_RUN(updateAes(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], sizeof(tv_AES256_NIST_Ex_cTxt_ref[tvi])), fRtn);
+        TEST_AES_RUN(finishAes(), fRtn);
+        printf("AES256-ECB Decrypt#%2ld: %s\n", tvi, \
+            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+    }
 }
 
 void test_aes(void)
 {
-    int fRtn;
-    uint32_t u32_v = 0xfedcba98U;
-    uint8_t u8a_p[4] = {0x98U,0xbaU,0xdcU,0xfeU};
+    test_aesEncV1();
 
-    printf("[rotWord test]");
-    printf("u32_v(origin): 0x%08x\r\n", u32_v);
-    printHex((void*)(&u32_v), sizeof(u32_v), "u32_v(origin)",  0UL);
-    TEST_AES_RUN(rotWord(u32_v), fRtn);
-    printf("u32_v(result): 0x%08x\r\n", u32_v);
-    printHex((void*)(&u32_v), sizeof(u32_v), "u32_v(result)",  0UL);
-
-    printHex((void*)(u8a_p), sizeof(u8a_p), "u8a_p(origin)", 0UL);
-    TEST_AES_RUN(rotWord((*((uint32_t*)u8a_p))), fRtn);
-    printHex((void*)(u8a_p), sizeof(u8a_p), "u8a_p(result)", 0UL);
-
-#ifdef DEBUG
-    printf("[TEST: AES128 keyExpansion]\r\n");
-    TEST_AES_RUN(keyExpansion(tv_AES128_key, AES128_Nk, AES128_Nr), fRtn);
-
-    printf("[TEST: AES192 keyExpansion]\r\n");
-    TEST_AES_RUN(keyExpansion(tv_AES192_key, AES192_Nk, AES192_Nr), fRtn);
-
-    printf("[TEST: AES256 keyExpansion]\r\n");
-    TEST_AES_RUN(keyExpansion(tv_AES256_key, AES256_Nk, AES256_Nr), fRtn);
-#endif /* DEBUG */
-
-    test_doCipher();
-
-    test_aesEnc();
-
-    test_doCipherInv();
-
-    test_aesDec();
-
-    test_doCipherInv2();
-
-    test_aesDec2();
+    test_aesDecV1();
+    test_aesDecV2();
 
     test_aes_blanks(); // calcaulates AES-GCM H
+
+    test_aesEncSUP();
+    test_aesDecSUP();
 }
 #endif /* TEST_AES */
 
