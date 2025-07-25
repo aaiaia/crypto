@@ -1,14 +1,21 @@
+#ifndef NTYPE_H
+#define NTYPE_H
+
 #include <stdint.h>
 #include <stddef.h> // size_t, NULL
 
-#define BNU32  uint32_t
+typedef uint32_t    bignum_t;
+#define bignum_bits 32U
+
 typedef struct {
     size_t  bits;    // bit width length
     size_t  size;    // size
     size_t  nlen;    // type length
-    BNU32*  nums;
-}bigNumU32s_s;
+    bignum_t    lmsk;
+    bignum_t*   nums;
+}bignum_s;
 
-bigNumU32s_s* mkBigNumU32s(size_t bits);
-int rmBitNumU32s(bigNumU32s_s** p);
+bignum_s* mkBigNum(size_t bits);
+int rmBitNum(bignum_s** p);
 
+#endif/* NTYPE_H */

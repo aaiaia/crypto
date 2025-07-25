@@ -1,7 +1,11 @@
+#include <time.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+
+#include <unistd.h>
 
 #include <sys/sysinfo.h>
 
@@ -9,6 +13,30 @@
 
 #include "common/util.h"
 #include "common/ntype.h"
+#include "common/returnType.h"
+
+#include "arith/arith_core.h"
+#include "logic/logic_core.h"
+
+#include "test/vector.h"
+
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
+
+const uint8_t MES_PASS[] = "\x1b[32mPASS\x1b[0m";
+const uint8_t MES_FAIL[] = "\x1b[31mFAIL\x1b[0m";
+
+#define TEST_ASSERT(CONDITION) {        \
+    if(!(CONDITION)) {                  \
+        printf("Assert: Fail\r\n");     \
+        while(!(CONDITION)) sleep(1);   \
+    }                                   \
+}
 
 void _memChk(void) {
     struct sysinfo info;
@@ -19,11 +47,44 @@ void _memChk(void) {
     printf("mem : %ld %ld %ld\n", info.totalram, info.totalram-info.freeram, info.freeram);
 }
 
+static char* g_tTimeTitle;
+static clock_t g_tic, g_toc;
+static double g_pTime;
+static bool g_clkOvf;
+#define TICK_TIME_START(TITLE) {    \
+    g_tTimeTitle = (TITLE);         \
+    g_tic = clock();                \
+}
+#define TICK_TIME_END   {                                                                   \
+    g_toc = clock();                                                                        \
+    if(g_toc > g_tic) {                                                                     \
+        g_clkOvf = false;                                                                   \
+        g_pTime = ((double)(g_toc - g_tic)) / CLOCKS_PER_SEC;                               \
+    } else {                                                                                \
+        g_clkOvf = true;                                                                    \
+    }                                                                                       \
+    if(!g_clkOvf)   printf("Process Time(%s): %lf\r\n", g_tTimeTitle ,g_pTime);             \
+    else            printf("Process Time(%s): clock tick overflow!!!\r\n", g_tTimeTitle);   \
+}
+
+void test_print_ntype(bignum_s* p, const char* title)
+{
+    printf("[%s]\r\n", title);
+    printf("addr:0x%p, bignum_t size:%lu\r\n", p, sizeof(bignum_t));
+    printf("p->nums:0x%p, p->lmsk:0x%x\r\np->bits=%ld, p->nlen=%ld, p->size=%ld\r\n", \
+            p->nums, p->lmsk, p->bits, p->nlen, p->size);
+    for(size_t i = p->nlen- 1u; i != ((size_t)-1); i--) {
+        printf("0x%08x", p->nums[i]);
+        if(i != 0u) printf(":");
+        else        printf("\r\n");
+    }
+}
+
 bool chkVector(uint8_t* va, uint8_t* vb, size_t size)
 {
     bool chkResult = (memcmp(va, vb, size) == 0);
 
-    printf("Test is \"%s\"\r\n", (chkResult?"PASS":"FAIL"));
+    printf("Test is \"%s\"\r\n", (chkResult?MES_PASS:MES_FAIL));
 
     return chkResult;
 }
@@ -56,6 +117,7 @@ void printHex(void* data, size_t size, const char* title, size_t lf)
 }
 
 void test_macro(void) {
+    bool cmp_result;
     // test: UIN_CEIL(n, x)
     {
         uint32_t ref, r, n, m;
@@ -66,42 +128,48 @@ void test_macro(void) {
         ref = 1u;
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14u; m = 14u;
         ref = 1u;
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024u; m = 1023u;
         ref = 2u;
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 34u + 7u; m = 17u;
         ref = 3u;
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 60u + 14u; m = 37u;
         ref = 2u;
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 35u + 6u; m = 7u;
         ref = 6u;
         r = UIN_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -115,42 +183,48 @@ void test_macro(void) {
         ref = 1;
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14; m = 14;
         ref = 1;
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024; m = 1023;
         ref = 2;
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 34u + 7; m = 17;
         ref = 3;
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 60u + 14; m = 37;
         ref = 2;
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 35u + 6; m = 7;
         ref = 6;
         r = INT_CEIL(n, m);
         printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?("PASS"):("FAIL"));
+        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
     }
 
@@ -164,49 +238,450 @@ void test_macro(void) {
         ref = 1u;
         r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 2
         n = 14u;
         ref = 2u;
         r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 3
         n = 1024u;
         ref = 128u;
         r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 4
         n = 10240u;
         ref = 1280u;
         r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 5
         n = 10241u;
         ref = 1281u;
         r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
         // test 6
         n = 727u;
         ref = 91u;
         r = BITS2SIZE(n);
         printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?("PASS"):("FAIL"));
+        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+    }
+
+    // test: BIT2U16L(bits)
+    {
+        uint32_t ref, r, n;
+        printf("[TEST] BIT2U16L\r\n");
+
+        // test 1
+        n = 6u;
+        ref = 1u;
+        r = BIT2U16L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 2
+        n = 14u;
+        ref = 1u;
+        r = BIT2U16L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 3
+        n = 1024u;
+        ref = 64u;
+        r = BIT2U16L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 4
+        n = 10240u;
+        ref = 640u;
+        r = BIT2U16L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 5
+        n = 10241u;
+        ref = 641u;
+        r = BIT2U16L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 6
+        n = 727u;
+        ref = 46u;
+        r = BIT2U16L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
 
     }
+
+    // test: BIT2U32L(bits)
+    {
+        uint32_t ref, r, n;
+        printf("[TEST] BIT2U32L\r\n");
+
+        // test 1
+        n = 6u;
+        ref = 1u;
+        r = BIT2U32L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 2
+        n = 14u;
+        ref = 1u;
+        r = BIT2U32L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 3
+        n = 1024u;
+        ref = 32u;
+        r = BIT2U32L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 4
+        n = 10240u;
+        ref = 320u;
+        r = BIT2U32L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 5
+        n = 10241u;
+        ref = 321u;
+        r = BIT2U32L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 6
+        n = 727u;
+        ref = 23u;
+        r = BIT2U32L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+    }
+
+    // test: BIT2U64L(bits)
+    {
+        uint32_t ref, r, n;
+        printf("[TEST] BIT2U64L\r\n");
+
+        // test 1
+        n = 6u;
+        ref = 1u;
+        r = BIT2U64L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 2
+        n = 14u;
+        ref = 1u;
+        r = BIT2U64L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 3
+        n = 1024u;
+        ref = 16u;
+        r = BIT2U64L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 4
+        n = 10240u;
+        ref = 160u;
+        r = BIT2U64L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 5
+        n = 10241u;
+        ref = 161u;
+        r = BIT2U64L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+        // test 6
+        n = 727u;
+        ref = 12u;
+        r = BIT2U64L(n);
+        printf("n=%u, r=%u\r\n", n, r);
+        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(ref==r);
+
+    }
+
+    // test: LASTBITMASK(bits, TYPE)
+    {
+        // uint32_t
+        uint32_t test_tmp_u32_bits;
+        uint32_t test_tmp_u32_mask;
+        uint32_t test_tmp_u32_ref;
+
+        test_tmp_u32_bits = 127UL;
+        test_tmp_u32_ref = 0x7FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 126UL;
+        test_tmp_u32_ref = 0x3FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 125UL;
+        test_tmp_u32_ref = 0x1FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 124UL;
+        test_tmp_u32_ref = 0x0FFFFFFFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 105UL;
+        test_tmp_u32_ref = 0x000001FFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 104UL;
+        test_tmp_u32_ref = 0x000000FFUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 103UL;
+        test_tmp_u32_ref = 0x0000007FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 102UL;
+        test_tmp_u32_ref = 0x0000003FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 101UL;
+        test_tmp_u32_ref = 0x0000001FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 100UL;
+        test_tmp_u32_ref = 0x0000000FUL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 99UL;
+        test_tmp_u32_ref = 0x00000007UL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 98UL;
+        test_tmp_u32_ref = 0x00000003UL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u32_bits = 97UL;
+        test_tmp_u32_ref = 0x00000001UL;
+        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
+        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
+        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        // uint64_t
+        uint64_t test_tmp_u64_bits;
+        uint64_t test_tmp_u64_mask;
+        uint64_t test_tmp_u64_ref;
+
+        test_tmp_u64_bits = 127UL;
+        test_tmp_u64_ref = 0x7FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 126UL;
+        test_tmp_u64_ref = 0x3FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 125UL;
+        test_tmp_u64_ref = 0x1FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 124UL;
+        test_tmp_u64_ref = 0x0FFFFFFFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 105UL;
+        test_tmp_u64_ref = 0x000001FFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 104UL;
+        test_tmp_u64_ref = 0x000000FFFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 103UL;
+        test_tmp_u64_ref = 0x0000007FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 102UL;
+        test_tmp_u64_ref = 0x0000003FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 101UL;
+        test_tmp_u64_ref = 0x0000001FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 100UL;
+        test_tmp_u64_ref = 0x0000000FFFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 99UL;
+        test_tmp_u64_ref = 0x00000007FFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 98UL;
+        test_tmp_u64_ref = 0x00000003FFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 97UL;
+        test_tmp_u64_ref = 0x00000001FFFFFFFFUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 69UL;
+        test_tmp_u64_ref = 0x000000000000001FUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 68UL;
+        test_tmp_u64_ref = 0x000000000000000FUL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 67UL;
+        test_tmp_u64_ref = 0x0000000000000007UL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 66UL;
+        test_tmp_u64_ref = 0x0000000000000003UL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+
+        test_tmp_u64_bits = 65UL;
+        test_tmp_u64_ref = 0x0000000000000001UL;
+        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
+        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
+        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+        TEST_ASSERT(cmp_result);
+    }
+
 }
 
 void test_ntype(void) {
 #define _CMP_TRUE_  1
-    bigNumU32s_s* p = (bigNumU32s_s*)NULL;
+    bignum_s* p = (bignum_s*)NULL;
 
     size_t test_bits, test_size, test_nlen;
     int test_cmp_bits, test_cmp_size, test_cmp_nlen;
@@ -215,160 +690,160 @@ void test_ntype(void) {
         test_bits = 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 8ul - 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 8ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 8ul + 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 16ul - 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 16ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 16ul + 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 512ul - 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 512ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 512ul + 1ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         test_bits = 1023ul;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
     }
 
     for(uint32_t tmp_bits = 1ul; tmp_bits < 20480ul; tmp_bits++) {
         test_bits = tmp_bits;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
-        p = mkBigNumU32s(test_bits);
+        p = mkBigNum(test_bits);
         test_cmp_bits = (test_bits == p->bits);
         test_cmp_size = (test_size == p->size);
         test_cmp_nlen = (test_nlen == p->nlen);
-        printf("(bigNumU32s_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
-            p->bits, (test_cmp_bits == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->size, (test_cmp_size == _CMP_TRUE_)?"PASS":"FAIL", \
-            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?"PASS":"FAIL");
-        rmBitNumU32s(&p);
+        printf("(bignum_s*):0x%p, bits:%8lu[bit]:%s, size:%6lu[Bytes]:%s, nlen:%4lu[length]:%s\r\n", p,
+            p->bits, (test_cmp_bits == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->size, (test_cmp_size == _CMP_TRUE_)?MES_PASS:MES_FAIL, \
+            p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
+        rmBitNum(&p);
 
         if((test_cmp_bits != 0) || (test_cmp_size != 0)) {
             printf("config:, bits:%8lu[bit], size:%6lu[Bytes], nlen:%4lu[length]\r\n", test_bits, test_size, test_nlen);
@@ -376,6 +851,453 @@ void test_ntype(void) {
         } else {}
     }
 #undef _CMP_TRUE_
+}
+
+#define TEST_ARITH_BITS 127u    //16Bytes
+void test_arith_add(void) {
+    int test_cmp;
+
+    bignum_s* test_ref;
+    bignum_s* test_dst;
+    bignum_s* test_opA;
+    bignum_s* test_opB;
+
+    test_ref = mkBigNum(TEST_ARITH_BITS);
+    test_dst = mkBigNum(TEST_ARITH_BITS);
+    test_opA = mkBigNum(TEST_ARITH_BITS);
+    test_opB = mkBigNum(TEST_ARITH_BITS);
+
+    /* Sum test */
+    for(unsigned int i = 0u; i < TV_U32_ADD_NUM; i++) {
+        memset(test_ref->nums, 0x0u, (test_ref->size));
+        memset(test_opA->nums, 0x0u, (test_opA->size));
+        memset(test_opB->nums, 0x0u, (test_opB->size));
+
+        memcpy(test_ref->nums, TV_u32_add_refList[i], TV_u32_add_lenList[i]);
+        memcpy(test_opA->nums, TV_u32_add_opAList[i], TV_u32_add_lenList[i]);
+        memcpy(test_opB->nums, TV_u32_add_opBList[i], TV_u32_add_lenList[i]);
+
+        TICK_TIME_START("add_NTYPE");
+        add_NTYPE(test_dst, test_opA, test_opB, TV_u32_add_carryList[i]);
+        TICK_TIME_END;
+        test_print_ntype(test_opA, "opA");
+        test_print_ntype(test_opB, "opB");
+        test_print_ntype(test_dst, "dst");
+        test_print_ntype(test_ref, "ref");
+        printf("[carry]\r\nc=0x%08x\r\n", TV_u32_add_carryList[i]);
+
+        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+        printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+
+    rmBitNum(&test_ref);
+    rmBitNum(&test_dst);
+    rmBitNum(&test_opA);
+    rmBitNum(&test_opB);
+}
+
+void test_arith_sub(void)
+{
+    int test_cmp;
+
+    bignum_s* test_ref;
+    bignum_s* test_dst;
+    bignum_s* test_opA;
+    bignum_s* test_opB;
+
+    test_ref = mkBigNum(TEST_ARITH_BITS);
+    test_dst = mkBigNum(TEST_ARITH_BITS);
+    test_opA = mkBigNum(TEST_ARITH_BITS);
+    test_opB = mkBigNum(TEST_ARITH_BITS);
+
+    /* Sum test */
+    for(unsigned int i = 0u; i < TV_U32_SUB_NUM; i++) {
+        memset(test_ref->nums, 0x0u, (test_ref->size));
+        memset(test_opA->nums, 0x0u, (test_opA->size));
+        memset(test_opB->nums, 0x0u, (test_opB->size));
+
+        memcpy(test_ref->nums, TV_u32_sub_refList[i], TV_u32_sub_lenList[i]);
+        memcpy(test_opA->nums, TV_u32_sub_opAList[i], TV_u32_sub_lenList[i]);
+        memcpy(test_opB->nums, TV_u32_sub_opBList[i], TV_u32_sub_lenList[i]);
+
+        TICK_TIME_START("sub_NTYPE");
+        sub_NTYPE(test_dst, test_opA, test_opB, TV_u32_sub_carryList[i]);
+        TICK_TIME_END;
+        test_print_ntype(test_opA, "opA");
+        test_print_ntype(test_opB, "opB");
+        test_print_ntype(test_dst, "dst");
+        test_print_ntype(test_ref, "ref");
+        printf("[carry]\r\nc=0x%08x\r\n", TV_u32_sub_carryList[i]);
+
+        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+        printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+
+    rmBitNum(&test_ref);
+    rmBitNum(&test_dst);
+    rmBitNum(&test_opA);
+    rmBitNum(&test_opB);
+}
+
+#define TEST_ARITH_MUL_U32_BS_BIT  1024U
+void test_arith_mul_u32_bs(void)
+{
+    int test_cmp;
+
+    bignum_s* test_ref = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<1U);
+    bignum_s* test_opA = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<0U);
+    bignum_s* test_opB = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<0U);
+    bignum_s* test_dst = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<1U);
+
+    /****************/
+    /* TestVector 1 */
+    (void)memset(test_ref->nums, 0U, test_ref->size);
+    (void)memset(test_opA->nums, 0U, test_opA->size);
+    (void)memset(test_opB->nums, 0U, test_opB->size);
+    (void)memset(test_dst->nums, 0U, test_dst->size);
+
+    // set operand A
+    test_opA->nums[0] = 0xffffffffU;
+    test_opA->nums[1] = 0xffffffffU;
+
+    // set operand B
+    test_opB->nums[0] = 0xffffffffU;
+    test_opB->nums[1] = 0xffffffffU;
+
+    // set reference
+    test_ref->nums[0] = 0x00000001U;
+    test_ref->nums[1] = 0x00000000U;
+    test_ref->nums[2] = 0xfffffffeU;
+    test_ref->nums[3] = 0xffffffffU;
+
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    TEST_ASSERT(test_cmp == 0);
+
+    /****************/
+    /* TestVector 2 */
+    (void)memset(test_ref->nums, 0U, test_ref->size);
+    (void)memset(test_opA->nums, 0U, test_opA->size);
+    (void)memset(test_opB->nums, 0U, test_opB->size);
+    (void)memset(test_dst->nums, 0U, test_dst->size);
+
+    // set operand A
+    test_opA->nums[0] = 0xffffffffU;
+    test_opA->nums[1] = 0xffffffffU;
+    test_opA->nums[2] = 0xffffffffU;
+    test_opA->nums[3] = 0xffffffffU;
+
+    // set operand B
+    test_opB->nums[0] = 0xffffffffU;
+    test_opB->nums[1] = 0xffffffffU;
+    test_opB->nums[2] = 0xffffffffU;
+    test_opB->nums[3] = 0xffffffffU;
+
+    // set reference
+    test_ref->nums[0] = 0x00000001U;
+    test_ref->nums[1] = 0x00000000U;
+    test_ref->nums[2] = 0x00000000U;
+    test_ref->nums[3] = 0x00000000U;
+    test_ref->nums[4] = 0xfffffffeU;
+    test_ref->nums[5] = 0xffffffffU;
+    test_ref->nums[6] = 0xffffffffU;
+    test_ref->nums[7] = 0xffffffffU;
+
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    TEST_ASSERT(test_cmp == 0);
+
+    /****************/
+    /* TestVector 3 */
+    (void)memset(test_ref->nums, 0U, test_ref->size);
+    (void)memset(test_opA->nums, 0U, test_opA->size);
+    (void)memset(test_opB->nums, 0U, test_opB->size);
+    (void)memset(test_dst->nums, 0U, test_dst->size);
+
+    // set operand A
+    test_opA->nums[0]  = 0xffffffffU;
+    test_opA->nums[1]  = 0xffffffffU;
+    test_opA->nums[2]  = 0xffffffffU;
+    test_opA->nums[3]  = 0xffffffffU;
+    test_opA->nums[4]  = 0xffffffffU;
+
+    // set operand B
+    test_opB->nums[0]  = 0xffffffffU;
+    test_opB->nums[1]  = 0xffffffffU;
+    test_opB->nums[2]  = 0xffffffffU;
+    test_opB->nums[3]  = 0xffffffffU;
+    test_opB->nums[4]  = 0xffffffffU;
+    test_opB->nums[5]  = 0xffffffffU;
+
+    // set reference
+    test_ref->nums[0]  = 0x00000001U;
+    test_ref->nums[1]  = 0x00000000U;
+    test_ref->nums[2]  = 0x00000000U;
+    test_ref->nums[3]  = 0x00000000U;
+    test_ref->nums[4]  = 0x00000000U;
+    test_ref->nums[5]  = 0xffffffffU;
+    test_ref->nums[6]  = 0xfffffffeU;
+    test_ref->nums[7]  = 0xffffffffU;
+    test_ref->nums[8]  = 0xffffffffU;
+    test_ref->nums[9]  = 0xffffffffU;
+    test_ref->nums[10] = 0xffffffffU;
+
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    TEST_ASSERT(test_cmp == 0);
+
+    /****************/
+    /* TestVector 4 */
+    (void)memset(test_ref->nums, 0U, test_ref->size);
+    (void)memset(test_opA->nums, 0U, test_opA->size);
+    (void)memset(test_opB->nums, 0U, test_opB->size);
+    (void)memset(test_dst->nums, 0U, test_dst->size);
+
+    // set operand A
+    test_opA->nums[0]  = 0xffffffffU;
+    test_opA->nums[1]  = 0xffffffffU;
+    test_opA->nums[2]  = 0xffffffffU;
+    test_opA->nums[3]  = 0xffffffffU;
+    test_opA->nums[4]  = 0xffffffffU;
+    test_opA->nums[5]  = 0x0fffffffU;
+
+    // set operand B
+    test_opB->nums[0]  = 0xffffffffU;
+    test_opB->nums[1]  = 0xffffffffU;
+    test_opB->nums[2]  = 0xffffffffU;
+    test_opB->nums[3]  = 0xffffffffU;
+    test_opB->nums[4]  = 0xffffffffU;
+    test_opB->nums[5]  = 0xffffffffU;
+    test_opB->nums[6]  = 0xffffffffU;
+
+    // set reference
+    test_ref->nums[0]  = 0x00000001U;
+    test_ref->nums[1]  = 0x00000000U;
+    test_ref->nums[2]  = 0x00000000U;
+    test_ref->nums[3]  = 0x00000000U;
+    test_ref->nums[4]  = 0x00000000U;
+    test_ref->nums[5]  = 0xf0000000U;
+    test_ref->nums[6]  = 0xffffffffU;
+    test_ref->nums[7]  = 0xfffffffeU;
+    test_ref->nums[8]  = 0xffffffffU;
+    test_ref->nums[9]  = 0xffffffffU;
+    test_ref->nums[10] = 0xffffffffU;
+    test_ref->nums[11] = 0xffffffffU;
+    test_ref->nums[12] = 0x0fffffffU;
+
+    TICK_TIME_START("mul_NTYPE_bs");
+    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_END;
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    TEST_ASSERT(test_cmp == 0);
+
+    rmBitNum(&test_ref);
+    rmBitNum(&test_opA);
+    rmBitNum(&test_opB);
+    rmBitNum(&test_dst);
+}
+
+#define TEST_ARITH_NTYPE_ADD_LOC_BIT        1024U
+void test_arith_add_loc(void)
+{
+    bignum_s* test_opA;
+    bignum_t test_opB;
+
+    test_opA = mkBigNum(TEST_ARITH_NTYPE_ADD_LOC_BIT);
+    (void)memset(test_opA->nums, 0x0U, test_opA->size);
+    test_print_ntype(test_opA, "cleared opA");
+
+    /* Set first stage 1 */
+    test_opB = 0x12345678U;
+    for(size_t i = 0UL; i < test_opA->nlen; i++) {
+        bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    test_print_ntype(test_opA, "add loc result of opA");
+
+    /* Set first stage 2 */
+    test_opB = 0x87654321U;
+    for(size_t i = 0UL; i < test_opA->nlen; i++) {
+        bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    test_print_ntype(test_opA, "add loc result of opA");
+
+    /* Set first stage 3 */
+    test_opB = 0x66666666U;
+    for(size_t i = 0UL; i < test_opA->nlen; i++) {
+        bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    test_print_ntype(test_opA, "add loc result of opA");
+
+    /* Set first stage 4 */
+    test_opB = 0x00800000U;
+    bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, 3);
+    if(tmp) {
+        printf("carry = %u \r\n", tmp);
+    }
+    test_print_ntype(test_opA, "Final Stage, add loc result of opA");
+
+    rmBitNum(&test_opA);
+}
+
+#define TEST_ARITH_MUL_u32_bs_NN_BIT       512U
+void test_arith_mul_u32_bs_nn(void)
+{
+    int test_cmp;
+    ReturnType fr;
+
+    bignum_s* test_ref = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+    bignum_s* test_opA = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+    bignum_s* test_opB = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+    bignum_s* test_dst = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+
+    /****************/
+    /* TestVector 1, Negative x Negative */
+    (void)memset(test_ref->nums, 0U,    test_ref->size);
+    (void)memset(test_opA->nums, 0xffU, test_opA->size);
+    (void)memset(test_opB->nums, 0xffU, test_opB->size);
+    (void)memset(test_dst->nums, 0U,    test_dst->size);
+
+    // set operand A -> -1
+    //test_opA->nums[0];
+
+    // set operand B
+    //test_opB->nums[0];
+
+    // set reference
+    test_ref->nums[0]  = 0x00000001U;
+
+    if(fr = mul_NTYPE_bs_ext(test_dst, test_opA, test_opB, false)) {
+        printReturnType(fr);
+    } else { /* Do nothing */ }
+    test_print_ntype(test_opA, "opA");
+    test_print_ntype(test_opB, "opB");
+    test_print_ntype(test_dst, "dst");
+    test_print_ntype(test_ref, "ref");
+
+    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    TEST_ASSERT(test_cmp == 0);
+
+    rmBitNum(&test_ref);
+    rmBitNum(&test_opA);
+    rmBitNum(&test_opB);
+    rmBitNum(&test_dst);
+}
+
+#define TEST_LOGIC_SHIFT_ONE_BIT    1024U
+#define TEST_LOGIC_SHIFT_REF        0x08108051U
+#define TEST_LOGIC_SHIFT_VAL        0x84084028U
+
+void test_logic_shft(void)
+{
+    int test_cmp;
+    ReturnType fr;
+
+    bignum_s* test_refer;
+    bignum_s* test_sft1b;
+    bignum_t test_ovf;
+
+    test_refer = mkBigNum(TEST_LOGIC_SHIFT_ONE_BIT);
+    test_sft1b = mkBigNum(TEST_LOGIC_SHIFT_ONE_BIT);
+
+    /* Shift sequence 1 */
+    (void)memset(test_refer->nums, 0x0U, test_refer->size);
+    (void)memset(test_sft1b->nums, 0x0U, test_sft1b->size);
+
+    // set reference
+    test_refer->nums[0] = 0x2U;
+
+    // set init vector
+    test_sft1b->nums[0] = 0x1U;
+
+    test_print_ntype(test_sft1b, "sft1b(before)");
+    // run test function
+    TICK_TIME_START("sftL1b");
+    if(fr = sftL1b(test_sft1b, &test_ovf, 0U)) {
+        TICK_TIME_END;
+        printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+    } else {
+        TICK_TIME_END;
+    }
+
+    test_cmp = memcmp(test_refer->nums, test_sft1b->nums, (test_refer->size));
+    test_print_ntype(test_refer, "refer");
+    test_print_ntype(test_sft1b, "sft1b(after)");
+    printf("sftL1b() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    TEST_ASSERT(test_cmp == 0);
+
+    /* Shift sequence 2 */
+    (void)memset(test_refer->nums, 0x0U, test_refer->size);
+    (void)memset(test_sft1b->nums, 0x0U, test_sft1b->size);
+
+    // set reference
+    for(size_t i = 0U; i < test_refer->nlen; i++) {
+        test_refer->nums[i] = TEST_LOGIC_SHIFT_REF;
+    }
+
+    // set init vector
+    for(size_t i = 0U; i < test_sft1b->nlen; i++) {
+        test_sft1b->nums[i] = TEST_LOGIC_SHIFT_VAL;
+    }
+
+    test_print_ntype(test_sft1b, "sft1b(before)");
+    // run test function
+    TICK_TIME_START("sftL1b");
+    if(fr = sftL1b(test_sft1b, &test_ovf, 1U)) {
+        TICK_TIME_END;
+        printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+    } else {
+        TICK_TIME_END;
+    }
+
+    test_cmp = memcmp(test_refer->nums, test_sft1b->nums, (test_refer->size));
+    test_print_ntype(test_refer, "refer");
+    test_print_ntype(test_sft1b, "sft1b(after)");
+    printf("sftL1b() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+
+    rmBitNum(&test_refer);
+    rmBitNum(&test_sft1b);
 }
 
 #include "common/bitwise.h"
@@ -665,7 +1587,7 @@ int test_ghash(void)
 #define TEST_AES_EXAM(STATEMENTS, DESCRIPTION)                      \
 {                                                                   \
     bool examResult = ((STATEMENTS));                               \
-    printf("%s:%s\r\n", (examResult?"PASS":"FAIL"), (DESCRIPTION)); \
+    printf("%s:%s\r\n", (examResult?MES_PASS:MES_FAIL), (DESCRIPTION)); \
 }
 
 /* 
@@ -896,7 +1818,7 @@ void test_aesEncSUP(void)
         TEST_AES_RUN(updateAes(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], sizeof(tv_AES_NIST_Ex_pTxt_ref[tvi])), fRtn);
         TEST_AES_RUN(finishAes(), fRtn);
         printf("AES128-ECB Encrypt#%2ld: %s\n", tvi, \
-            ((memcmp(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+            ((memcmp(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?MES_PASS:MES_FAIL));
     }
 
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
@@ -906,7 +1828,7 @@ void test_aesEncSUP(void)
         TEST_AES_RUN(updateAes(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], sizeof(tv_AES_NIST_Ex_pTxt_ref[tvi])), fRtn);
         TEST_AES_RUN(finishAes(), fRtn);
         printf("AES192-ECB Encrypt#%2ld: %s\n", tvi, \
-            ((memcmp(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+            ((memcmp(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?MES_PASS:MES_FAIL));
     }
 
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES_NIST_Ex_pTxt_ref)/AES_S_SIZE; tvi++)
@@ -916,7 +1838,7 @@ void test_aesEncSUP(void)
         TEST_AES_RUN(updateAes(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], sizeof(tv_AES_NIST_Ex_pTxt_ref[tvi])), fRtn);
         TEST_AES_RUN(finishAes(), fRtn);
         printf("AES256-ECB Encrypt#%2ld: %s\n", tvi, \
-            ((memcmp(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+            ((memcmp(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], AES_S_SIZE) == 0)?MES_PASS:MES_FAIL));
     }
 }
 
@@ -933,7 +1855,7 @@ void test_aesDecSUP(void)
         TEST_AES_RUN(updateAes(test_AES_out, tv_AES128_NIST_Ex_cTxt_ref[tvi], sizeof(tv_AES128_NIST_Ex_cTxt_ref[tvi])), fRtn);
         TEST_AES_RUN(finishAes(), fRtn);
         printf("AES128-ECB Decrypt#%2ld: %s\n", tvi, \
-            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?MES_PASS:MES_FAIL));
     }
 
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES192_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
@@ -943,7 +1865,7 @@ void test_aesDecSUP(void)
         TEST_AES_RUN(updateAes(test_AES_out, tv_AES192_NIST_Ex_cTxt_ref[tvi], sizeof(tv_AES192_NIST_Ex_cTxt_ref[tvi])), fRtn);
         TEST_AES_RUN(finishAes(), fRtn);
         printf("AES192-ECB Decrypt#%2ld: %s\n", tvi, \
-            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?MES_PASS:MES_FAIL));
     }
 
     for(size_t tvi = 0UL; tvi < sizeof(tv_AES256_NIST_Ex_cTxt_ref)/AES_S_SIZE; tvi++)
@@ -953,7 +1875,7 @@ void test_aesDecSUP(void)
         TEST_AES_RUN(updateAes(test_AES_out, tv_AES256_NIST_Ex_cTxt_ref[tvi], sizeof(tv_AES256_NIST_Ex_cTxt_ref[tvi])), fRtn);
         TEST_AES_RUN(finishAes(), fRtn);
         printf("AES256-ECB Decrypt#%2ld: %s\n", tvi, \
-            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?"PASS":"FAIL"));
+            ((memcmp(test_AES_out, tv_AES_NIST_Ex_pTxt_ref[tvi], AES_S_SIZE) == 0)?MES_PASS:MES_FAIL));
     }
 }
 
@@ -1220,7 +2142,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1244,7 +2166,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1268,7 +2190,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1292,7 +2214,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1316,7 +2238,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1340,7 +2262,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha256(g_sha256Dg32bSym, sizeof(g_sha256Dg32bSym));
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1380,7 +2302,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1420,7 +2342,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1460,7 +2382,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1500,7 +2422,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1540,7 +2462,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1580,7 +2502,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1620,7 +2542,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-256 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha256Dg32bSym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1652,7 +2574,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1678,7 +2600,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1704,7 +2626,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1730,7 +2652,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1756,7 +2678,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1791,7 +2713,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             finishSha512(g_sha512Dg64bSym, sizeof(g_sha512Dg64bSym));
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1832,7 +2754,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1873,7 +2795,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1914,7 +2836,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1955,7 +2877,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -1996,7 +2918,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -2037,7 +2959,7 @@ void test_FIPS_180_2_example_SHA2_Additional(void)
             }
 
             printf("SHA-512 #%lu: ", tv_num);
-            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+            printf("%s\n",((memcmp(ref_dgSym, g_sha512Dg64bSym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
             printf("================================================================================\n");
         }
@@ -2154,7 +3076,7 @@ void test_FIPS_198_hamc256_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-256: ", testNum);
-        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2212,7 +3134,7 @@ void test_FIPS_198_hamc256_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-256: ", testNum);
-        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2275,7 +3197,7 @@ void test_FIPS_198_hamc256_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-256: ", testNum);
-        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, SHA256_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2336,7 +3258,7 @@ void test_FIPS_198_hamc256_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-256(truncated to %lu Bytes): ", testNum, ref_mac_truncated_size);
-        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, ref_mac_truncated_size) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac256Sym, ref_mac_truncated_size) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2403,7 +3325,7 @@ void test_FIPS_198_hamc512_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-512: ", testNum);
-        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2461,7 +3383,7 @@ void test_FIPS_198_hamc512_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-512: ", testNum);
-        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2524,7 +3446,7 @@ void test_FIPS_198_hamc512_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-512: ", testNum);
-        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, SHA512_DIGEST_SIZE) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2584,7 +3506,7 @@ void test_FIPS_198_hamc512_imVal(void)
         printf("\n");
 
         printf("[%2lu]HMAC-512(truncated to %lu Bytes): ", testNum, ref_mac_truncated_size);
-        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, ref_mac_truncated_size) == 0)?"PASS":"FAIL"));
+        printf("%s\n",((memcmp(ref_mac, g_hmac512Sym, ref_mac_truncated_size) == 0)?MES_PASS:MES_FAIL));
 
         printf("--------------------------------------------------------------------------------\n");
     }
@@ -2630,7 +3552,7 @@ void test_RFC4493_aes128_cmac(void)
             finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
 
-            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
         }
         /* Example 2: len = 16 */
         {
@@ -2654,7 +3576,7 @@ void test_RFC4493_aes128_cmac(void)
             finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
 
-            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
         }
         /* Example 3: len = 40 */
         {
@@ -2679,7 +3601,7 @@ void test_RFC4493_aes128_cmac(void)
             }
             finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
         }
         /* Example 4: len = 64 */
         {
@@ -2705,7 +3627,7 @@ void test_RFC4493_aes128_cmac(void)
             }
             finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+            printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
         }
     }
 }
@@ -2743,7 +3665,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES128, Example #2 */
             {
@@ -2768,7 +3690,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES128, Example #3 */
             {
@@ -2794,7 +3716,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES128, Example #4 */
             {
@@ -2822,7 +3744,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES128-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
         }
         /* CMAC-AES192 */
@@ -2854,7 +3776,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES192, Example #2 */
             {
@@ -2879,7 +3801,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES192, Example #3 */
             {
@@ -2905,7 +3827,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES192, Example #4 */
             {
@@ -2933,7 +3855,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES192-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
         }
         /* CMAC-AES256 */
@@ -2965,7 +3887,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES256, Example #2 */
             {
@@ -2990,7 +3912,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES256, Example #3 */
             {
@@ -3016,7 +3938,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
             /* CMAC-AES256, Example #4 */
             {
@@ -3044,7 +3966,7 @@ void test_SP800_38B_cmac_aes_imVal(void)
                 }
                 finishCmac(tv_tag, &tv_mes[pSize], rSize);
 
-                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?"PASS":"FAIL"));
+                printf("AES256-CMAC#%2ld: %s\n", testNum, ((memcmp(tv_tag, ref_tag, CMAC_TAG128b_SIZE) == 0)?MES_PASS:MES_FAIL));
             }
         }
     }
@@ -3052,8 +3974,42 @@ void test_SP800_38B_cmac_aes_imVal(void)
 #endif /* TEST_CMAC */
 
 void test_sequence(void) {
+    printf("[test start: test_macro()]\r\n");
     test_macro();
+    printf("[test   end: test_macro()]\r\n");
+
+#if 0   /* CONFIG_DO_TEST_NTYPE */
+    printf("[test start: test_ntype()]\r\n");
     test_ntype();
+    printf("[test   end: test_ntype()]\r\n");
+#endif  /* CONFIG_DO_TEST_NTYPE */
+
+    /******************************/
+    printf("[test start: test_arith_add()]\r\n");
+    test_arith_add();
+    printf("[test   end: test_arith_add()]\r\n");
+
+    printf("[test start: test_arith_sub()]\r\n");
+    test_arith_sub();
+    printf("[test   end: test_arith_sub()]\r\n");
+
+    printf("[test start: test_arith_mul_u32_bs()]\r\n");
+    test_arith_mul_u32_bs();
+    printf("[test   end: test_arith_mul_u32_bs()]\r\n");
+
+    printf("[test start: test_arith_add_loc()]\r\n");
+    test_arith_add_loc();
+    printf("[test   end: test_arith_add_loc()]\r\n");
+
+    printf("[test start: test_arith_mul_u32_bs_nn()]\r\n");
+    test_arith_mul_u32_bs_nn();
+    printf("[test   end: test_arith_mul_u32_bs_nn()]\r\n");
+
+    /******************************/
+    printf("[test start: test_logic_shft()]\r\n");
+    printf("[test   end: test_logic_shft()]\r\n");
+    test_logic_shft();
+
     test_ghash();
 #ifdef TEST_AES
     test_aes();
@@ -3078,6 +4034,29 @@ void test_sequence(void) {
 #endif /* TEST_CMAC */
 }
 
+#define TEST_MUL_COUNT_TIME_LOOPS   102400000UL
+void test_u32_u64_mul_time(void) {
+    uint32_t x32, a32, b32;
+    uint64_t x64, a64, b64;
+    size_t loopCnt;
+
+    a32 = 0x1111ffffU;
+    b32 = 0x0000ffffU;
+    TICK_TIME_START("uint32_t mul time test");
+    for(loopCnt = 0UL; loopCnt < TEST_MUL_COUNT_TIME_LOOPS; loopCnt++) {
+        x32 = a32 * b32;
+    }
+    TICK_TIME_END;
+
+    a64 = 0x11111111ffffffffU;
+    b64 = 0x00000000ffffffffU;
+    TICK_TIME_START("uint64_t mul time test");
+    for(loopCnt = 0UL; loopCnt < TEST_MUL_COUNT_TIME_LOOPS; loopCnt++) {
+        x64 = a64 * b64;
+    }
+    TICK_TIME_END;
+}
+
 int main(int argc, char** argv) {
     printf("arg:%d, ",argc);
     for(unsigned int i=0; i<argc; i++) {
@@ -3086,4 +4065,6 @@ int main(int argc, char** argv) {
     printf("\r\n");
 
     test_sequence();
+
+    test_u32_u64_mul_time();
 }
