@@ -444,7 +444,6 @@ void test_macro(void) {
         printf("n=%u, r=%u\r\n", n, r);
         printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
         TEST_ASSERT(ref==r);
-
     }
 
     // test: LASTBITMASK(bits, TYPE)
@@ -676,10 +675,10 @@ void test_macro(void) {
         printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
         TEST_ASSERT(cmp_result);
     }
-
 }
 
-void test_ntype(void) {
+void test_ntype(void)
+{
 #define _CMP_TRUE_  1
     bignum_s* p = (bignum_s*)NULL;
 
@@ -831,7 +830,8 @@ void test_ntype(void) {
         rmBitNum(&p);
     }
 
-    for(uint32_t tmp_bits = 1ul; tmp_bits < 20480ul; tmp_bits++) {
+    for(uint32_t tmp_bits = 1ul; tmp_bits < 20480ul; tmp_bits++)
+    {
         test_bits = tmp_bits;
         test_size = UIN_CEIL(test_bits, 8u);
         test_nlen = BYTE2U32L(test_size);
@@ -845,10 +845,14 @@ void test_ntype(void) {
             p->nlen, (test_cmp_nlen == _CMP_TRUE_)?MES_PASS:MES_FAIL);
         rmBitNum(&p);
 
-        if((test_cmp_bits != 0) || (test_cmp_size != 0)) {
+        if((test_cmp_bits != 0) || (test_cmp_size != 0))
+        {
             printf("config:, bits:%8lu[bit], size:%6lu[Bytes], nlen:%4lu[length]\r\n", test_bits, test_size, test_nlen);
             break;
-        } else {}
+        }
+        else
+        {
+        }
     }
 #undef _CMP_TRUE_
 }

@@ -15,4 +15,4 @@ ReturnType mul_NTYPE_bs_ext(bignum_s* d, bignum_s* s1, bignum_s* s0, bool guard)
 
 bignum_t add_NTYPE_loc(bignum_s* d, bignum_t v, size_t loc);
 
-#endif
+#endif/* ARITH_CORE_H */

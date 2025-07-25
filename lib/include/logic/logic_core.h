@@ -9,4 +9,4 @@
 
 ReturnType sftL1b(bignum_s* d, bignum_t* o, bignum_t c);
 
-#endif
+#endif/* LOGIC_CORE_H */
