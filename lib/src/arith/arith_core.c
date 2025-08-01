@@ -7,24 +7,24 @@
 
 bignum_t add_NTYPE(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
     for(size_t i=0ul; i<d->nlen; i++) {
-        bignum_t s;
-        s = s0->nums[i] + c;
-        c = (s < s0->nums[i]);
-        s += s1->nums[i];
-        c |= (s < s1->nums[i]);
-        d->nums[i] = s;
+        bignum_t _s0, _s1;
+        _s0 = s0->nums[i] + c;
+        c = (_s0 < s0->nums[i]);
+        _s1 = _s0 + s1->nums[i];
+        c |= (_s1 < _s0);
+        d->nums[i] = _s1;
     }
     return c;
 }
 
 bignum_t sub_NTYPE(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
     for(size_t i=0UL; i<d->nlen; i++) {
-        bignum_t s;
-        s = s0->nums[i] - c;
-        c = (s > s0->nums[i]);
-        s -= s1->nums[i];
-        c |= (s > s1->nums[i]);
-        d->nums[i] = s;
+        bignum_t _s0, _s1;
+        _s0 = s0->nums[i] - c;
+        c = (_s0 > s0->nums[i]);
+        _s1 = _s0 - s1->nums[i];
+        c |= (_s1 > _s0);
+        d->nums[i] = _s1;
     }
     return c;
 }
