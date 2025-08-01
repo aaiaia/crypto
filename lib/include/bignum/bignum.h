@@ -1,5 +1,5 @@
-#ifndef NTYPE_H
-#define NTYPE_H
+#ifndef BIGNUM_H
+#define BIGNUM_H
 
 #include <stdint.h>
 #include <stddef.h> // size_t, NULL
@@ -18,4 +18,4 @@ typedef struct {
 bignum_s* mkBigNum(size_t bits);
 int rmBitNum(bignum_s** p);
 
-#endif/* NTYPE_H */
+#endif/* BIGNUM_H */

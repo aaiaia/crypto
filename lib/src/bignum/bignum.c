@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "common/ntype.h"
+#include "bignum/bignum.h"
 #include "common/util.h"
 
 bignum_s* mkBigNum(size_t bits) {

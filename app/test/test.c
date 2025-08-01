@@ -12,11 +12,11 @@
 #include <time.h>
 
 #include "common/util.h"
-#include "common/ntype.h"
+#include "bignum/bignum.h"
 #include "common/returnType.h"
 
-#include "arith/arith_core.h"
-#include "logic/logic_core.h"
+#include "bignum/bignum_math.h"
+#include "bignum/bignum_logic.h"
 
 #include "test/vector.h"
 
@@ -67,7 +67,7 @@ static bool g_clkOvf;
     else            printf("Process Time(%s): clock tick overflow!!!\r\n", g_tTimeTitle);   \
 }
 
-void test_print_ntype(bignum_s* p, const char* title)
+void test_print_bignum(bignum_s* p, const char* title)
 {
     printf("[%s]\r\n", title);
     printf("addr:0x%p, bignum_t size:%lu\r\n", p, sizeof(bignum_t));
@@ -678,7 +678,7 @@ void test_macro(void)
     }
 }
 
-void test_ntype(void)
+void test_bignum(void)
 {
 #define _CMP_TRUE_  1
     bignum_s* p = (bignum_s*)NULL;
@@ -858,8 +858,8 @@ void test_ntype(void)
 #undef _CMP_TRUE_
 }
 
-#define _TEST_ARITH_127BIT_ 127u    //16Bytes
-void test_arith_add(void)
+#define TEST_BIGNUM_127BIT  127u    //16Bytes
+void test_add_bignum_127b(void)
 {
     int test_cmp;
 
@@ -868,10 +868,10 @@ void test_arith_add(void)
     bignum_s* test_opA;
     bignum_s* test_opB;
 
-    test_ref = mkBigNum(_TEST_ARITH_127BIT_);
-    test_dst = mkBigNum(_TEST_ARITH_127BIT_);
-    test_opA = mkBigNum(_TEST_ARITH_127BIT_);
-    test_opB = mkBigNum(_TEST_ARITH_127BIT_);
+    test_ref = mkBigNum(TEST_BIGNUM_127BIT);
+    test_dst = mkBigNum(TEST_BIGNUM_127BIT);
+    test_opA = mkBigNum(TEST_BIGNUM_127BIT);
+    test_opB = mkBigNum(TEST_BIGNUM_127BIT);
 
     /* Sum test */
     for(unsigned int i = 0u; i < TV_U32_ADD_NUM; i++) {
@@ -883,17 +883,17 @@ void test_arith_add(void)
         memcpy(test_opA->nums, TV_u32_add_opAList[i], TV_u32_add_lenList[i]);
         memcpy(test_opB->nums, TV_u32_add_opBList[i], TV_u32_add_lenList[i]);
 
-        TICK_TIME_START("add_NTYPE");
-        add_NTYPE(test_dst, test_opA, test_opB, TV_u32_add_carryList[i]);
+        TICK_TIME_START("add_bignum");
+        add_bignum(test_dst, test_opA, test_opB, TV_u32_add_carryList[i]);
         TICK_TIME_END;
-        test_print_ntype(test_opA, "opA");
-        test_print_ntype(test_opB, "opB");
-        test_print_ntype(test_dst, "dst");
-        test_print_ntype(test_ref, "ref");
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
         printf("[carry]\r\nc=0x%08x\r\n", TV_u32_add_carryList[i]);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("add_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -903,7 +903,7 @@ void test_arith_add(void)
     rmBitNum(&test_opB);
 }
 
-void test_arith_sub(void)
+void test_sub_bignum_127b(void)
 {
     int test_cmp;
 
@@ -912,10 +912,10 @@ void test_arith_sub(void)
     bignum_s* test_opA;
     bignum_s* test_opB;
 
-    test_ref = mkBigNum(_TEST_ARITH_127BIT_);
-    test_dst = mkBigNum(_TEST_ARITH_127BIT_);
-    test_opA = mkBigNum(_TEST_ARITH_127BIT_);
-    test_opB = mkBigNum(_TEST_ARITH_127BIT_);
+    test_ref = mkBigNum(TEST_BIGNUM_127BIT);
+    test_dst = mkBigNum(TEST_BIGNUM_127BIT);
+    test_opA = mkBigNum(TEST_BIGNUM_127BIT);
+    test_opB = mkBigNum(TEST_BIGNUM_127BIT);
 
     /* Sum test */
     for(unsigned int i = 0u; i < TV_U32_SUB_NUM; i++) {
@@ -927,17 +927,17 @@ void test_arith_sub(void)
         memcpy(test_opA->nums, TV_u32_sub_opAList[i], TV_u32_sub_lenList[i]);
         memcpy(test_opB->nums, TV_u32_sub_opBList[i], TV_u32_sub_lenList[i]);
 
-        TICK_TIME_START("sub_NTYPE");
-        sub_NTYPE(test_dst, test_opA, test_opB, TV_u32_sub_carryList[i]);
+        TICK_TIME_START("sub_bignum");
+        sub_bignum(test_dst, test_opA, test_opB, TV_u32_sub_carryList[i]);
         TICK_TIME_END;
-        test_print_ntype(test_opA, "opA");
-        test_print_ntype(test_opB, "opB");
-        test_print_ntype(test_dst, "dst");
-        test_print_ntype(test_ref, "ref");
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
         printf("[carry]\r\nc=0x%08x\r\n", TV_u32_sub_carryList[i]);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("sub_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("sub_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -946,9 +946,8 @@ void test_arith_sub(void)
     rmBitNum(&test_opA);
     rmBitNum(&test_opB);
 }
-#undef _TEST_ARITH_127BIT_ //127u    //16Bytes
 
-#define _TEST_ARITH_256BIT_ 256u    // 32Bytes
+#define TEST_BIGNUM_256BIT  256u    // 32Bytes
 /*
  * Link: https://defuse.ca/big-number-calculator.htm
  * Operation: Addition
@@ -976,7 +975,7 @@ const bignum_t bignum256bNumB_1[] = { 0x00000001, 0x00000000, 0x00000000, 0x0000
 const size_t bignum256bNumB_Size_1 = sizeof(bignum256bNumB_1);
 const bignum_t bignum256bNumC_1[] = { 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
 const size_t bignum256bNumC_Size_1 = sizeof(bignum256bNumC_1);
-void test_arith_add_256b(void) {
+void test_add_bignum_256b(void) {
     int test_cmp;
 
     bignum_s* test_ref;
@@ -986,10 +985,10 @@ void test_arith_add_256b(void) {
     bignum_t test_ci;
     bignum_t test_co;
 
-    test_ref = mkBigNum(_TEST_ARITH_256BIT_);
-    test_dst = mkBigNum(_TEST_ARITH_256BIT_);
-    test_opA = mkBigNum(_TEST_ARITH_256BIT_);
-    test_opB = mkBigNum(_TEST_ARITH_256BIT_);
+    test_ref = mkBigNum(TEST_BIGNUM_256BIT);
+    test_dst = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opA = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opB = mkBigNum(TEST_BIGNUM_256BIT);
 
     /* Add test */
     {
@@ -1003,18 +1002,18 @@ void test_arith_add_256b(void) {
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("add_NTYPE");
-        test_co = add_NTYPE(test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START("add_bignum");
+        test_co = add_bignum(test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
-        test_print_ntype(test_opA, "opA");
-        test_print_ntype(test_opB, "opB");
-        test_print_ntype(test_dst, "dst");
-        test_print_ntype(test_ref, "ref");
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
         printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
         printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("add_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -1030,18 +1029,18 @@ void test_arith_add_256b(void) {
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("add_NTYPE");
-        test_co = add_NTYPE(test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START("add_bignum");
+        test_co = add_bignum(test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
-        test_print_ntype(test_opA, "opA");
-        test_print_ntype(test_opB, "opB");
-        test_print_ntype(test_dst, "dst");
-        test_print_ntype(test_ref, "ref");
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
         printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
         printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("add_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -1051,7 +1050,7 @@ void test_arith_add_256b(void) {
     rmBitNum(&test_opB);
 }
 
-void test_arith_sub_256b(void)
+void test_sub_bignum_256b(void)
 {
     int test_cmp;
 
@@ -1062,10 +1061,10 @@ void test_arith_sub_256b(void)
     bignum_t test_ci;
     bignum_t test_co;
 
-    test_ref = mkBigNum(_TEST_ARITH_256BIT_);
-    test_dst = mkBigNum(_TEST_ARITH_256BIT_);
-    test_opA = mkBigNum(_TEST_ARITH_256BIT_);
-    test_opB = mkBigNum(_TEST_ARITH_256BIT_);
+    test_ref = mkBigNum(TEST_BIGNUM_256BIT);
+    test_dst = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opA = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opB = mkBigNum(TEST_BIGNUM_256BIT);
 
     /* Sub test */
     {
@@ -1079,18 +1078,18 @@ void test_arith_sub_256b(void)
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("add_NTYPE");
-        test_co = sub_NTYPE(test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START("add_bignum");
+        test_co = sub_bignum(test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
-        test_print_ntype(test_opA, "opA");
-        test_print_ntype(test_opB, "opB");
-        test_print_ntype(test_dst, "dst");
-        test_print_ntype(test_ref, "ref");
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
         printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
         printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("add_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -1106,18 +1105,18 @@ void test_arith_sub_256b(void)
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("add_NTYPE");
-        test_co = sub_NTYPE(test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START("add_bignum");
+        test_co = sub_bignum(test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
-        test_print_ntype(test_opA, "opA");
-        test_print_ntype(test_opB, "opB");
-        test_print_ntype(test_dst, "dst");
-        test_print_ntype(test_ref, "ref");
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
         printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
         printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("add_NTYPE() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("add_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -1126,17 +1125,16 @@ void test_arith_sub_256b(void)
     rmBitNum(&test_opA);
     rmBitNum(&test_opB);
 }
-#undef _TEST_ARITH_256BIT_ //256u    // 32Bytes
 
-#define TEST_ARITH_MUL_U32_BS_BIT  1024U
-void test_arith_mul_u32_bs(void)
+#define TEST_MUL_BIGNUM_BS  1024U
+void test_mul_bignum_bs(void)
 {
     int test_cmp;
 
-    bignum_s* test_ref = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<1U);
-    bignum_s* test_opA = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<0U);
-    bignum_s* test_opB = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<0U);
-    bignum_s* test_dst = mkBigNum(TEST_ARITH_MUL_U32_BS_BIT<<1U);
+    bignum_s* test_ref = mkBigNum(TEST_MUL_BIGNUM_BS<<1U);
+    bignum_s* test_opA = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_opB = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_dst = mkBigNum(TEST_MUL_BIGNUM_BS<<1U);
 
     /****************/
     /* TestVector 1 */
@@ -1159,16 +1157,16 @@ void test_arith_mul_u32_bs(void)
     test_ref->nums[2] = 0xfffffffeU;
     test_ref->nums[3] = 0xffffffffU;
 
-    TICK_TIME_START("mul_NTYPE_bs");
-    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_bignum_bs");
+    mul_bignum_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
+    test_print_bignum(test_opA, "opA");
+    test_print_bignum(test_opB, "opB");
+    test_print_bignum(test_dst, "dst");
+    test_print_bignum(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    printf("mul_bignum_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
     TEST_ASSERT(test_cmp == 0);
 
     /****************/
@@ -1200,16 +1198,16 @@ void test_arith_mul_u32_bs(void)
     test_ref->nums[6] = 0xffffffffU;
     test_ref->nums[7] = 0xffffffffU;
 
-    TICK_TIME_START("mul_NTYPE_bs");
-    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_bignum_bs");
+    mul_bignum_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
+    test_print_bignum(test_opA, "opA");
+    test_print_bignum(test_opB, "opB");
+    test_print_bignum(test_dst, "dst");
+    test_print_bignum(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    printf("mul_bignum_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
     TEST_ASSERT(test_cmp == 0);
 
     /****************/
@@ -1247,16 +1245,16 @@ void test_arith_mul_u32_bs(void)
     test_ref->nums[9]  = 0xffffffffU;
     test_ref->nums[10] = 0xffffffffU;
 
-    TICK_TIME_START("mul_NTYPE_bs");
-    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_bignum_bs");
+    mul_bignum_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
+    test_print_bignum(test_opA, "opA");
+    test_print_bignum(test_opB, "opB");
+    test_print_bignum(test_dst, "dst");
+    test_print_bignum(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    printf("mul_bignum_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
     TEST_ASSERT(test_cmp == 0);
 
     /****************/
@@ -1298,16 +1296,16 @@ void test_arith_mul_u32_bs(void)
     test_ref->nums[11] = 0xffffffffU;
     test_ref->nums[12] = 0x0fffffffU;
 
-    TICK_TIME_START("mul_NTYPE_bs");
-    mul_NTYPE_bs(test_dst, test_opA, test_opB);
+    TICK_TIME_START("mul_bignum_bs");
+    mul_bignum_bs(test_dst, test_opA, test_opB);
     TICK_TIME_END;
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
+    test_print_bignum(test_opA, "opA");
+    test_print_bignum(test_opB, "opB");
+    test_print_bignum(test_dst, "dst");
+    test_print_bignum(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    printf("mul_bignum_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
     TEST_ASSERT(test_cmp == 0);
 
     rmBitNum(&test_ref);
@@ -1316,67 +1314,67 @@ void test_arith_mul_u32_bs(void)
     rmBitNum(&test_dst);
 }
 
-#define TEST_ARITH_NTYPE_ADD_LOC_BIT        1024U
-void test_arith_add_loc(void)
+#define TEST_ADD_BIGNUM_LOC_BIT_LEN 1024U
+void test_add_bignum_loc(void)
 {
     bignum_s* test_opA;
     bignum_t test_opB;
 
-    test_opA = mkBigNum(TEST_ARITH_NTYPE_ADD_LOC_BIT);
+    test_opA = mkBigNum(TEST_ADD_BIGNUM_LOC_BIT_LEN);
     (void)memset(test_opA->nums, 0x0U, test_opA->size);
-    test_print_ntype(test_opA, "cleared opA");
+    test_print_bignum(test_opA, "cleared opA");
 
     /* Set first stage 1 */
     test_opB = 0x12345678U;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    test_print_ntype(test_opA, "add loc result of opA");
+    test_print_bignum(test_opA, "add loc result of opA");
 
     /* Set first stage 2 */
     test_opB = 0x87654321U;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    test_print_ntype(test_opA, "add loc result of opA");
+    test_print_bignum(test_opA, "add loc result of opA");
 
     /* Set first stage 3 */
     test_opB = 0x66666666U;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    test_print_ntype(test_opA, "add loc result of opA");
+    test_print_bignum(test_opA, "add loc result of opA");
 
     /* Set first stage 4 */
     test_opB = 0x00800000U;
-    bignum_t tmp = add_NTYPE_loc(test_opA, test_opB, 3);
+    bignum_t tmp = add_bignum_loc(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
-    test_print_ntype(test_opA, "Final Stage, add loc result of opA");
+    test_print_bignum(test_opA, "Final Stage, add loc result of opA");
 
     rmBitNum(&test_opA);
 }
 
-#define TEST_ARITH_MUL_u32_bs_NN_BIT       512U
-void test_arith_mul_u32_bs_nn(void)
+#define TEST_MUL_BIGNUM_BS_NN_BIT_LEN   512U
+void test_mul_bignum_bs_nn(void)
 {
     int test_cmp;
     ReturnType fr;
 
-    bignum_s* test_ref = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
-    bignum_s* test_opA = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
-    bignum_s* test_opB = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
-    bignum_s* test_dst = mkBigNum(TEST_ARITH_MUL_u32_bs_NN_BIT);
+    bignum_s* test_ref = mkBigNum(TEST_MUL_BIGNUM_BS_NN_BIT_LEN);
+    bignum_s* test_opA = mkBigNum(TEST_MUL_BIGNUM_BS_NN_BIT_LEN);
+    bignum_s* test_opB = mkBigNum(TEST_MUL_BIGNUM_BS_NN_BIT_LEN);
+    bignum_s* test_dst = mkBigNum(TEST_MUL_BIGNUM_BS_NN_BIT_LEN);
 
     /****************/
     /* TestVector 1, Negative x Negative */
@@ -1394,16 +1392,16 @@ void test_arith_mul_u32_bs_nn(void)
     // set reference
     test_ref->nums[0]  = 0x00000001U;
 
-    if(fr = mul_NTYPE_bs_ext(test_dst, test_opA, test_opB, false)) {
+    if(fr = mul_bignum_bs_ext(test_dst, test_opA, test_opB, false)) {
         printReturnType(fr);
     } else { /* Do nothing */ }
-    test_print_ntype(test_opA, "opA");
-    test_print_ntype(test_opB, "opB");
-    test_print_ntype(test_dst, "dst");
-    test_print_ntype(test_ref, "ref");
+    test_print_bignum(test_opA, "opA");
+    test_print_bignum(test_opB, "opB");
+    test_print_bignum(test_dst, "dst");
+    test_print_bignum(test_ref, "ref");
 
     test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("mul_NTYPE_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    printf("mul_bignum_bs() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
     TEST_ASSERT(test_cmp == 0);
 
     rmBitNum(&test_ref);
@@ -1412,11 +1410,11 @@ void test_arith_mul_u32_bs_nn(void)
     rmBitNum(&test_dst);
 }
 
-#define TEST_LOGIC_SHIFT_ONE_BIT    1024U
-#define TEST_LOGIC_SHIFT_REF        0x08108051U
-#define TEST_LOGIC_SHIFT_VAL        0x84084028U
+#define TEST_LSL1B_BIGNUM_BIT_LEN   1024U
+#define TEST_LSL1B_BIGNUM_REF       0x08108051U
+#define TEST_LSL1B_BIGNUM_VAL       0x84084028U
 
-void test_logic_shft(void)
+void test_lsl1b_bignum(void)
 {
     int test_cmp;
     ReturnType fr;
@@ -1425,8 +1423,8 @@ void test_logic_shft(void)
     bignum_s* test_sft1b;
     bignum_t test_ovf;
 
-    test_refer = mkBigNum(TEST_LOGIC_SHIFT_ONE_BIT);
-    test_sft1b = mkBigNum(TEST_LOGIC_SHIFT_ONE_BIT);
+    test_refer = mkBigNum(TEST_LSL1B_BIGNUM_BIT_LEN);
+    test_sft1b = mkBigNum(TEST_LSL1B_BIGNUM_BIT_LEN);
 
     /* Shift sequence 1 */
     (void)memset(test_refer->nums, 0x0U, test_refer->size);
@@ -1438,20 +1436,20 @@ void test_logic_shft(void)
     // set init vector
     test_sft1b->nums[0] = 0x1U;
 
-    test_print_ntype(test_sft1b, "sft1b(before)");
+    test_print_bignum(test_sft1b, "sft1b(before)");
     // run test function
-    TICK_TIME_START("sftL1b");
-    if(fr = sftL1b(test_sft1b, &test_ovf, 0U)) {
+    TICK_TIME_START("lsl1b_bignum");
+    if(fr = lsl1b_bignum(test_sft1b, &test_ovf, 0U)) {
         TICK_TIME_END;
-        printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+        printf("lsl1b_bignum(test_sft1b, &test_ovf) = %d\r\n", fr);
     } else {
         TICK_TIME_END;
     }
 
     test_cmp = memcmp(test_refer->nums, test_sft1b->nums, (test_refer->size));
-    test_print_ntype(test_refer, "refer");
-    test_print_ntype(test_sft1b, "sft1b(after)");
-    printf("sftL1b() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    test_print_bignum(test_refer, "refer");
+    test_print_bignum(test_sft1b, "sft1b(after)");
+    printf("lsl1b_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
     TEST_ASSERT(test_cmp == 0);
 
     /* Shift sequence 2 */
@@ -1460,28 +1458,28 @@ void test_logic_shft(void)
 
     // set reference
     for(size_t i = 0U; i < test_refer->nlen; i++) {
-        test_refer->nums[i] = TEST_LOGIC_SHIFT_REF;
+        test_refer->nums[i] = TEST_LSL1B_BIGNUM_REF;
     }
 
     // set init vector
     for(size_t i = 0U; i < test_sft1b->nlen; i++) {
-        test_sft1b->nums[i] = TEST_LOGIC_SHIFT_VAL;
+        test_sft1b->nums[i] = TEST_LSL1B_BIGNUM_VAL;
     }
 
-    test_print_ntype(test_sft1b, "sft1b(before)");
+    test_print_bignum(test_sft1b, "sft1b(before)");
     // run test function
-    TICK_TIME_START("sftL1b");
-    if(fr = sftL1b(test_sft1b, &test_ovf, 1U)) {
+    TICK_TIME_START("lsl1b_bignum");
+    if(fr = lsl1b_bignum(test_sft1b, &test_ovf, 1U)) {
         TICK_TIME_END;
-        printf("sftL1b(test_sft1b, &test_ovf) = %d\r\n", fr);
+        printf("lsl1b_bignum(test_sft1b, &test_ovf) = %d\r\n", fr);
     } else {
         TICK_TIME_END;
     }
 
     test_cmp = memcmp(test_refer->nums, test_sft1b->nums, (test_refer->size));
-    test_print_ntype(test_refer, "refer");
-    test_print_ntype(test_sft1b, "sft1b(after)");
-    printf("sftL1b() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    test_print_bignum(test_refer, "refer");
+    test_print_bignum(test_sft1b, "sft1b(after)");
+    printf("lsl1b_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
 
     rmBitNum(&test_refer);
     rmBitNum(&test_sft1b);
@@ -4173,105 +4171,139 @@ void test_SP800_38B_cmac_aes_imVal(void)
 
 void test_sequence(void) {
     char keyin = '\0';
+    printf("--------------------------------------------------------------------------------\n");
     printf("[test start: test_macro()]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_macro");
     _COND_DO_TEST_(keyin)
     test_macro();
     printf("[test   end: test_macro()]\r\n");
+    printf("================================================================================\n");
 
-#if 0   /* CONFIG_DO_TEST_NTYPE */
-    printf("[test start: test_ntype()]\r\n");
-    test_ntype();
-    printf("[test   end: test_ntype()]\r\n");
-#endif  /* CONFIG_DO_TEST_NTYPE */
-
-    /******************************/
-    printf("[test start: test_arith_add()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_arith_add");
-    _COND_DO_TEST_(keyin)
-    test_arith_add();
-    printf("[test   end: test_arith_add()]\r\n");
-
-    printf("[test start: test_arith_sub()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_arith_sub");
-    _COND_DO_TEST_(keyin)
-    test_arith_sub();
-    printf("[test   end: test_arith_sub()]\r\n");
-
-    printf("[test start: test_arith_add_256b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_arith_add_256b");
-    _COND_DO_TEST_(keyin)
-    test_arith_add_256b();
-    printf("[test   end: test_arith_add_256b()]\r\n");
-
-    printf("[test start: test_arith_sub_256b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_arith_sub_256b");
-    _COND_DO_TEST_(keyin)
-    test_arith_sub_256b();
-    printf("[test   end: test_arith_sub_256b()]\r\n");
-
-    printf("[test start: test_arith_mul_u32_bs()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_arith_mul_u32_bs");
-    _COND_DO_TEST_(keyin)
-    test_arith_mul_u32_bs();
-    printf("[test   end: test_arith_mul_u32_bs()]\r\n");
-
-    printf("[test start: test_arith_add_loc()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_arith_add_loc");
-    _COND_DO_TEST_(keyin)
-    test_arith_add_loc();
-    printf("[test   end: test_arith_add_loc()]\r\n");
-
-    printf("[test start: test_arith_mul_u32_bs_nn()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_arith_mul_u32_bs_nn");
-    _COND_DO_TEST_(keyin)
-    test_arith_mul_u32_bs_nn();
-    printf("[test   end: test_arith_mul_u32_bs_nn()]\r\n");
+#if 0   /* CONFIG_DO_TEST_BIGNUM */
+    printf("[test start: test_bignum()]\r\n");
+    ttest_sub_127best_bignum();
+    printf("[test   end: test_bignum()]\r\n");
+#endif  /* CONFIG_DO_TEST_BIGNUM */
 
     /******************************/
-    printf("[test start: test_logic_shft()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_logic_shft");
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_add_bignum_127b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add_bignum_127b");
     _COND_DO_TEST_(keyin)
-    test_logic_shft();
-    printf("[test   end: test_logic_shft()]\r\n");
+    test_add_bignum_127b();
+    printf("[test   end: test_add_bignum_127b()]\r\n");
+    printf("================================================================================\n");
 
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_sub_bignum_127b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_127b");
+    _COND_DO_TEST_(keyin)
+    test_sub_bignum_127b();
+    printf("[test   end: test_sub_bignum_127b()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_add_bignum_256b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add_bignum_256b");
+    _COND_DO_TEST_(keyin)
+    test_add_bignum_256b();
+    printf("[test   end: test_add_bignum_256b()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_sub_bignum_256b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_256b");
+    _COND_DO_TEST_(keyin)
+    test_sub_bignum_256b();
+    printf("[test   end: test_sub_bignum_256b()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_bs()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_bs");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_bs();
+    printf("[test   end: test_mul_bignum_bs()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_add_bignum_loc()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add_bignum_loc");
+    _COND_DO_TEST_(keyin)
+    test_add_bignum_loc();
+    printf("[test   end: test_add_bignum_loc()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_bs_nn()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_bs_nn");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_bs_nn();
+    printf("[test   end: test_mul_bignum_bs_nn()]\r\n");
+    printf("================================================================================\n");
+
+    /******************************/
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_lsl1b_bignum()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_lsl1b_bignum");
+    _COND_DO_TEST_(keyin)
+    test_lsl1b_bignum();
+    printf("[test   end: test_lsl1b_bignum()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_ghash");
     _COND_DO_TEST_(keyin)
     test_ghash();
+    printf("================================================================================\n");
 #ifdef TEST_AES
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_aes");
     _COND_DO_TEST_(keyin)
     test_aes();
+    printf("================================================================================\n");
 #endif /* TEST_AES */
 
 #ifdef TEST_ENDIAN
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_endian");
     _COND_DO_TEST_(keyin)
     test_endian();
+    printf("================================================================================\n");
 #endif /* TEST_ENDIAN */
 
 #ifdef TEST_SHA
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_sha2");
     _COND_DO_TEST_(keyin)
     test_sha2();
+    printf("================================================================================\n");
 #endif /* TEST_SHA */
 
 #ifdef TEST_HMAC
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_FIPS_198_hamc256_imVal");
     _COND_DO_TEST_(keyin)
     test_FIPS_198_hamc256_imVal();
+    printf("================================================================================\n");
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_FIPS_198_hamc512_imVal");
     _COND_DO_TEST_(keyin)
     test_FIPS_198_hamc512_imVal();
+    printf("================================================================================\n");
 #endif /* TEST_HMAC */
 
 #ifdef TEST_CMAC
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_FIPS_198_hamc512_imVal");
     _COND_DO_TEST_(keyin)
     test_RFC4493_aes128_cmac();
+    printf("================================================================================\n");
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_SP800_38B_cmac_aes_imVal");
     _COND_DO_TEST_(keyin)
     test_SP800_38B_cmac_aes_imVal();
+    printf("================================================================================\n");
 #endif /* TEST_CMAC */
 }
 

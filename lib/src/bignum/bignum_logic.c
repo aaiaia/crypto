@@ -1,6 +1,6 @@
-#include "logic/logic_core.h"
+#include "bignum/bignum_logic.h"
 
-ReturnType sftL1b(bignum_s* d, bignum_t* o, bignum_t c)
+ReturnType lsl1b_bignum(bignum_s* d, bignum_t* o, bignum_t c)
 {
     if(d != NULL)
     {

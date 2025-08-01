@@ -1,8 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#define MACRO_test_print_ntype(p, title) {                              \
-    printf("ntype addr:0x%p, bignum_t size:%lu\r\n", (p), sizeof(bignum_t));  \
+#define MACRO_test_print_bignum(p, title) {                              \
+    printf("bignum addr:0x%p, bignum_t size:%lu\r\n", (p), sizeof(bignum_t));  \
     printf("[%s]\r\n", (title));                                        \
     for(size_t i = (p)->length- 1u; i != ((size_t)-1); i--) {           \
         printf("0x%08x", (p)->data[i]);                                 \

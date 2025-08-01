@@ -2,10 +2,10 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "arith/arith_core.h"
-#include "logic/logic_core.h"
+#include "bignum/bignum_math.h"
+#include "bignum/bignum_logic.h"
 
-bignum_t add_NTYPE(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
+bignum_t add_bignum(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
     for(size_t i=0ul; i<d->nlen; i++) {
         bignum_t _s0, _s1;
         _s0 = s0->nums[i] + c;
@@ -17,7 +17,7 @@ bignum_t add_NTYPE(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
     return c;
 }
 
-bignum_t sub_NTYPE(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
+bignum_t sub_bignum(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
     for(size_t i=0UL; i<d->nlen; i++) {
         bignum_t _s0, _s1;
         _s0 = s0->nums[i] - c;
@@ -44,7 +44,7 @@ bignum_t sub_NTYPE(bignum_s* d, bignum_s* s1, bignum_s* s0, bignum_t c) {
 // idea notes.
 // s0 accumulates then shift left
 // s1 checks inclease nums index and shift likes bit witth
-ReturnType mul_NTYPE_bs_ext(bignum_s* d, bignum_s* s1, bignum_s* s0, bool guard) {
+ReturnType mul_bignum_bs_ext(bignum_s* d, bignum_s* s1, bignum_s* s0, bool guard) {
     if((d != NULL) && (s1 != NULL) && (s0 != NULL)) {
         if((d->nlen) >= (s1->nlen + s0->nlen) || (!guard)) {
             bignum_s* tmp;
@@ -56,9 +56,9 @@ ReturnType mul_NTYPE_bs_ext(bignum_s* d, bignum_s* s1, bignum_s* s0, bool guard)
                 size_t sftBit = (nSftBit >= bignum_bits)?(bignum_bits):(nSftBit);
                 for(size_t sft = 0U; sft < sftBit; sft++) {
                     if(((s1->nums[i] >> sft) & 0x1U) != 0x0u) {
-                        add_NTYPE(d, d, tmp, 0U);
+                        add_bignum(d, d, tmp, 0U);
                     } else { /* Do nothing */}
-                    sftL1b(tmp, NULL, 0U);
+                    lsl1b_bignum(tmp, NULL, 0U);
                 }
                 nSftBit-=sftBit;
             }
@@ -79,7 +79,7 @@ ReturnType mul_NTYPE_bs_ext(bignum_s* d, bignum_s* s1, bignum_s* s0, bool guard)
     return E_OK;
 }
 
-bignum_t add_NTYPE_loc(bignum_s* d, bignum_t v, size_t loc) {
+bignum_t add_bignum_loc(bignum_s* d, bignum_t v, size_t loc) {
     bignum_t s;
     bignum_t c = v;
     for(size_t i = loc; i < d->nlen; i++) {
