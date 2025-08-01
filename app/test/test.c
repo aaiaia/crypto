@@ -3977,8 +3977,22 @@ void test_SP800_38B_cmac_aes_imVal(void)
 }
 #endif /* TEST_CMAC */
 
+#define _KEYIN_DO_TEST_(c, TEST_FUNC_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("run %s()(y/n)?: ", (TEST_FUNC_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+    } while(((c) != 'y' ) && ((c) != 'Y' ) && ((c) != 'n' ) && ((c) != 'N' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_(c)   if((c) == 'y')
+
 void test_sequence(void) {
+    char keyin = '\0';
     printf("[test start: test_macro()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_macro");
+    _COND_DO_TEST_(keyin)
     test_macro();
     printf("[test   end: test_macro()]\r\n");
 
@@ -3990,50 +4004,78 @@ void test_sequence(void) {
 
     /******************************/
     printf("[test start: test_arith_add()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_arith_add");
+    _COND_DO_TEST_(keyin)
     test_arith_add();
     printf("[test   end: test_arith_add()]\r\n");
 
     printf("[test start: test_arith_sub()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_arith_sub");
+    _COND_DO_TEST_(keyin)
     test_arith_sub();
     printf("[test   end: test_arith_sub()]\r\n");
 
     printf("[test start: test_arith_mul_u32_bs()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_arith_mul_u32_bs");
+    _COND_DO_TEST_(keyin)
     test_arith_mul_u32_bs();
     printf("[test   end: test_arith_mul_u32_bs()]\r\n");
 
     printf("[test start: test_arith_add_loc()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_arith_add_loc");
+    _COND_DO_TEST_(keyin)
     test_arith_add_loc();
     printf("[test   end: test_arith_add_loc()]\r\n");
 
     printf("[test start: test_arith_mul_u32_bs_nn()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_arith_mul_u32_bs_nn");
+    _COND_DO_TEST_(keyin)
     test_arith_mul_u32_bs_nn();
     printf("[test   end: test_arith_mul_u32_bs_nn()]\r\n");
 
     /******************************/
     printf("[test start: test_logic_shft()]\r\n");
-    printf("[test   end: test_logic_shft()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_logic_shft");
+    _COND_DO_TEST_(keyin)
     test_logic_shft();
+    printf("[test   end: test_logic_shft()]\r\n");
 
+    _KEYIN_DO_TEST_(keyin, "test_ghash");
+    _COND_DO_TEST_(keyin)
     test_ghash();
 #ifdef TEST_AES
+    _KEYIN_DO_TEST_(keyin, "test_aes");
+    _COND_DO_TEST_(keyin)
     test_aes();
 #endif /* TEST_AES */
 
 #ifdef TEST_ENDIAN
+    _KEYIN_DO_TEST_(keyin, "test_endian");
+    _COND_DO_TEST_(keyin)
     test_endian();
 #endif /* TEST_ENDIAN */
 
 #ifdef TEST_SHA
+    _KEYIN_DO_TEST_(keyin, "test_sha2");
+    _COND_DO_TEST_(keyin)
     test_sha2();
 #endif /* TEST_SHA */
 
 #ifdef TEST_HMAC
+    _KEYIN_DO_TEST_(keyin, "test_FIPS_198_hamc256_imVal");
+    _COND_DO_TEST_(keyin)
     test_FIPS_198_hamc256_imVal();
+    _KEYIN_DO_TEST_(keyin, "test_FIPS_198_hamc512_imVal");
+    _COND_DO_TEST_(keyin)
     test_FIPS_198_hamc512_imVal();
 #endif /* TEST_HMAC */
 
 #ifdef TEST_CMAC
+    _KEYIN_DO_TEST_(keyin, "test_FIPS_198_hamc512_imVal");
+    _COND_DO_TEST_(keyin)
     test_RFC4493_aes128_cmac();
+    _KEYIN_DO_TEST_(keyin, "test_SP800_38B_cmac_aes_imVal");
+    _COND_DO_TEST_(keyin)
     test_SP800_38B_cmac_aes_imVal();
 #endif /* TEST_CMAC */
 }
@@ -4062,13 +4104,18 @@ void test_u32_u64_mul_time(void) {
 }
 
 int main(int argc, char** argv) {
+    char keyin = '\0';
     printf("arg:%d, ",argc);
     for(unsigned int i=0; i<argc; i++) {
         printf("arg[%d]:%s, ", i, argv[i]);
     }
     printf("\r\n");
 
+    _KEYIN_DO_TEST_(keyin, "test_sequence");
+    _COND_DO_TEST_(keyin)
     test_sequence();
 
+    _KEYIN_DO_TEST_(keyin, "test_u32_u64_mul_time");
+    _COND_DO_TEST_(keyin)
     test_u32_u64_mul_time();
 }
