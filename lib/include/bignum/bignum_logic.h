@@ -7,6 +7,11 @@
 #include "common/returnType.h"
 #include "bignum/bignum.h"
 
+/* MSB: Most Significant Bit */
+size_t find_bignum_MSBL(const bignum_s* bignum);
+/* LSB: Least Significant Bit */
+size_t find_bignum_LSBL(const bignum_s* bignum);
+
 ReturnType lsl1b_bignum(bignum_s* d, bignum_t* o, bignum_t c);
 
 #endif/* BIGNUM_LOGIC_H */
