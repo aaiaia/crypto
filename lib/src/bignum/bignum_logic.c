@@ -74,24 +74,90 @@ size_t find_bignum_LSBL(const bignum_s* bignum)
 }
 #undef _XSB_MASK_
 
-ReturnType lsl1b_bignum(bignum_s* d, bignum_t* o, bignum_t c)
+ReturnType lslb_bignum(bignum_s* d, const size_t blen)
 {
     if(d != NULL)
     {
-        for(size_t i = 0U; i < d->nlen; i++)
-        {
-            bignum_t tmp = d->nums[i];
-            d->nums[i] = ((d->nums[i] << 1U) | c);
-            c = ((tmp >> (BIGNUM_BITS-1U)) != 0U)?(1U):(0U);
-        }
+        const size_t lml = BIGNUM_QUO_BITS(blen); // logical move left bitnum
+        const size_t lsl = BIGNUM_REM_BITS(blen); // logical shift left bits in bitnum
+        //const size_t lsr = BIGNUM_BITS - BIGNUM_REM_BITS(blen); // logical shift right bits to next bitnum
+        printf("blen=%lu,lml=%lu,lsl=%lu\n", blen, lml, lsl);
 
-        if(o != NULL)
+        if(d->nlen > lml)
         {
-            *o = c;
+            /* Not shift out condition */
+            if(lml != 0UL)
+            {
+                /* Move condition */
+                for(size_t dstIdx=d->nlen-1UL, srcIdx=d->nlen-1UL-lml; dstIdx>=lml; dstIdx--, srcIdx--)
+                {
+                    d->nums[dstIdx] = d->nums[srcIdx];
+                }
+                for(size_t clrIdx=0UL; clrIdx<lml; clrIdx++)
+                {
+                    d->nums[clrIdx] = 0x0UL;    // clear right side
+                }
+            }
+            else
+            {
+                /* Not move condition */
+            }
+
+            if(lsl != 0UL)
+            {
+                /* Shift condition */
+                return lslnb_bignum(d, NULL, 0U, lsl);
+            }
+            else
+            {
+                /* Not shift condition */
+            }
         }
         else
         {
-            /* Do nothing */
+            /* Shift out, set to all zero */
+            for(size_t idx=0UL; idx<d->nlen; idx++)
+            {
+                d->nums[idx] = 0x0UL;
+            }
+        }
+    }
+    else
+    {
+        return E_ERROR_NULL;
+    }
+
+    return E_OK;
+}
+
+ReturnType lslnb_bignum(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lslb)
+{
+    if(d != NULL)
+    {
+        if(BIGNUM_BITS > lslb)
+        {
+            const size_t lsrb = BIGNUM_BITS - lslb;
+            bignum_t c = ci;
+
+            for(size_t i = 0U; i < d->nlen; i++)
+            {
+                bignum_t tmp = d->nums[i];
+                d->nums[i] = ((d->nums[i] << lslb) | c);
+                c = (tmp >> lsrb);
+            }
+
+            if(co != NULL)
+            {
+                *co = c;
+            }
+            else
+            {
+                /* Do nothing */
+            }
+        }
+        else
+        {
+            return E_ERROR_ARGS;
         }
     }
     else

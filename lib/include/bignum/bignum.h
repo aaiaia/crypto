@@ -12,11 +12,15 @@ typedef uint64_t    bignum_t;
 #define BIGNUM_BITS 64U
 #define BIGNUM_SIZE 8U
 #define BIGNUM_IDX_BITS(idx)    U64L2BIT(idx)
+#define BIGNUM_QUO_BITS(bits)   QUOBITU64(bits)
+#define BIGNUM_REM_BITS(bits)   REMBITU64(bits)
 #elif(SET_BIGNUM_TYPE == 32)
 typedef uint32_t    bignum_t;
 #define BIGNUM_BITS 32U
 #define BIGNUM_SIZE 4U
 #define BIGNUM_IDX_BITS(idx)    U32L2BIT(idx)
+#define BIGNUM_QUO_BITS(bits)   QUOBITU32(bits)
+#define BIGNUM_REM_BITS(bits)   REMBITU32(bits)
 #else
 #error "NOT_IMPLEMENTS_YET"
 #endif

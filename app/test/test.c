@@ -1,6 +1,7 @@
 #include <time.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -67,16 +68,20 @@ static bool g_clkOvf;
     else            printf("Process Time(%s): clock tick overflow!!!\r\n", g_tTimeTitle);   \
 }
 
-void test_print_bignum(bignum_s* p, const char* title)
+#define test_print_bignum(p, title) test_print_bignum_ext(p, title, 0UL)
+void test_print_bignum_ext(bignum_s* p, const char* title, const size_t lfn)
 {
     printf("[%s]\r\n", title);
     printf("addr:0x%p, bignum_t size:%lu\r\n", p, sizeof(bignum_t));
     printf("p->nums:0x%p, p->lmsk:0x%x\r\np->bits=%ld, p->nlen=%ld, p->size=%ld\r\n", \
             p->nums, p->lmsk, p->bits, p->nlen, p->size);
+    printf("[HEX]\r\n");
     for(size_t i = p->nlen- 1u; i != ((size_t)-1); i--) {
-        printf("0x%08x", p->nums[i]);
-        if(i != 0u) printf(":");
-        else        printf("\r\n");
+        printf("%08x", p->nums[i]);
+        if(i != 0u)                 printf(" ");
+        else if((i & (lfn-1U) == lfn) & (lfn != 0U))
+                                    printf("\r\n");
+        else                        printf("\r\n");
     }
 }
 
@@ -1826,11 +1831,65 @@ void test_find_bignum_MSBL_LSBL(void)
     rmBitNum(&test_bignum);
 }
 
+#define TEST_LSLB_BIGNUM_BIT_LEN    1024
+#define TEST_LSLB_BIGNUM_NUM_LEN    32
+#define TEST_LSLB_BIGNUM_VECTOR1    0x00000001U
+void test_lslb_bignum(void)
+{
+    int test_cmp;
+    ReturnType fr;
+
+    bignum_s* test_refer;
+    bignum_s* test_sftb;
+
+    test_refer = mkBigNum(TEST_LSLB_BIGNUM_BIT_LEN);
+    test_sftb = mkBigNum(TEST_LSLB_BIGNUM_BIT_LEN);
+
+    printf("<Shift sequence rand>\r\n");
+    for(size_t lsl = 0UL; lsl < TEST_LSLB_BIGNUM_BIT_LEN; lsl++)
+    {
+        (void)memset(test_refer->nums, 0x0U, test_refer->size);
+        (void)memset(test_sftb->nums, 0x0U, test_sftb->size);
+
+        srand(time(NULL));
+        for(size_t rvg = 0UL; rvg < TEST_LSLB_BIGNUM_BIT_LEN; rvg++)
+        {
+            bignum_t rbit = (rand()&0x1);
+            // set reference
+            if(((lsl+rvg)>>5U) < (TEST_LSLB_BIGNUM_BIT_LEN>>5U))
+            {
+                test_refer->nums[((lsl+rvg)>>5U)] |= (rbit<<((lsl+rvg)&0x1F));
+            }
+
+            // set init vector
+            test_sftb->nums[(rvg>>5U)] |= (rbit<<(rvg&0x1F));
+        }
+
+        //test_print_bignum(test_sftb, "lslb(before)");
+        // run test function
+        printf("[lsl: %4lu]", lsl);
+        TICK_TIME_START("lslb_bignum");
+        if(fr = lslb_bignum(test_sftb, lsl)) {
+            TICK_TIME_END;
+            printf("lslb_bignum(test_sftb, %lu) = %d\r\n", lsl, fr);
+        } else {
+            TICK_TIME_END;
+        }
+
+        test_cmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
+        test_print_bignum(test_refer, "refer");
+        test_print_bignum(test_sftb, "lslb(after)");
+        printf("lslb_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+
+    rmBitNum(&test_refer);
+    rmBitNum(&test_sftb);
+}
 
 #define TEST_LSL1B_BIGNUM_BIT_LEN   1024U
 #define TEST_LSL1B_BIGNUM_REF       0x08108051U
 #define TEST_LSL1B_BIGNUM_VAL       0x84084028U
-
 void test_lsl1b_bignum(void)
 {
     int test_cmp;
@@ -4666,6 +4725,14 @@ void test_sequence(void) {
     _COND_DO_TEST_(keyin)
     test_find_bignum_MSBL_LSBL();
     printf("[test   end: test_find_bignum_MSBL_LSBL()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_lslb_bignum()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_lslb_bignum");
+    _COND_DO_TEST_(keyin)
+    test_lslb_bignum();
+    printf("[test   end: test_lslb_bignum()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
