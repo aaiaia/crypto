@@ -13,12 +13,17 @@ size_t find_bignum_MSBL(const bignum_s* bignum);
 size_t find_bignum_LSBL(const bignum_s* bignum);
 
 ReturnType lslb_bignum(bignum_s* d, const size_t blen);
-ReturnType rslb_bignum(bignum_s* d, const size_t blen);
+ReturnType lsrb_bignum(bignum_s* d, const size_t blen);
 
-ReturnType lslnb_bignum(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t blen);
+ReturnType lslnb_bignum(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lslb);
 static inline ReturnType lsl1b_bignum(bignum_s* d, bignum_t* co, const bignum_t ci)
 {
     return lslnb_bignum(d, co, ci, 1UL);
+}
+ReturnType lsrnb_bignum(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lsrb);
+static inline ReturnType lsr1b_bignum(bignum_s* d, bignum_t* co, const bignum_t ci)
+{
+    return lsrnb_bignum(d, co, ci, 1UL);
 }
 
 #endif/* BIGNUM_LOGIC_H */
