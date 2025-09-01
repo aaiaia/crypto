@@ -7,6 +7,14 @@
 #include "common/returnType.h"
 #include "bignum/bignum.h"
 
+/* ab: All bits */
+ReturnType inv_bignum(bignum_s* n);
+ReturnType set_bignum(bignum_s* n);
+ReturnType clr_bignum(bignum_s* n);
+
+ReturnType set1b_bignum(bignum_s* n, const size_t bloc);
+ReturnType clr1b_bignum(bignum_s* n, const size_t bloc);
+
 /* MSB: Most Significant Bit */
 size_t find_bignum_MSBL(const bignum_s* bignum);
 /* LSB: Least Significant Bit */

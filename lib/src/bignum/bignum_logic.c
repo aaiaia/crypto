@@ -4,6 +4,79 @@
 
 #include "bignum/bignum_logic.h"
 
+ReturnType inv_bignum(bignum_s* n)
+{
+    if(n != NULL)
+    {
+        for(size_t i = 0UL; i < n->nlen; i++)
+        {
+            n->nums[i] = ~n->nums[i];
+        }
+    }
+    else
+    {
+        return E_ERROR_NULL;
+    }
+    return E_OK;
+}
+
+ReturnType set_bignum(bignum_s* n)
+{
+    if(n != NULL)
+    {
+        for(size_t i = 0UL; i < n->nlen; i++)
+        {
+            n->nums[i] = BIGNUM_MAX;
+        }
+    }
+    else
+    {
+        return E_ERROR_NULL;
+    }
+    return E_OK;
+}
+
+ReturnType clr_bignum(bignum_s* n)
+{
+    if(n != NULL)
+    {
+        for(size_t i = 0UL; i < n->nlen; i++)
+        {
+            n->nums[i] = 0U;
+        }
+    }
+    else
+    {
+        return E_ERROR_NULL;
+    }
+    return E_OK;
+}
+
+ReturnType set1b_bignum(bignum_s* n, const size_t bloc)
+{
+    const size_t widx = BIGNUM_BITS_IDX(bloc);
+    const bignum_t bitMask = ( (1U<<BIGNUM_BITS_REM(bloc)));
+
+    if(n == NULL)       return E_ERROR_NULL;
+    if(n->nlen <= widx) return E_ERROR_ARGS;
+
+    n->nums[widx] |= bitMask;
+
+    return E_OK;
+}
+ReturnType clr1b_bignum(bignum_s* n, const size_t bloc)
+{
+    const size_t widx = BIGNUM_BITS_IDX(bloc);
+    const bignum_t bitMask = (~(1U<<BIGNUM_BITS_REM(bloc)));
+
+    if(n == NULL)       return E_ERROR_NULL;
+    if(n->nlen <= widx) return E_ERROR_ARGS;
+
+    n->nums[widx] &= bitMask;
+
+    return E_OK;
+}
+
 #define _XSB_MASK_(VAL)  ((VAL)&1U)
 /* MSB: Most Significant Bit */
 size_t find_bignum_MSBL(const bignum_s* bignum)
@@ -12,22 +85,22 @@ size_t find_bignum_MSBL(const bignum_s* bignum)
     size_t msblw = SIZE_MAX; // Most Significant Bit Location at word(not 1'b0)
     size_t msbln = SIZE_MAX; // Most Significant Bit Location at bignum(return value)
 
-    for(size_t i = bignum->nlen; i > 0UL ; i--)
+    for(size_t i = (bignum->nlen - 1UL); i < SIZE_MAX; i--)
     {
-        if(bignum->nums[i - 1UL] != 0x0UL)
+        if(bignum->nums[i] != 0x0UL)
         {
-            wdidx = i - 1UL;
+            wdidx = i;
             break;
         }
     }
 
     if(wdidx != SIZE_MAX)
     {
-        for(bignum_t l = BIGNUM_BITS; l > 0U; l--)
+        for(bignum_t l = (BIGNUM_BITS - 1UL); l < BIGNUM_MAX; l--)
         {
-            if(_XSB_MASK_(bignum->nums[wdidx] >> (l - 1U)) == 0x1U)
+            if(_XSB_MASK_(bignum->nums[wdidx] >> l) == 0x1U)
             {
-                msblw = (l - 1U);
+                msblw = l;
                 break;
             }
         }
@@ -35,12 +108,13 @@ size_t find_bignum_MSBL(const bignum_s* bignum)
 
     if(msblw != SIZE_MAX)
     {
-        msbln = BIGNUM_IDX_BITS(wdidx) + msblw;
+        msbln = BIGNUM_LEN_BITS(wdidx) + msblw;
     }
 
     return msbln;
 }
 
+#include <stdio.h>
 /* LSB: Least Significant Bit */
 size_t find_bignum_LSBL(const bignum_s* bignum)
 {
@@ -71,7 +145,7 @@ size_t find_bignum_LSBL(const bignum_s* bignum)
 
     if(lsblw != SIZE_MAX)
     {
-        lsbln = BIGNUM_IDX_BITS(wdidx) + lsblw;
+        lsbln = BIGNUM_LEN_BITS(wdidx) + lsblw;
     }
 
     return lsbln;
@@ -82,8 +156,8 @@ ReturnType lslb_bignum(bignum_s* d, const size_t blen)
 {
     if(d != NULL)
     {
-        const size_t lml = BIGNUM_QUO_BITS(blen); // logical move left bitnum
-        const size_t lsl = BIGNUM_REM_BITS(blen); // logical shift left bits in bitnum
+        const size_t lml = BIGNUM_BITS_IDX(blen); // logical move left bitnum
+        const size_t lsl = BIGNUM_BITS_REM(blen); // logical shift left bits in bitnum
 #ifdef DEBUG
         printf("blen=%lu,lml=%lu,lsl=%lu\n", blen, lml, lsl);
 #endif /* DEBUG */
@@ -141,8 +215,8 @@ ReturnType lsrb_bignum(bignum_s* d, const size_t blen)
 {
     if(d != NULL)
     {
-        const size_t lmr = BIGNUM_QUO_BITS(blen); // logical move right bitnum
-        const size_t lsr = BIGNUM_REM_BITS(blen); // logical shift right bits in bitnum
+        const size_t lmr = BIGNUM_BITS_IDX(blen); // logical move right bitnum
+        const size_t lsr = BIGNUM_BITS_REM(blen); // logical shift right bits in bitnum
 #ifdef DEBUG
         printf("blen=%lu,lmr=%lu,lsr=%lu\n", blen, lmr, lsr);
 #endif /* DEBUG */
