@@ -5,12 +5,30 @@
 #include "bignum/bignum_math.h"
 #include "bignum/bignum_logic.h"
 
-ReturnType cpy_bignum_math(bignum_s* d, const bignum_s* s) {
+ReturnType cpy_bignum_math_ext(bignum_s* d, const bignum_s* s, const bool ignore_type) {
     if((d != NULL) && (s != NULL)) {
         if((d->nums != NULL) && (s->nums != NULL)) {
             bignum_t signBit;
-            if(s->nums[s->nlen-1U]&BIGNUM_MSB_MASK) signBit = BIGNUM_MAX;
-            else                                    signBit = 0U;
+            if(d->type == BIGNUM_TYPE_SIGNED) {
+                if((d->type == s->type) || (ignore_type)) {
+                    if(s->nums[s->nlen-1U]&BIGNUM_MSB_MASK) signBit = BIGNUM_MAX;
+                    else                                    signBit = 0U;
+                } else {
+                    /* is not BIGNUM_TYPE_SIGNED */
+                    return E_ERROR_BIGNUM_SIGN;
+                }
+            }
+            else if(d->type == BIGNUM_TYPE_UNSIGNED) {
+                if((d->type == s->type) || (ignore_type)) {
+                    signBit = 0U;
+                } else {
+                    /*  is not BIGNUM_TYPE_UNSIGNED */
+                    return E_ERROR_BIGNUM_SIGN;
+                }
+            }
+            else {
+                    return E_ERROR_BIGNUM_SIGN;
+            }
 
             if(d->nlen >= s->nlen) {
                 for(size_t i = s->nlen; i < d->nlen; i++)
@@ -24,7 +42,7 @@ ReturnType cpy_bignum_math(bignum_s* d, const bignum_s* s) {
             } else {
                 for(size_t i = s->nlen - 1U; i >= d->nlen; i--)
                 {
-                    if(s->nums[i] != signBit)   return E_ERROR_ARGS;
+                    if(s->nums[i] != signBit)   return E_ERROR_BIGNUM_LOSS;
                 }
                 for(size_t i = d->nlen - 1U; i < SIZE_MAX; i--)
                 {
@@ -60,6 +78,8 @@ ReturnType twos_bignum(bignum_s* d, const bignum_s* s)
 ReturnType abs_bignum(bignum_s* d, const bignum_s* s)
 {
     if((d == NULL) || (s == NULL))  return E_ERROR_NULL;
+    if((d->type != BIGNUM_TYPE_SIGNED) || (s->type != BIGNUM_TYPE_SIGNED))
+                                    return E_ERROR_BIGNUM_SIGN;
 
     if(s->nums[s->nlen-1Ul]&BIGNUM_MSB_MASK) // negative
     {
@@ -106,14 +126,14 @@ bignum_cmp_e cmp0_bignum(const bignum_s* s) {
  *  0: s0 == s1
  * -1: s0  < s1
  */
-bignum_cmp_e NOT_IMPLEMENT_cmp_bignum_with_sub(const bignum_s* s0, const bignum_s* s1) {
+bignum_cmp_e cmp_bignum_with_sub_add_twos(const bignum_s* s0, const bignum_s* s1) {
     bignum_cmp_e cmp = BIGNUM_CMP_ER;
     bignum_s* tmp;    // 2's compliment...?...
                         //
-    if(s0->bits > s1->bits) tmp = mkBigNum(s0->bits);
-    else                    tmp = mkBigNum(s1->bits);
+    if(s0->bits > s1->bits) tmp = mkBigNum_ext(s0->bits, s0->type);
+    else                    tmp = mkBigNum_ext(s1->bits, s1->type);
 
-    if(sub_bignum(NULL, tmp, s0, s1, 0U) == E_OK)
+    if(sub_bignum_with_add_twos(NULL, tmp, s0, s1, 0U) == E_OK)
     {
         bignum_sign_e zero = cmp0_bignum(tmp);
         bignum_sign_e sign = sign_bignum(tmp);
@@ -166,6 +186,20 @@ bignum_cmp_e cmp_bignum_logical(const bignum_s* s0, const bignum_s* s1) {
     else                                    return BIGNUM_CMP_ER; /* Unreachable */
 }
 
+static inline bignum_t getMSB_fill(const bignum_s* s, const bool sub_signed_twos) {
+    if(s->type == BIGNUM_TYPE_SIGNED) {
+            if( ((s->nums[(s->nlen-1U)]))&BIGNUM_MSB_MASK) {
+                if(!sub_signed_twos)    return BIGNUM_MAX;
+                else                    return 0U;
+            } else {
+                if(!sub_signed_twos)    return 0U;
+                else                    return BIGNUM_MAX;
+            }
+    } else {
+                                        return 0U;
+    }
+}
+
 /* Return carry out, it can be only FALSE / TRUE, the others are error */
 ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci) {
     if(!((d != NULL) && (s0 != NULL) && (s1 != NULL)))
@@ -178,32 +212,32 @@ ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignu
         bignum_t _c = ci;
 
         /* just Consider Condition(d->nlen == s1->nlen == s0->nlen) */
-        const bignum_t _ms0_ = ((s0->nums[(s0->nlen-1U)]&BIGNUM_MSB_MASK)?BIGNUM_MAX:0U);  // _msN_: magnitude sN
-        const bignum_t _ms1_ = ((s1->nums[(s1->nlen-1U)]&BIGNUM_MSB_MASK)?BIGNUM_MAX:0U);  // _msN_: magnitude sN
+        const bignum_t _bf0_ = getMSB_fill(s0, false);  // _bfN_: bit fill sN
+        const bignum_t _bf1_ = getMSB_fill(s1, false);  // _bfN_: bit fill sN
+
         for(size_t i=0ul; i<d->nlen; i++) {
             bignum_t _ts0_, _ss0_;   // _tsN_: temp sN, _ssN_: selecte sN
             bignum_t _ts1_, _ss1_;
 
             if(i < s0->nlen)    _ss0_ = s0->nums[i];
-            else                _ss0_ = _ms0_;
+            else                _ss0_ = _bf0_;
             _ts0_ = _ss0_ + _c;
             _c = (_ts0_ < _ss0_);
 
             if(i < s1->nlen)    _ss1_ = s1->nums[i];
-            else                _ss1_ = _ms1_;
+            else                _ss1_ = _bf1_;
             _ts1_ = _ts0_ + _ss1_;
             _c |= (_ts1_ < _ts0_);
             d->nums[i] = _ts1_;
         }
 
         if(co != NULL)  (*co) = _c;
-
     }
     return E_OK;
 }
 
 /* Return carry out, it can be only FALSE / TRUE, the others are error */
-ReturnType sub_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t c) {
+ReturnType sub_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci) {
     if(!((d != NULL) && (s0 != NULL) && (s1 != NULL)))
         return E_ERROR_NULL;
 
@@ -211,23 +245,59 @@ ReturnType sub_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignu
         return E_ERROR_ARGS;
 
     {
-        bignum_t _c = c;
+        bignum_t _c = ci;
 
-        const bignum_t _ms0_ = ((s0->nums[(s0->nlen-1U)]&BIGNUM_MSB_MASK)?BIGNUM_MAX:0U);  // _msN_: magnitude sN
-        const bignum_t _ms1_ = ((s1->nums[(s1->nlen-1U)]&BIGNUM_MSB_MASK)?BIGNUM_MAX:0U);  // _msN_: magnitude sN
+        const bignum_t _bf0_ = getMSB_fill(s0, false);  // _bfN_: bit fill sN
+        const bignum_t _bf1_ = getMSB_fill(s1, false);  // _bfN_: bit fill sN
+
         for(size_t i=0UL; i<d->nlen; i++) {
             bignum_t _ts0_, _ss0_;
             bignum_t _ts1_, _ss1_;
 
             if(i < s0->nlen)    _ss0_ = s0->nums[i];
-            else                _ss0_ = _ms0_;
+            else                _ss0_ = _bf0_;
             _ts0_ = _ss0_ - _c;
             _c = (_ts0_ > _ss0_);
 
             if(i < s1->nlen)    _ss1_ = s1->nums[i];
-            else                _ss1_ = _ms1_;
+            else                _ss1_ = _bf1_;
             _ts1_ = _ts0_ - _ss1_;
             _c |= (_ts1_ > _ts0_);
+            d->nums[i] = _ts1_;
+        }
+
+        if(co != NULL)  (*co) = _c;
+    }
+    return E_OK;
+}
+
+ReturnType sub_bignum_with_add_twos(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci) {
+    if(!((d != NULL) && (s0 != NULL) && (s1 != NULL)))
+        return E_ERROR_NULL;
+
+    if(!((d->nlen >= s0->nlen) && (d->nlen >= s1->nlen)))
+        return E_ERROR_ARGS;
+
+    {
+        bignum_t _c = ci + 1U;  // 2's compliment
+
+        /* just Consider Condition(d->nlen == s1->nlen == s0->nlen) */
+        const bignum_t _bf0_ = getMSB_fill(s0, false);  // _bfN_: bit fill sN
+        const bignum_t _bf1_ = getMSB_fill(s1, true);   // _bfN_: bit fill sN
+
+        for(size_t i=0ul; i<d->nlen; i++) {
+            bignum_t _ts0_, _ss0_;   // _tsN_: temp sN, _ssN_: selecte sN
+            bignum_t _ts1_, _ss1_;
+
+            if(i < s0->nlen)    _ss0_ = ( (s0->nums[i]));
+            else                _ss0_ = _bf0_;
+            _ts0_ = _ss0_ + _c;
+            _c = (_ts0_ < _ss0_);
+
+            if(i < s1->nlen)    _ss1_ = (~(s1->nums[i]));
+            else                _ss1_ = _bf1_;
+            _ts1_ = _ts0_ + _ss1_;
+            _c |= (_ts1_ < _ts0_);
             d->nums[i] = _ts1_;
         }
 

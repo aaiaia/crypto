@@ -7,6 +7,8 @@ typedef enum {
     E_ERROR_NULL,
     E_ERROR_RUNTIME,
     E_ERROR_DIVIDE_ZERO,
+    E_ERROR_BIGNUM_SIGN,
+    E_ERROR_BIGNUM_LOSS,
     E_NOT_IMPL,
 } ReturnType;
 

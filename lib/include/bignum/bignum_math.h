@@ -23,19 +23,27 @@ typedef enum {
     BIGNUM_SIGN_ERR,// ERRor
 } bignum_sign_e;
 
-ReturnType cpy_bignum_math(bignum_s* dst, const bignum_s* s);
+ReturnType cpy_bignum_math_ext(bignum_s* d, const bignum_s* s, const bool force);
+static inline ReturnType cpy_bignum_math(bignum_s* d, const bignum_s* s)
+{
+    return cpy_bignum_math_ext(d, s, false);
+}
 
 ReturnType twos_bignum(bignum_s* d, const bignum_s* s);
 ReturnType abs_bignum(bignum_s* d, const bignum_s* s);
 bignum_sign_e sign_bignum(const bignum_s* s);
 bignum_sign_e NOT_IMPLEMENT_signbit_bignum(const bignum_s* s, const size_t msbl, const bignum_sign_e sign);
 bignum_cmp_e cmp0_bignum(const bignum_s* s);
-bignum_cmp_e NOT_IMPLEMENT_cmp_bignum_with_sub(const bignum_s* s0, const bignum_s* s1);
+bignum_cmp_e cmp_bignum_with_sub_add_twos(const bignum_s* s0, const bignum_s* s1);
 bignum_cmp_e cmp_bignum_logical(const bignum_s* s0, const bignum_s* s1);
 ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 ReturnType sub_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
-#define mul_bignum_bs(d, s1, s0)    mul_bignum_bs_ext(d, s1, s0, true)
+ReturnType sub_bignum_with_add_twos(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 ReturnType mul_bignum_bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
+static inline ReturnType mul_bignum_bs(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    return mul_bignum_bs_ext(d, s1, s0, true);
+}
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
 ReturnType div_bignum_with_mod_ext(bignum_t* q, bignum_t* r, const bignum_s* n, const bignum_s* d, const bool guard);
 

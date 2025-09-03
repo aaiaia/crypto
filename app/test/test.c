@@ -48,7 +48,7 @@ void _memChk(void) {
     printf("mem : %ld %ld %ld\n", info.totalram, info.totalram-info.freeram, info.freeram);
 }
 
-static char* g_tTimeTitle;
+static const char* g_tTimeTitle;
 static clock_t g_tic, g_toc;
 static double g_pTime;
 static bool g_clkOvf;
@@ -927,7 +927,7 @@ void test_bignum(void)
 #undef _CMP_TRUE_
 }
 
-void test_cpy_bignum_math(void)
+void test_cpy_bignum_math_signed(void)
 {
 #define TEST_BIGNUM_L_BIT   128U
 #define TEST_BIGNUM_S_BIT   64U
@@ -935,18 +935,22 @@ void test_cpy_bignum_math(void)
     int test_cmp_fail;
 
     ReturnType fr;
-    bignum_s* test_bignum_l;
-    bignum_s* test_bignum_s;
+    bignum_s* test_bignum_r;    // reference
+    bignum_s* test_bignum_l;    // long
+    bignum_s* test_bignum_s;    // short
 
-    test_bignum_l = mkBigNum(TEST_BIGNUM_L_BIT);
-    test_bignum_s = mkBigNum(TEST_BIGNUM_S_BIT);
+    test_bignum_r = mkBigNum_signed(TEST_BIGNUM_L_BIT);
+    test_bignum_l = mkBigNum_signed(TEST_BIGNUM_L_BIT);
+    test_bignum_s = mkBigNum_signed(TEST_BIGNUM_S_BIT);
 
     /* Copy bignum Short to Long, Positive */
     {
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x00000000;
+        test_bignum_r->nums[3] = 0x00000000;
+        memcpy(test_bignum_s->nums, test_bignum_r->nums, test_bignum_s->size);
         memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
-        //memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_s->nums[0] = 0xA8ABCDEF;
-        test_bignum_s->nums[1] = 0x70275bCE;
 
         TICK_TIME_START("cpy_bignum_math(long, short)");
         if(fr = cpy_bignum_math(test_bignum_l, test_bignum_s)) {
@@ -957,16 +961,18 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_s, "short");
         test_print_bignum(test_bignum_l, "long");
 
-        test_cmp = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp = memcmp(test_bignum_r->nums, test_bignum_l->nums, (test_bignum_l->size));
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
     /* Copy bignum Short to Long, Negative */
     {
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0xFFFFFFFF;
+        test_bignum_r->nums[3] = 0xFFFFFFFF;
+        memcpy(test_bignum_s->nums, test_bignum_r->nums, test_bignum_s->size);
         memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
-        //memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_s->nums[0] = 0x9B25814B;
-        test_bignum_s->nums[1] = 0xA8CFD59C;
 
         TICK_TIME_START("cpy_bignum_math(long, short)");
         if(fr = cpy_bignum_math(test_bignum_l, test_bignum_s)) {
@@ -977,19 +983,19 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_s, "short");
         test_print_bignum(test_bignum_l, "long");
 
-        test_cmp = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp = memcmp(test_bignum_r->nums, test_bignum_l->nums, (test_bignum_l->size));
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
     /* Copy bignum Long to Short, Positive */
     {
-        //memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x00000000;
+        test_bignum_r->nums[3] = 0x00000000;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
         memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_l->nums[0] = 0xA8ABCDEF;
-        test_bignum_l->nums[1] = 0x70275bCE;
-        test_bignum_l->nums[2] = 0x00000000;
-        test_bignum_l->nums[3] = 0x00000000;
 
         TICK_TIME_START("cpy_bignum_math(short, long)");
         if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
@@ -1000,18 +1006,18 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_l, "long");
         test_print_bignum(test_bignum_s, "short");
 
-        test_cmp = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp = memcmp(test_bignum_r->nums, test_bignum_l->nums, (test_bignum_l->size));
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
     /* Copy bignum Long to Short, Negative */
     {
-        //memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0xFFFFFFFF;
+        test_bignum_r->nums[3] = 0xFFFFFFFF;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
         memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_l->nums[0] = 0x9B25814B;
-        test_bignum_l->nums[1] = 0xA8CFD59C;
-        test_bignum_l->nums[2] = 0xFFFFFFFF;
-        test_bignum_l->nums[3] = 0xFFFFFFFF;
 
         TICK_TIME_START("cpy_bignum_math(short, long)");
         if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
@@ -1022,7 +1028,7 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_l, "long");
         test_print_bignum(test_bignum_s, "short");
 
-        test_cmp = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp = memcmp(test_bignum_r->nums, test_bignum_l->nums, (test_bignum_l->size));
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
@@ -1030,12 +1036,12 @@ void test_cpy_bignum_math(void)
     /* FAIL CASE */
     /* Copy bignum Long to Short, Positive */
     {
-        //memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x783BC0A0;
+        test_bignum_r->nums[3] = 0x00000000;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
         memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_l->nums[0] = 0xA8ABCDEF;
-        test_bignum_l->nums[1] = 0x70275bCE;
-        test_bignum_l->nums[2] = 0x783BC0A0;
-        test_bignum_l->nums[3] = 0x00000000;
 
         TICK_TIME_START("cpy_bignum_math(short, long)");
         if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
@@ -1046,7 +1052,7 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_l, "long");
         test_print_bignum(test_bignum_s, "short");
 
-        test_cmp_fail = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
         printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp_fail != 0);
@@ -1054,12 +1060,12 @@ void test_cpy_bignum_math(void)
     /* FAIL CASE */
     /* Copy bignum Long to Short, Positive */
     {
-        //memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x00000000;
+        test_bignum_r->nums[3] = 0x783BC0A0;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
         memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_l->nums[0] = 0xA8ABCDEF;
-        test_bignum_l->nums[1] = 0x70275bCE;
-        test_bignum_l->nums[2] = 0x00000000;
-        test_bignum_l->nums[3] = 0x783BC0A0;
 
         TICK_TIME_START("cpy_bignum_math(short, long)");
         if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
@@ -1070,7 +1076,7 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_l, "long");
         test_print_bignum(test_bignum_s, "short");
 
-        test_cmp_fail = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
         printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp_fail != 0);
@@ -1078,12 +1084,12 @@ void test_cpy_bignum_math(void)
     /* FAIL CASE */
     /* Copy bignum Long to Short, Negative */
     {
-        //memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0x7FFFFFFF;
+        test_bignum_r->nums[3] = 0xFFFFFFFF;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
         memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_l->nums[0] = 0x9B25814B;
-        test_bignum_l->nums[1] = 0xA8CFD59C;
-        test_bignum_l->nums[2] = 0x7FFFFFFF;
-        test_bignum_l->nums[3] = 0xFFFFFFFF;
 
         TICK_TIME_START("cpy_bignum_math(short, long)");
         if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
@@ -1094,7 +1100,7 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_l, "long");
         test_print_bignum(test_bignum_s, "short");
 
-        test_cmp_fail = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
         printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp_fail != 0);
@@ -1102,12 +1108,12 @@ void test_cpy_bignum_math(void)
     /* FAIL CASE */
     /* Copy bignum Long to Short, Negative */
     {
-        //memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0xFFFFFFFF;
+        test_bignum_r->nums[3] = 0x7FFFFFFF;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
         memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
-        test_bignum_l->nums[0] = 0x9B25814B;
-        test_bignum_l->nums[1] = 0xA8CFD59C;
-        test_bignum_l->nums[2] = 0xFFFFFFFF;
-        test_bignum_l->nums[3] = 0x7FFFFFFF;
 
         TICK_TIME_START("cpy_bignum_math(short, long)");
         if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
@@ -1118,7 +1124,218 @@ void test_cpy_bignum_math(void)
         test_print_bignum(test_bignum_l, "long");
         test_print_bignum(test_bignum_s, "short");
 
-        test_cmp_fail = memcmp(test_bignum_s->nums, test_bignum_l->nums, (test_bignum_s->size));
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
+        printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp_fail != 0);
+    }
+
+    rmBitNum(&test_bignum_l);
+    rmBitNum(&test_bignum_s);
+#undef TEST_BIGNUM_L_BIT
+#undef TEST_BIGNUM_S_BIT
+}
+
+void test_cpy_bignum_math_unsigned(void)
+{
+#define TEST_BIGNUM_L_BIT   128U
+#define TEST_BIGNUM_S_BIT   64U
+    int test_cmp;
+    int test_cmp_fail;
+
+    ReturnType fr;
+    bignum_s* test_bignum_r;    // reference
+    bignum_s* test_bignum_l;    // long
+    bignum_s* test_bignum_s;    // short
+
+    test_bignum_r = mkBigNum_unsigned(TEST_BIGNUM_L_BIT);
+    test_bignum_l = mkBigNum_unsigned(TEST_BIGNUM_L_BIT);
+    test_bignum_s = mkBigNum_unsigned(TEST_BIGNUM_S_BIT);
+
+    /* Copy bignum Short to Long */
+    {
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x00000000;
+        test_bignum_r->nums[3] = 0x00000000;
+        memcpy(test_bignum_s->nums, test_bignum_r->nums, test_bignum_s->size);
+        memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+
+        TICK_TIME_START("cpy_bignum_math(long, short)");
+        if(fr = cpy_bignum_math(test_bignum_l, test_bignum_s)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_s, "short");
+        test_print_bignum(test_bignum_l, "long");
+
+        test_cmp = memcmp(test_bignum_r->nums, test_bignum_l->nums, (test_bignum_l->size));
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+    /* Copy bignum Short to Long */
+    {
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0x00000000;
+        test_bignum_r->nums[3] = 0x00000000;
+        memcpy(test_bignum_s->nums, test_bignum_r->nums, test_bignum_s->size);
+        memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
+
+        TICK_TIME_START("cpy_bignum_math(long, short)");
+        if(fr = cpy_bignum_math(test_bignum_l, test_bignum_s)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_s, "short");
+        test_print_bignum(test_bignum_l, "long");
+
+        test_cmp = memcmp(test_bignum_r->nums, test_bignum_l->nums, (test_bignum_l->size));
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+
+    /* Copy bignum Long to Short */
+    {
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x00000000;
+        test_bignum_r->nums[3] = 0x00000000;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
+        memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
+
+        TICK_TIME_START("cpy_bignum_math(short, long)");
+        if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_l, "long");
+        test_print_bignum(test_bignum_s, "short");
+
+        test_cmp = memcmp(test_bignum_r->nums, test_bignum_l->nums, (test_bignum_l->size));
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+    /* FAIL CASE */
+    /* Copy bignum Long to Short */
+    {
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0xFFFFFFFF;
+        test_bignum_r->nums[3] = 0xFFFFFFFF;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
+        memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
+
+        TICK_TIME_START("cpy_bignum_math(short, long)");
+        if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_l, "long");
+        test_print_bignum(test_bignum_s, "short");
+
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
+        printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp_fail != 0);
+    }
+
+    /* FAIL CASE */
+    /* Copy bignum Long to Short */
+    {
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x783BC0A0;
+        test_bignum_r->nums[3] = 0x00000000;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
+        memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
+
+        TICK_TIME_START("cpy_bignum_math(short, long)");
+        if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_l, "long");
+        test_print_bignum(test_bignum_s, "short");
+
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
+        printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp_fail != 0);
+    }
+    /* FAIL CASE */
+    /* Copy bignum Long to Short */
+    {
+        test_bignum_r->nums[0] = 0xA8ABCDEF;
+        test_bignum_r->nums[1] = 0x70275bCE;
+        test_bignum_r->nums[2] = 0x00000000;
+        test_bignum_r->nums[3] = 0x783BC0A0;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
+        memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
+
+        TICK_TIME_START("cpy_bignum_math(short, long)");
+        if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_l, "long");
+        test_print_bignum(test_bignum_s, "short");
+
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
+        printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp_fail != 0);
+    }
+    /* FAIL CASE */
+    /* Copy bignum Long to Short */
+    {
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0x7FFFFFFF;
+        test_bignum_r->nums[3] = 0xFFFFFFFF;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
+        memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
+
+        TICK_TIME_START("cpy_bignum_math(short, long)");
+        if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_l, "long");
+        test_print_bignum(test_bignum_s, "short");
+
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
+        printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
+        printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp_fail != 0);
+    }
+    /* FAIL CASE */
+    /* Copy bignum Long to Short */
+    {
+        test_bignum_r->nums[0] = 0x9B25814B;
+        test_bignum_r->nums[1] = 0xA8CFD59C;
+        test_bignum_r->nums[2] = 0xFFFFFFFF;
+        test_bignum_r->nums[3] = 0x7FFFFFFF;
+        memcpy(test_bignum_l->nums, test_bignum_r->nums, test_bignum_l->size);
+        memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
+
+        TICK_TIME_START("cpy_bignum_math(short, long)");
+        if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+
+        test_print_bignum(test_bignum_l, "long");
+        test_print_bignum(test_bignum_s, "short");
+
+        test_cmp_fail = memcmp(test_bignum_r->nums, test_bignum_s->nums, (test_bignum_s->size));
         printf("%sFAIL CASE%s: ", ANSI_COLOR_MAGENTA, ANSI_COLOR_RESET);
         printf("cpy_bignum_math() is %s\r\n", ((test_cmp_fail != 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp_fail != 0);
@@ -1316,7 +1533,7 @@ void test_twos_bignum_256b(void)
 #undef TEST_BIGNUM_TWOS_BIT
 }
 
-void test_abs_bignum_256b(void)
+void test_abs_bignum_signed_256b(void)
 {
 #define TEST_BIGNUM_ABS_BIT  256U // 32Bytes, 32bits 8ea
     int test_cmp;
@@ -1326,9 +1543,9 @@ void test_abs_bignum_256b(void)
     bignum_s* test_dst;
     bignum_s* test_opA;
 
-    test_ref = mkBigNum(TEST_BIGNUM_ABS_BIT);
-    test_dst = mkBigNum(TEST_BIGNUM_ABS_BIT);
-    test_opA = mkBigNum(TEST_BIGNUM_ABS_BIT);
+    test_ref = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
+    test_dst = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
+    test_opA = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
 
     /* absolute test, 1 -> 1 */
     {
@@ -1575,7 +1792,7 @@ void test_sign_bignum_256b(void)
         test_bignum->nums[test_bignum->nlen-1U] = BIGNUM_MAX;
         test_sign_ref = BIGNUM_SIGN_NEG;
 
-        TICK_TIME_START("sign_bignum, unsigned int, significant bit is 1'b1");
+        TICK_TIME_START("sign_bignum, signed int, significant bit is 1'b1");
         test_sign = sign_bignum(test_bignum);
         TICK_TIME_END;
         test_print_bignum(test_bignum, "bignum");
@@ -1674,8 +1891,27 @@ void test_cmp0_bignum_256b(void)
 #undef TEST_BIGNUM_CMP0_BIT
 }
 
+/*
+ * int32_t, INT32_MAX, INT32_MIN
+ * (INT32_MAX/2)-2 - (INT32_MIN/2)+3 : 0x7ffffffa
+ * (INT32_MIN/2)+3 - (INT32_MAX/2)-2 : 0x80000006
+ * (INT32_MAX/2)-1 - (INT32_MIN/2)+2 : 0x7ffffffc
+ * (INT32_MIN/2)+2 - (INT32_MAX/2)-1 : 0x80000004
+ * (INT32_MAX/2)-0 - (INT32_MIN/2)+1 : 0x7ffffffe
+ * (INT32_MIN/2)+1 - (INT32_MAX/2)-0 : 0x80000002
+ *
+ * (INT64_MAX/2)-3 = 0x3FFF_FFFF_FFFF_FFFC
+ * (INT64_MAX/2)-2 = 0x3FFF_FFFF_FFFF_FFFD
+ * (INT64_MAX/2)-1 = 0x3FFF_FFFF_FFFF_FFFE
+ * (INT64_MAX/2)-0 = 0x3FFF_FFFF_FFFF_FFFF
+ *
+ * (INT64_MIN/2)+4 = 0xC000_0000_0000_0003
+ * (INT64_MIN/2)+3 = 0xC000_0000_0000_0003
+ * (INT64_MIN/2)+2 = 0xC000_0000_0000_0002
+ * (INT64_MIN/2)+1 = 0xC000_0000_0000_0001
+ */
 typedef bignum_cmp_e (*TEST_FP_BIGNUM_CMP)(const bignum_s*, const bignum_s*);
-void test_cmp_bignum_256b(const char* test_fn_name, const TEST_FP_BIGNUM_CMP test_fp)
+void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_CMP test_fp)
 {
 #define TEST_BIGNUM_CMP_WITH_SUB_BIT  256U // 32Bytes, 32bits 8ea
     int test_cmp;
@@ -1684,887 +1920,352 @@ void test_cmp_bignum_256b(const char* test_fn_name, const TEST_FP_BIGNUM_CMP tes
     bignum_cmp_e test_bignum_cmp        = BIGNUM_CMP_NU;
     bignum_cmp_e test_bignum_cmp_ref;
 
-    bignum_s* test_bignum_____0;
+    bignum_s* test_tmp;
 
-    bignum_s* test_bignum____p1;
-    bignum_s* test_bignum____p2;
-    bignum_s* test_bignum_maxm2;
-    bignum_s* test_bignum_maxm1;
-    bignum_s* test_bignum___max;
+    bignum_s* test_bignum_______0;
 
-    bignum_s* test_bignum____m1;
-    bignum_s* test_bignum____m2;
-    bignum_s* test_bignum_minp2;
-    bignum_s* test_bignum_minp1;
-    bignum_s* test_bignum___min;
+    bignum_s* test_bignum______p1;
+    bignum_s* test_bignum______p2;
 
-    bignum_s* test_bignum__tmp0;
-    bignum_s* test_bignum__tmp1;
+    bignum_s* test_bignum_maxd2m3;
+    bignum_s* test_bignum_maxd2m2;
+    bignum_s* test_bignum_maxd2m1;
+    bignum_s* test_bignum___maxd2;
 
-    test_bignum_____0 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum____p1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum____p2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_maxm2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_maxm1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum___max = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum___maxm2;
+    bignum_s* test_bignum___maxm1;
+    bignum_s* test_bignum_____max;
 
-    test_bignum____m1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum____m2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_minp2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_minp1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum___min = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum______m1;
+    bignum_s* test_bignum______m2;
 
-    test_bignum__tmp0 =  mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum__tmp1 =  mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_mind2p4;
+    bignum_s* test_bignum_mind2p3;
+    bignum_s* test_bignum_mind2p2;
+    bignum_s* test_bignum_mind2p1;
 
-    test_bignum_____0->nums[0] = 0x00000000U;;
-    test_bignum_____0->nums[1] = 0x00000000U;;
-    test_bignum_____0->nums[2] = 0x00000000U;;
-    test_bignum_____0->nums[3] = 0x00000000U;;
-    test_bignum_____0->nums[4] = 0x00000000U;;
-    test_bignum_____0->nums[5] = 0x00000000U;;
-    test_bignum_____0->nums[6] = 0x00000000U;;
-    test_bignum_____0->nums[7] = 0x00000000U;;
+    bignum_s* test_bignum___minp2;
+    bignum_s* test_bignum___minp1;
+    bignum_s* test_bignum_____min;
 
-    test_bignum____p1->nums[0] = 0x00000001U;;
-    test_bignum____p1->nums[1] = 0x00000000U;;
-    test_bignum____p1->nums[2] = 0x00000000U;;
-    test_bignum____p1->nums[3] = 0x00000000U;;
-    test_bignum____p1->nums[4] = 0x00000000U;;
-    test_bignum____p1->nums[5] = 0x00000000U;;
-    test_bignum____p1->nums[6] = 0x00000000U;;
-    test_bignum____p1->nums[7] = 0x00000000U;;
+    bignum_s* test_bignum____tmp0;
+    bignum_s* test_bignum____tmp1;
 
-    test_bignum____p2->nums[0] = 0x00000002U;;
-    test_bignum____p2->nums[1] = 0x00000000U;;
-    test_bignum____p2->nums[2] = 0x00000000U;;
-    test_bignum____p2->nums[3] = 0x00000000U;;
-    test_bignum____p2->nums[4] = 0x00000000U;;
-    test_bignum____p2->nums[5] = 0x00000000U;;
-    test_bignum____p2->nums[6] = 0x00000000U;;
-    test_bignum____p2->nums[7] = 0x00000000U;;
+    test_tmp = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
 
-    test_bignum_maxm2->nums[0] = 0xFFFFFFFDU;
-    test_bignum_maxm2->nums[1] = 0xFFFFFFFFU;
-    test_bignum_maxm2->nums[2] = 0xFFFFFFFFU;
-    test_bignum_maxm2->nums[3] = 0xFFFFFFFFU;
-    test_bignum_maxm2->nums[4] = 0xFFFFFFFFU;
-    test_bignum_maxm2->nums[5] = 0xFFFFFFFFU;
-    test_bignum_maxm2->nums[6] = 0xFFFFFFFFU;
-    test_bignum_maxm2->nums[7] = 0x7FFFFFFFU;
+    test_bignum_______0 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum______p1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum______p2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_maxd2m3 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_maxd2m2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_maxd2m1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum___maxd2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum___maxm2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum___maxm1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_____max = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
 
-    test_bignum_maxm1->nums[0] = 0xFFFFFFFEU;
-    test_bignum_maxm1->nums[1] = 0xFFFFFFFFU;
-    test_bignum_maxm1->nums[2] = 0xFFFFFFFFU;
-    test_bignum_maxm1->nums[3] = 0xFFFFFFFFU;
-    test_bignum_maxm1->nums[4] = 0xFFFFFFFFU;
-    test_bignum_maxm1->nums[5] = 0xFFFFFFFFU;
-    test_bignum_maxm1->nums[6] = 0xFFFFFFFFU;
-    test_bignum_maxm1->nums[7] = 0x7FFFFFFFU;
+    test_bignum______m1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum______m2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_mind2p4 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_mind2p3 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_mind2p2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_mind2p1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum___minp2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum___minp1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum_____min = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
 
-    test_bignum___max->nums[0] = 0xFFFFFFFFU;
-    test_bignum___max->nums[1] = 0xFFFFFFFFU;
-    test_bignum___max->nums[2] = 0xFFFFFFFFU;
-    test_bignum___max->nums[3] = 0xFFFFFFFFU;
-    test_bignum___max->nums[4] = 0xFFFFFFFFU;
-    test_bignum___max->nums[5] = 0xFFFFFFFFU;
-    test_bignum___max->nums[6] = 0xFFFFFFFFU;
-    test_bignum___max->nums[7] = 0x7FFFFFFFU;
+    test_bignum____tmp0 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    test_bignum____tmp1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
 
-    test_bignum____m1->nums[0] = 0xFFFFFFFFU;
-    test_bignum____m1->nums[1] = 0xFFFFFFFFU;
-    test_bignum____m1->nums[2] = 0xFFFFFFFFU;
-    test_bignum____m1->nums[3] = 0xFFFFFFFFU;
-    test_bignum____m1->nums[4] = 0xFFFFFFFFU;
-    test_bignum____m1->nums[5] = 0xFFFFFFFFU;
-    test_bignum____m1->nums[6] = 0xFFFFFFFFU;
-    test_bignum____m1->nums[7] = 0xFFFFFFFFU;
+    test_bignum_______0->nums[0] = 0x00000000U;
+    test_bignum_______0->nums[1] = 0x00000000U;
+    test_bignum_______0->nums[2] = 0x00000000U;
+    test_bignum_______0->nums[3] = 0x00000000U;
+    test_bignum_______0->nums[4] = 0x00000000U;
+    test_bignum_______0->nums[5] = 0x00000000U;
+    test_bignum_______0->nums[6] = 0x00000000U;
+    test_bignum_______0->nums[7] = 0x00000000U;
 
-    test_bignum____m2->nums[0] = 0xFFFFFFFEU;
-    test_bignum____m2->nums[1] = 0xFFFFFFFFU;
-    test_bignum____m2->nums[2] = 0xFFFFFFFFU;
-    test_bignum____m2->nums[3] = 0xFFFFFFFFU;
-    test_bignum____m2->nums[4] = 0xFFFFFFFFU;
-    test_bignum____m2->nums[5] = 0xFFFFFFFFU;
-    test_bignum____m2->nums[6] = 0xFFFFFFFFU;
-    test_bignum____m2->nums[7] = 0xFFFFFFFFU;
+    test_bignum______p1->nums[0] = 0x00000001U;
+    test_bignum______p1->nums[1] = 0x00000000U;
+    test_bignum______p1->nums[2] = 0x00000000U;
+    test_bignum______p1->nums[3] = 0x00000000U;
+    test_bignum______p1->nums[4] = 0x00000000U;
+    test_bignum______p1->nums[5] = 0x00000000U;
+    test_bignum______p1->nums[6] = 0x00000000U;
+    test_bignum______p1->nums[7] = 0x00000000U;
 
-    test_bignum_minp2->nums[0] = 0x00000002U;
-    test_bignum_minp2->nums[1] = 0x00000000U;
-    test_bignum_minp2->nums[2] = 0x00000000U;
-    test_bignum_minp2->nums[3] = 0x00000000U;
-    test_bignum_minp2->nums[4] = 0x00000000U;
-    test_bignum_minp2->nums[5] = 0x00000000U;
-    test_bignum_minp2->nums[6] = 0x00000000U;
-    test_bignum_minp2->nums[7] = 0x80000000U;
+    test_bignum______p2->nums[0] = 0x00000002U;
+    test_bignum______p2->nums[1] = 0x00000000U;
+    test_bignum______p2->nums[2] = 0x00000000U;
+    test_bignum______p2->nums[3] = 0x00000000U;
+    test_bignum______p2->nums[4] = 0x00000000U;
+    test_bignum______p2->nums[5] = 0x00000000U;
+    test_bignum______p2->nums[6] = 0x00000000U;
+    test_bignum______p2->nums[7] = 0x00000000U;
 
-    test_bignum_minp1->nums[0] = 0x00000001U;
-    test_bignum_minp1->nums[1] = 0x00000000U;
-    test_bignum_minp1->nums[2] = 0x00000000U;
-    test_bignum_minp1->nums[3] = 0x00000000U;
-    test_bignum_minp1->nums[4] = 0x00000000U;
-    test_bignum_minp1->nums[5] = 0x00000000U;
-    test_bignum_minp1->nums[6] = 0x00000000U;
-    test_bignum_minp1->nums[7] = 0x80000000U;
+    test_bignum_maxd2m3->nums[0] = 0xFFFFFFFDU;
+    test_bignum_maxd2m3->nums[1] = 0xFFFFFFFFU;
+    test_bignum_maxd2m3->nums[2] = 0xFFFFFFFFU;
+    test_bignum_maxd2m3->nums[3] = 0xFFFFFFFFU;
+    test_bignum_maxd2m3->nums[4] = 0xFFFFFFFFU;
+    test_bignum_maxd2m3->nums[5] = 0xFFFFFFFFU;
+    test_bignum_maxd2m3->nums[6] = 0xFFFFFFFFU;
+    test_bignum_maxd2m3->nums[7] = 0x3FFFFFFFU;
 
-    test_bignum___min->nums[0] = 0x00000000U;
-    test_bignum___min->nums[1] = 0x00000000U;
-    test_bignum___min->nums[2] = 0x00000000U;
-    test_bignum___min->nums[3] = 0x00000000U;
-    test_bignum___min->nums[4] = 0x00000000U;
-    test_bignum___min->nums[5] = 0x00000000U;
-    test_bignum___min->nums[6] = 0x00000000U;
-    test_bignum___min->nums[7] = 0x80000000U;
+    test_bignum_maxd2m2->nums[0] = 0xFFFFFFFDU;
+    test_bignum_maxd2m2->nums[1] = 0xFFFFFFFFU;
+    test_bignum_maxd2m2->nums[2] = 0xFFFFFFFFU;
+    test_bignum_maxd2m2->nums[3] = 0xFFFFFFFFU;
+    test_bignum_maxd2m2->nums[4] = 0xFFFFFFFFU;
+    test_bignum_maxd2m2->nums[5] = 0xFFFFFFFFU;
+    test_bignum_maxd2m2->nums[6] = 0xFFFFFFFFU;
+    test_bignum_maxd2m2->nums[7] = 0x3FFFFFFFU;
 
-    /* bignum compare, 0 == 0 */
+    test_bignum_maxd2m1->nums[0] = 0xFFFFFFFEU;
+    test_bignum_maxd2m1->nums[1] = 0xFFFFFFFFU;
+    test_bignum_maxd2m1->nums[2] = 0xFFFFFFFFU;
+    test_bignum_maxd2m1->nums[3] = 0xFFFFFFFFU;
+    test_bignum_maxd2m1->nums[4] = 0xFFFFFFFFU;
+    test_bignum_maxd2m1->nums[5] = 0xFFFFFFFFU;
+    test_bignum_maxd2m1->nums[6] = 0xFFFFFFFFU;
+    test_bignum_maxd2m1->nums[7] = 0x3FFFFFFFU;
+
+    test_bignum___maxd2->nums[0] = 0xFFFFFFFFU;
+    test_bignum___maxd2->nums[1] = 0xFFFFFFFFU;
+    test_bignum___maxd2->nums[2] = 0xFFFFFFFFU;
+    test_bignum___maxd2->nums[3] = 0xFFFFFFFFU;
+    test_bignum___maxd2->nums[4] = 0xFFFFFFFFU;
+    test_bignum___maxd2->nums[5] = 0xFFFFFFFFU;
+    test_bignum___maxd2->nums[6] = 0xFFFFFFFFU;
+    test_bignum___maxd2->nums[7] = 0x3FFFFFFFU;
+
+    test_bignum___maxm2->nums[0] = 0xFFFFFFFDU;
+    test_bignum___maxm2->nums[1] = 0xFFFFFFFFU;
+    test_bignum___maxm2->nums[2] = 0xFFFFFFFFU;
+    test_bignum___maxm2->nums[3] = 0xFFFFFFFFU;
+    test_bignum___maxm2->nums[4] = 0xFFFFFFFFU;
+    test_bignum___maxm2->nums[5] = 0xFFFFFFFFU;
+    test_bignum___maxm2->nums[6] = 0xFFFFFFFFU;
+    test_bignum___maxm2->nums[7] = 0x7FFFFFFFU;
+
+    test_bignum___maxm1->nums[0] = 0xFFFFFFFEU;
+    test_bignum___maxm1->nums[1] = 0xFFFFFFFFU;
+    test_bignum___maxm1->nums[2] = 0xFFFFFFFFU;
+    test_bignum___maxm1->nums[3] = 0xFFFFFFFFU;
+    test_bignum___maxm1->nums[4] = 0xFFFFFFFFU;
+    test_bignum___maxm1->nums[5] = 0xFFFFFFFFU;
+    test_bignum___maxm1->nums[6] = 0xFFFFFFFFU;
+    test_bignum___maxm1->nums[7] = 0x7FFFFFFFU;
+
+    test_bignum_____max->nums[0] = 0xFFFFFFFFU;
+    test_bignum_____max->nums[1] = 0xFFFFFFFFU;
+    test_bignum_____max->nums[2] = 0xFFFFFFFFU;
+    test_bignum_____max->nums[3] = 0xFFFFFFFFU;
+    test_bignum_____max->nums[4] = 0xFFFFFFFFU;
+    test_bignum_____max->nums[5] = 0xFFFFFFFFU;
+    test_bignum_____max->nums[6] = 0xFFFFFFFFU;
+    test_bignum_____max->nums[7] = 0x7FFFFFFFU;
+
+    test_bignum______m1->nums[0] = 0xFFFFFFFFU;
+    test_bignum______m1->nums[1] = 0xFFFFFFFFU;
+    test_bignum______m1->nums[2] = 0xFFFFFFFFU;
+    test_bignum______m1->nums[3] = 0xFFFFFFFFU;
+    test_bignum______m1->nums[4] = 0xFFFFFFFFU;
+    test_bignum______m1->nums[5] = 0xFFFFFFFFU;
+    test_bignum______m1->nums[6] = 0xFFFFFFFFU;
+    test_bignum______m1->nums[7] = 0xFFFFFFFFU;
+
+    test_bignum______m2->nums[0] = 0xFFFFFFFEU;
+    test_bignum______m2->nums[1] = 0xFFFFFFFFU;
+    test_bignum______m2->nums[2] = 0xFFFFFFFFU;
+    test_bignum______m2->nums[3] = 0xFFFFFFFFU;
+    test_bignum______m2->nums[4] = 0xFFFFFFFFU;
+    test_bignum______m2->nums[5] = 0xFFFFFFFFU;
+    test_bignum______m2->nums[6] = 0xFFFFFFFFU;
+    test_bignum______m2->nums[7] = 0xFFFFFFFFU;
+
+    test_bignum_mind2p4->nums[0] = 0x00000004U;
+    test_bignum_mind2p4->nums[1] = 0x00000000U;
+    test_bignum_mind2p4->nums[2] = 0x00000000U;
+    test_bignum_mind2p4->nums[3] = 0x00000000U;
+    test_bignum_mind2p4->nums[4] = 0x00000000U;
+    test_bignum_mind2p4->nums[5] = 0x00000000U;
+    test_bignum_mind2p4->nums[6] = 0x00000000U;
+    test_bignum_mind2p4->nums[7] = 0xC0000000U;
+
+    test_bignum_mind2p3->nums[0] = 0x00000003U;
+    test_bignum_mind2p3->nums[1] = 0x00000000U;
+    test_bignum_mind2p3->nums[2] = 0x00000000U;
+    test_bignum_mind2p3->nums[3] = 0x00000000U;
+    test_bignum_mind2p3->nums[4] = 0x00000000U;
+    test_bignum_mind2p3->nums[5] = 0x00000000U;
+    test_bignum_mind2p3->nums[6] = 0x00000000U;
+    test_bignum_mind2p3->nums[7] = 0xC0000000U;
+
+    test_bignum_mind2p2->nums[0] = 0x00000002U;
+    test_bignum_mind2p2->nums[1] = 0x00000000U;
+    test_bignum_mind2p2->nums[2] = 0x00000000U;
+    test_bignum_mind2p2->nums[3] = 0x00000000U;
+    test_bignum_mind2p2->nums[4] = 0x00000000U;
+    test_bignum_mind2p2->nums[5] = 0x00000000U;
+    test_bignum_mind2p2->nums[6] = 0x00000000U;
+    test_bignum_mind2p2->nums[7] = 0xC0000000U;
+
+    test_bignum_mind2p1->nums[0] = 0x00000001U;
+    test_bignum_mind2p1->nums[1] = 0x00000000U;
+    test_bignum_mind2p1->nums[2] = 0x00000000U;
+    test_bignum_mind2p1->nums[3] = 0x00000000U;
+    test_bignum_mind2p1->nums[4] = 0x00000000U;
+    test_bignum_mind2p1->nums[5] = 0x00000000U;
+    test_bignum_mind2p1->nums[6] = 0x00000000U;
+    test_bignum_mind2p1->nums[7] = 0xC0000000U;
+
+    test_bignum___minp2->nums[0] = 0x00000002U;
+    test_bignum___minp2->nums[1] = 0x00000000U;
+    test_bignum___minp2->nums[2] = 0x00000000U;
+    test_bignum___minp2->nums[3] = 0x00000000U;
+    test_bignum___minp2->nums[4] = 0x00000000U;
+    test_bignum___minp2->nums[5] = 0x00000000U;
+    test_bignum___minp2->nums[6] = 0x00000000U;
+    test_bignum___minp2->nums[7] = 0x80000000U;
+
+    test_bignum___minp1->nums[0] = 0x00000001U;
+    test_bignum___minp1->nums[1] = 0x00000000U;
+    test_bignum___minp1->nums[2] = 0x00000000U;
+    test_bignum___minp1->nums[3] = 0x00000000U;
+    test_bignum___minp1->nums[4] = 0x00000000U;
+    test_bignum___minp1->nums[5] = 0x00000000U;
+    test_bignum___minp1->nums[6] = 0x00000000U;
+    test_bignum___minp1->nums[7] = 0x80000000U;
+
+    test_bignum_____min->nums[0] = 0x00000000U;
+    test_bignum_____min->nums[1] = 0x00000000U;
+    test_bignum_____min->nums[2] = 0x00000000U;
+    test_bignum_____min->nums[3] = 0x00000000U;
+    test_bignum_____min->nums[4] = 0x00000000U;
+    test_bignum_____min->nums[5] = 0x00000000U;
+    test_bignum_____min->nums[6] = 0x00000000U;
+    test_bignum_____min->nums[7] = 0x80000000U;
+
+    typedef struct {
+        bignum_s*       bignumA;
+        bignum_s*       bignumB;
+        bignum_cmp_e    cmp_ref;
+        char*           title;
+        bool            assert;
+    } test_bignum_cmp_set_t;
+    test_bignum_cmp_set_t cmpTestSet[] = {
+        {test_bignum_______0,   test_bignum_______0,    BIGNUM_CMP_EQ,  "cmp_bignum, 0 == 0",           true },
+        {test_bignum______p1,   test_bignum_______0,    BIGNUM_CMP_GT,  "cmp_bignum, 1 > 0",            true },
+        {test_bignum_______0,   test_bignum______p1,    BIGNUM_CMP_LT,  "cmp_bignum, 0 < 1",            true },
+        {test_bignum______p1,   test_bignum______p1,    BIGNUM_CMP_EQ,  "cmp_bignum, 1 == 1",           true },
+        {test_bignum______p2,   test_bignum______p1,    BIGNUM_CMP_GT,  "cmp_bignum, 2 > 1",            true },
+        {test_bignum______p1,   test_bignum______p2,    BIGNUM_CMP_LT,  "cmp_bignum, 1 < 2",            true },
+        {test_bignum______p2,   test_bignum______p2,    BIGNUM_CMP_EQ,  "cmp_bignum, 2 == 2",           true },
+        {test_bignum___maxm2,   test_bignum___maxm2,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX-2 == MAX-2",   true },
+        {test_bignum___maxm2,   test_bignum______p2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-2 > 2",        true },
+        {test_bignum______p2,   test_bignum___maxm2,    BIGNUM_CMP_LT,  "cmp_bignum, 2 < MAX-2",        true },
+        {test_bignum___maxm1,   test_bignum___maxm1,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX-1 == MAX-1",   true },
+        {test_bignum___maxm1,   test_bignum___maxm2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-1 > MAX-2",    true },
+        {test_bignum___maxm2,   test_bignum___maxm1,    BIGNUM_CMP_LT,  "cmp_bignum, MAX-1 < MAX-2",    true },
+        {test_bignum_____max,   test_bignum_____max,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX == MAX",       true },
+        {test_bignum_____max,   test_bignum___maxm1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX > MAX-1",      true },
+        {test_bignum___maxm1,   test_bignum_____max,    BIGNUM_CMP_LT,  "cmp_bignum, MAX-1 < MAX",      true },
+        {test_bignum_______0,   test_bignum_______0,    BIGNUM_CMP_EQ,  "cmp_bignum, 0 == 0",           true },
+        {test_bignum_______0,   test_bignum______m1,    BIGNUM_CMP_GT,  "cmp_bignum, 0 > -1",           true },
+        {test_bignum______m1,   test_bignum_______0,    BIGNUM_CMP_LT,  "cmp_bignum, -1 < 0",           true },
+        {test_bignum______m1,   test_bignum______m1,    BIGNUM_CMP_EQ,  "cmp_bignum, -1 == -1",         true },
+        {test_bignum______m1,   test_bignum______m2,    BIGNUM_CMP_GT,  "cmp_bignum, -1 > -2",          true },
+        {test_bignum______m2,   test_bignum______m2,    BIGNUM_CMP_EQ,  "cmp_bignum, -2 == -2",         true },
+        {test_bignum______m2,   test_bignum___minp2,    BIGNUM_CMP_GT,  "cmp_bignum, -2 > MIN+2",       true },
+        {test_bignum___minp2,   test_bignum______m2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+2 < -2",       true },
+        {test_bignum___minp2,   test_bignum___minp2,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN+2 == MIN+2",   true },
+        {test_bignum___minp2,   test_bignum___minp1,    BIGNUM_CMP_GT,  "cmp_bignum, MIN+2 > MIN+1",    true },
+        {test_bignum___minp1,   test_bignum___minp2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+1 < MIN+2",    true },
+        {test_bignum___minp1,   test_bignum___minp1,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN+1 == MIN+1",   true },
+        {test_bignum___minp1,   test_bignum_____min,    BIGNUM_CMP_GT,  "cmp_bignum, MIN+1 > MIN",      true },
+        {test_bignum_____min,   test_bignum___minp1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN < MIN+1",      true },
+        {test_bignum_____min,   test_bignum_____min,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN == MIN",       true },
+        {test_bignum______p1,   test_bignum______m1,    BIGNUM_CMP_GT,  "cmp_bignum, +1 > -1",          true },
+        {test_bignum______m1,   test_bignum______p1,    BIGNUM_CMP_LT,  "cmp_bignum, -1 < +1",          true },
+        {test_bignum______p2,   test_bignum______m2,    BIGNUM_CMP_GT,  "cmp_bignum, +2 > -2",          true },
+        {test_bignum______m2,   test_bignum______p2,    BIGNUM_CMP_LT,  "cmp_bignum, -2 < +2",          true },
+
+        {test_bignum_maxd2m3,   test_bignum_mind2p4,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-3 > MIN/2+4",true },  // invalid
+        {test_bignum_mind2p4,   test_bignum_maxd2m3,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+4 < MAX/2-3",true },  // invalid
+        {test_bignum_maxd2m2,   test_bignum_mind2p3,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-2 > MIN/2+3",true },  // invalid
+        {test_bignum_mind2p3,   test_bignum_maxd2m2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+3 < MAX/2-2",true },  // invalid
+        {test_bignum_maxd2m1,   test_bignum_mind2p2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-1 > MIN/2+2",true },  // invalid
+        {test_bignum_mind2p2,   test_bignum_maxd2m1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+2 < MAX/2-1",true },  // invalid
+        {test_bignum___maxd2,   test_bignum_mind2p1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-0 > MIN/2+1",true },  // invalid
+        {test_bignum_mind2p1,   test_bignum___maxd2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+1 < MAX/2-0",true },  // invalid
+
+        {test_bignum___maxm1,   test_bignum___minp2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-1 > MIN+2",    false},  // invalid
+        {test_bignum___minp2,   test_bignum___maxm1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+2 < MAX-1",    false},  // invalid
+        {test_bignum_____max,   test_bignum___minp1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX > MIN+1",      false},  // invalid
+        {test_bignum___minp1,   test_bignum_____max,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+1 < MAX",      false},  // invalid
+    };
+
+    for(size_t i = 0UL; i < sizeof(cmpTestSet)/sizeof(test_bignum_cmp_set_t); i++)
     {
-        bignum_s* test_bignum_A = test_bignum_____0;
-        bignum_s* test_bignum_B = test_bignum_____0;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
+        bignum_s* test_bignum_A = cmpTestSet[i].bignumA;
+        bignum_s* test_bignum_B = cmpTestSet[i].bignumB;
+        test_bignum_cmp_ref = cmpTestSet[i].cmp_ref;
 
-        TICK_TIME_START("cmp_bignum, 0 == 0");
+        TICK_TIME_START(cmpTestSet[i].title);
         test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
         TICK_TIME_END;
         test_print_bignum(test_bignum_A, "A");
         test_print_bignum(test_bignum_B, "B");
         test_print_bignum_cmp(test_bignum_cmp);
 
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, 1 > 0 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p1;
-        bignum_s* test_bignum_B = test_bignum_____0;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, 1 > 0");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
+        sub_bignum(NULL, test_bignum____tmp0, test_bignum_A, test_bignum_B, 0U);
+        test_print_bignum(test_bignum____tmp0, "sub_bignum");
+        sub_bignum_with_add_twos(NULL, test_bignum____tmp0, test_bignum_A, test_bignum_B, 0U);
+        test_print_bignum(test_bignum____tmp0, "sub_bignum_with_add_twos");
 
         test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, 0 < 1 */
-    {
-        bignum_s* test_bignum_A = test_bignum_____0;
-        bignum_s* test_bignum_B = test_bignum____p1;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, 0 < 1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
+        printf("%s() is %s\r\n", test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
+        if(cmpTestSet[i].assert) {
+            TEST_ASSERT(test_cmp == 1);
+        }
+        else if((cmpTestSet[i].assert)&&(test_cmp == 1)) {
+            printf("ASSERT IS IGNORED\n");
+        }
     }
 
-    /* bignum compare, 1 == 1 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p1;
-        bignum_s* test_bignum_B = test_bignum____p1;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, 1 == 1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, 2 > 1 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p2;
-        bignum_s* test_bignum_B = test_bignum____p1;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, 2 > 1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, 1 < 2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p1;
-        bignum_s* test_bignum_B = test_bignum____p2;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, 1 < 2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, 2 == 2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p2;
-        bignum_s* test_bignum_B = test_bignum____p2;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, 2 == 2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, MAX-2 == MAX-2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_maxm2;
-        bignum_s* test_bignum_B = test_bignum_maxm2;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, MAX-2 == MAX-2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MAX-2 > 2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_maxm2;
-        bignum_s* test_bignum_B = test_bignum____p2;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, MAX-2 > 2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, 2 < MAX-2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p2;
-        bignum_s* test_bignum_B = test_bignum_maxm2;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, 2 < MAX-2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, MAX-1 == MAX-1 */
-    {
-        bignum_s* test_bignum_A = test_bignum_maxm1;
-        bignum_s* test_bignum_B = test_bignum_maxm1;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, MAX-1 == MAX-1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MAX-1 > MAX-2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_maxm1;
-        bignum_s* test_bignum_B = test_bignum_maxm2;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, MAX-1 > MAX-2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MAX-1 < MAX-2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_maxm2;
-        bignum_s* test_bignum_B = test_bignum_maxm1;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, MAX-1 < MAX-2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, MAX == MAX */
-    {
-        bignum_s* test_bignum_A = test_bignum___max;
-        bignum_s* test_bignum_B = test_bignum___max;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, MAX == MAX");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MAX > MAX-1 */
-    {
-        bignum_s* test_bignum_A = test_bignum___max;
-        bignum_s* test_bignum_B = test_bignum_maxm1;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, MAX > MAX-1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MAX-1 < MAX */
-    {
-        bignum_s* test_bignum_A = test_bignum_maxm1;
-        bignum_s* test_bignum_B = test_bignum___max;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, MAX-1 < MAX");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, 0 == 0 */
-    {
-        bignum_s* test_bignum_A = test_bignum_____0;
-        bignum_s* test_bignum_B = test_bignum_____0;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, 0 == 0");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, 0 > -1 */
-    {
-        bignum_s* test_bignum_A = test_bignum_____0;
-        bignum_s* test_bignum_B = test_bignum____m1;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, 0 > -1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, -1 < 0 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m1;
-        bignum_s* test_bignum_B = test_bignum_____0;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, -1 < 0");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, -1 == -1 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m1;
-        bignum_s* test_bignum_B = test_bignum____m1;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, -1 == -1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, -1 > -2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m1;
-        bignum_s* test_bignum_B = test_bignum____m2;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, -1 > -2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, -2 < -1 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m2;
-        bignum_s* test_bignum_B = test_bignum____m1;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, -2 < -1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, -2 == -2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m2;
-        bignum_s* test_bignum_B = test_bignum____m2;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, -2 == -2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, -2 > MIN+2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m2;
-        bignum_s* test_bignum_B = test_bignum_minp2;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, -2 > MIN+2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MIN+2 < -2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp2;
-        bignum_s* test_bignum_B = test_bignum____m2;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, MIN+2 < -2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, MIN+2 == MIN+2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp2;
-        bignum_s* test_bignum_B = test_bignum_minp2;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, MIN+2 == MIN+2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MIN+2 > MIN+1 */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp2;
-        bignum_s* test_bignum_B = test_bignum_minp1;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, MIN+2 > MIN+1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MIN+1 < MIN+2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp1;
-        bignum_s* test_bignum_B = test_bignum_minp2;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, MIN+1 < MIN+2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, MIN+1 == MIN+1 */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp1;
-        bignum_s* test_bignum_B = test_bignum_minp1;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, MIN+1 == MIN+1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MIN+1 > MIN */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp1;
-        bignum_s* test_bignum_B = test_bignum___min;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, MIN+1 > MIN");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, MIN < MIN+1 */
-    {
-        bignum_s* test_bignum_A = test_bignum___min;
-        bignum_s* test_bignum_B = test_bignum_minp1;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, MIN < MIN+1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, MIN == MIN */
-    {
-        bignum_s* test_bignum_A = test_bignum___min;
-        bignum_s* test_bignum_B = test_bignum___min;
-        test_bignum_cmp_ref = BIGNUM_CMP_EQ;
-
-        TICK_TIME_START("cmp_bignum, MIN == MIN");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, +1 > -1 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p1;
-        bignum_s* test_bignum_B = test_bignum____m1;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, +1 > -1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "+1 - -1");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, -1 < +1 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m1;
-        bignum_s* test_bignum_B = test_bignum____p1;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, -1 < +1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "-1 - +1");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, +2 > -2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____p2;
-        bignum_s* test_bignum_B = test_bignum____m2;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, +2 > -2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "+2 - -2");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-    /* bignum compare, -2 < +2 */
-    {
-        bignum_s* test_bignum_A = test_bignum____m2;
-        bignum_s* test_bignum_B = test_bignum____p2;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, -2 < +2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "-2 - +2");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 1);
-    }
-
-    /* bignum compare, MAX-1 > MIN+2 */
-    {
-        bignum_s* test_bignum_A = test_bignum_maxm1;
-        bignum_s* test_bignum_B = test_bignum_minp2;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, MAX-1 > MIN+2");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "MAX-1 - MIN+2");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-#if 0
-        TEST_ASSERT(test_cmp == 1);
-#endif
-    }
-    /* bignum compare, MIN+2 < MAX-1 */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp2;
-        bignum_s* test_bignum_B = test_bignum_maxm1;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, MIN+2 < MAX-1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "MIN+2 - MAX-1");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-#if 0
-        TEST_ASSERT(test_cmp == 1);
-#endif
-    }
-
-    /* bignum compare, MAX > MIN+1 */
-    {
-        bignum_s* test_bignum_A = test_bignum___max;
-        bignum_s* test_bignum_B = test_bignum_minp1;
-        test_bignum_cmp_ref = BIGNUM_CMP_GT;
-
-        TICK_TIME_START("cmp_bignum, MAX > MIN+1");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "MAX - MIN+1");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-#if 0
-        TEST_ASSERT(test_cmp == 1);
-#endif
-    }
-    /* bignum compare, MIN+1 < MAX */
-    {
-        bignum_s* test_bignum_A = test_bignum_minp1;
-        bignum_s* test_bignum_B = test_bignum___max;
-        test_bignum_cmp_ref = BIGNUM_CMP_LT;
-
-        TICK_TIME_START("cmp_bignum, MIN+1 < MAX");
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
-        TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
-
-        sub_bignum(NULL, test_bignum__tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum__tmp0, "MIN+1 - MAX");
-
-        test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n",test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-#if 0
-        TEST_ASSERT(test_cmp == 1);
-#endif
-    }
-
-    rmBitNum(&test_bignum_____0);
-
-    rmBitNum(&test_bignum____p1);
-    rmBitNum(&test_bignum____p2);
-    rmBitNum(&test_bignum_maxm2);
-    rmBitNum(&test_bignum_maxm1);
-    rmBitNum(&test_bignum___max);
-
-    rmBitNum(&test_bignum____m1);
-    rmBitNum(&test_bignum____m2);
-    rmBitNum(&test_bignum_minp2);
-    rmBitNum(&test_bignum_minp1);
-    rmBitNum(&test_bignum___min);
-
-    rmBitNum(&test_bignum__tmp0);
-    rmBitNum(&test_bignum__tmp1);
+    rmBitNum(&test_tmp);
+
+    rmBitNum(&test_bignum_______0);
+
+    rmBitNum(&test_bignum______p1);
+    rmBitNum(&test_bignum______p2);
+    rmBitNum(&test_bignum_maxd2m3);
+    rmBitNum(&test_bignum_maxd2m2);
+    rmBitNum(&test_bignum_maxd2m1);
+    rmBitNum(&test_bignum___maxd2);
+    rmBitNum(&test_bignum___maxm2);
+    rmBitNum(&test_bignum___maxm1);
+    rmBitNum(&test_bignum_____max);
+
+    rmBitNum(&test_bignum______m1);
+    rmBitNum(&test_bignum______m2);
+    rmBitNum(&test_bignum_mind2p4);
+    rmBitNum(&test_bignum_mind2p3);
+    rmBitNum(&test_bignum_mind2p2);
+    rmBitNum(&test_bignum_mind2p1);
+    rmBitNum(&test_bignum___minp2);
+    rmBitNum(&test_bignum___minp1);
+    rmBitNum(&test_bignum_____min);
+
+    rmBitNum(&test_bignum____tmp0);
+    rmBitNum(&test_bignum____tmp1);
 #undef TEST_BIGNUM_CMP_WITH_SUB_BIT
 }
 
 #define TEST_BIGNUM_127BIT  127u    //16Bytes
-void test_add_bignum_127b(void)
+void test_sub_bignum_unsigned_127b(void)
 {
     int test_cmp;
 
@@ -2579,7 +2280,7 @@ void test_add_bignum_127b(void)
     test_opA = mkBigNum(TEST_BIGNUM_127BIT);
     test_opB = mkBigNum(TEST_BIGNUM_127BIT);
 
-    /* Sum test */
+    /* add_bignum test */
     for(unsigned int i = 0u; i < TV_U32_ADD_NUM; i++) {
         memset(test_ref->nums, 0x0u, (test_ref->size));
         memset(test_opA->nums, 0x0u, (test_opA->size));
@@ -2602,53 +2303,6 @@ void test_add_bignum_127b(void)
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
         printf("add_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-
-    rmBitNum(&test_ref);
-    rmBitNum(&test_dst);
-    rmBitNum(&test_opA);
-    rmBitNum(&test_opB);
-}
-
-void test_sub_bignum_127b(void)
-{
-    int test_cmp;
-
-    bignum_s* test_ref;
-    bignum_s* test_dst;
-    bignum_s* test_opA;
-    bignum_s* test_opB;
-    bignum_t  test_co;
-
-    test_ref = mkBigNum(TEST_BIGNUM_127BIT);
-    test_dst = mkBigNum(TEST_BIGNUM_127BIT);
-    test_opA = mkBigNum(TEST_BIGNUM_127BIT);
-    test_opB = mkBigNum(TEST_BIGNUM_127BIT);
-
-    /* Sum test */
-    for(unsigned int i = 0u; i < TV_U32_SUB_NUM; i++) {
-        memset(test_ref->nums, 0x0u, (test_ref->size));
-        memset(test_opA->nums, 0x0u, (test_opA->size));
-        memset(test_opB->nums, 0x0u, (test_opB->size));
-
-        memcpy(test_ref->nums, TV_u32_sub_refList[i], TV_u32_sub_lenList[i]);
-        memcpy(test_opA->nums, TV_u32_sub_opAList[i], TV_u32_sub_lenList[i]);
-        memcpy(test_opB->nums, TV_u32_sub_opBList[i], TV_u32_sub_lenList[i]);
-        test_co = BIGNUM_MAX;
-
-        TICK_TIME_START("sub_bignum");
-        sub_bignum(&test_co, test_dst, test_opA, test_opB, TV_u32_sub_carryInList[i]);
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_opB, "opB");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-        printf("[ref carry]\r\nc=0x%08x\r\n", TV_u32_sub_carryInList[i]);
-        printf("[out carry]\r\nc=0x%08x\r\n", test_co);
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("sub_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -2699,7 +2353,7 @@ const bignum_t bignum256bNumB_2[] = { 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFF
 const size_t bignum256bNumB_Size_2 = sizeof(bignum256bNumB_2);
 const bignum_t bignum256bNumC_2[] = { 0xFFFFFFFD, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, };
 const size_t bignum256bNumC_Size_2 = sizeof(bignum256bNumC_2);
-void test_add_bignum_256b(void) {
+void test_add_bignum_unsigned_256b(void) {
     int test_cmp;
 
     bignum_s* test_ref;
@@ -2709,10 +2363,10 @@ void test_add_bignum_256b(void) {
     bignum_t test_ci;
     bignum_t test_co;
 
-    test_ref = mkBigNum(TEST_BIGNUM_256BIT);
-    test_dst = mkBigNum(TEST_BIGNUM_256BIT);
-    test_opA = mkBigNum(TEST_BIGNUM_256BIT);
-    test_opB = mkBigNum(TEST_BIGNUM_256BIT);
+    test_ref = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_dst = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_opA = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_opB = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
 
     /* Add test */
     {
@@ -2801,7 +2455,9 @@ void test_add_bignum_256b(void) {
     rmBitNum(&test_opB);
 }
 
-void test_sub_bignum_256b(void)
+typedef ReturnType (*TEST_FP_BIGNUM_SUB)(bignum_t*, bignum_s*, const bignum_s*, const bignum_s*, const bignum_t);
+void test_sub_bignum_unsigned_256b(const char* test_fn_name, const TEST_FP_BIGNUM_SUB test_fp)
+
 {
     int test_cmp;
 
@@ -2812,10 +2468,10 @@ void test_sub_bignum_256b(void)
     bignum_t test_ci;
     bignum_t test_co;
 
-    test_ref = mkBigNum(TEST_BIGNUM_256BIT);
-    test_dst = mkBigNum(TEST_BIGNUM_256BIT);
-    test_opA = mkBigNum(TEST_BIGNUM_256BIT);
-    test_opB = mkBigNum(TEST_BIGNUM_256BIT);
+    test_ref = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_dst = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_opA = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_opB = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
 
     /* Sub test */
     {
@@ -2829,8 +2485,8 @@ void test_sub_bignum_256b(void)
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("sub_bignum");
-        sub_bignum(&test_co, test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START(test_fn_name);
+        test_fp(&test_co, test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
         test_print_bignum(test_opA, "opA");
         test_print_bignum(test_opB, "opB");
@@ -2840,7 +2496,7 @@ void test_sub_bignum_256b(void)
         printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("sub_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("%s() is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -2856,8 +2512,8 @@ void test_sub_bignum_256b(void)
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("sub_bignum");
-        sub_bignum(&test_co, test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START(test_fn_name);
+        test_fp(&test_co, test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
         test_print_bignum(test_opA, "opA");
         test_print_bignum(test_opB, "opB");
@@ -2867,7 +2523,7 @@ void test_sub_bignum_256b(void)
         printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("sub_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("%s() is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -2883,8 +2539,8 @@ void test_sub_bignum_256b(void)
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("sub_bignum");
-        sub_bignum(&test_co, test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START(test_fn_name);
+        test_fp(&test_co, test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
         test_print_bignum(test_opA, "opA");
         test_print_bignum(test_opB, "opB");
@@ -2894,7 +2550,7 @@ void test_sub_bignum_256b(void)
         printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("sub_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("%s() is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -6743,17 +6399,25 @@ void test_sequence(void) {
 
 #if 0   /* CONFIG_DO_TEST_BIGNUM */
     printf("[test start: test_bignum()]\r\n");
-    ttest_sub_127best_bignum();
+    test_bignum();
     printf("[test   end: test_bignum()]\r\n");
 #endif  /* CONFIG_DO_TEST_BIGNUM */
 
     /******************************/
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_cpy_bignum_math()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_cpy_bignum_math");
+    printf("[test start: test_cpy_bignum_math_signed()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_cpy_bignum_math_signed");
     _COND_DO_TEST_(keyin)
-    test_cpy_bignum_math();
-    printf("[test   end: test_cpy_bignum_math()]\r\n");
+    test_cpy_bignum_math_signed();
+    printf("[test   end: test_cpy_bignum_math_signed()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_cpy_bignum_math_unsigned()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_cpy_bignum_math_unsigned");
+    _COND_DO_TEST_(keyin)
+    test_cpy_bignum_math_unsigned();
+    printf("[test   end: test_cpy_bignum_math_unsigned()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -6765,11 +6429,11 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_abs_bignum_256b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_abs_bignum_256b");
+    printf("[test start: test_abs_bignum_signed_256b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_abs_bignum_signed_256b");
     _COND_DO_TEST_(keyin)
-    test_abs_bignum_256b();
-    printf("[test   end: test_abs_bignum_256b()]\r\n");
+    test_abs_bignum_signed_256b();
+    printf("[test   end: test_abs_bignum_signed_256b()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -6788,54 +6452,54 @@ void test_sequence(void) {
     printf("[test   end: test_cmp0_bignum_256b()]\r\n");
     printf("================================================================================\n");
 
-#if 0 /* NOT_IMPLEMENT_cmp_bignum_with_sub */
+#if 1 /* cmp_bignum_with_sub_add_twos */
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_cmp_bignum_256b(NOT_IMPLEMENT_cmp_bignum_with_sub)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_cmp_bignum_256b");
+    printf("[test start: test_cmp_bignum_signed_256b(cmp_bignum_with_sub_add_twos)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_cmp_bignum_signed_256b");
     _COND_DO_TEST_(keyin)
-    test_cmp_bignum_256b("NOT_IMPLEMENT_cmp_bignum_with_sub", NOT_IMPLEMENT_cmp_bignum_with_sub);
-    printf("[test   end: test_cmp_bignum_256b(NOT_IMPLEMENT_cmp_bignum_with_sub)]\r\n");
+    test_cmp_bignum_signed_256b("cmp_bignum_with_sub_add_twos", cmp_bignum_with_sub_add_twos);
+    printf("[test   end: test_cmp_bignum_signed_256b(cmp_bignum_with_sub_add_twos)]\r\n");
     printf("================================================================================\n");
-#endif/* NOT_IMPLEMENT_cmp_bignum_with_sub */
+#endif/* cmp_bignum_with_sub_add_twos */
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_cmp_bignum_256b(cmp_bignum_logical)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_cmp_bignum_256b");
+    printf("[test start: test_cmp_bignum_signed_256b(cmp_bignum_logical)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_cmp_bignum_signed_256b");
     _COND_DO_TEST_(keyin)
-    test_cmp_bignum_256b("cmp_bignum_logical", cmp_bignum_logical);
-    printf("[test   end: test_cmp_bignum_256b(cmp_bignum_logical)]\r\n");
-    printf("================================================================================\n");
-
-    printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_add_bignum_127b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_add_bignum_127b");
-    _COND_DO_TEST_(keyin)
-    test_add_bignum_127b();
-    printf("[test   end: test_add_bignum_127b()]\r\n");
+    test_cmp_bignum_signed_256b("cmp_bignum_logical", cmp_bignum_logical);
+    printf("[test   end: test_cmp_bignum_signed_256b(cmp_bignum_logical)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_127b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_127b");
+    printf("[test start: test_sub_bignum_unsigned_127b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_127b");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_127b();
-    printf("[test   end: test_sub_bignum_127b()]\r\n");
+    test_sub_bignum_unsigned_127b();
+    printf("[test   end: test_sub_bignum_unsigned_127b()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_add_bignum_256b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_add_bignum_256b");
+    printf("[test start: test_add_bignum_unsigned_256b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add_bignum_unsigned_256b");
     _COND_DO_TEST_(keyin)
-    test_add_bignum_256b();
-    printf("[test   end: test_add_bignum_256b()]\r\n");
+    test_add_bignum_unsigned_256b();
+    printf("[test   end: test_add_bignum_unsigned_256b()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_256b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_256b");
+    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_256b();
-    printf("[test   end: test_sub_bignum_256b()]\r\n");
+    test_sub_bignum_unsigned_256b("sub_bignum", sub_bignum);
+    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b");
+    _COND_DO_TEST_(keyin)
+    test_sub_bignum_unsigned_256b("sub_bignum_with_add_twos", sub_bignum_with_add_twos);
+    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
