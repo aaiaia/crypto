@@ -114,7 +114,62 @@ size_t find_bignum_MSBL(const bignum_s* bignum)
     return msbln;
 }
 
-#include <stdio.h>
+/* MSB: Most Significant Bit */
+size_t find_bignum_MSBL_bitLoc(const bignum_s* bignum, const size_t bitloc)
+{
+#define _WD_MSK_(bl)    (BIGNUM_MAX>>((BIGNUM_BITS-1U)-BIGNUM_BITS_REM(bl)))
+    size_t find_wdidx = SIZE_MAX; // word index used in bignum_s
+    size_t find_msblw = SIZE_MAX; // Most Significant Bit Location at word(not 1'b0)
+    size_t find_msbln = SIZE_MAX; // Most Significant Bit Location at bignum(return value)
+    size_t idx;
+    bignum_t loc;
+    if(bignum == NULL)          return SIZE_MAX;
+    if(bitloc >= bignum->bits)  return SIZE_MAX;    // start bit location is over bit width
+
+    // 0 -> 0, 31 -> 0, 32 -> 1, 63 -> 1, 64 -> 2, 95 -> 2, 96 -> 3 , ...
+    idx = BIGNUM_BITS_IDX(bitloc);
+    if((bignum->nums[idx] & _WD_MSK_(bitloc)) != 0x0UL)
+    {
+        find_wdidx = idx;
+    }
+    else
+    {
+        idx = (BIGNUM_BITS_IDX(bitloc) - 1U);
+        while(idx < SIZE_MAX)
+        {
+            if(bignum->nums[idx] != 0x0UL)
+            {
+                find_wdidx = idx;
+                break;
+            }
+            idx--;
+        }
+    }
+
+    if(find_wdidx != SIZE_MAX)
+    {
+        if(find_wdidx == BIGNUM_BITS_IDX(bitloc))   loc = BIGNUM_BITS_REM(bitloc);
+        else                                        loc = (BIGNUM_BITS - 1UL);
+        while(loc < BIGNUM_MAX)
+        {
+            if(_XSB_MASK_(bignum->nums[find_wdidx] >> loc) == 0x1U)
+            {
+                find_msblw = loc;
+                break;
+            }
+            loc--;
+        }
+    }
+
+    if(find_msblw != SIZE_MAX)
+    {
+        find_msbln = BIGNUM_LEN_BITS(find_wdidx) + find_msblw;
+    }
+
+    return find_msbln;
+#undef _WD_MSK_
+}
+
 /* LSB: Least Significant Bit */
 size_t find_bignum_LSBL(const bignum_s* bignum)
 {
@@ -149,6 +204,62 @@ size_t find_bignum_LSBL(const bignum_s* bignum)
     }
 
     return lsbln;
+}
+
+/* LSB: Least Significant Bit */
+size_t find_bignum_LSBL_bitLoc(const bignum_s* bignum, const size_t bitloc)
+{
+#define _WD_MSK_(bl)    (BIGNUM_MAX<<(BIGNUM_BITS_REM(bl)))
+    size_t find_wdidx = SIZE_MAX; // word index used in bignum_s
+    size_t find_lsblw = SIZE_MAX; // Least Significant Bit Location at word(not 1'b0)
+    size_t find_lsbln = SIZE_MAX; // Least Significant Bit Location at bignum(return value)
+    size_t idx;
+    bignum_t loc;
+    if(bignum == NULL)          return SIZE_MAX;
+    if(bitloc >= bignum->bits)  return SIZE_MAX;    // start bit location is over bit width
+
+    // 0 -> 0, 31 -> 0, 32 -> 1, 63 -> 1, 64 -> 2, 95 -> 2, 96 -> 3 , ...
+    idx = BIGNUM_BITS_IDX(bitloc);
+    if((bignum->nums[idx] & _WD_MSK_(bitloc)) != 0x0UL)
+    {
+        find_wdidx = idx;
+    }
+    else
+    {
+        idx = (BIGNUM_BITS_IDX(bitloc) + 1U);
+        while(idx < bignum->nlen)
+        {
+            if(bignum->nums[idx] != 0x0UL)
+            {
+                find_wdidx = idx;
+                break;
+            }
+            idx++;
+        }
+    }
+
+    if(find_wdidx != SIZE_MAX)
+    {
+        if(find_wdidx == BIGNUM_BITS_IDX(bitloc))   loc = BIGNUM_BITS_REM(bitloc);
+        else                                        loc = 0UL;
+        while(loc < BIGNUM_BITS)
+        {
+            if(_XSB_MASK_(bignum->nums[find_wdidx] >> loc) == 0x1U)
+            {
+                find_lsblw = loc;
+                break;
+            }
+            loc++;
+        }
+    }
+
+    if(find_lsblw != SIZE_MAX)
+    {
+        find_lsbln = BIGNUM_LEN_BITS(find_wdidx) + find_lsblw;
+    }
+
+    return find_lsbln;
+#undef _WD_MSK_
 }
 #undef _XSB_MASK_
 

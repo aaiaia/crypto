@@ -3083,25 +3083,151 @@ void test_bignum_bit_contol(void)
 void test_find_bignum_MSBL_LSBL(void)
 {
 #define TEST_MSBL_LSBL_BIT_LEN  256U
+    bignum_s* test_bignum_case0;
+    bignum_s* test_bignum_case1;
+    bignum_s* test_bignum_case2;
+    bignum_s* test_bignum_case3;
+    bignum_s* test_bignum_case4;
+    bignum_s* test_bignum_case5;
+    bignum_s* test_bignum_case6;
+    bignum_s* test_bignum_case7;
+    bignum_s* test_bignum_case8;
+    bignum_s* test_bignum_case9;
+
     bignum_s* test_bignum;
     size_t test_msbl, test_lsbl;
     size_t test_ref_msbl, test_ref_lsbl;
-    bignum_t test_ovf;
+    size_t test_ref_bitnum;
 
-    test_bignum = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case0 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case1 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case2 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case3 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case4 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case5 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case6 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case7 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case8 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
+    test_bignum_case9 = mkBigNum(TEST_MSBL_LSBL_BIT_LEN);
 
-    /* MSB and LSB find case 0 */
+    test_bignum_case0->nums[0] = 0x00000000;
+    test_bignum_case0->nums[1] = 0x00000000;
+    test_bignum_case0->nums[2] = 0x00000000;
+    test_bignum_case0->nums[3] = 0x00000000;
+    test_bignum_case0->nums[4] = 0x00000000;
+    test_bignum_case0->nums[5] = 0x00000000;
+    test_bignum_case0->nums[6] = 0x00000000;
+    test_bignum_case0->nums[7] = 0x00000000;
+
+    test_bignum_case1->nums[0] = 0x00000001;
+    test_bignum_case1->nums[1] = 0x00000000;
+    test_bignum_case1->nums[2] = 0x00000000;
+    test_bignum_case1->nums[3] = 0x00000000;
+    test_bignum_case1->nums[4] = 0x00000000;
+    test_bignum_case1->nums[5] = 0x00000000;
+    test_bignum_case1->nums[6] = 0x00000000;
+    test_bignum_case1->nums[7] = 0x00000000;
+
+    test_bignum_case2->nums[0] = 0x00000000;
+    test_bignum_case2->nums[1] = 0x00000000;
+    test_bignum_case2->nums[2] = 0x00000000;
+    test_bignum_case2->nums[3] = 0x00000000;
+    test_bignum_case2->nums[4] = 0x00000000;
+    test_bignum_case2->nums[5] = 0x00000000;
+    test_bignum_case2->nums[6] = 0x00000000;
+    test_bignum_case2->nums[7] = 0x80000000;
+
+    test_bignum_case3->nums[0] = 0x00000001;
+    test_bignum_case3->nums[1] = 0x00000000;
+    test_bignum_case3->nums[2] = 0x00000000;
+    test_bignum_case3->nums[3] = 0x00000000;
+    test_bignum_case3->nums[4] = 0x00000000;
+    test_bignum_case3->nums[5] = 0x00000000;
+    test_bignum_case3->nums[6] = 0x00000000;
+    test_bignum_case3->nums[7] = 0x80000000;
+
+    test_bignum_case4->nums[0] = 0x00000000;
+    test_bignum_case4->nums[1] = 0x00000000;
+    test_bignum_case4->nums[2] = 0x00000000;
+    test_bignum_case4->nums[3] = 0x00000001;
+    test_bignum_case4->nums[4] = 0x80000000;
+    test_bignum_case4->nums[5] = 0x00000000;
+    test_bignum_case4->nums[6] = 0x00000000;
+    test_bignum_case4->nums[7] = 0x00000000;
+
+    test_bignum_case5->nums[0] = 0x00018000;
+    test_bignum_case5->nums[1] = 0x00000000;
+    test_bignum_case5->nums[2] = 0x00000000;
+    test_bignum_case5->nums[3] = 0x00000000;
+    test_bignum_case5->nums[4] = 0x00000000;
+    test_bignum_case5->nums[5] = 0x00000000;
+    test_bignum_case5->nums[6] = 0x00000000;
+    test_bignum_case5->nums[7] = 0x00000000;
+
+    test_bignum_case6->nums[0] = 0x00000000;
+    test_bignum_case6->nums[1] = 0x00000000;
+    test_bignum_case6->nums[2] = 0x00000000;
+    test_bignum_case6->nums[3] = 0x00000000;
+    test_bignum_case6->nums[4] = 0x00000000;
+    test_bignum_case6->nums[5] = 0x00000000;
+    test_bignum_case6->nums[6] = 0x00000000;
+    test_bignum_case6->nums[7] = 0x00018000;
+
+    test_bignum_case7->nums[0] = 0x00000000;
+    test_bignum_case7->nums[1] = 0x00000000;
+    test_bignum_case7->nums[2] = 0x00000000;
+    test_bignum_case7->nums[3] = 0x00000000;
+    test_bignum_case7->nums[4] = 0x00018000;
+    test_bignum_case7->nums[5] = 0x00000000;
+    test_bignum_case7->nums[6] = 0x00000000;
+    test_bignum_case7->nums[7] = 0x00000000;
+
+    test_bignum_case8->nums[0] = 0x00000000;
+    test_bignum_case8->nums[1] = 0x00000000;
+    test_bignum_case8->nums[2] = 0x00000000;
+    test_bignum_case8->nums[3] = 0x00018000;
+    test_bignum_case8->nums[4] = 0x00000000;
+    test_bignum_case8->nums[5] = 0x00000000;
+    test_bignum_case8->nums[6] = 0x00000000;
+    test_bignum_case8->nums[7] = 0x00000000;
+
+    test_bignum_case9->nums[0] = 0x00000000;
+    test_bignum_case9->nums[1] = 0x00010000;
+    test_bignum_case9->nums[2] = 0x00000000;
+    test_bignum_case9->nums[3] = 0x00000000;
+    test_bignum_case9->nums[4] = 0x00000000;
+    test_bignum_case9->nums[5] = 0x00000000;
+    test_bignum_case9->nums[6] = 0x00008000;
+    test_bignum_case9->nums[7] = 0x00000000;
+
+    typedef struct {
+        bignum_s* in_bignum;
+        size_t ref_msbl;
+        size_t ref_lsbl;
+        size_t ref_bitnum;
+    } test_finf_bignum_MSBnLSB_t;
+
+    test_finf_bignum_MSBnLSB_t tvSet[] = {
+        {test_bignum_case0, SIZE_MAX,                       SIZE_MAX,                       0UL },
+        {test_bignum_case1, 0UL,                            0UL,                            1UL },
+        {test_bignum_case2, TEST_MSBL_LSBL_BIT_LEN - 1UL,   TEST_MSBL_LSBL_BIT_LEN - 1UL,   1UL },
+        {test_bignum_case3, TEST_MSBL_LSBL_BIT_LEN - 1UL,   0UL,                            2UL },
+        {test_bignum_case4, (5UL * BIGNUM_BITS) - 1UL,      ((4UL - 1UL) * BIGNUM_BITS),    2UL },
+        {test_bignum_case5, (32UL * (1UL - 1UL)) + 16UL,    (32UL * (1UL - 1UL)) + 15UL,    2UL },
+        {test_bignum_case6, (32UL * (8UL - 1UL)) + 16UL,    (32UL * (8UL - 1UL)) + 15UL,    2UL },
+        {test_bignum_case7, (32UL * (5UL - 1UL)) + 16UL,    (32UL * (5UL - 1UL)) + 15UL,    2UL },
+        {test_bignum_case8, (32UL * (4UL - 1UL)) + 16UL,    (32UL * (4UL - 1UL)) + 15UL,    2UL },
+        {test_bignum_case9, (32UL * (7UL - 1UL)) + 15UL,    (32UL * (2UL - 1UL)) + 16UL,    2UL },
+    };
+
+    /* find_bignum_MSBL, find_bignum_LSBL */
+    for(size_t i = 0UL; i < sizeof(tvSet)/sizeof(test_finf_bignum_MSBnLSB_t); i++)
     {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
+        test_bignum = tvSet[i].in_bignum;
+        test_ref_msbl = tvSet[i].ref_msbl;
+        test_ref_lsbl = tvSet[i].ref_lsbl;
 
-        // set reference
-        test_ref_msbl = SIZE_MAX;
-        test_ref_lsbl = SIZE_MAX;
-
-        // set init vector
-        // ZERO
-
+        printf("case%ld ", i);
         test_print_bignum(test_bignum, "test_bignum");
         // run test function 'find_bignum_MSBL'
         TICK_TIME_START("find_bignum_MSBL");
@@ -3130,370 +3256,107 @@ void test_find_bignum_MSBL_LSBL(void)
         TEST_ASSERT(test_ref_lsbl == test_lsbl);
     }
 
-    /* MSB and LSB find case 1 */
+    /* find_bignum_MSBL_bitLoc, find_bignum_LSBL_bitLoc */
+    for(size_t i = 0UL; i < sizeof(tvSet)/sizeof(test_finf_bignum_MSBnLSB_t); i++)
     {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
+        test_bignum = tvSet[i].in_bignum;
+        test_ref_msbl = tvSet[i].ref_msbl;
+        test_ref_lsbl = tvSet[i].ref_lsbl;
+        test_ref_bitnum = tvSet[i].ref_bitnum;
 
-        // set reference
-        test_ref_msbl = 0UL;
-        test_ref_lsbl = 0UL;
-
-        // set init vector
-        test_bignum->nums[0] = 0x1U;
-
+        printf("case[%ld] first ", i);
         test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
+        // run test function 'find_bignum_MSBL_bitLoc'
+        TICK_TIME_START("find_bignum_MSBL_bitLoc");
+        if((test_msbl = find_bignum_MSBL_bitLoc(test_bignum, test_bignum->bits-1UL)) != SIZE_MAX) {
             TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
+            printf("find_bignum_MSBL_bitLoc(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
         } else {
             TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
+            printf("find_bignum_MSBL_bitLoc: can't find MSB location\r\n");
         }
 
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
+        printf("find_bignum_MSBL_bitLoc() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_ref_msbl == test_msbl);
 
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
+        // run test function 'find_bignum_LSBL_bitLoc'
+        TICK_TIME_START("find_bignum_LSBL_bitLoc");
+        if((test_lsbl = find_bignum_LSBL_bitLoc(test_bignum, 0UL)) != SIZE_MAX) {
             TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
+            printf("find_bignum_LSBL_bitLoc(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
         } else {
             TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
+            printf("find_bignum_LSBL_bitLoc: can't find MSB location\r\n");
         }
 
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
+        printf("find_bignum_LSBL_bitLoc() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
 
-    /* MSB and LSB find case 2 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = TEST_MSBL_LSBL_BIT_LEN - 1UL;
-        test_ref_lsbl = TEST_MSBL_LSBL_BIT_LEN - 1UL;
-
-        // set init vector
-        test_bignum->nums[test_bignum->nlen - 1UL] = (0x1U << (BIGNUM_BITS - 1U));
-
+        printf("case[%ld] next", i);
         test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
+        // run test function 'find_bignum_MSBL_bitLoc'
+        TICK_TIME_START("find_bignum_MSBL_bitLoc");
+        if((test_msbl = find_bignum_MSBL_bitLoc(test_bignum, test_msbl-1UL)) != SIZE_MAX) {
             TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
+            printf("find_bignum_MSBL_bitLoc(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
         } else {
             TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
+            printf("find_bignum_MSBL_bitLoc: can't find MSB location\r\n");
         }
 
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_msbl == test_msbl);
+        if(test_ref_bitnum == 0)
+        {
+            printf("find_bignum_MSBL_bitLoc() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(test_ref_msbl == test_msbl);
+        }
+        else if(test_ref_bitnum == 1)
+        {
+            printf("find_bignum_MSBL_bitLoc() is %s\r\n", ((SIZE_MAX == test_msbl)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(SIZE_MAX == test_msbl);
+        }
+        else
+        {
+            printf("find_bignum_MSBL_bitLoc() is %s\r\n", ((test_ref_lsbl == test_msbl)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(test_ref_lsbl == test_msbl);
+        }
 
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
+        // run test function 'find_bignum_LSBL_bitLoc'
+        TICK_TIME_START("find_bignum_LSBL_bitLoc");
+        if((test_lsbl = find_bignum_LSBL_bitLoc(test_bignum, test_lsbl+1UL)) != SIZE_MAX) {
             TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
+            printf("find_bignum_LSBL_bitLoc(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
         } else {
             TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
+            printf("find_bignum_LSBL_bitLoc: can't find MSB location\r\n");
         }
 
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_lsbl == test_lsbl);
+        if(test_ref_bitnum == 0)
+        {
+            printf("find_bignum_LSBL_bitLoc() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(test_ref_lsbl == test_lsbl);
+        }
+        else if(test_ref_bitnum == 1)
+        {
+            printf("find_bignum_LSBL_bitLoc() is %s\r\n", ((SIZE_MAX == test_lsbl)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(SIZE_MAX == test_lsbl);
+        }
+        else
+        {
+            printf("find_bignum_LSBL_bitLoc() is %s\r\n", ((test_ref_msbl == test_lsbl)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(test_ref_msbl == test_lsbl);
+        }
     }
 
-    /* MSB and LSB find case 3 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = TEST_MSBL_LSBL_BIT_LEN - 1UL;
-        test_ref_lsbl = 0UL;
-
-        // set init vector
-        test_bignum->nums[test_bignum->nlen - 1UL] = (0x1U << (BIGNUM_BITS - 1U));
-        test_bignum->nums[0] = 0x1U;
-
-        test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_msbl == test_msbl);
-
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
-
-    /* MSB and LSB find case 4 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = (5UL * BIGNUM_BITS) - 1UL;
-        test_ref_lsbl = ((4UL - 1UL) * BIGNUM_BITS);
-
-        // set init vector
-        test_bignum->nums[5UL - 1UL] = (0x1U << (BIGNUM_BITS - 1U));
-        test_bignum->nums[4UL - 1UL] = 0x1U;
-
-        test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_msbl == test_msbl);
-
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
-
-    /* MSB and LSB find case 5 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = (32UL * (1UL - 1UL)) + 16UL;
-        test_ref_lsbl = (32UL * (1UL - 1UL)) + 15UL;
-
-        // set init vector
-        test_bignum->nums[(1UL - 1UL)] = 0x00018000U; // 32b'0000_0000_0000_0001_1000_0000_0000_0000
-
-        test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        //TEST_ASSERT(test_ref_msbl == test_msbl);
-
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        //TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
-
-    /* MSB and LSB find case 6 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = (32UL * (8UL - 1UL)) + 16UL;
-        test_ref_lsbl = (32UL * (8UL - 1UL)) + 15UL;
-
-        // set init vector
-        test_bignum->nums[(8UL - 1UL)] = 0x00018000U; // 32b'0000_0000_0000_0001_1000_0000_0000_0000
-
-        test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_msbl == test_msbl);
-
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
-
-    /* MSB and LSB find case 7 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = (32UL * (5UL - 1UL)) + 16UL;
-        test_ref_lsbl = (32UL * (5UL - 1UL)) + 15UL;
-
-        // set init vector
-        test_bignum->nums[(5UL - 1UL)] = 0x00018000U; // 32b'0000_0000_0000_0001_1000_0000_0000_0000
-
-        test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_msbl == test_msbl);
-
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
-
-    /* MSB and LSB find case 8 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = (32UL * (4UL - 1UL)) + 16UL;
-        test_ref_lsbl = (32UL * (4UL - 1UL)) + 15UL;
-
-        // set init vector
-        test_bignum->nums[(4UL - 1UL)] = 0x00018000U; // 32b'0000_0000_0000_0001_1000_0000_0000_0000
-
-        test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_msbl == test_msbl);
-
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
-
-    /* MSB and LSB find case 8 */
-    {
-        // clr bitnum
-        (void)memset(test_bignum->nums, 0x0U, test_bignum->size);
-
-        // set reference
-        test_ref_msbl = (32UL * (7UL - 1UL)) + 15UL;
-        test_ref_lsbl = (32UL * (2UL - 1UL)) + 16UL;
-
-        // set init vector
-        test_bignum->nums[(7UL - 1UL)] = 0x00008000U; // 32b'0000_0000_0000_0001_1000_0000_0000_0000
-        test_bignum->nums[(2UL - 1UL)] = 0x00010000U; // 32b'0000_0000_0000_0001_1000_0000_0000_0000
-
-        test_print_bignum(test_bignum, "test_bignum");
-        // run test function 'find_bignum_MSBL'
-        TICK_TIME_START("find_bignum_MSBL");
-        if((test_msbl = find_bignum_MSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL(test_bignum) = 0x%lx, %lu\r\n", test_msbl, test_msbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_MSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_MSBL() is %s\r\n", ((test_ref_msbl == test_msbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_msbl == test_msbl);
-
-        // run test function 'find_bignum_LSBL'
-        TICK_TIME_START("find_bignum_LSBL");
-        if((test_lsbl = find_bignum_LSBL(test_bignum)) != SIZE_MAX) {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL(test_bignum) = 0x%lx, %lu\r\n", test_lsbl, test_lsbl);
-        } else {
-            TICK_TIME_END;
-            printf("find_bignum_LSBL: can't find MSB location\r\n");
-        }
-
-        printf("find_bignum_LSBL() is %s\r\n", ((test_ref_lsbl == test_lsbl)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_ref_lsbl == test_lsbl);
-    }
-
-    rmBitNum(&test_bignum);
+    rmBitNum(&test_bignum_case0);
+    rmBitNum(&test_bignum_case1);
+    rmBitNum(&test_bignum_case2);
+    rmBitNum(&test_bignum_case3);
+    rmBitNum(&test_bignum_case4);
+    rmBitNum(&test_bignum_case5);
+    rmBitNum(&test_bignum_case6);
+    rmBitNum(&test_bignum_case7);
+    rmBitNum(&test_bignum_case8);
+    rmBitNum(&test_bignum_case9);
 #undef TEST_MSBL_LSBL_BIT_LEN
 }
 
