@@ -3474,11 +3474,15 @@ void test_lslnb_bignum_self(void)
 {
 #define TEST_LSLNB_BIGNUM_BIT_LEN    1024
 #define TEST_LSLNB_BIGNUM_NUM_LEN    32
-    int test_cmp;
+#define _FIRST_IDX_ 0U
+    int test_memcmp;
+    bool test_cmp_co;
     ReturnType fr;
 
     bignum_s* test_refer;
+    bignum_t test_ref_co;
     bignum_s* test_sftb;
+    bignum_t test_ci, test_co;
 
     test_refer = mkBigNum(TEST_LSLNB_BIGNUM_BIT_LEN);
     test_sftb = mkBigNum(TEST_LSLNB_BIGNUM_BIT_LEN);
@@ -3488,54 +3492,81 @@ void test_lslnb_bignum_self(void)
     {
         (void)memset(test_refer->nums, 0x0U, test_refer->size);
         (void)memset(test_sftb->nums, 0x0U, test_sftb->size);
+        test_ci = 0U;
+        test_ref_co = 0U;
 
         srand(time(NULL));
+        /* carry into LSB */
+        for(size_t cbi = 0UL; cbi < lsl; cbi++)
+        {
+            bignum_t rbit = (rand()&0x1);
+            test_ci |= (rbit<<cbi);
+        }
+        // set reference
+        test_refer->nums[_FIRST_IDX_] |= test_ci;
+
+        /* shifted */
         for(size_t rvg = 0UL; rvg < TEST_LSLNB_BIGNUM_BIT_LEN; rvg++)
         {
             bignum_t rbit = (rand()&0x1);
             // set reference
             if(((rvg+lsl)>>5U) < (TEST_LSLNB_BIGNUM_BIT_LEN>>5U))
             {
+                /* in bignum */
                 test_refer->nums[((rvg+lsl)>>5U)] |= (rbit<<((rvg+lsl)&0x1F));
+            }
+            else
+            {
+                /* carry out */
+                test_ref_co |= (rbit<<((rvg+lsl)&0x1F));
             }
 
             // set init vector
             test_sftb->nums[(rvg>>5U)] |= (rbit<<(rvg&0x1F));
         }
 
+        printf("cin: 0x%08x\n", test_ci);
         test_print_bignum(test_sftb, "lslnb(before)");
         // run test function
         printf("[lsl: %4lu]", lsl);
         TICK_TIME_START("lslnb_bignum_self");
-        if(fr = lslnb_bignum_self(test_sftb, NULL, 0U, lsl)) {
+        if(fr = lslnb_bignum_self(test_sftb, &test_co, test_ci, lsl)) {
             TICK_TIME_END;
             printf("lslnb_bignum_self(test_sftb, %lu) = %d\r\n", lsl, fr);
         } else {
             TICK_TIME_END;
         }
 
-        test_cmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
+        test_memcmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
+        test_cmp_co = (test_ref_co == test_co);
         test_print_bignum(test_refer, "refer");
+        printf("ref cout: 0x%08x\n", test_ref_co);
         test_print_bignum(test_sftb, "lslnb(after)");
-        printf("lslnb_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
+        printf("cout: 0x%08x\n", test_co);
+        printf("lslnb_bignum_self() is %s\r\n", (((test_memcmp == 0) && (test_cmp_co))?MES_PASS:MES_FAIL));
+        TEST_ASSERT((test_memcmp == 0) && (test_cmp_co));
     }
 
     rmBitNum(&test_refer);
     rmBitNum(&test_sftb);
 #undef TEST_LSLNB_BIGNUM_BIT_LEN
 #undef TEST_LSLNB_BIGNUM_NUM_LEN
+#undef _FIRST_IDX_
 }
 
 void test_lsrnb_bignum_self(void)
 {
-#define TEST_LSRNB_BIGNUM_BIT_LEN    1024
-#define TEST_LSRNB_BIGNUM_NUM_LEN    32
-    int test_cmp;
+#define TEST_LSRNB_BIGNUM_BIT_LEN   1024
+#define TEST_LSRNB_BIGNUM_NUM_LEN   32
+#define _LAST_IDX_  ((TEST_LSRNB_BIGNUM_BIT_LEN/BIGNUM_BITS)-1U)
+    int test_memcmp;
+    bool test_cmp_co;
     ReturnType fr;
 
     bignum_s* test_refer;
+    bignum_t test_ref_co;
     bignum_s* test_sftb;
+    bignum_t test_ci, test_co;
 
     test_refer = mkBigNum(TEST_LSRNB_BIGNUM_BIT_LEN);
     test_sftb = mkBigNum(TEST_LSRNB_BIGNUM_BIT_LEN);
@@ -3545,43 +3576,65 @@ void test_lsrnb_bignum_self(void)
     {
         (void)memset(test_refer->nums, 0x0U, test_refer->size);
         (void)memset(test_sftb->nums, 0x0U, test_sftb->size);
+        test_ci = 0U;
+        test_ref_co = 0U;
 
         srand(time(NULL));
+        /* carry into MSB */
+        for(size_t cbi = 0UL; cbi < lsr; cbi++)
+        {
+            bignum_t rbit = (rand()&0x1);
+            test_ci |= (rbit<<(BIGNUM_BITS-1U)-cbi);
+        }
+        // set reference
+        test_refer->nums[_LAST_IDX_] |= test_ci;
+
         for(size_t rvg = 0UL; rvg < TEST_LSRNB_BIGNUM_BIT_LEN; rvg++)
         {
             bignum_t rbit = (rand()&0x1);
             // set reference
             if(((rvg-lsr)>>5U) < (TEST_LSRNB_BIGNUM_BIT_LEN>>5U))
             {
+                /* in bignum */
                 test_refer->nums[((rvg-lsr)>>5U)] |= (rbit<<((rvg-lsr)&0x1F));
+            }
+            else
+            {
+                /* carry out */
+                test_ref_co |= (rbit<<((rvg-lsr)&0x1F));
             }
 
             // set init vector
             test_sftb->nums[(rvg>>5U)] |= (rbit<<(rvg&0x1F));
         }
 
+        printf("cin: 0x%08x\n", test_ci);
         test_print_bignum(test_sftb, "lsrnb(before)");
         // run test function
         printf("[lsr: %4lu]", lsr);
         TICK_TIME_START("lsrnb_bignum_self");
-        if(fr = lsrnb_bignum_self(test_sftb, NULL, 0UL, lsr)) {
+        if(fr = lsrnb_bignum_self(test_sftb, &test_co, test_ci, lsr)) {
             TICK_TIME_END;
             printf("lsrnb_bignum_self(test_sftb, %lu) = %d\r\n", lsr, fr);
         } else {
             TICK_TIME_END;
         }
 
-        test_cmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
+        test_memcmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
+        test_cmp_co = (test_ref_co == test_co);
         test_print_bignum(test_refer, "refer");
+        printf("ref cout: 0x%08x\n", test_ref_co);
         test_print_bignum(test_sftb, "lsrnb(after)");
-        printf("lsrnb_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
+        printf("cout: 0x%08x\n", test_co);
+        printf("lsrnb_bignum_self() is %s\r\n", (((test_memcmp == 0) && (test_cmp_co))?MES_PASS:MES_FAIL));
+        TEST_ASSERT(((test_memcmp == 0) && (test_cmp_co)));
     }
 
     rmBitNum(&test_refer);
     rmBitNum(&test_sftb);
 #undef TEST_LSRNB_BIGNUM_BIT_LEN
 #undef TEST_LSRNB_BIGNUM_NUM_LEN
+#undef _LAST_IDX_
 }
 
 void test_lsl1b_bignum_self(void)
