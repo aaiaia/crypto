@@ -298,7 +298,7 @@ ReturnType lslb_bignum(bignum_s* d, const size_t blen)
             if(lsl != 0UL)
             {
                 /* Shift condition */
-                return lslnb_bignum(d, NULL, 0U, lsl);
+                return lslnb_bignum_self(d, NULL, 0U, lsl);
             }
             else
             {
@@ -357,7 +357,7 @@ ReturnType lsrb_bignum(bignum_s* d, const size_t blen)
             if(lsr != 0UL)
             {
                 /* Shift condition */
-                return lsrnb_bignum(d, NULL, 0U, lsr);
+                return lsrnb_bignum_self(d, NULL, 0U, lsr);
             }
             else
             {
@@ -381,20 +381,28 @@ ReturnType lsrb_bignum(bignum_s* d, const size_t blen)
     return E_OK;
 }
 
-ReturnType lslnb_bignum(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lslb)
+ReturnType lslnb_bignum_self(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lslb)
 {
     if(d != NULL)
     {
         if(BIGNUM_BITS > lslb)
         {
             const size_t lsrb = BIGNUM_BITS - lslb;
-            bignum_t c = ci;
+            bignum_t c;
 
-            for(size_t fi = 0U; fi != d->nlen; fi++)
+            if(lslb != 0U)
             {
-                bignum_t tmp = d->nums[fi];
-                d->nums[fi] = ((d->nums[fi] << lslb) | c);
-                c = (tmp >> lsrb);
+                c = ci;
+                for(size_t fi = 0U; fi != d->nlen; fi++)
+                {
+                    bignum_t tmp = d->nums[fi];
+                    d->nums[fi] = ((d->nums[fi] << lslb) | c);
+                    c = (tmp >> lsrb);
+                }
+            }
+            else
+            {
+                c = 0U;
             }
 
             if(co != NULL)
@@ -418,20 +426,28 @@ ReturnType lslnb_bignum(bignum_s* d, bignum_t* co, const bignum_t ci, const size
     return E_OK;
 }
 
-ReturnType lsrnb_bignum(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lsrb)
+ReturnType lsrnb_bignum_self(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lsrb)
 {
     if(d != NULL)
     {
         if(BIGNUM_BITS > lsrb)
         {
             const size_t lslb = BIGNUM_BITS - lsrb;
-            bignum_t c = ci;
+            bignum_t c;
 
-            for(size_t ii = d->nlen-1U; ii != SIZE_MAX ; ii--)
+            if(lsrb != 0U)
             {
-                bignum_t tmp = d->nums[ii];
-                d->nums[ii] = ((d->nums[ii] >> lsrb) | c);
-                c = (tmp << lslb);
+                c = ci;
+                for(size_t ii = d->nlen-1U; ii != SIZE_MAX ; ii--)
+                {
+                    bignum_t tmp = d->nums[ii];
+                    d->nums[ii] = ((d->nums[ii] >> lsrb) | c);
+                    c = (tmp << lslb);
+                }
+            }
+            else
+            {
+                c = 0U;
             }
 
             if(co != NULL)

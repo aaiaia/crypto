@@ -3363,7 +3363,6 @@ void test_find_bignum_MSBL_LSBL(void)
 void test_lslb_bignum(void)
 {
 #define TEST_LSLB_BIGNUM_BIT_LEN    1024
-#define TEST_LSLB_BIGNUM_NUM_LEN    32
     int test_cmp;
     ReturnType fr;
 
@@ -3414,13 +3413,11 @@ void test_lslb_bignum(void)
     rmBitNum(&test_refer);
     rmBitNum(&test_sftb);
 #undef TEST_LSLB_BIGNUM_BIT_LEN
-#undef TEST_LSLB_BIGNUM_NUM_LEN
 }
 
 void test_lsrb_bignum(void)
 {
 #define TEST_LSRB_BIGNUM_BIT_LEN    1024
-#define TEST_LSRB_BIGNUM_NUM_LEN    32
     int test_cmp;
     ReturnType fr;
 
@@ -3471,10 +3468,123 @@ void test_lsrb_bignum(void)
     rmBitNum(&test_refer);
     rmBitNum(&test_sftb);
 #undef TEST_LSRB_BIGNUM_BIT_LEN
-#undef TEST_LSRB_BIGNUM_NUM_LEN
 }
 
-void test_lsl1b_bignum(void)
+void test_lslnb_bignum_self(void)
+{
+#define TEST_LSLNB_BIGNUM_BIT_LEN    1024
+#define TEST_LSLNB_BIGNUM_NUM_LEN    32
+    int test_cmp;
+    ReturnType fr;
+
+    bignum_s* test_refer;
+    bignum_s* test_sftb;
+
+    test_refer = mkBigNum(TEST_LSLNB_BIGNUM_BIT_LEN);
+    test_sftb = mkBigNum(TEST_LSLNB_BIGNUM_BIT_LEN);
+
+    printf("<Shift sequence rand>\r\n");
+    for(size_t lsl = 0UL; lsl < TEST_LSLNB_BIGNUM_NUM_LEN; lsl++)
+    {
+        (void)memset(test_refer->nums, 0x0U, test_refer->size);
+        (void)memset(test_sftb->nums, 0x0U, test_sftb->size);
+
+        srand(time(NULL));
+        for(size_t rvg = 0UL; rvg < TEST_LSLNB_BIGNUM_BIT_LEN; rvg++)
+        {
+            bignum_t rbit = (rand()&0x1);
+            // set reference
+            if(((rvg+lsl)>>5U) < (TEST_LSLNB_BIGNUM_BIT_LEN>>5U))
+            {
+                test_refer->nums[((rvg+lsl)>>5U)] |= (rbit<<((rvg+lsl)&0x1F));
+            }
+
+            // set init vector
+            test_sftb->nums[(rvg>>5U)] |= (rbit<<(rvg&0x1F));
+        }
+
+        test_print_bignum(test_sftb, "lslnb(before)");
+        // run test function
+        printf("[lsl: %4lu]", lsl);
+        TICK_TIME_START("lslnb_bignum_self");
+        if(fr = lslnb_bignum_self(test_sftb, NULL, 0U, lsl)) {
+            TICK_TIME_END;
+            printf("lslnb_bignum_self(test_sftb, %lu) = %d\r\n", lsl, fr);
+        } else {
+            TICK_TIME_END;
+        }
+
+        test_cmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
+        test_print_bignum(test_refer, "refer");
+        test_print_bignum(test_sftb, "lslnb(after)");
+        printf("lslnb_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+
+    rmBitNum(&test_refer);
+    rmBitNum(&test_sftb);
+#undef TEST_LSLNB_BIGNUM_BIT_LEN
+#undef TEST_LSLNB_BIGNUM_NUM_LEN
+}
+
+void test_lsrnb_bignum_self(void)
+{
+#define TEST_LSRNB_BIGNUM_BIT_LEN    1024
+#define TEST_LSRNB_BIGNUM_NUM_LEN    32
+    int test_cmp;
+    ReturnType fr;
+
+    bignum_s* test_refer;
+    bignum_s* test_sftb;
+
+    test_refer = mkBigNum(TEST_LSRNB_BIGNUM_BIT_LEN);
+    test_sftb = mkBigNum(TEST_LSRNB_BIGNUM_BIT_LEN);
+
+    printf("<Shift sequence rand>\r\n");
+    for(size_t lsr = 0UL; lsr < TEST_LSRNB_BIGNUM_NUM_LEN; lsr++)
+    {
+        (void)memset(test_refer->nums, 0x0U, test_refer->size);
+        (void)memset(test_sftb->nums, 0x0U, test_sftb->size);
+
+        srand(time(NULL));
+        for(size_t rvg = 0UL; rvg < TEST_LSRNB_BIGNUM_BIT_LEN; rvg++)
+        {
+            bignum_t rbit = (rand()&0x1);
+            // set reference
+            if(((rvg-lsr)>>5U) < (TEST_LSRNB_BIGNUM_BIT_LEN>>5U))
+            {
+                test_refer->nums[((rvg-lsr)>>5U)] |= (rbit<<((rvg-lsr)&0x1F));
+            }
+
+            // set init vector
+            test_sftb->nums[(rvg>>5U)] |= (rbit<<(rvg&0x1F));
+        }
+
+        test_print_bignum(test_sftb, "lsrnb(before)");
+        // run test function
+        printf("[lsr: %4lu]", lsr);
+        TICK_TIME_START("lsrnb_bignum_self");
+        if(fr = lsrnb_bignum_self(test_sftb, NULL, 0UL, lsr)) {
+            TICK_TIME_END;
+            printf("lsrnb_bignum_self(test_sftb, %lu) = %d\r\n", lsr, fr);
+        } else {
+            TICK_TIME_END;
+        }
+
+        test_cmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
+        test_print_bignum(test_refer, "refer");
+        test_print_bignum(test_sftb, "lsrnb(after)");
+        printf("lsrnb_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
+
+    rmBitNum(&test_refer);
+    rmBitNum(&test_sftb);
+#undef TEST_LSRNB_BIGNUM_BIT_LEN
+#undef TEST_LSRNB_BIGNUM_NUM_LEN
+}
+
+void test_lsl1b_bignum_self(void)
 {
 #define TEST_LSL1B_BIGNUM_BIT_LEN   1024U
 #define TEST_LSL1B_BIGNUM_REF       0x08108051U
@@ -3501,10 +3611,10 @@ void test_lsl1b_bignum(void)
 
     test_print_bignum(test_sft1b, "sft1b(before)");
     // run test function
-    TICK_TIME_START("lsl1b_bignum");
-    if(fr = lsl1b_bignum(test_sft1b, &test_ovf, 0U)) {
+    TICK_TIME_START("lsl1b_bignum_self");
+    if(fr = lsl1b_bignum_self(test_sft1b, &test_ovf, 0U)) {
         TICK_TIME_END;
-        printf("lsl1b_bignum(test_sft1b, &test_ovf) = %d\r\n", fr);
+        printf("lsl1b_bignum_self(test_sft1b, &test_ovf) = %d\r\n", fr);
     } else {
         TICK_TIME_END;
     }
@@ -3512,7 +3622,7 @@ void test_lsl1b_bignum(void)
     test_cmp = memcmp(test_refer->nums, test_sft1b->nums, (test_refer->size));
     test_print_bignum(test_refer, "refer");
     test_print_bignum(test_sft1b, "sft1b(after)");
-    printf("lsl1b_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    printf("lsl1b_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
     TEST_ASSERT(test_cmp == 0);
 
     /* Shift sequence 2 */
@@ -3531,10 +3641,10 @@ void test_lsl1b_bignum(void)
 
     test_print_bignum(test_sft1b, "sft1b(before)");
     // run test function
-    TICK_TIME_START("lsl1b_bignum");
-    if(fr = lsl1b_bignum(test_sft1b, &test_ovf, 1U)) {
+    TICK_TIME_START("lsl1b_bignum_self");
+    if(fr = lsl1b_bignum_self(test_sft1b, &test_ovf, 1U)) {
         TICK_TIME_END;
-        printf("lsl1b_bignum(test_sft1b, &test_ovf) = %d\r\n", fr);
+        printf("lsl1b_bignum_self(test_sft1b, &test_ovf) = %d\r\n", fr);
     } else {
         TICK_TIME_END;
     }
@@ -3542,7 +3652,7 @@ void test_lsl1b_bignum(void)
     test_cmp = memcmp(test_refer->nums, test_sft1b->nums, (test_refer->size));
     test_print_bignum(test_refer, "refer");
     test_print_bignum(test_sft1b, "sft1b(after)");
-    printf("lsl1b_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+    printf("lsl1b_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
 
     rmBitNum(&test_refer);
     rmBitNum(&test_sft1b);
@@ -6423,11 +6533,27 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_lsl1b_bignum()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_lsl1b_bignum");
+    printf("[test start: test_lslnb_bignum_self()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_lslnb_bignum_self");
     _COND_DO_TEST_(keyin)
-    test_lsl1b_bignum();
-    printf("[test   end: test_lsl1b_bignum()]\r\n");
+    test_lslnb_bignum_self();
+    printf("[test   end: test_lslnb_bignum_self()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_lsrnb_bignum_self()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_lsrnb_bignum_self");
+    _COND_DO_TEST_(keyin)
+    test_lsrnb_bignum_self();
+    printf("[test   end: test_lsrnb_bignum_self()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_lsl1b_bignum_self()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_lsl1b_bignum_self");
+    _COND_DO_TEST_(keyin)
+    test_lsl1b_bignum_self();
+    printf("[test   end: test_lsl1b_bignum_self()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");

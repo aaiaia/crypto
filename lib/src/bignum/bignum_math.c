@@ -339,7 +339,7 @@ ReturnType mul_bignum_bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0
                             return E_ERROR_RUNTIME;
                         }
                     } else { /* Do nothing */}
-                    lsl1b_bignum(tmp, NULL, 0U);
+                    lsl1b_bignum_self(tmp, NULL, 0U);
                 }
                 nSftBit-=sftBit;
             }
