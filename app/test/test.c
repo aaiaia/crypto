@@ -68,10 +68,11 @@ static bool g_clkOvf;
     else            printf("Process Time(%s): clock tick overflow!!!\r\n", g_tTimeTitle);   \
 }
 
-#define test_print_bignum(p, title) test_print_bignum_ext(p, title, 0UL, false)
-void test_print_bignum_ext(bignum_s* p, const char* title, const size_t lfn, const bool details)
+#define test_print_bignum_value_only(p) test_print_bignum_ext(p, NULL, false, 0UL, false, true, false)
+#define test_print_bignum(p, title) test_print_bignum_ext(p, title, true, 0UL, false, false, true)
+void test_print_bignum_ext(bignum_s* p, const char* title, const bool linefeed, const size_t lfn, const bool details, const bool prefix, const bool space)
 {
-    printf("[%s]\r\n", title);
+    if(title != NULL)   printf("[%s]\r\n", title);
     if(details)
     {
         printf("addr:0x%p, bignum_t size:%lu\r\n", p, sizeof(bignum_t));
@@ -79,13 +80,15 @@ void test_print_bignum_ext(bignum_s* p, const char* title, const size_t lfn, con
                 p->nums, p->lmsk, p->bits, p->nlen, p->size);
         printf("[HEX]\r\n");
     }
+    if(prefix)                      printf("0x");
+    if(prefix&&space)               printf(" ");
     for(size_t i = p->nlen- 1u; i != ((size_t)-1); i--) {
         printf("%08x", p->nums[i]);
-        if(i != 0u)                 printf(" ");
-        else if((i & (lfn-1U) == lfn) & (lfn != 0U))
+        if((i != 0u) && space)      printf(" ");
+        if((((i & (lfn-1U)) == lfn) && (lfn != 0U)) && linefeed)
                                     printf("\r\n");
-        else                        printf("\r\n");
     }
+    if(linefeed)                    printf("\r\n");
 }
 
 #define test_print_bignum_sign(sign)  test_print_bignum_sign_ext(sign, true)
@@ -3714,6 +3717,313 @@ void test_lsl1b_bignum_self(void)
 #undef TEST_LSL1B_BIGNUM_VAL
 }
 
+void test_div_bignum_with_mod(void)
+{
+#define TEST_DIV_BIGNUM_BIT_LEN   512U
+    char keyin;
+    int test_cmp;
+    ReturnType fr;
+
+    bignum_s* numerator = mkBigNum(TEST_DIV_BIGNUM_BIT_LEN);
+    bignum_s* denominator = mkBigNum(TEST_DIV_BIGNUM_BIT_LEN);
+    bignum_s* quotient = mkBigNum(TEST_DIV_BIGNUM_BIT_LEN);
+    bignum_s* remainder = mkBigNum(TEST_DIV_BIGNUM_BIT_LEN);
+
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[0]  = 0x00000001U;
+        denominator->nums[0] = 0x00000001U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[0]  = 0x00000002U;
+        denominator->nums[0] = 0x00000001U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[0]  = 0x00000003U;
+        denominator->nums[0] = 0x00000001U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+    /********************************************************************************/
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[0]  = 0x00000001U;
+        denominator->nums[0] = 0x00000001U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[0]  = 0x00000002U;
+        denominator->nums[0] = 0x00000002U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[0]  = 0x00000003U;
+        denominator->nums[0] = 0x00000002U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[1]  = 0x0000FFFFU;
+        numerator->nums[0]  = 0xFFFF0000U;
+        denominator->nums[0] = 0x00010000U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+    /* case */
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+        numerator->nums[1]  = 0x0000FFFFU;
+        numerator->nums[0]  = 0xFFFF0ABDU;
+        denominator->nums[0] = 0x00010000U;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+        printf("********************************************************************************\n");
+
+#if 0
+        test_cmp = memcmp(A, B, SIZE);
+        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+#endif
+    }
+
+#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_FUNC_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+    for(size_t i = 0UL; i < 0x10UL; i++)
+    {
+        (void)memset(numerator->nums, 0U, numerator->size);
+        (void)memset(denominator->nums, 0U, denominator->size);
+        (void)memset(quotient->nums, 0U, quotient->size);
+        (void)memset(remainder->nums, 0U, remainder->size);
+        /* set test vector*/
+
+        srand(time(NULL)+i);
+        for(size_t byte = 0UL; byte < numerator->size; byte++)
+        {
+            ((uint8_t*)numerator->nums)[byte] = (rand()&0xFFU);
+        }
+        for(size_t byte = 0UL; byte < (denominator->size)>>1UL; byte++)
+        {
+            ((uint8_t*)denominator->nums)[byte] = (rand()&0xFFU);
+        }
+        printf("********************************************************************************\n");
+#if 0
+        printf("> RESTRICT SIGNIFICANT BIT TO POSITIVE <\n");
+        numerator->nums[numerator->nlen-1UL]&=0x7FFFFFFFU;
+        denominator->nums[(denominator->nlen>>1UL)-1UL]&=0x7FFFFFFFU;
+#endif
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        printf("********************************************************************************\n");
+        printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
+        test_print_bignum(numerator, "numerator");
+        test_print_bignum(denominator, "denominator");
+        test_print_bignum(quotient, "quotient");
+        test_print_bignum(remainder, "remainder");
+
+        printf("[DIVIDE]\n");
+        test_print_bignum_value_only(numerator);
+        printf("/");
+        test_print_bignum_value_only(denominator);
+        printf("\n");
+        test_print_bignum_value_only(quotient);
+        printf("\n");
+
+        printf("[MODULO]\n");
+        test_print_bignum_value_only(numerator);
+        printf("%%");
+        test_print_bignum_value_only(denominator);
+        printf("\n");
+        test_print_bignum_value_only(remainder);
+        printf("\n");
+
+        printf("********************************************************************************\n");
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+    }
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+
+    rmBitNum(&numerator);
+    rmBitNum(&denominator);
+    rmBitNum(&quotient);
+    rmBitNum(&remainder);
+#undef TEST_DIV_BIGNUM_BIT_LEN
+}
+
+
 #include "common/bitwise.h"
 #include "ghash/gf128.h"
 int test_ghash(void)
@@ -6607,6 +6917,14 @@ void test_sequence(void) {
     _COND_DO_TEST_(keyin)
     test_lsl1b_bignum_self();
     printf("[test   end: test_lsl1b_bignum_self()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_div_bignum_with_mod()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_div_bignum_with_mod");
+    _COND_DO_TEST_(keyin)
+    test_div_bignum_with_mod();
+    printf("[test   end: test_div_bignum_with_mod()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
