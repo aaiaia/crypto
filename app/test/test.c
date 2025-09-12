@@ -3718,12 +3718,262 @@ void test_lsl1b_bignum_self(void)
 #undef TEST_LSL1B_BIGNUM_VAL
 }
 
+bignum_t TV_NUMERATOR_1024b_0[] = {
+    0x4369ae20, 0x29577b17, 0x58486b5a, 0x19d20572, 0x3f7f2036, 0x910a0724, 0xaf1583d5, 0x8bbfa569, 
+    0x6d9b27c2, 0xc5f0b7f2, 0xb64cd781, 0x35772bea, 0xe8a7b4b4, 0xb2f102a3, 0xbde33e63, 0x92d3623e, 
+    0x2b44bba5, 0xc05999bc, 0xdf9ef131, 0xf7f17c42, 0x48fa3269, 0x88d59f70, 0xbd054d17, 0x66900125, 
+    0x193ba1a9, 0xc8766ff0, 0x4ef15d32, 0x15af50e9, 0x38891448, 0xb6afddd4, 0x90beb8c8, 0xb64fbc85, 
+};
+bignum_t TV_DENOMINATOR_1024b_0[] = {
+    0xf9d3b27b, 0x8cfa1316, 0x3ec62e31, 0xeb0ca221, 0x5a207330, 0x4c52f100, 0x2a7eebeb, 0x950f0c27, 
+    0xfd13fe57, 0x1e98733b, 0x7d351fa8, 0x0022c21f, 0xa8e7ee49, 0x8eabde5d, 0xcfb8fe21, 0x095d2940, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_0[] = {
+    0xae65dcf1, 0xe4d55616, 0x8a39ae15, 0x3e299c30, 0x0be397a4, 0x6e090208, 0xdafa658f, 0xef2f249d, 
+    0xada23430, 0x58dcd9f4, 0xdddcd407, 0x74f501e1, 0xc527b7e3, 0xa8ccb137, 0x066fb7a1, 0x7836d323, 
+    0x00000013, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_0[] = {
+    0x2135f455, 0xc127a75d, 0x230fbfd3, 0x7a0c5fd4, 0x1e6d12ac, 0xea276e96, 0xdf2421ee, 0x6ce4848a, 
+    0x0144f4f8, 0x835f5bdc, 0x5cb2d774, 0x3deec3ed, 0xa77436eb, 0xe3e66287, 0x11577bf5, 0x02eb9703, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+/****************************************************************************************************/
+
+bignum_t TV_NUMERATOR_1024b_1[] = {
+    0xfaf1899d, 0xf3240f25, 0x3495f9e7, 0xcfc02f7d, 0x1d870e18, 0x959caba6, 0x9d460ee1, 0x91fa189f, 
+    0x82bf2837, 0x8f58c1e8, 0xc371a10d, 0x75db1b2f, 0xe83c8e2a, 0x6805a562, 0x77e801c2, 0x77011aa0, 
+    0xc30ae377, 0x59a3995a, 0xeacd51cc, 0x66154eff, 0xc0bf90e0, 0xe0c1e7d0, 0x799c3358, 0xb78f74bd, 
+    0x45aa2467, 0xd3c1cff4, 0x2c145750, 0x408fa12d, 0xfaf0c207, 0x5e8dc681, 0x49cd5172, 0xc4e93a9c, 
+};
+bignum_t TV_DENOMINATOR_1024b_1[] = {
+    0x0e787209, 0xf60aa92f, 0x7300b29c, 0x5ae5227f, 0x980b9400, 0x8eb4459f, 0xa4a3bfbf, 0x83a577aa, 
+    0x126d6da0, 0x3d79eff3, 0x91a2e7da, 0xa60ac8ba, 0x79e7b872, 0x25e34daa, 0x3d304e24, 0x88c5f495, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_1[] = {
+    0x1bdfc9cc, 0xac2d9380, 0x6eb01bd9, 0x1decbd03, 0x82c5b3b0, 0x2f558ef1, 0xea9df955, 0x33eebc13, 
+    0xcd103da5, 0x2e106968, 0xd48da85f, 0x6c1ce220, 0xcd9c5983, 0xff576ba7, 0x5e96f05d, 0x708f801c, 
+    0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_1[] = {
+    0x98969971, 0xb001ccd7, 0x23544342, 0xc4c3788e, 0xd99348eb, 0x472a2c29, 0x9fe85669, 0x9c025b9d, 
+    0xc27ed433, 0x1016747f, 0xf472b0c1, 0xc6839c22, 0xb74aa3d5, 0x8475d720, 0x76dc3a5c, 0x32be743d, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+/****************************************************************************************************/
+
+bignum_t TV_NUMERATOR_1024b_2[] = {
+    0x3820e0a9, 0xbc46364f, 0x033134af, 0x0b0f017b, 0xfec8eac5, 0x06c6fffd, 0xc0ab735c, 0x74f0cc2b, 
+    0xe7e647ea, 0x6088005f, 0xc35b1b75, 0x29d38f2d, 0x6d3b6e0d, 0x8a9582ef, 0x813c6ae8, 0x145482b0, 
+    0x28c175d9, 0x795e381a, 0x1ce50afc, 0xcc25e33b, 0x98dac9de, 0x87d13bcb, 0x9544d126, 0x6c4840b8, 
+    0xdda4b3a4, 0x592bd7f0, 0x120bd11f, 0x8c258e79, 0x211ffedd, 0x1fab0ed6, 0xd9a73800, 0x2dd826b6, 
+};
+bignum_t TV_DENOMINATOR_1024b_2[] = {
+    0x439ed3eb, 0xb8dc904b, 0x1053dd11, 0x0c67019d, 0x8b274f94, 0xd121af1d, 0xebefba0a, 0xce38ba8e, 
+    0x4953d964, 0x541ea44e, 0x075270c1, 0x894bf14e, 0x92c7782b, 0x686a9413, 0x17f12898, 0x378027c2, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_2[] = {
+    0xc687dca0, 0xe44c97a9, 0x6d3f201b, 0x00bcfa47, 0xaf1933ae, 0xd37cf269, 0x679c536e, 0x6b5b4e52, 
+    0x0fc5e12d, 0x6fd662c3, 0x65e8fde9, 0x8b2e6e58, 0xa3153f13, 0x3188e363, 0x13cacf04, 0xd375ba3a, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_2[] = {
+    0xf3d179c9, 0xcfd0555b, 0x401cd294, 0xabfbac76, 0xbc0386f0, 0x11c5e069, 0x269eb2d5, 0x9cc84abe, 
+    0xc550e201, 0x8803d895, 0xd859705e, 0x167e6107, 0x51064615, 0x14f85c94, 0x8eaf2234, 0x127024a8, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+/****************************************************************************************************/
+
+bignum_t TV_NUMERATOR_1024b_3[] = {
+    0xa0926d45, 0x870f4cb0, 0x2fb5c028, 0x12bfbe38, 0x94ac8292, 0x7e38d912, 0xabaa9bd1, 0xe0d00b25, 
+    0xb94556ea, 0x58be8753, 0xbc17160d, 0x223e96d5, 0xc9140710, 0xbc652978, 0x17bda4ac, 0xb29edd06, 
+    0x1285c6c9, 0x40c9fe0a, 0x92a3bba9, 0x91cd3a07, 0xa2422259, 0xf38f8285, 0x22f7947d, 0x6837dc7f, 
+    0x262af60d, 0x4117a18e, 0x53c9309b, 0x8c654a0b, 0xf6be08b2, 0xc4a2ece6, 0x9bc38c6d, 0x9618c589, 
+};
+bignum_t TV_DENOMINATOR_1024b_3[] = {
+    0x13794946, 0xd52a8165, 0x2fb7ad7b, 0x77b5ddf0, 0xf2cdc86a, 0xd7ec2e65, 0xba3d6a6d, 0xc2b5252c, 
+    0xb7e71962, 0x41fe227f, 0x971dd036, 0x0b8989a6, 0x7d5e5c5e, 0x2e9ec4a6, 0x5659022f, 0x9d05982d, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_3[] = {
+    0x84845e80, 0x3b50c21f, 0xaa757dc1, 0x4489ec98, 0xc43806a9, 0xb23ca303, 0x57425411, 0xd6694be5, 
+    0xc7743723, 0x5921a2e2, 0xea3a93b8, 0xbda3662b, 0xae8b7bba, 0x1ede7eca, 0x1ca434ec, 0xf4b5af53, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_3[] = {
+    0x7aee1645, 0x330bfd34, 0xf2eafbc6, 0x87f59f70, 0x01150232, 0xb7426296, 0xb8807926, 0x5a3cbe55, 
+    0x538d4d04, 0x0a3cd84a, 0xf3a16b0a, 0x68d3cbba, 0xcdbac9dc, 0xd1bd4f8d, 0x1996ac0f, 0x0b94d376, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+/****************************************************************************************************/
+
+bignum_t TV_NUMERATOR_1024b_4[] = {
+    0x4264c4a4, 0xf9eba54b, 0x9a4bbd26, 0x97fa6782, 0xe5b25b56, 0x31b376e5, 0x0067417d, 0x7c080fdf, 
+    0xc859faf7, 0x72581148, 0xd60e1ff5, 0x0c7a32ea, 0xbfe9d15e, 0x0ae1cecc, 0xb171b8aa, 0x399fe3cd, 
+    0x84d132cb, 0xd326ad0b, 0x8deb6f4e, 0x729d3988, 0xb1b21f2d, 0x725d4fe8, 0x7617f4f9, 0x2c40afec, 
+    0xab27b620, 0xdffe5671, 0xf1b01a09, 0x86030dcb, 0x33b95816, 0xb0d5ae26, 0x1aa0395e, 0xd354ceb9, 
+};
+bignum_t TV_DENOMINATOR_1024b_4[] = {
+    0x6b979f34, 0xec6ac3f0, 0xc62ea9d3, 0xcef9564e, 0xed59d37e, 0x02aea1fb, 0x256f7eb8, 0x02e8fa54, 
+    0x1ea84261, 0x6a2748ea, 0x50cde0a4, 0x57829c2f, 0xa2e92a07, 0xd1175505, 0xba6675dc, 0x1c4e49cd, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_4[] = {
+    0x37c6d868, 0xc05e736b, 0xb33b0a5f, 0x53920afb, 0x3af619d1, 0xac7195dc, 0xc81deb93, 0x052b6dce, 
+    0xdec23152, 0xc204efea, 0xc59099db, 0x89534e47, 0x25d943c2, 0x9a4c2e4c, 0xcf7bd76c, 0x774bf2df, 
+    0x00000007, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_4[] = {
+    0x50403784, 0x1c2c7fa2, 0xe641e9b7, 0x1efc761b, 0xceee0c62, 0xb1bff1f4, 0x3b43a565, 0xe61d9046, 
+    0x26e66d26, 0x79538463, 0x7ae45b68, 0xcd5cdce5, 0x5bf36d45, 0x8d77aa30, 0x7391e0b6, 0x1a711823, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+/****************************************************************************************************/
+
+bignum_t TV_NUMERATOR_1024b_5[] = {
+    0x7ff1a049, 0x45465c34, 0x7916b3a4, 0xda202fdf, 0xd6fb1151, 0xf30ad4e9, 0x478e634c, 0x915adb97, 
+    0x46981d4c, 0xbcef47c9, 0x4a3ae092, 0x044f72f5, 0xcf4ad2ef, 0x430c194b, 0x89171091, 0x7f2fdd4b, 
+    0x3c9d0192, 0x6c37a7da, 0xd6df304b, 0xb88b3a5d, 0xaf8c3cca, 0xba3845ab, 0xbfb44d41, 0xe0774189, 
+    0xc88b97c8, 0xc01cc085, 0x69b42aa4, 0x8af1a721, 0x5252aa75, 0xf8a79a52, 0x4e85203a, 0x9863140f, 
+};
+bignum_t TV_DENOMINATOR_1024b_5[] = {
+    0x20a19afd, 0x64c5c88d, 0xd3496d3e, 0xf21f760a, 0x8e203ca2, 0x3c54370a, 0xc67c0256, 0x30f7c87f, 
+    0x95fe1824, 0x448709c1, 0x1d17d10e, 0xc2322b5a, 0x9be3e81a, 0xadc996a9, 0xe8a07720, 0xcabc0151, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_5[] = {
+    0xf89cb9b5, 0xf955c36b, 0x9a8451db, 0xe3da3c9e, 0x051519f0, 0x61d8bf41, 0xd47e4019, 0xd5e52ac0, 
+    0x2f842c09, 0x5696224e, 0xd45436db, 0x42179c8a, 0xd0807408, 0x5de6dd7a, 0x4df1602a, 0xc06cb079, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_5[] = {
+    0x1a823668, 0xe249a479, 0x37d06135, 0xe018c89d, 0x04982da3, 0x2b9f7c78, 0xcc4dd976, 0x43580531, 
+    0xb0381043, 0xddc8c64d, 0x296515d3, 0xc0f652b4, 0x94194be5, 0x39f7b160, 0xc7a7059a, 0x01ce11dd, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+/****************************************************************************************************/
+
+bignum_t TV_NUMERATOR_1024b_6[] = {
+    0x9575d4fb, 0x166940e5, 0x60aa4334, 0xde3768bb, 0x075475a2, 0x5d87f7f7, 0xbcc075a5, 0xd7e124c4, 
+    0x86b43ec1, 0xe0b75b1d, 0xad47e79b, 0x84c910e1, 0x21d594e3, 0x49a970ac, 0xbced59c7, 0x3810eea9, 
+    0x6e70f165, 0xe529a312, 0x59fe346f, 0x4f61e2c8, 0x20a66543, 0xfd21d7ba, 0x1f0bb404, 0xa0c2c86c, 
+    0x97cdd148, 0x08e38369, 0x9e439e4e, 0x52d953ac, 0x4d3896d6, 0xcc83dce8, 0xb3c96103, 0x200a950d, 
+};
+bignum_t TV_DENOMINATOR_1024b_6[] = {
+    0x6f1c3162, 0x23f5177e, 0xb17060fa, 0x54175109, 0xf5b30688, 0xa2841f54, 0x62059f33, 0x4e871b69, 
+    0x0e3dd3c6, 0xeabe3ffe, 0xd7342862, 0xe353b522, 0x87d911bb, 0x334e4c9a, 0x5b1489a9, 0x9871c599, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_6[] = {
+    0x7b991b14, 0x621b4c09, 0xb7227639, 0x2d786ce2, 0x87440678, 0x70b2db42, 0x86a0ad87, 0xea0313b4, 
+    0xf5c6b554, 0xb65383ad, 0x287f42b6, 0x615eec88, 0xe6c33306, 0x0ac9b310, 0x269bbeff, 0x35ce99d0, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_6[] = {
+    0x547aa353, 0xa3d94d47, 0x445e03f8, 0x53a25e43, 0x7dd1374f, 0x63a2ca2a, 0x945d4fbd, 0x27758ff6, 
+    0xaddabf86, 0x78557eaa, 0x34771b8b, 0xc34af029, 0xcce4d9bc, 0xe7dd960f, 0x7ec77867, 0x7552e8fa, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+/****************************************************************************************************/
+
+bignum_t TV_NUMERATOR_1024b_7[] = {
+    0x77af3cce, 0x725b42b2, 0x593b282b, 0xf7274ace, 0x67a2f852, 0x54da40fa, 0x0f43a86a, 0xb26cb7b3, 
+    0x5bafe94b, 0x00e2ac3c, 0xbdf81dd1, 0xd8cdd4bf, 0x960ae503, 0x297af2e1, 0x3aeabc5f, 0xf953d52b, 
+    0xcf72c971, 0xeb85eba6, 0x2357a11d, 0xbd7bb78d, 0x5e642e49, 0xd31355c3, 0xb273708d, 0xa37e431c, 
+    0x62856a9c, 0x33a9257f, 0x5caa59d0, 0x21e09f35, 0x07522266, 0x494170bf, 0x86e7b562, 0x1ac70979, 
+};
+bignum_t TV_DENOMINATOR_1024b_7[] = {
+    0xe5cad925, 0x82bc2ada, 0x8f3bd899, 0x3f708e05, 0x1dc3da78, 0x91e4db09, 0xe7a0132a, 0x8c611be8, 
+    0x14b150a5, 0xf6d36ce4, 0xf4dcf064, 0x9d7d453b, 0x97c1b611, 0xe82a33c3, 0x8ba402c5, 0x268d82e4, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_QUOTIENT_1024b_7[] = {
+    0xa473601a, 0xeb0ca473, 0x23f1319d, 0xe38dde3e, 0x519fc94e, 0xeea78b20, 0x73eb626c, 0x0b196866, 
+    0x0158c20e, 0x0b87d796, 0x3f8697ba, 0xd20b0d3f, 0x7d804be3, 0x8770e211, 0x9a07d3a6, 0xb1cf24d9, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+bignum_t TV_REMAINDER_1024b_7[] = {
+    0xd0084f0c, 0xcdaa6570, 0x423b9a7e, 0xc474ae2c, 0xcdfb33e1, 0xb5a0973d, 0x9d2a29b8, 0x45b8a995, 
+    0x42b2ad7f, 0x3f317ccf, 0x4fd61c91, 0xb00c3c46, 0xb9e2259f, 0x734eae94, 0x6ced245b, 0x09b51f93, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
+bignum_t* TV_LIST_NUMERATOR_1024b[] = {
+    TV_NUMERATOR_1024b_0,
+    TV_NUMERATOR_1024b_1,
+    TV_NUMERATOR_1024b_2,
+    TV_NUMERATOR_1024b_3,
+    TV_NUMERATOR_1024b_4,
+    TV_NUMERATOR_1024b_5,
+    TV_NUMERATOR_1024b_6,
+    TV_NUMERATOR_1024b_7,
+};
+bignum_t* TV_LIST_DENOMINATOR_1024b[] = {
+    TV_DENOMINATOR_1024b_0,
+    TV_DENOMINATOR_1024b_1,
+    TV_DENOMINATOR_1024b_2,
+    TV_DENOMINATOR_1024b_3,
+    TV_DENOMINATOR_1024b_4,
+    TV_DENOMINATOR_1024b_5,
+    TV_DENOMINATOR_1024b_6,
+    TV_DENOMINATOR_1024b_7,
+};
+bignum_t* TV_LIST_QUOTIENT_1024b[] = {
+    TV_QUOTIENT_1024b_0,
+    TV_QUOTIENT_1024b_1,
+    TV_QUOTIENT_1024b_2,
+    TV_QUOTIENT_1024b_3,
+    TV_QUOTIENT_1024b_4,
+    TV_QUOTIENT_1024b_5,
+    TV_QUOTIENT_1024b_6,
+    TV_QUOTIENT_1024b_7,
+};
+bignum_t* TV_LIST_REMAINDER_1024b[] = {
+    TV_REMAINDER_1024b_0,
+    TV_REMAINDER_1024b_1,
+    TV_REMAINDER_1024b_2,
+    TV_REMAINDER_1024b_3,
+    TV_REMAINDER_1024b_4,
+    TV_REMAINDER_1024b_5,
+    TV_REMAINDER_1024b_6,
+    TV_REMAINDER_1024b_7,
+};
+
 void test_mul_bignum(void)
 {
-#define TEST_MUL_BIGNUM_BIT_LEN   512U
+#define TEST_MUL_BIGNUM_BIT_LEN   1024U
     char keyin;
-    int test_cmp;
+    int test_memcmp0;
     ReturnType fr;
+
+    bool manually = false;
 
     bignum_s* multiplier = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
     bignum_s* multiplicand = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
@@ -3735,55 +3985,88 @@ void test_mul_bignum(void)
         printf("%s: ", (TEST_FUNC_NAME)); \
         (c) = getchar(); \
         getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
     } while(((c) != 'y' ) && ((c) != 'Y' )); \
     if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
 }
 #define _COND_DO_TEST_0_(c)   if((c) == 'y')
-    for(size_t i = 0UL; i < 0x10UL; i++)
+    _KEYIN_DO_TEST_0_(keyin, "Test Manually?(y/n)");
+    _COND_DO_TEST_0_(keyin) manually = true;
+
+    if(!manually)
     {
-        (void)memset(multiplier->nums, 0U, multiplier->size);
-        (void)memset(multiplicand->nums, 0U, multiplicand->size);
-        (void)memset(product->nums, 0U, product->size);
-        /* set test vector*/
+        bignum_s* addedNumber = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+        bignum_s* productAddRem = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
 
-        srand(time(NULL)+i);
-        for(size_t byte = 0UL; byte < (multiplier->size)>>1UL; byte++)
+        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
         {
-            ((uint8_t*)multiplier->nums)[byte] = (rand()&0xFFU);
+            memcpy(multiplier->nums, TV_LIST_QUOTIENT_1024b[i], multiplier->size);
+            memcpy(multiplicand->nums, TV_LIST_DENOMINATOR_1024b[i], multiplicand->size);
+
+            memcpy(addedNumber->nums, TV_LIST_REMAINDER_1024b[i], addedNumber->size);
+
+
+            TICK_TIME_START("mul_bignum");
+            if(fr = mul_bignum(product, multiplier, multiplicand)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+            TICK_TIME_END;
+
+            if(fr = add_bignum(NULL, productAddRem, product, addedNumber, 0U)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+
+            test_memcmp0 = memcmp(productAddRem->nums, TV_LIST_NUMERATOR_1024b[i], productAddRem->size);
+            printf("mul_bignum() then add to remainder is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(test_memcmp0 == 0);
         }
-        for(size_t byte = 0UL; byte < (multiplicand->size)>>1UL; byte++)
+
+        rmBitNum(&productAddRem);
+        rmBitNum(&addedNumber);
+    }
+    else
+    {
+        for(size_t i = 0UL; i < 0x10UL; i++)
         {
-            ((uint8_t*)multiplicand->nums)[byte] = (rand()&0xFFU);
+            (void)memset(multiplier->nums, 0U, multiplier->size);
+            (void)memset(multiplicand->nums, 0U, multiplicand->size);
+            (void)memset(product->nums, 0U, product->size);
+            /* set test vector*/
+
+            srand(time(NULL)+i);
+            for(size_t byte = 0UL; byte < (multiplier->size)>>1UL; byte++)
+            {
+                ((uint8_t*)multiplier->nums)[byte] = (rand()&0xFFU);
+            }
+            for(size_t byte = 0UL; byte < (multiplicand->size)>>1UL; byte++)
+            {
+                ((uint8_t*)multiplicand->nums)[byte] = (rand()&0xFFU);
+            }
+
+            /* multiplier */
+            TICK_TIME_START("mul_bignum");
+            if(fr = mul_bignum(product, multiplier, multiplicand)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+            TICK_TIME_END;
+            printf("********************************************************************************\n");
+            printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
+            test_print_bignum(multiplier, "multiplier");
+            test_print_bignum(multiplicand, "multiplicand");
+            test_print_bignum(product, "product");
+
+            printf("[PRODUCT]\n");
+            test_print_bignum_value_only(multiplier);
+            printf("*");
+            test_print_bignum_value_only(multiplicand);
+            printf("\n");
+            test_print_bignum_value_only(product);
+            printf("\n");
+
+            printf("********************************************************************************\n");
+            _KEYIN_DO_TEST_0_(keyin, "check result(y)");
         }
-        printf("********************************************************************************\n");
-#if 0
-        printf("> RESTRICT SIGNIFICANT BIT TO POSITIVE <\n");
-        product->nums[product->nlen-1UL]&=0x7FFFFFFFU;
-        multiplier->nums[(multiplier->nlen>>1UL)-1UL]&=0x7FFFFFFFU;
-#endif
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("mul_bignum");
-        if(fr = mul_bignum(product, multiplier, multiplicand)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
-        test_print_bignum(multiplier, "multiplier");
-        test_print_bignum(multiplicand, "multiplicand");
-        test_print_bignum(product, "product");
-
-        printf("[PRODUCT]\n");
-        test_print_bignum_value_only(multiplier);
-        printf("*");
-        test_print_bignum_value_only(multiplicand);
-        printf("\n");
-        test_print_bignum_value_only(product);
-        printf("\n");
-
-        printf("********************************************************************************\n");
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
     }
 #undef _KEYIN_DO_TEST_0_
 #undef _COND_DO_TEST_0_
@@ -3796,9 +4079,9 @@ void test_mul_bignum(void)
 
 void test_div_bignum_with_mod(void)
 {
-#define TEST_DIV_BIGNUM_BIT_LEN   512U
+#define TEST_DIV_BIGNUM_BIT_LEN   1024U
     char keyin;
-    int test_cmp;
+    int test_memcmp0, test_memcmp1;
     ReturnType fr;
 
     bignum_s* numerator = mkBigNum(TEST_DIV_BIGNUM_BIT_LEN);
@@ -3806,241 +4089,7 @@ void test_div_bignum_with_mod(void)
     bignum_s* quotient = mkBigNum(TEST_DIV_BIGNUM_BIT_LEN);
     bignum_s* remainder = mkBigNum(TEST_DIV_BIGNUM_BIT_LEN);
 
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[0]  = 0x00000001U;
-        denominator->nums[0] = 0x00000001U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[0]  = 0x00000002U;
-        denominator->nums[0] = 0x00000001U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[0]  = 0x00000003U;
-        denominator->nums[0] = 0x00000001U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
-    /********************************************************************************/
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[0]  = 0x00000001U;
-        denominator->nums[0] = 0x00000001U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[0]  = 0x00000002U;
-        denominator->nums[0] = 0x00000002U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[0]  = 0x00000003U;
-        denominator->nums[0] = 0x00000002U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[1]  = 0x0000FFFFU;
-        numerator->nums[0]  = 0xFFFF0000U;
-        denominator->nums[0] = 0x00010000U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
-    /* case */
-    {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-        numerator->nums[1]  = 0x0000FFFFU;
-        numerator->nums[0]  = 0xFFFF0ABDU;
-        denominator->nums[0] = 0x00010000U;
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-        printf("********************************************************************************\n");
-
-#if 0
-        test_cmp = memcmp(A, B, SIZE);
-        printf("div_bignum_with_mod() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-#endif
-    }
+    bool manually = false;
 
 #define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
     (c) = '\0'; \
@@ -4048,65 +4097,88 @@ void test_div_bignum_with_mod(void)
         printf("%s: ", (TEST_FUNC_NAME)); \
         (c) = getchar(); \
         getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
     } while(((c) != 'y' ) && ((c) != 'Y' )); \
     if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
 }
 #define _COND_DO_TEST_0_(c)   if((c) == 'y')
-    for(size_t i = 0UL; i < 0x10UL; i++)
+    _KEYIN_DO_TEST_0_(keyin, "Test Manually?(y/n)");
+    _COND_DO_TEST_0_(keyin) manually = true;
+
+    if(!manually)
     {
-        (void)memset(numerator->nums, 0U, numerator->size);
-        (void)memset(denominator->nums, 0U, denominator->size);
-        (void)memset(quotient->nums, 0U, quotient->size);
-        (void)memset(remainder->nums, 0U, remainder->size);
-        /* set test vector*/
-
-        srand(time(NULL)+i);
-        for(size_t byte = 0UL; byte < numerator->size; byte++)
+        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
         {
-            ((uint8_t*)numerator->nums)[byte] = (rand()&0xFFU);
+            memcpy(numerator->nums, TV_LIST_NUMERATOR_1024b[i], numerator->size);
+            memcpy(denominator->nums, TV_LIST_DENOMINATOR_1024b[i], denominator->size);
+
+            /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+            TICK_TIME_START("div_bignum_with_mod");
+            if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+            TICK_TIME_END;
+
+            test_memcmp0 = memcmp(quotient->nums, TV_LIST_QUOTIENT_1024b[i], quotient->size);
+            test_memcmp1 = memcmp(remainder->nums, TV_LIST_REMAINDER_1024b[i], remainder->size);
+            printf("div_bignum_with_mod() divide is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+            printf("div_bignum_with_mod() modulo is %s\r\n", ((test_memcmp1 == 0)?MES_PASS:MES_FAIL));
+            TEST_ASSERT((test_memcmp0 == 0) && (test_memcmp1 == 0));
         }
-        for(size_t byte = 0UL; byte < (denominator->size)>>1UL; byte++)
+    }
+    else
+    {
+        for(size_t i = 0UL; i < 0x10UL; i++)
         {
-            ((uint8_t*)denominator->nums)[byte] = (rand()&0xFFU);
+            (void)memset(numerator->nums, 0U, numerator->size);
+            (void)memset(denominator->nums, 0U, denominator->size);
+            (void)memset(quotient->nums, 0U, quotient->size);
+            (void)memset(remainder->nums, 0U, remainder->size);
+            /* set test vector*/
+
+            srand(time(NULL)+i);
+            for(size_t byte = 0UL; byte < numerator->size; byte++)
+            {
+                ((uint8_t*)numerator->nums)[byte] = (rand()&0xFFU);
+            }
+            for(size_t byte = 0UL; byte < (denominator->size)>>1UL; byte++)
+            {
+                ((uint8_t*)denominator->nums)[byte] = (rand()&0xFFU);
+            }
+
+            /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+            TICK_TIME_START("div_bignum_with_mod");
+            if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+            TICK_TIME_END;
+            printf("********************************************************************************\n");
+            printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
+            test_print_bignum(numerator, "numerator");
+            test_print_bignum(denominator, "denominator");
+            test_print_bignum(quotient, "quotient");
+            test_print_bignum(remainder, "remainder");
+
+            printf("[DIVIDE]\n");
+            test_print_bignum_value_only(numerator);
+            printf("/");
+            test_print_bignum_value_only(denominator);
+            printf("\n");
+            test_print_bignum_value_only(quotient);
+            printf("\n");
+
+            printf("[MODULO]\n");
+            test_print_bignum_value_only(numerator);
+            printf("%%");
+            test_print_bignum_value_only(denominator);
+            printf("\n");
+            test_print_bignum_value_only(remainder);
+            printf("\n");
+
+            printf("********************************************************************************\n");
+            _KEYIN_DO_TEST_0_(keyin, "check result(y)");
         }
-        printf("********************************************************************************\n");
-#if 0
-        printf("> RESTRICT SIGNIFICANT BIT TO POSITIVE <\n");
-        numerator->nums[numerator->nlen-1UL]&=0x7FFFFFFFU;
-        denominator->nums[(denominator->nlen>>1UL)-1UL]&=0x7FFFFFFFU;
-#endif
-
-        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-        TICK_TIME_START("div_bignum_with_mod");
-        if(fr = div_bignum_with_mod(quotient, remainder, numerator, denominator)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        printf("********************************************************************************\n");
-        printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
-        test_print_bignum(numerator, "numerator");
-        test_print_bignum(denominator, "denominator");
-        test_print_bignum(quotient, "quotient");
-        test_print_bignum(remainder, "remainder");
-
-        printf("[DIVIDE]\n");
-        test_print_bignum_value_only(numerator);
-        printf("/");
-        test_print_bignum_value_only(denominator);
-        printf("\n");
-        test_print_bignum_value_only(quotient);
-        printf("\n");
-
-        printf("[MODULO]\n");
-        test_print_bignum_value_only(numerator);
-        printf("%%");
-        test_print_bignum_value_only(denominator);
-        printf("\n");
-        test_print_bignum_value_only(remainder);
-        printf("\n");
-
-        printf("********************************************************************************\n");
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
     }
 #undef _KEYIN_DO_TEST_0_
 #undef _COND_DO_TEST_0_
