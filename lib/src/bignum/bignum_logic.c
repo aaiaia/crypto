@@ -76,6 +76,16 @@ ReturnType clr1b_bignum(bignum_s* n, const size_t bloc)
 
     return E_OK;
 }
+bignum_t chk1b_bignum(const bignum_s* n, const size_t bloc)
+{
+    const size_t widx = BIGNUM_BITS_IDX(bloc);
+    const bignum_t bitMask = ( (1U<<BIGNUM_BITS_REM(bloc)));
+
+    if(n == NULL)               return BIGNUM_MAX;
+    if(n->nlen <= widx)         return BIGNUM_MAX;
+
+    return (n->nums[widx] & bitMask);
+}
 
 #define _XSB_MASK_(VAL)  ((VAL)&1U)
 /* MSB: Most Significant Bit */

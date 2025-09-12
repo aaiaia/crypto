@@ -14,6 +14,7 @@ ReturnType clr_bignum(bignum_s* n);
 
 ReturnType set1b_bignum(bignum_s* n, const size_t bloc);
 ReturnType clr1b_bignum(bignum_s* n, const size_t bloc);
+bignum_t chk1b_bignum(const bignum_s* n, const size_t bloc);
 
 /* MSB: Most Significant Bit */
 size_t find_bignum_MSBL_bitLoc(const bignum_s* bignum, const size_t bitloc);
