@@ -263,122 +263,119 @@ size_t find_bignum_LSBL_bitLoc(const bignum_s* bignum, const size_t bitloc)
 }
 #undef _XSB_MASK_
 
-ReturnType lslb_bignum(bignum_s* d, const size_t blen)
+ReturnType lslb_bignum_self(bignum_s* d, const size_t blen)
 {
-    if(d != NULL)
-    {
-        const size_t lml = BIGNUM_BITS_IDX(blen); // logical move left bitnum
-        const size_t lsl = BIGNUM_BITS_REM(blen); // logical shift left bits in bitnum
+    const size_t lml = BIGNUM_BITS_IDX(blen); // logical move left bitnum
+    const size_t lsl = BIGNUM_BITS_REM(blen); // logical shift left bits in bitnum
+    ReturnType fr = E_NOT_OK;
 #ifdef DEBUG
-        printf("blen=%lu,lml=%lu,lsl=%lu\n", blen, lml, lsl);
+    printf("blen=%lu,lml=%lu,lsl=%lu\n", blen, lml, lsl);
 #endif /* DEBUG */
 
-        if(d->nlen > lml)
-        {
-            /* Not shift out condition */
-            if(lml != 0UL)
-            {
-                /* Move condition */
-                /* dii: destination inverse index, sii: source inverse index */
-                for(size_t dii=(d->nlen-1UL), sii=(d->nlen-lml-1UL); dii>=lml; dii--, sii--)
-                {
-                    d->nums[dii] = d->nums[sii];
-                }
-                /* clear forward index */
-                for(size_t cfi=0UL; cfi<lml; cfi++)
-                {
-                    d->nums[cfi] = 0x0UL;    // clear right side
-                }
-            }
-            else
-            {
-                /* Not move condition */
-            }
-
-            if(lsl != 0UL)
-            {
-                /* Shift condition */
-                return lslnb_bignum_self(d, NULL, 0U, lsl);
-            }
-            else
-            {
-                /* Not shift condition */
-            }
-        }
-        else
-        {
-            /* Shift out, set to all zero */
-            for(size_t idx=0UL; idx<d->nlen; idx++)
-            {
-                d->nums[idx] = 0x0UL;
-            }
-        }
+    if(d->nlen > lml)
+    {
+        /* Move left word */
+        fr = lmlw_bignum_self(d, lml);
+        if(fr != E_OK)  return fr;
+        /* Shift left bits */
+        fr = lslnb_bignum_self(d, NULL, 0U, lsl);
+        if(fr != E_OK)  return fr;
     }
     else
     {
-        return E_ERROR_NULL;
+        /* Shift out, set to all zero */
+        fr = clr_bignum(d);
+        if(fr != E_OK)  return fr;
     }
 
     return E_OK;
 }
 
-ReturnType lsrb_bignum(bignum_s* d, const size_t blen)
+ReturnType lsrb_bignum_self(bignum_s* d, const size_t blen)
+{
+    const size_t lmr = BIGNUM_BITS_IDX(blen); // logical move right bitnum
+    const size_t lsr = BIGNUM_BITS_REM(blen); // logical shift right bits in bitnum
+    ReturnType fr = E_NOT_OK;
+#ifdef DEBUG
+    printf("blen=%lu,lmr=%lu,lsr=%lu\n", blen, lmr, lsr);
+#endif /* DEBUG */
+
+    if(d->nlen > lmr)
+    {
+        /* Move right word */
+        fr = lmrw_bignum_self(d, lmr);
+        if(fr != E_OK)  return fr;
+        /* Shift right bits */
+        fr = lsrnb_bignum_self(d, NULL, 0U, lsr);
+        if(fr != E_OK)  return fr;
+    }
+    else
+    {
+        /* Shift out, set to all zero */
+        fr = clr_bignum(d);
+        if(fr != E_OK)  return fr;
+    }
+
+    return E_OK;
+}
+
+ReturnType lmlw_bignum_self(bignum_s* d, const size_t lml)
 {
     if(d != NULL)
     {
-        const size_t lmr = BIGNUM_BITS_IDX(blen); // logical move right bitnum
-        const size_t lsr = BIGNUM_BITS_REM(blen); // logical shift right bits in bitnum
-#ifdef DEBUG
-        printf("blen=%lu,lmr=%lu,lsr=%lu\n", blen, lmr, lsr);
-#endif /* DEBUG */
-
-        if(d->nlen > lmr)
+        if(lml != 0UL)
         {
-            /* Not shift out condition */
-            if(lmr != 0UL)
+            /* Move condition */
+            /* dii: destination inverse index, sii: source inverse index */
+            for(size_t dii=(d->nlen-1UL), sii=(d->nlen-lml-1UL); dii>=lml; dii--, sii--)
             {
-                /* Move condition */
-                /* dfi: destination forward index, sfi: source forward index */
-                for(size_t dfi=0UL, sfi=lmr; sfi<(d->nlen); dfi++, sfi++)
-                {
-                    d->nums[dfi] = d->nums[sfi];
-                }
-                /* cii: clear inverse index */
-                for(size_t cii=(d->nlen-1U); cii>(d->nlen-lmr-1U); cii--)
-                {
-                    d->nums[cii] = 0x0UL;    // clear left side
-                }
+                d->nums[dii] = d->nums[sii];
             }
-            else
+            /* clear forward index */
+            for(size_t cfi=0UL; cfi<lml; cfi++)
             {
-                /* Not move condition */
-            }
-
-            if(lsr != 0UL)
-            {
-                /* Shift condition */
-                return lsrnb_bignum_self(d, NULL, 0U, lsr);
-            }
-            else
-            {
-                /* Not shift condition */
+                d->nums[cfi] = 0x0UL;    // clear right side
             }
         }
         else
         {
-            /* Shift out, set to all zero */
-            for(size_t idx=0UL; idx<d->nlen; idx++)
-            {
-                d->nums[idx] = 0x0UL;
-            }
+            /* Not move condition */
         }
+        return E_OK;
     }
     else
     {
         return E_ERROR_NULL;
     }
-
-    return E_OK;
+}
+ReturnType lmrw_bignum_self(bignum_s* d, const size_t lmr)
+{
+    if(d != NULL)
+    {
+        if(lmr != 0UL)
+        {
+            /* Move condition */
+            /* dfi: destination forward index, sfi: source forward index */
+            for(size_t dfi=0UL, sfi=lmr; sfi<(d->nlen); dfi++, sfi++)
+            {
+                d->nums[dfi] = d->nums[sfi];
+            }
+            /* cii: clear inverse index */
+            for(size_t cii=(d->nlen-1U); cii>(d->nlen-lmr-1U); cii--)
+            {
+                d->nums[cii] = 0x0UL;    // clear left side
+            }
+        }
+        else
+        {
+            /* Not move condition */
+        }
+        return E_OK;
+    }
+    else
+    {
+        return E_ERROR_NULL;
+    }
 }
 
 ReturnType lslnb_bignum_self(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lslb)

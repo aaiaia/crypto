@@ -22,8 +22,11 @@ size_t find_bignum_MSBL(const bignum_s* bignum);
 size_t find_bignum_LSBL_bitLoc(const bignum_s* bignum, const size_t bitloc);
 size_t find_bignum_LSBL(const bignum_s* bignum);
 
-ReturnType lslb_bignum(bignum_s* d, const size_t blen);
-ReturnType lsrb_bignum(bignum_s* d, const size_t blen);
+ReturnType lslb_bignum_self(bignum_s* d, const size_t blen);
+ReturnType lsrb_bignum_self(bignum_s* d, const size_t blen);
+
+ReturnType lmlw_bignum_self(bignum_s* d, const size_t lml);
+ReturnType lmrw_bignum_self(bignum_s* d, const size_t lmr);
 
 ReturnType lslnb_bignum_self(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lslb);
 static inline ReturnType lsl1b_bignum_self(bignum_s* d, bignum_t* co, const bignum_t ci)

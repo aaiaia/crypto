@@ -11,7 +11,8 @@ static char* const ReturnName4 = "E_ERROR_RUNTIME";
 static char* const ReturnName5 = "E_ERROR_DIVIDE_ZERO";
 static char* const ReturnName6 = "E_ERROR_BIGNUM_SIGN";
 static char* const ReturnName7 = "E_ERROR_BIGNUM_LOSS";
-static char* const ReturnName8 = "E_NOT_IMPL";
+static char* const ReturnName8 = "E_HAS_NO_VALUE";
+static char* const ReturnName9 = "E_NOT_IMPL";
 
 static const const char* ReturnName[] = {
     ReturnName0,
@@ -23,6 +24,7 @@ static const const char* ReturnName[] = {
     ReturnName6,
     ReturnName7,
     ReturnName8,
+    ReturnName9,
     NULL,
 };
 

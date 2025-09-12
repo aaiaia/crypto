@@ -3398,10 +3398,10 @@ void test_lslb_bignum(void)
         test_print_bignum(test_sftb, "lslb(before)");
         // run test function
         printf("[lsl: %4lu]", lsl);
-        TICK_TIME_START("lslb_bignum");
-        if(fr = lslb_bignum(test_sftb, lsl)) {
+        TICK_TIME_START("lslb_bignum_self");
+        if(fr = lslb_bignum_self(test_sftb, lsl)) {
             TICK_TIME_END;
-            printf("lslb_bignum(test_sftb, %lu) = %d\r\n", lsl, fr);
+            printf("lslb_bignum_self(test_sftb, %lu) = %d\r\n", lsl, fr);
         } else {
             TICK_TIME_END;
         }
@@ -3409,7 +3409,7 @@ void test_lslb_bignum(void)
         test_cmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
         test_print_bignum(test_refer, "refer");
         test_print_bignum(test_sftb, "lslb(after)");
-        printf("lslb_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("lslb_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 
@@ -3453,10 +3453,10 @@ void test_lsrb_bignum(void)
         test_print_bignum(test_sftb, "lsrb(before)");
         // run test function
         printf("[lsr: %4lu]", lsr);
-        TICK_TIME_START("lsrb_bignum");
-        if(fr = lsrb_bignum(test_sftb, lsr)) {
+        TICK_TIME_START("lsrb_bignum_self");
+        if(fr = lsrb_bignum_self(test_sftb, lsr)) {
             TICK_TIME_END;
-            printf("lsrb_bignum(test_sftb, %lu) = %d\r\n", lsr, fr);
+            printf("lsrb_bignum_self(test_sftb, %lu) = %d\r\n", lsr, fr);
         } else {
             TICK_TIME_END;
         }
@@ -3464,7 +3464,7 @@ void test_lsrb_bignum(void)
         test_cmp = memcmp(test_refer->nums, test_sftb->nums, (test_refer->size));
         test_print_bignum(test_refer, "refer");
         test_print_bignum(test_sftb, "lsrb(after)");
-        printf("lsrb_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        printf("lsrb_bignum_self() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
         TEST_ASSERT(test_cmp == 0);
     }
 

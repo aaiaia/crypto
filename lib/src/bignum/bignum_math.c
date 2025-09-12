@@ -436,7 +436,7 @@ ReturnType div_bignum_with_mod_ext(bignum_s* q, bignum_s* r, const bignum_s* n, 
 
                 _d_lsbl_ = (_n_msbl_ - _d_msbl_);
                 _d_msbl_ = _n_msbl_;
-                if(lslb_bignum(_d_m2_, _d_lsbl_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if(lslb_bignum_self(_d_m2_, _d_lsbl_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
                 _DPRINTF_("[init] _n_msbl_ = %lu\n", _n_msbl_);
                 _DPRINTF_("[init] _d_msbl_ = %lu\n", _d_msbl_);
                 _DPRINTF_("[init] _d_lsbl_ = %lu\n", _d_lsbl_);
@@ -480,7 +480,7 @@ ReturnType div_bignum_with_mod_ext(bignum_s* q, bignum_s* r, const bignum_s* n, 
                             /* found next bit loction */
                             if(_d_lsbl_ >= _lsrl_)
                             {
-                                _fr_ = lsrb_bignum(_d_m2_, _lsrl_);
+                                _fr_ = lsrb_bignum_self(_d_m2_, _lsrl_);
                                 if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); break; };
                                 _n_msbl_ = _msbl_;
                                 _d_msbl_ -= _lsrl_;
