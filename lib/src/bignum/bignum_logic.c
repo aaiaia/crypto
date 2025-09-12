@@ -385,6 +385,11 @@ ReturnType lslnb_bignum_self(bignum_s* d, bignum_t* co, const bignum_t ci, const
 {
     if(d != NULL)
     {
+        if(lslb == 0UL)
+        {
+            /* no shift */
+            return E_OK;
+        }
         if(BIGNUM_BITS > lslb)
         {
             const size_t lsrb = BIGNUM_BITS - lslb;
@@ -430,6 +435,11 @@ ReturnType lsrnb_bignum_self(bignum_s* d, bignum_t* co, const bignum_t ci, const
 {
     if(d != NULL)
     {
+        if(lsrb == 0UL)
+        {
+            /* no shift */
+            return E_OK;
+        }
         if(BIGNUM_BITS > lsrb)
         {
             const size_t lslb = BIGNUM_BITS - lsrb;
