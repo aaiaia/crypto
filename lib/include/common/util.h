@@ -18,15 +18,24 @@
 #define BITS2SIZE(BITS)     ((BITS>>3U)+((((BITS)&0x7U)!=0x0U)?(1U):(0U)))
 #define BYTE2BITS(SIZE)     ((SIZE)<<3U)
 
-#define BIT2U16L(bits)  ((bits>>4u)+(((bits&0x0Fu)!=0x0u)?(1u):(0u)))
+#define REMBITU16(bits)     (bits&0x0Fu)
+#define QUOBITU16(bits)     (bits>>4u)
+#define BIT2U16L(bits)      (QUOBITU16(bits)+((REMBITU16(bits)!=0x0u)?(1u):(0u)))
+#define U16L2BIT(U16L)      (U16L<<4u)
 #define BYTE2U16L(SIZE)     (((SIZE)>>1U)+((((SIZE)&0x1U)!=0x0U)?(1U):(0U)))
 #define U16L2BYTE(U16L)     ((U16L)<<1U)
 
-#define BIT2U32L(bits)  ((bits>>5u)+(((bits&0x1Fu)!=0x0u)?(1u):(0u)))
+#define REMBITU32(bits)     (bits&0x1Fu)
+#define QUOBITU32(bits)     (bits>>5u)
+#define BIT2U32L(bits)      (QUOBITU32(bits)+((REMBITU32(bits)!=0x0u)?(1u):(0u)))
+#define U32L2BIT(U32L)      (U32L<<5u)
 #define BYTE2U32L(SIZE)     (((SIZE)>>2U)+((((SIZE)&0x3U)!=0x0U)?(1U):(0U)))
 #define U32L2BYTE(U32L)     ((U32L)<<2U)
 
-#define BIT2U64L(bits)  ((bits>>6u)+(((bits&0x3Fu)!=0x0u)?(1u):(0u)))
+#define REMBITU64(bits)     (bits&0x3Fu)
+#define QUOBITU64(bits)     (bits>>6u)
+#define BIT2U64L(bits)      (QUOBITU64(bits)+((REMBITU64(bits)!=0x0u)?(1u):(0u)))
+#define U64L2BIT(U64L)      (U64L<<6u)
 #define BYTE2U64L(SIZE)     (((SIZE)>>3U)+((((SIZE)&0x7U)!=0x0U)?(1U):(0U)))
 #define U64L2BYTE(U64L)     ((U64L)<<3U)
 
