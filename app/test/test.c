@@ -2564,6 +2564,169 @@ void test_sub_bignum_unsigned_256b(const char* test_fn_name, const TEST_FP_BIGNU
 }
 
 #define TEST_MUL_BIGNUM_BS  1024U
+bignum_t bignum1024bNum__A_0[] = {
+    0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNum__B_0[] = {
+    0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNumRef_0[] = {
+    0x00000001U, 0x00000000U, 0xfffffffeU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+
+bignum_t bignum1024bNum__A_1[] = {
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNum__B_1[] = {
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNumRef_1[] = {
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0xfffffffeU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+
+bignum_t bignum1024bNum__A_2[] = {
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNum__B_2[] = {
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNumRef_2[] = {
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xffffffffU, 0xfffffffeU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+
+bignum_t bignum1024bNum__A_3[] = {
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNum__B_3[] = {
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+bignum_t bignum1024bNumRef_3[] = {
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xffffffffU, 0xfffffffeU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+
+bignum_t bignum1024bNum__A_4[] = {
+    0x00000007U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+}; // 7
+bignum_t bignum1024bNum__B_4[] = {
+    0xfffffff2U, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+}; // -14
+bignum_t bignum1024bNumRef_4[] = {
+    0xffffff9eU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0x00000006U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+}; // -98
+
+bignum_t bignum1024bNum__A_5[] = {
+    0xfffffff2U, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+}; // -14
+bignum_t bignum1024bNum__B_5[] = {
+    0x00000007U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+}; // 7
+bignum_t bignum1024bNumRef_5[] = {
+    0xffffff9eU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0x00000006U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+}; // -98
+
+bignum_t* bignum1024bNum__A_LIST[] = {
+    bignum1024bNum__A_0,
+    bignum1024bNum__A_1,
+    bignum1024bNum__A_2,
+    bignum1024bNum__A_3,
+    bignum1024bNum__A_4,
+    bignum1024bNum__A_5,
+};
+bignum_t* bignum1024bNum__B_LIST[] = {
+    bignum1024bNum__B_0,
+    bignum1024bNum__B_1,
+    bignum1024bNum__B_2,
+    bignum1024bNum__B_3,
+    bignum1024bNum__B_4,
+    bignum1024bNum__B_5,
+};
+bignum_t* bignum1024bNumRef_LIST[] = {
+    bignum1024bNumRef_0,
+    bignum1024bNumRef_1,
+    bignum1024bNumRef_2,
+    bignum1024bNumRef_3,
+    bignum1024bNumRef_4,
+    bignum1024bNumRef_5,
+};
+
 typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignum_s*);
 void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
 {
@@ -2574,177 +2737,26 @@ void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL te
     bignum_s* test_opB = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
     bignum_s* test_dst = mkBigNum(TEST_MUL_BIGNUM_BS<<1U);
 
-    /****************/
-    /* TestVector 1 */
-    (void)memset(test_ref->nums, 0U, test_ref->size);
-    (void)memset(test_opA->nums, 0U, test_opA->size);
-    (void)memset(test_opB->nums, 0U, test_opB->size);
-    (void)memset(test_dst->nums, 0U, test_dst->size);
+    for(size_t tvi = 0UL; tvi < sizeof(bignum1024bNumRef_LIST)/sizeof(bignum_t*); tvi++)
+    {
+        (void)memcpy(test_ref->nums, bignum1024bNumRef_0, test_ref->size);
+        (void)memcpy(test_opA->nums, bignum1024bNum__A_0, test_opA->size);
+        (void)memcpy(test_opB->nums, bignum1024bNum__B_0, test_opB->size);
+        (void)memset(test_dst->nums, 0U, test_dst->size);
 
-    // set operand A
-    test_opA->nums[0] = 0xffffffffU;
-    test_opA->nums[1] = 0xffffffffU;
+        TICK_TIME_START(test_fn_name);
+        test_fp(test_dst, test_opA, test_opB);
+        TICK_TIME_END;
+        printf("[tvi: %lu]\r\n", tvi);
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
 
-    // set operand B
-    test_opB->nums[0] = 0xffffffffU;
-    test_opB->nums[1] = 0xffffffffU;
-
-    // set reference
-    test_ref->nums[0] = 0x00000001U;
-    test_ref->nums[1] = 0x00000000U;
-    test_ref->nums[2] = 0xfffffffeU;
-    test_ref->nums[3] = 0xffffffffU;
-
-    TICK_TIME_START(test_fn_name);
-    test_fp(test_dst, test_opA, test_opB);
-    TICK_TIME_END;
-    test_print_bignum(test_opA, "opA");
-    test_print_bignum(test_opB, "opB");
-    test_print_bignum(test_dst, "dst");
-    test_print_bignum(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("%s is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
-    TEST_ASSERT(test_cmp == 0);
-
-    /****************/
-    /* TestVector 2 */
-    (void)memset(test_ref->nums, 0U, test_ref->size);
-    (void)memset(test_opA->nums, 0U, test_opA->size);
-    (void)memset(test_opB->nums, 0U, test_opB->size);
-    (void)memset(test_dst->nums, 0U, test_dst->size);
-
-    // set operand A
-    test_opA->nums[0] = 0xffffffffU;
-    test_opA->nums[1] = 0xffffffffU;
-    test_opA->nums[2] = 0xffffffffU;
-    test_opA->nums[3] = 0xffffffffU;
-
-    // set operand B
-    test_opB->nums[0] = 0xffffffffU;
-    test_opB->nums[1] = 0xffffffffU;
-    test_opB->nums[2] = 0xffffffffU;
-    test_opB->nums[3] = 0xffffffffU;
-
-    // set reference
-    test_ref->nums[0] = 0x00000001U;
-    test_ref->nums[1] = 0x00000000U;
-    test_ref->nums[2] = 0x00000000U;
-    test_ref->nums[3] = 0x00000000U;
-    test_ref->nums[4] = 0xfffffffeU;
-    test_ref->nums[5] = 0xffffffffU;
-    test_ref->nums[6] = 0xffffffffU;
-    test_ref->nums[7] = 0xffffffffU;
-
-    TICK_TIME_START(test_fn_name);
-    test_fp(test_dst, test_opA, test_opB);
-    TICK_TIME_END;
-    test_print_bignum(test_opA, "opA");
-    test_print_bignum(test_opB, "opB");
-    test_print_bignum(test_dst, "dst");
-    test_print_bignum(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("%s is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
-    TEST_ASSERT(test_cmp == 0);
-
-    /****************/
-    /* TestVector 3 */
-    (void)memset(test_ref->nums, 0U, test_ref->size);
-    (void)memset(test_opA->nums, 0U, test_opA->size);
-    (void)memset(test_opB->nums, 0U, test_opB->size);
-    (void)memset(test_dst->nums, 0U, test_dst->size);
-
-    // set operand A
-    test_opA->nums[0]  = 0xffffffffU;
-    test_opA->nums[1]  = 0xffffffffU;
-    test_opA->nums[2]  = 0xffffffffU;
-    test_opA->nums[3]  = 0xffffffffU;
-    test_opA->nums[4]  = 0xffffffffU;
-
-    // set operand B
-    test_opB->nums[0]  = 0xffffffffU;
-    test_opB->nums[1]  = 0xffffffffU;
-    test_opB->nums[2]  = 0xffffffffU;
-    test_opB->nums[3]  = 0xffffffffU;
-    test_opB->nums[4]  = 0xffffffffU;
-    test_opB->nums[5]  = 0xffffffffU;
-
-    // set reference
-    test_ref->nums[0]  = 0x00000001U;
-    test_ref->nums[1]  = 0x00000000U;
-    test_ref->nums[2]  = 0x00000000U;
-    test_ref->nums[3]  = 0x00000000U;
-    test_ref->nums[4]  = 0x00000000U;
-    test_ref->nums[5]  = 0xffffffffU;
-    test_ref->nums[6]  = 0xfffffffeU;
-    test_ref->nums[7]  = 0xffffffffU;
-    test_ref->nums[8]  = 0xffffffffU;
-    test_ref->nums[9]  = 0xffffffffU;
-    test_ref->nums[10] = 0xffffffffU;
-
-    TICK_TIME_START(test_fn_name);
-    test_fp(test_dst, test_opA, test_opB);
-    TICK_TIME_END;
-    test_print_bignum(test_opA, "opA");
-    test_print_bignum(test_opB, "opB");
-    test_print_bignum(test_dst, "dst");
-    test_print_bignum(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("%s is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
-    TEST_ASSERT(test_cmp == 0);
-
-    /****************/
-    /* TestVector 4 */
-    (void)memset(test_ref->nums, 0U, test_ref->size);
-    (void)memset(test_opA->nums, 0U, test_opA->size);
-    (void)memset(test_opB->nums, 0U, test_opB->size);
-    (void)memset(test_dst->nums, 0U, test_dst->size);
-
-    // set operand A
-    test_opA->nums[0]  = 0xffffffffU;
-    test_opA->nums[1]  = 0xffffffffU;
-    test_opA->nums[2]  = 0xffffffffU;
-    test_opA->nums[3]  = 0xffffffffU;
-    test_opA->nums[4]  = 0xffffffffU;
-    test_opA->nums[5]  = 0x0fffffffU;
-
-    // set operand B
-    test_opB->nums[0]  = 0xffffffffU;
-    test_opB->nums[1]  = 0xffffffffU;
-    test_opB->nums[2]  = 0xffffffffU;
-    test_opB->nums[3]  = 0xffffffffU;
-    test_opB->nums[4]  = 0xffffffffU;
-    test_opB->nums[5]  = 0xffffffffU;
-    test_opB->nums[6]  = 0xffffffffU;
-
-    // set reference
-    test_ref->nums[0]  = 0x00000001U;
-    test_ref->nums[1]  = 0x00000000U;
-    test_ref->nums[2]  = 0x00000000U;
-    test_ref->nums[3]  = 0x00000000U;
-    test_ref->nums[4]  = 0x00000000U;
-    test_ref->nums[5]  = 0xf0000000U;
-    test_ref->nums[6]  = 0xffffffffU;
-    test_ref->nums[7]  = 0xfffffffeU;
-    test_ref->nums[8]  = 0xffffffffU;
-    test_ref->nums[9]  = 0xffffffffU;
-    test_ref->nums[10] = 0xffffffffU;
-    test_ref->nums[11] = 0xffffffffU;
-    test_ref->nums[12] = 0x0fffffffU;
-
-    TICK_TIME_START(test_fn_name);
-    test_fp(test_dst, test_opA, test_opB);
-    TICK_TIME_END;
-    test_print_bignum(test_opA, "opA");
-    test_print_bignum(test_opB, "opB");
-    test_print_bignum(test_dst, "dst");
-    test_print_bignum(test_ref, "ref");
-
-    test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-    printf("%s is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
-    TEST_ASSERT(test_cmp == 0);
+        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+        printf("%s is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        TEST_ASSERT(test_cmp == 0);
+    }
 
     rmBitNum(&test_ref);
     rmBitNum(&test_opA);
