@@ -2739,9 +2739,9 @@ void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL te
 
     for(size_t tvi = 0UL; tvi < sizeof(bignum1024bNumRef_LIST)/sizeof(bignum_t*); tvi++)
     {
-        (void)memcpy(test_ref->nums, bignum1024bNumRef_0, test_ref->size);
-        (void)memcpy(test_opA->nums, bignum1024bNum__A_0, test_opA->size);
-        (void)memcpy(test_opB->nums, bignum1024bNum__B_0, test_opB->size);
+        (void)memcpy(test_ref->nums, bignum1024bNumRef_LIST[tvi], test_ref->size);
+        (void)memcpy(test_opA->nums, bignum1024bNum__A_LIST[tvi], test_opA->size);
+        (void)memcpy(test_opB->nums, bignum1024bNum__B_LIST[tvi], test_opB->size);
         (void)memset(test_dst->nums, 0U, test_dst->size);
 
         TICK_TIME_START(test_fn_name);
@@ -7025,19 +7025,19 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b()]\r\n");
+    printf("[test start: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
     _COND_DO_TEST_(keyin)
     test_mul_bignum_1024b("mul_bignum_1bs", mul_bignum_1bs);
-    printf("[test   end: test_mul_bignum_1024b()]\r\n");
+    printf("[test   end: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b()]\r\n");
+    printf("[test start: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
     _COND_DO_TEST_(keyin)
     test_mul_bignum_1024b("mul_bignum", mul_bignum);
-    printf("[test   end: test_mul_bignum_1024b()]\r\n");
+    printf("[test   end: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
