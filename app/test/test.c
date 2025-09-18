@@ -4025,6 +4025,129 @@ bignum_t* TV_LIST_REMAINDER_1024b[] = {
     TV_REMAINDER_1024b_7,
 };
 
+typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignum_s*);
+void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
+{
+#define TEST_MUL_BIGNUM_BIT_LEN   1024U
+    char keyin;
+    int test_memcmp0;
+    ReturnType fr;
+
+    bool manually = false;
+
+    bignum_s* multiplier = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+    bignum_s* multiplicand = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+    bignum_s* product = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+
+#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_FUNC_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+    _KEYIN_DO_TEST_0_(keyin, "Test Manually?(y/n)");
+    _COND_DO_TEST_0_(keyin) manually = true;
+
+    if(!manually)
+    {
+        bignum_s* addedNumber = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+        bignum_s* productAddRem = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+
+        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
+        {
+            memcpy(multiplier->nums, TV_LIST_QUOTIENT_1024b[i], multiplier->size);
+            memcpy(multiplicand->nums, TV_LIST_DENOMINATOR_1024b[i], multiplicand->size);
+
+            memcpy(addedNumber->nums, TV_LIST_REMAINDER_1024b[i], addedNumber->size);
+
+
+            TICK_TIME_START(test_fn_name);
+            fr = test_fp(product, multiplier, multiplicand);
+            TICK_TIME_END;
+#if 1 /*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+            printf("%s() = ", test_fn_name);
+            printReturnType(fr);
+#endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+
+            if(fr = add_bignum(NULL, productAddRem, product, addedNumber, 0U)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+
+            test_memcmp0 = memcmp(productAddRem->nums, TV_LIST_NUMERATOR_1024b[i], productAddRem->size);
+            if(test_memcmp0 != 0)
+            {
+                test_print_bignum(multiplier, "multiplier");
+                test_print_bignum(multiplicand, "multiplicand");
+                test_print_bignum(product, "product");
+            }
+            printf("[%lu] %s() then add to remainder is %s\r\n", i, test_fn_name, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+#if 0 /*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+            TEST_ASSERT(test_memcmp0 == 0);
+#endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+        }
+
+        rmBitNum(&productAddRem);
+        rmBitNum(&addedNumber);
+    }
+    else
+    {
+        for(size_t i = 0UL; i < 0x10UL; i++)
+        {
+            (void)memset(multiplier->nums, 0U, multiplier->size);
+            (void)memset(multiplicand->nums, 0U, multiplicand->size);
+            (void)memset(product->nums, 0U, product->size);
+            /* set test vector*/
+
+            srand(time(NULL)+i);
+            for(size_t byte = 0UL; byte < (multiplier->size)>>1UL; byte++)
+            {
+                ((uint8_t*)multiplier->nums)[byte] = (rand()&0xFFU);
+            }
+            for(size_t byte = 0UL; byte < (multiplicand->size)>>1UL; byte++)
+            {
+                ((uint8_t*)multiplicand->nums)[byte] = (rand()&0xFFU);
+            }
+
+            /* multiplier */
+            TICK_TIME_START(test_fn_name);
+            fr = test_fp(product, multiplier, multiplicand);
+            TICK_TIME_END;
+            printf("%s() = ", test_fn_name);
+            printReturnType(fr);
+            printf("********************************************************************************\n");
+            printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
+            printf("%s()", test_fn_name);
+            test_print_bignum(multiplier, "multiplier");
+            test_print_bignum(multiplicand, "multiplicand");
+            test_print_bignum(product, "product");
+
+            printf("[PRODUCT]\n");
+            test_print_bignum_value_only(multiplier);
+            printf("*");
+            test_print_bignum_value_only(multiplicand);
+            printf("\n");
+            test_print_bignum_value_only(product);
+            printf("\n");
+
+            printf("********************************************************************************\n");
+            _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        }
+    }
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+
+    rmBitNum(&multiplier);
+    rmBitNum(&multiplicand);
+    rmBitNum(&product);
+#undef TEST_MUL_BIGNUM_BIT_LEN
+}
+
 void test_div_bignum_with_mod(void)
 {
 #define TEST_DIV_BIGNUM_BIT_LEN   1024U
@@ -4136,6 +4259,137 @@ void test_div_bignum_with_mod(void)
     rmBitNum(&quotient);
     rmBitNum(&remainder);
 #undef TEST_DIV_BIGNUM_BIT_LEN
+}
+
+void test_gcd_bignum(void)
+{
+#define TEST_GCD_BIGNUM_BIT_LEN   1024U
+    char keyin;
+    int test_memcmp0, test_memcmp1;
+    ReturnType fr;
+
+    bignum_s* num_a = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_s* num_b = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_s* num_g = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_s* num_s = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_s* num_t = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_s* prod_as = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_s* prod_bt = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_s* sum = mkBigNum(TEST_GCD_BIGNUM_BIT_LEN);
+    bignum_cmp_e num_cmp;
+
+    bool manually = false;
+
+#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_FUNC_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+    _KEYIN_DO_TEST_0_(keyin, "Test Manually?(y/n)");
+    _COND_DO_TEST_0_(keyin) manually = true;
+
+#if 0 /* NO_MANUALL_YET */
+    if(!manually)
+    {
+        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
+        {
+            memcpy(num_a->nums, TV_LIST_NUMERATOR_1024b[i], num_a->size);
+            memcpy(num_b->nums, TV_LIST_DENOMINATOR_1024b[i], num_b->size);
+
+            /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+            TICK_TIME_START("div_bignum_with_mod");
+            if(fr = TEST_FUNCTION_NAME(...)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+            TICK_TIME_END;
+
+            test_memcmp0 = memcmp(num_g->nums, TV_LIST_QUOTIENT_1024b[i], quotient->size);
+            test_memcmp1 = memcmp(num_s->nums, TV_LIST_REMAINDER_1024b[i], num_s->size);
+            printf("TEST_FUNCTION_NAME() divide is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+            printf("TEST_FUNCTION_NAME() modulo is %s\r\n", ((test_memcmp1 == 0)?MES_PASS:MES_FAIL));
+            TEST_ASSERT((test_memcmp0 == 0) && (test_memcmp1 == 0));
+        }
+    }
+    else
+    {
+#endif/* NO_MANUALL_YET */
+        /* 
+         * Value Example: https://ko.wikipedia.org/wiki/%EC%9C%A0%ED%81%B4%EB%A6%AC%EB%93%9C_%ED%98%B8%EC%A0%9C%EB%B2%95
+         *            GLUE     SEQ     SEQ     SEQ     SEQ    GLUE      GLUE     SEQ     SEQ    GLUE      GLUE
+         * | index |     q | old r |     r | old s |     s |    qs | olds-qs | old t |     t |    qt | oldt-qt |
+         * |  init |     - | 78696 | 19332 |     1 |     0 |     0 |       1 |     0 |     1 |     4 |      -4 |
+         * |     0 |     4 | 19332 |  1368 |     0 |     1 |    14 |     -14 |     1 |    -4 |    -5 |      57 |
+         * |     1 |    14 |  1368 |   180 |     1 |   -14 |   -98 |      99 |    -4 |    57 |   399 |    -403 |
+         * |     2 |     7 |   180 |   108 |   -14 |    99 |    99 |    -113 |    57 |  -403 |  -403 |     460 |
+         * |     3 |     1 |   108 |    72 |    99 |  -113 |  -113 |     212 |  -403 |   460 |   460 |    -863 |
+         * |     4 |     1 |    72 |    36 |  -113 |   212 |   424 |    -537 |   460 |  -863 | -1726 |    2186 |
+         * |     5 |     2 |    36 |     0 |   212 |  -537 |     0 |     212 |  -863 |  2186 |     0 |    -863 |
+         * a       :     78696
+         * s(old_s):       212
+         * b       :     19332
+         * t(old_t):      -863
+         * as      :  16683552
+         *      bt : -16683516
+         * as + bt :        36
+         */
+        (void)memset(num_a->nums, 0U, num_a->size);
+        (void)memset(num_b->nums, 0U, num_b->size);
+        (void)memset(num_g->nums, 0U, num_g->size);
+        (void)memset(num_s->nums, 0U, num_s->size);
+        (void)memset(num_t->nums, 0U, num_t->size);
+        /* set test vector*/
+        num_a->nums[0] = 78696U;
+        num_b->nums[0] = 19332;
+
+        /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+        TICK_TIME_START("gcd_bignum");
+        if(fr = gcd_bignum(num_g, num_s, num_t, num_a, num_b)) {
+            printReturnType(fr);
+        } else { /* Do nothing */ }
+        TICK_TIME_END;
+        printf("********************************************************************************\n");
+        printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
+        test_print_bignum(num_a, "num_a");
+        test_print_bignum(num_b, "num_b");
+        test_print_bignum(num_g, "gcd");
+        test_print_bignum(num_s, "coef s");
+        test_print_bignum(num_t, "coef t");
+
+        if((fr = mul_bignum_unsafe(prod_as, num_a, num_s)) != E_OK)     { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = mul_bignum_unsafe(prod_bt, num_b, num_t)) != E_OK)     { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = add_bignum(NULL, sum, prod_as, prod_bt, 0UL)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        test_print_bignum(prod_as, "prod_as");
+        test_print_bignum(prod_bt, "prod_bt");
+        test_print_bignum(num_b, "num_b");
+
+        num_cmp = cmp_bignum_logical(sum, num_g);
+        printf("a*s+b*t=gcd(a,b) is %s\r\n", ((num_cmp == BIGNUM_CMP_EQ)?MES_PASS:MES_FAIL));
+
+
+        printf("********************************************************************************\n");
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+#if 0 /* NO_MANUALL_YET */
+    }
+#endif/* NO_MANUALL_YET */
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+
+    rmBitNum(&num_a);
+    rmBitNum(&num_b);
+    rmBitNum(&num_g);
+    rmBitNum(&num_s);
+    rmBitNum(&num_t);
+    rmBitNum(&prod_as);
+    rmBitNum(&prod_bt);
+    rmBitNum(&sum);
+#undef TEST_GCD_BIGNUM_BIT_LEN
 }
 
 #include "common/bitwise.h"
@@ -7066,11 +7320,35 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum", mul_bignum);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_unsafe", mul_bignum_unsafe);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
     printf("[test start: test_div_bignum_with_mod()]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_div_bignum_with_mod");
     _COND_DO_TEST_(keyin)
     test_div_bignum_with_mod();
     printf("[test   end: test_div_bignum_with_mod()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_gcd_bignum()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_gcd_bignum");
+    _COND_DO_TEST_(keyin)
+    test_gcd_bignum();
+    printf("[test   end: test_gcd_bignum()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");

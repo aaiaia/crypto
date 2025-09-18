@@ -65,4 +65,10 @@ static inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const big
     return div_bignum_with_mod_nbs_ext(q, r, n, d, true);   // bit length guard
 }
 
+ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b, const bool guard);
+static inline ReturnType gcd_bignum(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b)
+{
+    return gcd_bignum_ext(r, s, t, a, b, true);
+}
+
 #endif/* BIGNUM_MATH_H */

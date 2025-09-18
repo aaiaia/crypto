@@ -798,5 +798,124 @@ ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s*
     return E_OK;
 }
 
+/* 
+ * Note. This function implements to application for getting multiplicative inverse(reciprocal)
+ *
+ * link: https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+ * Title : Extended Euclidean algorithm, WIKIPEDIA
+ * Chapter. Polynomial extended Euclidean algorithm: as + bt = gcd(a,b)
+ * Chapter. Pseudocode(Not Optimized)
+ */
+/* r: gcd, s and t: coefficient(optional), a and b: number */
+/* 
+ * Value Example: https://ko.wikipedia.org/wiki/%EC%9C%A0%ED%81%B4%EB%A6%AC%EB%93%9C_%ED%98%B8%EC%A0%9C%EB%B2%95
+ *            GLUE     SEQ     SEQ     SEQ     SEQ    GLUE      GLUE     SEQ     SEQ    GLUE      GLUE
+ * | index |     q | old r |     r | old s |     s |    qs | olds-qs | old t |     t |    qt | oldt-qt |
+ * |  init |     - | 78696 | 19332 |     1 |     0 |     0 |       1 |     0 |     1 |     4 |      -4 |
+ * |     0 |     4 | 19332 |  1368 |     0 |     1 |    14 |     -14 |     1 |    -4 |    -5 |      57 |
+ * |     1 |    14 |  1368 |   180 |     1 |   -14 |   -98 |      99 |    -4 |    57 |   399 |    -403 |
+ * |     2 |     7 |   180 |   108 |   -14 |    99 |    99 |    -113 |    57 |  -403 |  -403 |     460 |
+ * |     3 |     1 |   108 |    72 |    99 |  -113 |  -113 |     212 |  -403 |   460 |   460 |    -863 |
+ * |     4 |     1 |    72 |    36 |  -113 |   212 |   424 |    -537 |   460 |  -863 | -1726 |    2186 |
+ * |     5 |     2 |    36 |     0 |   212 |  -537 |     0 |     212 |  -863 |  2186 |     0 |    -863 |
+ * a       :     78696
+ * s(old_s):       212
+ * b       :     19332
+ * t(old_t):      -863
+ * as      :  16683552
+ *      bt : -16683516
+ * as + bt :        36
+ */
+ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b, const bool guard) {
+    if((r != NULL) && (a != NULL) && (b != NULL)) {
+        if((((a->bits) == (b->bits)) && ((a->bits) == (r->bits)))|| (!guard)) {
+            ReturnType _fr_;
+            bignum_s* _tmp_ = mkBigNum(r->bits); /* temp */
+            bignum_s* _quo_ = mkBigNum(r->bits); /* quotient */
+            bignum_s* _o_r_ = mkBigNum(r->bits); /* p: previous(old) */
+            bignum_s* ___r_ = mkBigNum(r->bits); /* c: current */
+            bignum_s* _o_s_ = mkBigNum(r->bits); /* p: previous(old) */
+            bignum_s* ___s_ = mkBigNum(r->bits); /* c: current */
+            bignum_s* _o_t_ = mkBigNum(r->bits); /* p: previous(old) */
+            bignum_s* ___t_ = mkBigNum(r->bits); /* c: current */
+
+            // (old_r, r) := (a, b)
+            if(cpy_bignum_math(_o_r_, a) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if(cpy_bignum_math(___r_, b) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            // (old_s, s) := (1, 0)
+            if(clr_bignum(_o_s_) != E_OK)         { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if(set1b_bignum(_o_s_, 0UL) != E_OK)  { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if(clr_bignum(___s_) != E_OK)         { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            // (old_t, t) := (0, 1)
+            if(clr_bignum(_o_t_) != E_OK)         { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if(clr_bignum(___t_) != E_OK)         { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if(set1b_bignum(___t_, 0UL) != E_OK)  { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+
+            _PRINT_BITNUM_(_o_r_, "[init] _o_r_");
+            _PRINT_BITNUM_(___r_, "[init] ___r_");
+            _PRINT_BITNUM_(_o_s_, "[init] _o_s_");
+            _PRINT_BITNUM_(___s_, "[init] ___s_");
+            _PRINT_BITNUM_(_o_t_, "[init] _o_t_");
+            _PRINT_BITNUM_(___t_, "[init] ___t_");
+            while(cmp0_bignum(___r_) != BIGNUM_CMP_ZO)
+            {
+                if((_fr_ = cpy_bignum_math(_tmp_, ___r_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+
+                // quotient := old_r div r
+                if((_fr_ = div_bignum_with_mod(_quo_, ___r_, _o_r_, ___r_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); }
+                if((_fr_ = cpy_bignum_math(_o_r_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                // (old_r, r) := (r, old_r − quotient × r)
+                // note: 'old_r − quotient × r' is maen that remainder
+                _PRINT_BITNUM_(_quo_, "_quo_");
+                _PRINT_BITNUM_(_o_r_, "_o_r_");
+                _PRINT_BITNUM_(___r_, "___r_");
+
+                // (old_s, s) := (s, old_s − quotient × s)
+                if((_fr_ = cpy_bignum_math(_tmp_, ___s_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = mul_bignum_unsafe(_tmp_, _quo_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = sub_bignum(NULL, _tmp_, _o_s_, _tmp_, 0U)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = cpy_bignum_math(_o_s_, ___s_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = cpy_bignum_math(___s_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                _PRINT_BITNUM_(_o_s_, "_o_s_");
+                _PRINT_BITNUM_(___s_, "___s_");
+
+                // (old_t, t) := (t, old_t − quotient × t)
+                if((_fr_ = cpy_bignum_math(_tmp_, ___t_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = mul_bignum_unsafe(_tmp_, _quo_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = sub_bignum(NULL, _tmp_, _o_t_, _tmp_, 0U)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = cpy_bignum_math(_o_t_, ___t_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = cpy_bignum_math(___t_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                _PRINT_BITNUM_(_o_t_, "_o_t_");
+                _PRINT_BITNUM_(___t_, "___t_");
+            }
+
+            if(s != NULL) {
+                if(cpy_bignum_math(s, _o_s_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            }
+            if(t != NULL) {
+                if(cpy_bignum_math(t, _o_t_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            }
+            _PRINT_BITNUM_(_o_s_, "Bézout coefficients: s");
+            _PRINT_BITNUM_(_o_t_, "Bézout coefficients: t");
+
+            if(cpy_bignum_math(r, _o_r_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            _PRINT_BITNUM_(_o_r_, "greatest common divisor");
+
+            if(rmBitNum(&_tmp_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_quo_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_o_r_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&___r_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_o_s_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&___s_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_o_t_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&___t_) != 0)  { /* Memory leakage? */ };
+        } else {
+            return E_ERROR_BIGNUM_LENGTH;
+        }
+    } else {
+        return E_ERROR_NULL;
+    }
+    return E_OK;
+}
 #undef _DPRINTF_
 
