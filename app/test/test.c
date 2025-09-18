@@ -4324,13 +4324,13 @@ void test_gcd_bignum(void)
          * Value Example: https://ko.wikipedia.org/wiki/%EC%9C%A0%ED%81%B4%EB%A6%AC%EB%93%9C_%ED%98%B8%EC%A0%9C%EB%B2%95
          *            GLUE     SEQ     SEQ     SEQ     SEQ    GLUE      GLUE     SEQ     SEQ    GLUE      GLUE
          * | index |     q | old r |     r | old s |     s |    qs | olds-qs | old t |     t |    qt | oldt-qt |
-         * |  init |     - | 78696 | 19332 |     1 |     0 |     0 |       1 |     0 |     1 |     4 |      -4 |
-         * |     0 |     4 | 19332 |  1368 |     0 |     1 |    14 |     -14 |     1 |    -4 |    -5 |      57 |
-         * |     1 |    14 |  1368 |   180 |     1 |   -14 |   -98 |      99 |    -4 |    57 |   399 |    -403 |
-         * |     2 |     7 |   180 |   108 |   -14 |    99 |    99 |    -113 |    57 |  -403 |  -403 |     460 |
+         * |  init |     4 | 78696 | 19332 |     1 |     0 |     0 |       1 |     0 |     1 |     4 |      -4 |
+         * |     0 |    14 | 19332 |  1368 |     0 |     1 |    14 |     -14 |     1 |    -4 |    -5 |      57 |
+         * |     1 |     7 |  1368 |   180 |     1 |   -14 |   -98 |      99 |    -4 |    57 |   399 |    -403 |
+         * |     2 |     1 |   180 |   108 |   -14 |    99 |    99 |    -113 |    57 |  -403 |  -403 |     460 |
          * |     3 |     1 |   108 |    72 |    99 |  -113 |  -113 |     212 |  -403 |   460 |   460 |    -863 |
-         * |     4 |     1 |    72 |    36 |  -113 |   212 |   424 |    -537 |   460 |  -863 | -1726 |    2186 |
-         * |     5 |     2 |    36 |     0 |   212 |  -537 |     0 |     212 |  -863 |  2186 |     0 |    -863 |
+         * |     4 |     2 |    72 |    36 |  -113 |   212 |   424 |    -537 |   460 |  -863 | -1726 |    2186 |
+         * |     5 |   INF |    36 |     0 |   212 |  -537 |     0 |     212 |  -863 |  2186 |     0 |    -863 |
          * a       :     78696
          * s(old_s):       212
          * b       :     19332
@@ -4390,6 +4390,303 @@ void test_gcd_bignum(void)
     rmBitNum(&prod_bt);
     rmBitNum(&sum);
 #undef TEST_GCD_BIGNUM_BIT_LEN
+}
+
+void test_mim_bignum(void)
+{
+#if 0 /* BackUp_to_Test_Results_for_test_mim_bignum */
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+a3ae3103 e6ec1af9 108c05ff f86108f6 b4a52ea0 cd0fbec3 1efd6247 22bcdea0 c844e9ed dc8df411 94a4f602 ad63c714 d71fe20a f1c061d7 dba66982 f499b7db 685bf8cb f9501a91 f7933b99 8ca832cd 2e21a819 e5bb6e58 b2cfcb19 315be29c 62a8b168 5987565e 079267be 7a102514 3cedab8d 099f8d99 9e703695 f93aebfa
+[num_n]
+03707660 7d30fe7b 953fb771 de43fba3 d6178827 9172092e 57dbb82d f45af1a3 f3466202 9bbec424 6173763b 6de41baf 86161e63 1a2e762a e65e3c51 67ab40f1 aba43e77 5d50ad26 06921fbe 5e059123 fbf0edf0 4718ee95 f7901176 009cb334 46edc937 4a1b0647 341a2d3b 0aa1360b a8d502b2 215d8481 9074c3cc 56c56a0f
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+********************************************************************************
+DIFF!!!
+3de6a5a22f7a4e8e7c26579bfe2e9a241b22c481d542af04ff483d65935f0cb6d8900f7bf71efec24c00324a0824945b6f4f88881fe362cecfc14d3554a20202dcb8ad458f2d5bc5da6a3c8c768fad6a1c6c78e815a4508ee8e18e837548a41ab394a86711c2c63e180ac10b3ec456f79be52112a8bc47048c186a49a13ac5
+********************************************************************************
+
+
+mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
+Process Time(mim_bignum): 0.000053
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+c4e13a31 3441a407 2983016d 741d0f04 f7a70524 ba758d9c 18ad3267 09bfdb92 adf98d2d 182006bb 0fe45e70 2668ffd2 ed8f971e 5de069b1 a4738c76 11e10580 e16d275c 11225d9f bef57053 7b703bcf 32b7b4ac 3cf6242d 62ab7191 00985985 5b05ff72 64682e6a 7a0018ac 3d831a86 7bbe870e 9479bcd1 abd9377b 3c5486e9
+[num_n]
+1e9e4b87 82ebfff1 6a0176cc 866db29e f2a29056 54e88c88 570bfdff bf921097 1b608891 80fe7a9e 7a0919e8 7a100d9c 4ea8cacc 90818a58 4c6bef28 77b00e8a df8a17e2 83718592 8f09dbde c265d281 18494238 341f6824 f43f19ed d08473fd 07a65df1 e27bb7b0 47760c40 4d893fdf 1422d010 2b290b07 6f957ad3 7dcda015
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+********************************************************************************
+DIFF!!!
+12ad318ff1721d808e14c39ecaf34776e6383740674ec54f2fe8e2f73240adf9ac1b3653eda634d95080795a9022a8a513ae2173380e5aa40d0a0b8ef179d1a81a0ad841381521237e87c6b3e12c94fe6d7a4f69d6500c7937b1098b63eaaa8fb2fa9a0e0a070819228bdfd5048b7dd30cb5c867e4852813671bc348924219bb
+********************************************************************************
+
+
+mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
+Process Time(mim_bignum): 0.002045
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+2e9cf96e 9615776a 9d373ebc 29073d68 238d96cc 9e706d75 dc3de540 e1ab21bf 06e3f72b 78402ce1 0d377fc1 e3b0d257 ee265e29 93308f9c 5b3a1f22 a53ec8db 6bb7ff97 32f4624c 54ceef8c c2acf9c5 922e9af7 d5557d39 95e15aca d210dbd4 850b35e6 a0935cc8 0c4393fd 19cb2b9b 59447a9b c09cdfcb 0e49eefe 8bd09f9e
+[num_n]
+a9cc1294 cf05d3fd 9f7b2d0c fe47c1e8 5ecebef5 da1a07f5 35c56f03 889eb614 fd0dc1d2 6658cf92 7de64b16 e9f32a68 f4a3eee5 e5428632 3cd04d74 a1a9532b a76902d3 dbe94767 fd58ec80 fe867a0f beab5fb3 06b5e5c8 2fa42175 01e929d4 8e198c74 ebef7b7d 596506ef c8cfb00b a5a9ce3d 8641a7ba a2374c2d 5b0f481a
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+********************************************************************************
+
+
+mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
+Process Time(mim_bignum): 0.002399
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+606312bc 195eaa3d db619108 c1959774 241f3825 bfd86ed8 99ee2c3e b0e94aa3 49b412dc 8249acd3 a0fc714c 71783cff 5f60b7e7 3f80ac5a 3d42f40d a096916d 31c930af a8b06254 8af81072 19dc4878 20373ae5 426a6630 a25d7b32 65c83d82 20804d54 25694318 df342aa0 bb113e3b f4d07e12 c709b570 f8b3f5e3 a8bd34cc
+[num_n]
+a4e6b20b 97804f0f a25c9c35 bb9ba251 c8b7159d 585c3eaa 5630623d bbc9e198 4f32bc87 def3736d a101926a d3eb3c2b 5eb95fae 050d4819 75985c22 7aafdcc8 54c91471 5271da37 2ea72ea8 8d83ccb0 b35165ec 98b0bd53 1eac46b2 5b12b3e3 77a3961b 43330986 1aabdcdc cf7a4bc7 b9b52f45 91100c6c 5134fe78 9b104c5c
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+********************************************************************************
+
+
+mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
+Process Time(mim_bignum): 0.002417
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+c420c1ff aaf9f07b 7a766306 a0d5a3bf 57f0f171 ea05e15e 3f24a0a2 ce6b7fc4 76c70f2f 7f7a1874 d68e63e0 7eb3cee5 06ec908b c5bdbe9d 56342309 f5b8b547 4895170b a38911f6 10af1298 ade1557a 27d3cd28 668a7a4d 3f6b54ae 6f20303d f18dfaad 7961e378 02314333 ba82adfe 6c43ae19 4b0ff990 fb337e32 2fa24344
+[num_n]
+9b19fa19 44e8e30f b09145e7 9f44adcb 2d44911f 97682d0d 43dd7118 57618482 d5123635 3852c9c9 f10139d4 17693a0d ad28f28a 25509c2a 860f94d5 8c724ba0 dae46b6f 60c88f1d e9d09a0a bc111b23 03a2edfb ca8d96b1 832289eb 9767356b 84a3df43 dfbf82df 1489ef99 0e783508 d8606419 09742798 8a22b62c e3928c40
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 8e5dab95 9ca8c5b6 efbdf420 cca3699d 3eb0edff d819c5da 292694f4 d4b16ff9 c102d0e6 b908c2cf f051b72f 65b9af3f d8d43afd f09e4635 52e285db f06c29db
+[num_n]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 aab7dacb cb8efafa cf86d3a6 ae55418c c79a5e59 bfd35481 86ff3038 82f9afdf eb4cd1d1 be742629 d87e6422 8ea72e6e db8b053e 4d55504e 7d3789a2 0e620e1a
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 41770dd8 023becf5 201c0cec e4608e9d d4487d3c 34252b11 009f4221 50f3b4bb f28ec6af 749a958c 13151e23 8c68d671 8b38c5ef 8d677e46 f7493842 4812319d
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+530c55c0 79274155 9532bca5 634c7e93 aa4bc27d 34755d9d 940a8b6a 59800d93 922d7f24 920f98f0 cf7026cf a233d12c 164c2097 e1531229 b10b5dc6 eedf146e 9b708ca2 4028c9ff cdf3fe76 1d850c7f 6bcd85b8 a207cceb 1d7eb280 44a4e2f8 3063d940 5bd60157 d6796a9d 1a3efab3 2b7eecb7 ea4e399d 390e9e4c 747e1fef
+[num_n]
+f69da2ae abc5da32 7ae17317 f8587db5 209a02c9 d7f294ef 2cf15bfe b5e23148 f2ddd478 4bf8bf63 e91b9a43 38e2b356 c31035e8 c5a3932e 3c79cc6d f0547479 92dbb9e7 0fa4c9a5 e3b790e1 1fa321db 4a925497 671a62cf 8978f976 c298c0aa cc141e6a c1121501 98edc043 588e87b3 2b3a3598 90ead613 b560b618 ccac8c62
+[a^-1 mod n(inverse mod n)]
+06e6bd16 686bba28 a3ad5f72 441c5f5e 5ac1e067 fabbf8f5 922edd2f 074cbf59 c3f9a41c a035abe0 d0f4937b 0b1a7eae 3f2cc791 221eb208 507b0b48 8f0e5383 90721bfa 2bf86377 196463c3 20168674 90d01190 33f6eca6 7ab2c810 b25d968d 103d7eb4 65c31233 a158b1b7 867eb832 e6186ee7 fbadb9a4 4fe987c2 af359aed
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+5a8896fe 7c784992 00f03fca 235d3b58 f366b8d5 60814bae 66bae343 b78e675c 0b1eb5ea 77595336 cce18fcb 6ad5a01d 06368ab1 1b90cb23 0355dc5b 8249a621 a65c9641 8c72a701 77b92a4d cf6a9354 1bfae6f8 8d7647a8 d292b461 a34a8b65 d0249a8b fbedd72a eac0ba7b 4e996e23 6d6fb1e4 a4b4f471 ef6ad63e 7a66ca45
+[num_n]
+2621bfaa e6ffab1a 7d69bd10 63e0a519 eeb19d52 257dbf86 44d79749 6177207c 3bc0ffcc 82425d6d 05dd6b4a f1f47b9c 8b20939f 39e8effa 761f29e5 3c607d6f 3ebc6f15 3d8002bb eb77cf55 685b08ec e7abaf3e 72d0d191 e3c968cc 22c00029 7fef1382 948bec96 0e744d7c 735d3da9 39df6de1 ec072917 a7a7ccf9 411116fd
+[a^-1 mod n(inverse mod n)]
+05e66b53 b0020c3d b5de513a 254c9be6 b0b51634 ac8fae39 717b9181 c52e7e4b 28aaf72d f5f20110 c054eeac 7d65fe7c f69bafaf b6edfde3 d52999d3 be7fbf0a a219de2a ded17051 c49b9ad8 8ef8a7ed 36e02f6a a72e795e 0532c12a 5cf82df7 95fee112 52c4c14a 59b90095 af61ab75 201e255a 356c94e6 66b7ffbc 12e4027c
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+4e371350 736dbeff ddda4ef8 42a018b5 b7d3936c 6adf5d15 80171fd1 ba4cdcfd c4a59274 90e4b0e5 97aedf8d e945224a 69b40f55 5f46f6ae 5dd2f5bc 88366b50 15adc3aa 4d02060a c49a6b9f dc6d3b13 55c85fb0 e923b9a0 4abf5137 21be8d6b 60c1a442 3e6b9f25 befd63c8 1873b4a5 df3cf749 d9fa4f13 9e93aab6 5dccc61e
+[num_n]
+944bccd2 15505743 360ee9c2 a427bab4 671fee67 616ca2f3 296c9316 5da13dc2 357c7bd2 1a495974 6ac207ef bf9bc600 bd81c56e 43366013 0ff1d99b 6cc14663 623279a5 df976d7a 036c29bf de453a4f 3e8f0e30 276e3a74 85175409 5f14eabc 53e23864 94015143 8ee4858f 06ab400e 68a0f6b3 e9221f7c b8401fa3 c00884ef
+[a^-1 mod n(inverse mod n)]
+1fde5b2c de381bd6 ce49e75b 4c9abd1d d3b04665 2d9ba361 7b21aae2 595484f6 0c697724 dd80f348 5ea9d644 fd66c4af bb0a9d2f e853796f 87dd28fc 6a570d9c b84b1059 6095d45f 0ff1be22 2c9547c5 45777fab 9e2e1d16 ffb905e4 09a40ae2 4cf6d58a 9e8473f8 20fd4839 2488cf30 ba48427c 015b2a7c bb758970 0e8fdba5
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+f6bc6e56 d2b9cb99 acdf1aaa c99ae097 f8c5e738 8bb1893b 593c5f4b 61e0ed9f eab58b39 0deb7e01 1680ca32 a21bb0bf 3a36af4f 584ddc0e db7f5ec1 f63814b1 a8a0ba0b d5fe37e4 ddaf82e3 e17a10ea de61734a 725db019 8925ad45 9074f69c cabcd4f1 218762fa ce08d2f6 9caf7794 ef159a59 d48a6c44 95394ef4 a93ac8d9
+[num_n]
+4ccb6ca2 9ac2eb7c 92412716 63ab256f 0c53eda5 05229c38 fbf70513 841fe3aa 31aab71e 30aa547c dd7cf0f4 9fd28167 4ecb09cd 26a533e8 73e630da ee39f312 790ccab4 cdd88be9 dd1e7338 83b65e81 a5639a3e 324db899 f8f6e7db c0e648c5 3ff129e4 fb6d76a5 9bbdda02 11fae766 314d8699 55c1b21c 360093fb a7579c5b
+[a^-1 mod n(inverse mod n)]
+2b2e28f2 63109624 626a44d8 db9592a4 3c8b704a df86c87b 5abc2775 1e28a00b 3884682f d80d8ec5 ad90109d b74e638d 508c29c1 29732cdb b89737fb 279fa199 302ef886 bf6b39b2 7575c004 f5356a9d 9a832a2c 66b78d92 227dfa46 373fd918 0f7feb9e 1ba5ea1d a985267c 7be30c50 e7f2ecdb 95e8004d 8f212379 db17f478
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+68dc1c14 50949612 66fb53ca f958fa7d fe9063e4 59f82a04 4dd617bd d3857354 8c887e3e 2e9abe9c 02fbcf7b 596a1a1a 376aba55 ab53ec90 03924a7e f9ebd64e 59e37f92 98c3cc87 a265613f 32b05fe2 bf67681a 505a4685 995fa8aa 91f3cfc7 4bbcc611 21672662 33b1e050 f0f87aa5 170ed4cb c1e7ddee cdb5dbca a712013a
+[num_n]
+3ee98919 44cc0a65 11f495ed 055c56f9 a720ac79 6e8b6a77 6b0fc2ea f532a225 a5bc0edf bb16cf24 ef39970b b5364d2e b1210ef7 205bb480 1a9048cf 8de617c5 01f81096 26968de4 8461be87 842c1fba 01b3439f 4024384b 0362b8c7 e41eb56b d27a0942 112c26fd dc9167ca 2b6c7761 731f67f5 20d6923c 7d9a1279 4c3b628f
+[a^-1 mod n(inverse mod n)]
+13dc618a 12cff19d 1d930a7e 3a62c6f7 d558a116 32ccdd65 52bd9178 5dc6265e 9dc0819f 97effeff 157863bc 447cea43 7d1ed952 830139df 67e365d0 2a7d6e17 ced07fbb 10e63621 d41a8310 28bfdf9c 20b816d4 9574dac6 3bed7bef 1aacb514 d585cee2 0a441c83 5bd12018 5e46f8aa e7b620c1 5ac1003d 860f4215 3155781d
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+5ad248da e25b2a2e 21619e3d 3e54a7e8 42a32be8 0a153b25 939bfe3b 18b9e980 f0edb0b3 39c890e4 234a9656 1203bc5a 9916ade5 829f2758 83455298 c8fbcf3d b4e82355 a5464ecd 379299b8 6aa6adb3 940dbe2a 1ce206ea 7c56c98b 47e7195f 43dd06d7 0ebc347f 28f30bb7 119ff56a f1dc2432 65af21f1 0fe172e8 a43c586b
+[num_n]
+58192987 2bb31c08 2d7315c1 552d26bd 84e5ed27 6983504b 4099c41f d960c4d0 ee766b23 86a9f26c 1ee89b98 a941d05c 7c69d71d 43b78721 c0645b08 724e65ca efc2311a 8b0ad185 3e5ac84d c566855e 261f9622 f723c6b7 f10da3a8 5ea399d5 37264905 cc77bdf1 9562c766 4066c803 28735c40 31b91449 aeff0e89 6c738b31
+[a^-1 mod n(inverse mod n)]
+536e1902 f399e309 e644cf12 aa9365cc b4cdec3c 5f6df605 7e8166a4 f4736419 2b5f426b 39a01e53 f376f236 d7d12dc5 c8c96dc6 6abf648f 9fc6e4d2 c7fd76b2 8452f522 c65d04ba cc597023 65324c3b 0b1aa607 082278ad 046656c9 7ceb4ae7 6e34bea7 53c5a157 0cab820d d1229f61 4f377e97 78577a7a 1dd9ef51 f3322e45
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+9ea41d84 22f43ebe ce54e443 404f14ef 0b3e3550 b0adc762 8345f258 75c7ff1a 81284664 26e9da8a 14942f51 44d6babb 8e88884d 2a82702b d02a595b 46d6d31d 025d8a9c d5455bc3 50589789 48323240 5e06ddfe b146d275 e4828729 d4769266 87454012 f5032cc6 10655708 d42c635f 55972c3c 6150eebb ae11966e ef4d2575
+[num_n]
+c4e219a4 974c20be 00c38398 8a27df91 88460f09 60304b7e ee44d587 29e94c20 4bcd84d9 4b5d3a68 385cb9f9 9f99827f e6dfbee2 4207a967 1beb3b09 9e7e9c72 82269ee3 25deaf3f bd207720 b3a3c104 9db639da ecbd2c12 4dbc6d2c fc75d39f 01c033e5 218fc89d 6dd45faf 060acbc2 ca7baeda 7070a520 c0f7595d 74136b1c
+[a^-1 mod n(inverse mod n)]
+88ae4485 eb4ae7c3 f892a694 be8e2408 02848fae 0043f3ad ac1f9fc4 f1a921b1 9e4729f4 60cbc9c1 4a6db772 82452f86 cd8dc493 8b098b3a 8237d6f0 b8d28005 23b32cc9 cc0dd3c2 bc4fa162 015d9528 4eca36f1 030d9183 f5cc22a8 ade06848 cf40bfbc 08f67062 fa0c240c d401c048 205827fb 44528734 33fe64f8 af9b1a4d
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+5867f11c 1d9fb4e8 ce74bdf6 952bba38 6c1e269d 33eb7fdc 6820ece6 e3a7de3b 4a516835 d13f2bd8 df913c5d bf9b11cf eb3b1e56 835ff082 3c4407a8 5d8dd315 802909f8 609a9c81 d2a04cf0 b0d6b195 b8be6600 23ac7b94 e77ad548 0caa0b88 c86f5cdf c7fc35e2 f0753f1b 1ef22fb7 9bba858e c500bf9e 6e2b3d84 e19c2ce9
+[num_n]
+ac280a2d 6023a45d 9356490f 3a895c18 dca8aa1a 3b48d349 1908c13a 51be827f c8e78803 904e1484 1cbfb221 adb46ec1 6c6247f2 2fcb88df b603b8d2 f69bf7c5 563aef0c 3254d1fa 12feb3ec 480c7a7a 337c6a50 148527e4 0c1cdb31 45bdd64a 079a3b38 42d34726 b6a772cd d9fd10e3 68e52930 780a09db d71e5bfb b53b0fcf
+[a^-1 mod n(inverse mod n)]
+5c104818 853e8364 603199c0 c77109fa 957a2735 18dfd810 bcf60306 34d29bd6 ebf42bb6 6cbe12ba fc86128a 214b687b 2c782c65 574fd04e 51e81993 f150b827 a4a4914e a5d6fb6f 17cd09ad 7b2185cb 13ecfb20 94d6a02d 26f0c588 03a1a91e 5ed9d4ed 2a107063 873f6226 a1e0aeb3 00b1eebc 951b454e 2527411e 15877acb
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+3415fa3e 95e78990 15ba45ad 65b8c281 7a5641f7 e0f3173e 0141a809 9f0998f6 8013b405 d1cf4b68 558debe3 3d6c4083 754ee0a2 f1d596f8 a29f70a9 8985417b 42e5ba69 7abe7d71 4f7fa3ba f6f2a3d3 5c0a0cf9 33f788f9 16eb670e 435cc1d9 6afceb09 6efece95 88b01623 9699c663 d7157139 e19c9208 a80b4d6a f2c5ed61
+[num_n]
+804b406a 5a5ade98 510bc535 bf723059 678533a8 088ec321 c10079ce 0c757c16 f1e68cc2 08d2d31c 4c520466 0bab26bf 7ca5e5e7 cdc3a7f2 f40452f6 8496892f debaeeec 868118e6 4759404c 2f81da95 d72240db cfa3a0fd 80bc6d55 b8cf40f2 336dd4a0 39bfa6fb 2abf729a a9b855fc 539d3ad1 22e4902b 049d14c6 9cd31e93
+[a^-1 mod n(inverse mod n)]
+36a69dcf 85ea4e65 afccc0ab db7ae25a fd5f2aff 09f94154 a978e5c9 4d970cfe 351573ba 8786231d 5ae45854 5987aac8 8cec2017 7d6f362e b34f9cbf 4767adbc 52dd70ce 4bc33bac 6a8854bc 2a574b04 78b503f3 da6a7f78 f7ce8d16 6722af34 1e4292ee 1f862e18 02af0d0a c88387f8 22676fc2 0cbcd6ee 53d3cb40 400a165b
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+b94fc3d8 73f77a9e eba48fea 84f7b419 01c88765 7a458ce2 2d8ad8ec 937d00e0 dbcc5ed5 0cd60f00 2098366a f5ec929c 4d42d998 18020a41 f75aecb3 a2348206 c087c60b b677cab5 a24ad859 9e50c3b5 29d78dd7 0bb05544 b8b8309c 74fb3fb4 d14f4101 d47fdd49 ac8896e9 26ec2852 ccdd82c7 f79d131c 44355cbf 2af073d0
+[num_n]
+b9663316 060ec69c 8b49e32d cfe6424c 67687601 b2f9cace 6d7afb56 506ee9a3 5f25506a 837db85e 79fdeb83 7fd9d666 b67d37e4 8b4fd317 2a8c6dad 0fc452f5 a2d3b224 03bb73f6 7e11ac19 23592ed2 f1e81174 2546aa7c 7da95b1a 227f437d d0f6b10d 3d624a65 ee53ea50 6846c17d c2cac9a9 c9012163 87dcd7a4 af4cccc3
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+********************************************************************************
+
+
+********************************************************************************
+TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
+[num_a]
+40aa8b96 bfcd7862 5b9205cb 1dd37e27 2e4ea5e3 680cd647 700488b2 90379faa ebbd1e5c 72e65d90 74324df6 a530824b e6980c21 9cd2bebd 745113e6 4ce18b8e 4b38ffe1 712b437e 8d1d735a 4aea3ec5 fc3a62df 5d6daa8e 04325abe 96538f6a c7d39ef3 9e260b33 d3891b85 ee04621d ddf535cf 69783446 9c072e2c 8cbcccd4
+[num_n]
+b3b96f6c f316d7c2 ef8b30b9 f81b14bc 9e4afc6c 64aeb1cd 222af772 b0243747 c6599431 274c9136 9215a53c 7dcabf31 e64ebb96 8c87d6b0 79d33a69 5edeb294 3248a0f1 ba7c9156 98db7d4b e471764f c133c0dc 0e037510 755cb7c9 ab6af441 8e246064 e3b6d94d f70bd594 b0438fe5 25bc67fe 8e1959ab b14cd56a dcd0e12a
+[a^-1 mod n(inverse mod n)]
+00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+********************************************************************************
+#endif /* BackUp_to_Test_Results_for_test_mim_bignum */
+#define TEST_MIM_BIGNUM_BIT_LEN   1024U
+    char keyin;
+    int test_memcmp0;
+    ReturnType fr;
+
+    bignum_s* num_a = mkBigNum(TEST_MIM_BIGNUM_BIT_LEN);
+    bignum_s* num_n = mkBigNum(TEST_MIM_BIGNUM_BIT_LEN);
+    bignum_s* num_i = mkBigNum(TEST_MIM_BIGNUM_BIT_LEN);
+    bignum_cmp_e num_cmp;
+
+    bool manually = false;
+
+#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_FUNC_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+    _KEYIN_DO_TEST_0_(keyin, "Test Manually?(y/n)");
+    _COND_DO_TEST_0_(keyin) manually = true;
+
+#if 0 /* NO_MANUALL_YET */
+    if(!manually)
+    {
+        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
+        {
+            memcpy(num_a->nums, TV_LIST_NUMERATOR_1024b[i], num_a->size);
+            memcpy(num_n->nums, TV_LIST_DENOMINATOR_1024b[i], num_n->size);
+
+            /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
+            TICK_TIME_START("div_bignum_with_mod");
+            if(fr = TEST_FUNCTION_NAME(...)) {
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+            TICK_TIME_END;
+
+            test_memcmp0 = memcmp(num_i->nums, TV_LIST_QUOTIENT_1024b[i], quotient->size);
+            printf("TEST_FUNCTION_NAME() divide is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+            TEST_ASSERT(test_memcmp0 == 0);
+        }
+    }
+    else
+    {
+#endif/* NO_MANUALL_YET */
+        for(size_t i = 0UL; i < 0x10UL; i++)
+        {
+            (void)memset(num_a->nums, 0U, num_a->size);
+            (void)memset(num_n->nums, 0U, num_n->size);
+            (void)memset(num_i->nums, 0U, num_i->size);
+            /* set test vector*/
+
+            srand(time(NULL)+i);
+            for(size_t byte = 0UL; byte < (num_a->size); byte++)
+            {
+                ((uint8_t*)num_a->nums)[byte] = (rand()&0xFFU);
+            }
+            for(size_t byte = 0UL; byte < (num_n->size); byte++)
+            {
+                ((uint8_t*)num_n->nums)[byte] = (rand()&0xFFU);
+            }
+
+            TICK_TIME_START("mim_bignum");
+            if(fr = mim_bignum(num_i, num_a, num_n)) {
+                printf("mim_bignum() = ");
+                printReturnType(fr);
+            } else { /* Do nothing */ }
+            TICK_TIME_END;
+            printf("********************************************************************************\n");
+            printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'\n");
+            test_print_bignum(num_a, "num_a");
+            test_print_bignum(num_n, "num_n");
+            test_print_bignum(num_i, "a^-1 mod n(inverse mod n)");
+
+            printf("********************************************************************************\n");
+            _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        }
+#if 0 /* NO_MANUALL_YET */
+    }
+#endif/* NO_MANUALL_YET */
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+
+    rmBitNum(&num_a);
+    rmBitNum(&num_n);
+    rmBitNum(&num_i);
+#undef TEST_MIM_BIGNUM_BIT_LEN
 }
 
 #include "common/bitwise.h"
@@ -7349,6 +7646,14 @@ void test_sequence(void) {
     _COND_DO_TEST_(keyin)
     test_gcd_bignum();
     printf("[test   end: test_gcd_bignum()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mim_bignum()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mim_bignum");
+    _COND_DO_TEST_(keyin)
+    test_mim_bignum();
+    printf("[test   end: test_mim_bignum()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");

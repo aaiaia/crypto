@@ -33,10 +33,19 @@ static inline ReturnType cpy_bignum_math(bignum_s* d, const bignum_s* s)
 
 ReturnType twos_bignum(bignum_s* d, const bignum_s* s);
 ReturnType abs_bignum(bignum_s* d, const bignum_s* s);
-bignum_sign_e sign_bignum(const bignum_s* s);
+bignum_sign_e sign_bignum_ext(const bignum_s* s, const bool ignoreType);
+static inline bignum_sign_e sign_bignum(const bignum_s* s)
+{
+    return sign_bignum_ext(s, false);
+}
+static inline bignum_sign_e sign_bignum_unsafe(const bignum_s* s)
+{
+    return sign_bignum_ext(s, true);
+}
 bignum_sign_e NOT_IMPLEMENT_signbit_bignum(const bignum_s* s, const size_t msbl, const bignum_sign_e sign);
 bignum_cmp_e cmp0_bignum(const bignum_s* s);
 bignum_cmp_e cmp1_bignum(const bignum_s* s);
+bignum_cmp_e cmp2_bignum(const bignum_s* s);
 bignum_cmp_e cmp_bignum_with_sub_add_twos(const bignum_s* s0, const bignum_s* s1);
 bignum_cmp_e cmp_bignum_logical(const bignum_s* s0, const bignum_s* s1);
 ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
@@ -71,4 +80,10 @@ static inline ReturnType gcd_bignum(bignum_s* r, bignum_s* s, bignum_s* t, const
     return gcd_bignum_ext(r, s, t, a, b, true);
 }
 
+/* mim_bignum and mim_bignum_ext is muliplicative inverse modular */
+ReturnType mim_bignum_ext(bignum_s* t, const bignum_s* a, const bignum_s* n, const bool guard);
+static inline ReturnType mim_bignum(bignum_s* t, const bignum_s* a, const bignum_s* n)
+{
+    return mim_bignum_ext(t, a, n, true);
+}
 #endif/* BIGNUM_MATH_H */

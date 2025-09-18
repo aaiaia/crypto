@@ -123,13 +123,14 @@ ReturnType abs_bignum(bignum_s* d, const bignum_s* s)
     }
 }
 
-bignum_sign_e sign_bignum(const bignum_s* s)
+bignum_sign_e sign_bignum_ext(const bignum_s* s, const bool ignoreType)
 {
     if(!(s != NULL))                            return BIGNUM_SIGN_ERR;
     if(!(s->nlen != 0UL))                       return BIGNUM_SIGN_ERR;
     if(!(s->nums != NULL))                      return BIGNUM_SIGN_ERR;
 
-    if(!(s->type != BIGNUM_TYPE_UNSIGNED))      return BIGNUM_SIGN_POS;
+    if((!(s->type != BIGNUM_TYPE_UNSIGNED)) && (!ignoreType))
+                                                return BIGNUM_SIGN_POS;
     if(!(s->nums[s->nlen-1U]&BIGNUM_MSB_MASK))  return BIGNUM_SIGN_POS;
     else                                        return BIGNUM_SIGN_NEG;
 }
@@ -167,7 +168,7 @@ bignum_cmp_e cmp1_bignum(const bignum_s* s) {
         {
             if(s->nums[i] != 0U)    return BIGNUM_CMP_NO;
         }
-        return BIGNUM_CMP_NO;
+        return BIGNUM_CMP_ON;
     }
     return BIGNUM_CMP_ER;
 }
@@ -909,6 +910,98 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
             if(rmBitNum(&___s_) != 0)  { /* Memory leakage? */ };
             if(rmBitNum(&_o_t_) != 0)  { /* Memory leakage? */ };
             if(rmBitNum(&___t_) != 0)  { /* Memory leakage? */ };
+        } else {
+            return E_ERROR_BIGNUM_LENGTH;
+        }
+    } else {
+        return E_ERROR_NULL;
+    }
+    return E_OK;
+}
+
+ReturnType mim_bignum_ext(bignum_s* t, const bignum_s* a, const bignum_s* n, const bool guard) {
+    if((t != NULL) && (a != NULL) && (n != NULL)) {
+        if((((a->bits) == (n->bits)) && ((a->bits) == (t->bits)))|| (!guard)) {
+            ReturnType _fr_;
+            bignum_sign_e _sign_of_o_t_;
+            bignum_cmp_e _o_r_is_0_;
+            bignum_cmp_e _o_r_is_1_;
+            bignum_s* _tmp_ = mkBigNum(t->bits); /* temp */
+            bignum_s* _quo_ = mkBigNum(t->bits); /* quotient */
+            bignum_s* _o_r_ = mkBigNum(t->bits); /* p: previous(old) */
+            bignum_s* _n_r_ = mkBigNum(t->bits); /* c: current */
+            bignum_s* _o_t_ = mkBigNum(t->bits); /* p: previous(old) */
+            bignum_s* _n_t_ = mkBigNum(t->bits); /* c: current */
+
+            // r := n;     newr := a
+            if((_fr_ = cpy_bignum_math(_o_r_, n)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if((_fr_ = cpy_bignum_math(_n_r_, a)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            // t := 0;     newt := 1
+            if(clr_bignum(_o_t_) != E_OK)         { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if(clr_bignum(_n_t_) != E_OK)         { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+            if(set1b_bignum(_n_t_, 0UL) != E_OK)  { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+
+            _PRINT_BITNUM_(_o_r_, "[init] _o_r_");
+            _PRINT_BITNUM_(_n_r_, "[init] _n_r_");
+            _PRINT_BITNUM_(_o_t_, "[init] _o_t_");
+            _PRINT_BITNUM_(_n_t_, "[init] _n_t_");
+            while(cmp0_bignum(_n_r_) != BIGNUM_CMP_ZO)
+            {
+                if((_fr_ = cpy_bignum_math(_tmp_, _n_r_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+
+                // quotient := r div newr
+                if((_fr_ = div_bignum_with_mod(_quo_, _n_r_, _o_r_, _n_r_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); }
+                if((_fr_ = cpy_bignum_math(_o_r_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                // (r, newr) := (newr, r − quotient × newr)
+                // note: 'old_r − quotient × r' is maen that remainder
+                _PRINT_BITNUM_(_quo_, "_quo_");
+                _PRINT_BITNUM_(_o_r_, "_o_r_");
+                _PRINT_BITNUM_(_n_r_, "_n_r_");
+
+                // (t, newt) := (newt, t − quotient × newt)
+                if((_fr_ = cpy_bignum_math(_tmp_, _n_t_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = mul_bignum_unsafe(_tmp_, _quo_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = sub_bignum(NULL, _tmp_, _o_t_, _tmp_, 0U)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = cpy_bignum_math(_o_t_, _n_t_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                if((_fr_ = cpy_bignum_math(_n_t_, _tmp_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                _PRINT_BITNUM_(_o_t_, "_o_t_");
+                _PRINT_BITNUM_(_n_t_, "_n_t_");
+            }
+
+            _o_r_is_0_ = cmp0_bignum(_o_r_);
+            _o_r_is_1_ = cmp1_bignum(_o_r_);
+            if((_o_r_is_0_ == BIGNUM_CMP_ZO) || (_o_r_is_1_ == BIGNUM_CMP_ON))
+            {
+                // if t < 0 then
+                //     t := t + n
+                _PRINT_BITNUM_(_o_t_, "Bézout coefficients: t");
+                _sign_of_o_t_ = sign_bignum_unsafe(_o_t_);
+                if(_sign_of_o_t_ == BIGNUM_SIGN_NEG)
+                {
+                    /*  added with n */
+                    if((_fr_ = add_bignum(NULL, t, _o_t_, n, 0U)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                }
+                else if(_sign_of_o_t_ == BIGNUM_SIGN_POS)
+                {
+                    if((_fr_ = cpy_bignum_math(t, _o_t_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                }
+                else
+                {
+                    /* has error */ _DPRINTF_("%s, line:%d, _sign_of_o_t_: %d\n", __func__, __LINE__, _sign_of_o_t_);
+                }
+            }
+
+            if(rmBitNum(&_tmp_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_quo_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_o_r_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_n_r_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_o_t_) != 0)  { /* Memory leakage? */ };
+            if(rmBitNum(&_n_t_) != 0)  { /* Memory leakage? */ };
+
+            if((_o_r_is_0_ != BIGNUM_CMP_ZO) && (_o_r_is_1_ != BIGNUM_CMP_ON))
+            {
+                return E_HAS_NO_VALUE;
+            }
         } else {
             return E_ERROR_BIGNUM_LENGTH;
         }
