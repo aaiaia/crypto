@@ -2764,20 +2764,20 @@ void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL te
     rmBitNum(&test_dst);
 }
 
-#define TEST_ADD_BIGNUM_LOC_BIT_LEN 1024U
-void test_add_bignum_loc(void)
+#define TEST_ADD_BIGNUM_CARRY_LOC_BIT_LEN 1024U
+void test_add_bignum_carry_loc(void)
 {
     bignum_s* test_opA;
     bignum_t test_opB;
 
-    test_opA = mkBigNum(TEST_ADD_BIGNUM_LOC_BIT_LEN);
+    test_opA = mkBigNum(TEST_ADD_BIGNUM_CARRY_LOC_BIT_LEN);
     (void)memset(test_opA->nums, 0x0U, test_opA->size);
     test_print_bignum(test_opA, "cleared opA");
 
     /* Set first stage 1 */
     test_opB = 0x12345678U;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2787,7 +2787,7 @@ void test_add_bignum_loc(void)
     /* Set first stage 2 */
     test_opB = 0x87654321U;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2797,7 +2797,7 @@ void test_add_bignum_loc(void)
     /* Set first stage 3 */
     test_opB = 0x66666666U;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2806,7 +2806,7 @@ void test_add_bignum_loc(void)
 
     /* Set first stage 4 */
     test_opB = 0x00800000U;
-    bignum_t tmp = add_bignum_loc(test_opA, test_opB, 3);
+    bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
@@ -7017,11 +7017,11 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_add_bignum_loc()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_add_bignum_loc");
+    printf("[test start: test_add_bignum_carry_loc()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc");
     _COND_DO_TEST_(keyin)
-    test_add_bignum_loc();
-    printf("[test   end: test_add_bignum_loc()]\r\n");
+    test_add_bignum_carry_loc();
+    printf("[test   end: test_add_bignum_carry_loc()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");

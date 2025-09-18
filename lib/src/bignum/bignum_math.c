@@ -96,7 +96,7 @@ ReturnType twos_bignum(bignum_s* d, const bignum_s* s)
     ret = inv_bignum(d);
     if(ret != E_OK) return ret;
 
-    (void)add_bignum_loc(d, 1UL, 0UL);
+    (void)add_bignum_carry_loc(d, 1UL, 0UL);
 
     ret = E_OK;
 
@@ -262,6 +262,23 @@ ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignu
         if(co != NULL)  (*co) = _c;
     }
     return E_OK;
+}
+
+bignum_t add_bignum_carry_loc(bignum_s* d, const bignum_t v, const size_t idx) {
+    bignum_t s;
+    bignum_t c = v;
+    for(size_t i = idx; i < d->nlen; i++) {
+        s = d->nums[i] + c;
+        c = (s < d->nums[i]);
+        d->nums[i] = s;
+        if(c != 0UL) {
+            continue;
+        }
+        else {
+            break;
+        }
+    }
+    return c;
 }
 
 /* Return carry out, it can be only FALSE / TRUE, the others are error */
@@ -647,19 +664,3 @@ ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s*
 }
 #undef _DPRINTF_
 
-bignum_t add_bignum_loc(bignum_s* d, const bignum_t v, const size_t idx) {
-    bignum_t s;
-    bignum_t c = v;
-    for(size_t i = idx; i < d->nlen; i++) {
-        s = d->nums[i] + c;
-        c = (s < d->nums[i]);
-        d->nums[i] = s;
-        if(c != 0UL) {
-            continue;
-        }
-        else {
-            break;
-        }
-    }
-    return c;
-}

@@ -37,6 +37,7 @@ bignum_cmp_e cmp0_bignum(const bignum_s* s);
 bignum_cmp_e cmp_bignum_with_sub_add_twos(const bignum_s* s0, const bignum_s* s1);
 bignum_cmp_e cmp_bignum_logical(const bignum_s* s0, const bignum_s* s1);
 ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
+bignum_t add_bignum_carry_loc(bignum_s* d, const bignum_t v, const size_t idx);
 ReturnType sub_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 ReturnType sub_bignum_with_add_twos(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
@@ -55,7 +56,5 @@ static  inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const bi
 {
     return div_bignum_with_mod_nbs_ext(q, r, n, d, true);   // bit length guard
 }
-
-bignum_t add_bignum_loc(bignum_s* d, const bignum_t v, const size_t idx);
 
 #endif/* BIGNUM_MATH_H */
