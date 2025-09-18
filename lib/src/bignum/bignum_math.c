@@ -9,10 +9,14 @@
 #include <stdio.h>
 #define _DPRINTF_   printf
 
-#define _PRINT_BITNUM_(p, title) _internal_print_bignum(p, title, 0UL, false)
-void _internal_print_bignum(bignum_s* p, const char* title, const size_t lfn, const bool details)
+#define _PRINT_BITNUM_(p, title) _internal_print_bignum(p, title, __func__, __LINE__, 0UL, false)
+void _internal_print_bignum(bignum_s* p, const char* title, const char* funcName, const int lineNum, const size_t lfn, const bool details)
 {
     _DPRINTF_("[%s]\r\n", title);
+    if(funcName != NULL)
+    {
+        _DPRINTF_("@%s():%d\r\n", funcName, lineNum);
+    }
     if(details)
     {
         _DPRINTF_("addr:0x%p, bignum_t size:%lu\r\n", p, sizeof(bignum_t));
@@ -150,6 +154,23 @@ bignum_cmp_e cmp0_bignum(const bignum_s* s) {
     }
     return BIGNUM_CMP_ER;
 }
+
+bignum_cmp_e cmp1_bignum(const bignum_s* s) {
+    if(s != NULL)
+    {
+        if(s->nlen >= 1UL)
+        {
+            if(s->nums[0] != 1U)    return BIGNUM_CMP_NO;
+        }
+
+        for(size_t i = 1UL; i < s->nlen; i++)
+        {
+            if(s->nums[i] != 0U)    return BIGNUM_CMP_NO;
+        }
+        return BIGNUM_CMP_NO;
+    }
+    return BIGNUM_CMP_ER;
+}
 /* +1: s0  > s1
  *  0: s0 == s1
  * -1: s0  < s1
@@ -234,7 +255,7 @@ ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignu
         return E_ERROR_NULL;
 
     if(!((d->nlen >= s0->nlen) && (d->nlen >= s1->nlen)))
-        return E_ERROR_ARGS;
+        return E_ERROR_BIGNUM_LENGTH;
 
     {
         bignum_t _c = ci;
@@ -287,7 +308,7 @@ ReturnType sub_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignu
         return E_ERROR_NULL;
 
     if(!((d->nlen >= s0->nlen) && (d->nlen >= s1->nlen)))
-        return E_ERROR_ARGS;
+        return E_ERROR_BIGNUM_LENGTH;
 
     {
         bignum_t _c = ci;
@@ -321,7 +342,7 @@ ReturnType sub_bignum_with_add_twos(bignum_t* co, bignum_s* d, const bignum_s* s
         return E_ERROR_NULL;
 
     if(!((d->nlen >= s0->nlen) && (d->nlen >= s1->nlen)))
-        return E_ERROR_ARGS;
+        return E_ERROR_BIGNUM_LENGTH;
 
     {
         bignum_t _c = ci + 1U;  // 2's compliment
@@ -392,7 +413,7 @@ ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
                             return E_ERROR_RUNTIME;
                         }
                     } else { /* Do nothing */}
-                    lsl1b_bignum_self(tmp, NULL, 0U);
+                    asl1b_bignum_self(tmp, NULL, 0U);
                 }
                 nSftBit-=sftBit;
             }
@@ -405,7 +426,7 @@ ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
             } else { /* Do nothing */ }
 #endif  /* IMPL_BIT_SHIFT_MULTIPLIER */
         } else {
-            return E_ERROR_ARGS;
+            return E_ERROR_BIGNUM_LENGTH;
         }
     } else {
         return E_ERROR_NULL;
@@ -413,7 +434,7 @@ ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
     return E_OK;
 }
 
-ReturnType mul_bignum_nbs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard) {
+ReturnType mul_bignum_nbs_up2dn_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard) {
     if((d != NULL) && (s1 != NULL) && (s0 != NULL)) {
         _DPRINTF_("find_bignum_MSBL(s1) = %lu\n", find_bignum_MSBL(s1));
         _DPRINTF_("find_bignum_MSBL(s0) = %lu\n", find_bignum_MSBL(s0));
@@ -422,6 +443,10 @@ ReturnType mul_bignum_nbs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
 #if 0 /* NOT_CONSIDER_SIGNED_CASES */
             if((s1->type == BIGNUM_TYPE_SIGNED) && (s0->type == BIGNUM_TYPE_SIGNED))
 #endif/* NOT_CONSIDER_SIGNED_CASES */
+            if(!guard)
+            {
+                return E_NOT_IMPL;
+            }
             if((s1->type != BIGNUM_TYPE_UNSIGNED) || (s0->type != BIGNUM_TYPE_UNSIGNED))
             {
                 return E_ERROR_BIGNUM_SIGN;
@@ -444,8 +469,9 @@ ReturnType mul_bignum_nbs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
                 if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
 
                 _PRINT_BITNUM_(_s0m2_, "[init] _s0m2_");
-
-                if(lslb_bignum_self(_s0m2_, _s1_msbl_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                _DPRINTF_("[init] _s1_msbl_ = %ld\r\n", _s1_msbl_);
+                if(aslb_bignum_self(_s0m2_, _s1_msbl_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                _PRINT_BITNUM_(_s0m2_, "[init] _s0m2_<<_s1_msbl_");
 
                 _DPRINTF_("line before while(_s1_msbl_ != SIZE_MAX)\n");
                 while(_s1_msbl_ != SIZE_MAX)
@@ -455,7 +481,7 @@ ReturnType mul_bignum_nbs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
                     bignum_t _bits_ = chk1b_bignum(s1, _s1_msbl_);
                     if(_bits_ != SIZE_MAX)
                     {
-                        size_t _msbl_, _lsrl_;
+                        size_t _msbl_, _asrl_;
 
                         if(_bits_ != 0U)
                         {
@@ -465,15 +491,15 @@ ReturnType mul_bignum_nbs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
                         }
 
                         _msbl_ = find_bignum_MSBL_bitLoc(s1, _s1_msbl_-1UL);
-                        _lsrl_ = (_s1_msbl_ - _msbl_);
+                        _asrl_ = (_s1_msbl_ - _msbl_);
                         _DPRINTF_("_msbl_ = %lu\n", _msbl_);
-                        _DPRINTF_("_lsrl_ = %lu\n", _lsrl_);
+                        _DPRINTF_("_asrl_ = %lu\n", _asrl_);
 
                         if(_msbl_ != SIZE_MAX)
                         {
                             if(_s1_msbl_ >= _msbl_)
                             {
-                                _fr_ = lsrb_bignum_self(_s0m2_ , _lsrl_);
+                                _fr_ = asrb_bignum_self(_s0m2_ , _asrl_);
                                 if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); break; };
                                 _s1_msbl_ = _msbl_;
                             }
@@ -515,7 +541,7 @@ ReturnType mul_bignum_nbs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
                 return clr_bignum(d);
             }
         } else {
-            return E_ERROR_ARGS;
+            return E_ERROR_BIGNUM_LENGTH;
         }
     } else {
         return E_ERROR_NULL;
@@ -523,6 +549,115 @@ ReturnType mul_bignum_nbs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
     return E_OK;
 }
 
+ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard) {
+    if((d != NULL) && (s1 != NULL) && (s0 != NULL)) {
+        _DPRINTF_("find_bignum_MSBL(s1) = %lu\n", find_bignum_MSBL(s1));
+        _DPRINTF_("find_bignum_MSBL(s0) = %lu\n", find_bignum_MSBL(s0));
+
+        if((d->bits) >= (find_bignum_MSBL(s1) + find_bignum_MSBL(s0) + 1UL) || (!guard)) {
+#if 0 /* NOT_CONSIDER_SIGNED_CASES */
+            if((s1->type == BIGNUM_TYPE_SIGNED) && (s0->type == BIGNUM_TYPE_SIGNED))
+#endif/* NOT_CONSIDER_SIGNED_CASES */
+            if((s1->type != BIGNUM_TYPE_UNSIGNED) || (s0->type != BIGNUM_TYPE_UNSIGNED))
+            {
+                return E_ERROR_BIGNUM_SIGN;
+            }
+
+            if(cmp0_bignum(s0) != BIGNUM_CMP_ZO)
+            {
+                ReturnType _fr_ = E_OK;
+
+                bignum_s* _s0m2_;
+                bignum_s* _prod_;
+
+                size_t _s1_lsbl_ = find_bignum_LSBL(s1);
+
+                _s0m2_ = mkBigNum(d->bits);
+                _prod_ = mkBigNum(d->bits);
+                _fr_ = cpy_bignum_math(_s0m2_, s0);
+                if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                _fr_ = clr_bignum(_prod_);
+                if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+
+                _PRINT_BITNUM_(_s0m2_, "[init] _s0m2_");
+                _DPRINTF_("[init] _s1_lsbl_ = %ld\r\n", _s1_lsbl_);
+                if(aslb_bignum_self_unsafe(_s0m2_, _s1_lsbl_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                _PRINT_BITNUM_(_s0m2_, "[init] _s0m2_<<_s1_lsbl_");
+
+                while(s1->bits > _s1_lsbl_)
+                {
+                    _DPRINTF_("_s1_lsbl_ = %lu\n", _s1_lsbl_);
+                    _PRINT_BITNUM_(_s0m2_, "_s0m2_");
+                    bignum_t _bits_ = chk1b_bignum(s1, _s1_lsbl_);
+                    if(_bits_ != SIZE_MAX)
+                    {
+                        size_t _lsbl_, _asll_;
+
+                        if(_bits_ != 0U)
+                        {
+                            _fr_ = add_bignum(NULL, _prod_, _prod_, _s0m2_, 0U);
+                            _PRINT_BITNUM_(_prod_, "_prod_ += _s0m2_");
+                            if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); break; };
+                        }
+
+                        _lsbl_ = find_bignum_LSBL_bitLoc(s1, _s1_lsbl_+1UL);
+                        _asll_ = (_lsbl_ - _s1_lsbl_ );
+                        _DPRINTF_("_lsbl_ = %lu\n", _lsbl_);
+                        _DPRINTF_("_asll_ = %lu\n", _asll_);
+
+                        if(_lsbl_ != SIZE_MAX)
+                        {
+                            if(_lsbl_ >= _s1_lsbl_)
+                            {
+                                _fr_ = aslb_bignum_self_unsafe(_s0m2_ , _asll_);
+                                if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); break; };
+                                _s1_lsbl_ = _lsbl_;
+                            }
+                            else
+                            {
+                                /* It could be unreacherable? */
+                                _fr_ = E_ERROR_RUNTIME;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            /* not found bit location, is end */
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        /* has error */
+                        _fr_ = E_ERROR_RUNTIME;
+                        _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_);
+                        break;
+                    }
+                }
+
+                if(_fr_ == E_OK)
+                {
+                    /* _quot_ is quotient */
+                    _fr_ = cpy_bignum_math(d, _prod_);
+                    if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
+                }
+
+                if(rmBitNum(&_s0m2_) != 0)  { /* Memory leakage? */ };
+                if(rmBitNum(&_prod_) != 0)  { /* Memory leakage? */ };
+            }
+            else
+            {
+                /* s0 is zero */
+                return clr_bignum(d);
+            }
+        } else {
+            return E_ERROR_BIGNUM_LENGTH;
+        }
+    } else {
+        return E_ERROR_NULL;
+    }
+    return E_OK;
+}
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
 /* Divide with Modulo: ('n'umerator - 'r'emainder) / 'd'enominator = 'q'uotient  */
 ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d, const bool guard) {
@@ -655,12 +790,13 @@ ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s*
                 return E_ERROR_DIVIDE_ZERO;
             };
         } else {
-            return E_ERROR_ARGS;
+            return E_ERROR_BIGNUM_LENGTH;
         }
     } else {
         return E_ERROR_NULL;
     }
     return E_OK;
 }
+
 #undef _DPRINTF_
 

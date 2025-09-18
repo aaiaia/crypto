@@ -2731,6 +2731,7 @@ typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignu
 void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
 {
     int test_cmp;
+    ReturnType fr;
 
     bignum_s* test_ref = mkBigNum(TEST_MUL_BIGNUM_BS<<1U);
     bignum_s* test_opA = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
@@ -2745,7 +2746,7 @@ void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL te
         (void)memset(test_dst->nums, 0U, test_dst->size);
 
         TICK_TIME_START(test_fn_name);
-        test_fp(test_dst, test_opA, test_opB);
+        fr = test_fp(test_dst, test_opA, test_opB);
         TICK_TIME_END;
         printf("[tvi: %lu]\r\n", tvi);
         test_print_bignum(test_opA, "opA");
@@ -2755,7 +2756,53 @@ void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL te
 
         test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
         printf("%s is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
+        if(fr == E_OK) {
+            TEST_ASSERT(test_cmp == 0);
+        } else {
+            printReturnType(fr);
+        }
+    }
+
+    rmBitNum(&test_ref);
+    rmBitNum(&test_opA);
+    rmBitNum(&test_opB);
+    rmBitNum(&test_dst);
+}
+
+typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignum_s*);
+void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
+{
+    int test_cmp;
+    ReturnType fr;
+
+    bignum_s* test_ref = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_opA = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_opB = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_dst = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+
+    for(size_t tvi = 0UL; tvi < sizeof(bignum1024bNumRef_LIST)/sizeof(bignum_t*); tvi++)
+    {
+        (void)memcpy(test_ref->nums, bignum1024bNumRef_LIST[tvi], test_ref->size);
+        (void)memcpy(test_opA->nums, bignum1024bNum__A_LIST[tvi], test_opA->size);
+        (void)memcpy(test_opB->nums, bignum1024bNum__B_LIST[tvi], test_opB->size);
+        (void)memset(test_dst->nums, 0U, test_dst->size);
+
+        TICK_TIME_START(test_fn_name);
+        fr = test_fp(test_dst, test_opA, test_opB);
+        TICK_TIME_END;
+        printf("[tvi: %lu]\r\n", tvi);
+        test_print_bignum(test_opA, "opA");
+        test_print_bignum(test_opB, "opB");
+        test_print_bignum(test_dst, "dst");
+        test_print_bignum(test_ref, "ref");
+
+        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
+        printf("%s is %s\r\n", test_fn_name, ((test_cmp == 0)?MES_PASS:MES_FAIL));
+        if(fr == E_OK) {
+            TEST_ASSERT(test_cmp == 0);
+        } else {
+            printReturnType(fr);
+        }
     }
 
     rmBitNum(&test_ref);
@@ -3977,117 +4024,6 @@ bignum_t* TV_LIST_REMAINDER_1024b[] = {
     TV_REMAINDER_1024b_6,
     TV_REMAINDER_1024b_7,
 };
-
-void test_mul_bignum(void)
-{
-#define TEST_MUL_BIGNUM_BIT_LEN   1024U
-    char keyin;
-    int test_memcmp0;
-    ReturnType fr;
-
-    bool manually = false;
-
-    bignum_s* multiplier = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
-    bignum_s* multiplicand = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
-    bignum_s* product = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
-
-#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
-    (c) = '\0'; \
-    do { \
-        printf("%s: ", (TEST_FUNC_NAME)); \
-        (c) = getchar(); \
-        getchar(); \
-        if('A' <= (c) && (c) <= 'Z')    break; \
-        if('a' <= (c) && (c) <= 'z')    break; \
-    } while(((c) != 'y' ) && ((c) != 'Y' )); \
-    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
-}
-#define _COND_DO_TEST_0_(c)   if((c) == 'y')
-    _KEYIN_DO_TEST_0_(keyin, "Test Manually?(y/n)");
-    _COND_DO_TEST_0_(keyin) manually = true;
-
-    if(!manually)
-    {
-        bignum_s* addedNumber = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
-        bignum_s* productAddRem = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
-
-        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
-        {
-            memcpy(multiplier->nums, TV_LIST_QUOTIENT_1024b[i], multiplier->size);
-            memcpy(multiplicand->nums, TV_LIST_DENOMINATOR_1024b[i], multiplicand->size);
-
-            memcpy(addedNumber->nums, TV_LIST_REMAINDER_1024b[i], addedNumber->size);
-
-
-            TICK_TIME_START("mul_bignum");
-            if(fr = mul_bignum(product, multiplier, multiplicand)) {
-                printReturnType(fr);
-            } else { /* Do nothing */ }
-            TICK_TIME_END;
-
-            if(fr = add_bignum(NULL, productAddRem, product, addedNumber, 0U)) {
-                printReturnType(fr);
-            } else { /* Do nothing */ }
-
-            test_memcmp0 = memcmp(productAddRem->nums, TV_LIST_NUMERATOR_1024b[i], productAddRem->size);
-            printf("mul_bignum() then add to remainder is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
-            TEST_ASSERT(test_memcmp0 == 0);
-        }
-
-        rmBitNum(&productAddRem);
-        rmBitNum(&addedNumber);
-    }
-    else
-    {
-        for(size_t i = 0UL; i < 0x10UL; i++)
-        {
-            (void)memset(multiplier->nums, 0U, multiplier->size);
-            (void)memset(multiplicand->nums, 0U, multiplicand->size);
-            (void)memset(product->nums, 0U, product->size);
-            /* set test vector*/
-
-            srand(time(NULL)+i);
-            for(size_t byte = 0UL; byte < (multiplier->size)>>1UL; byte++)
-            {
-                ((uint8_t*)multiplier->nums)[byte] = (rand()&0xFFU);
-            }
-            for(size_t byte = 0UL; byte < (multiplicand->size)>>1UL; byte++)
-            {
-                ((uint8_t*)multiplicand->nums)[byte] = (rand()&0xFFU);
-            }
-
-            /* multiplier */
-            TICK_TIME_START("mul_bignum");
-            if(fr = mul_bignum(product, multiplier, multiplicand)) {
-                printReturnType(fr);
-            } else { /* Do nothing */ }
-            TICK_TIME_END;
-            printf("********************************************************************************\n");
-            printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
-            test_print_bignum(multiplier, "multiplier");
-            test_print_bignum(multiplicand, "multiplicand");
-            test_print_bignum(product, "product");
-
-            printf("[PRODUCT]\n");
-            test_print_bignum_value_only(multiplier);
-            printf("*");
-            test_print_bignum_value_only(multiplicand);
-            printf("\n");
-            test_print_bignum_value_only(product);
-            printf("\n");
-
-            printf("********************************************************************************\n");
-            _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        }
-    }
-#undef _KEYIN_DO_TEST_0_
-#undef _COND_DO_TEST_0_
-
-    rmBitNum(&multiplier);
-    rmBitNum(&multiplicand);
-    rmBitNum(&product);
-#undef TEST_MUL_BIGNUM_BIT_LEN
-}
 
 void test_div_bignum_with_mod(void)
 {
@@ -7033,11 +6969,35 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
+    printf("[test start: test_mul_bignum_1024b(mul_bignum)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
     _COND_DO_TEST_(keyin)
     test_mul_bignum_1024b("mul_bignum", mul_bignum);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
+    printf("[test   end: test_mul_bignum_1024b(mul_bignum)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b(mul_bignum_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b("mul_bignum", mul_bignum_unsafe);
+    printf("[test   end: test_mul_bignum_1024b(mul_bignum_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum", mul_bignum);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum", mul_bignum_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -7103,14 +7063,6 @@ void test_sequence(void) {
     _COND_DO_TEST_(keyin)
     test_lsl1b_bignum_self();
     printf("[test   end: test_lsl1b_bignum_self()]\r\n");
-    printf("================================================================================\n");
-
-    printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mul_bignum");
-    _COND_DO_TEST_(keyin)
-    test_mul_bignum();
-    printf("[test   end: test_mul_bignum()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
