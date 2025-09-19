@@ -70,7 +70,20 @@ static bool g_clkOvf;
 
 #define test_print_bignum_value_only(p) test_print_bignum_ext(p, NULL, false, 0UL, false, true, false)
 #define test_print_bignum(p, title) test_print_bignum_ext(p, title, true, 0UL, false, false, true)
-void test_print_bignum_ext(bignum_s* p, const char* title, const bool linefeed, const size_t lfn, const bool details, const bool prefix, const bool space)
+#define test_print_bignum_array(nums, nlen) test_print_bignum_array_ext(nums, nlen, true, 0UL, false, true)
+static inline void test_print_bignum_array_ext(const bignum_t* nums, const size_t nlen, const bool linefeed, const size_t lfn, const bool prefix, const bool space)
+{
+    if(prefix)                      printf("0x");
+    if(prefix&&space)               printf(" ");
+    for(size_t i = nlen- 1u; i != ((size_t)-1); i--) {
+        printf("%08x", nums[i]);
+        if((i != 0u) && space)      printf(" ");
+        if((((i & (lfn-1U)) == lfn) && (lfn != 0U)) && linefeed)
+                                    printf("\r\n");
+    }
+    if(linefeed)                    printf("\r\n");
+}
+void test_print_bignum_ext(const bignum_s* p, const char* title, const bool linefeed, const size_t lfn, const bool details, const bool prefix, const bool space)
 {
     if(title != NULL)   printf("[%s]\r\n", title);
     if(details)
@@ -80,15 +93,7 @@ void test_print_bignum_ext(bignum_s* p, const char* title, const bool linefeed, 
                 p->nums, p->lmsk, p->bits, p->nlen, p->size);
         printf("[HEX]\r\n");
     }
-    if(prefix)                      printf("0x");
-    if(prefix&&space)               printf(" ");
-    for(size_t i = p->nlen- 1u; i != ((size_t)-1); i--) {
-        printf("%08x", p->nums[i]);
-        if((i != 0u) && space)      printf(" ");
-        if((((i & (lfn-1U)) == lfn) && (lfn != 0U)) && linefeed)
-                                    printf("\r\n");
-    }
-    if(linefeed)                    printf("\r\n");
+    test_print_bignum_array_ext(p->nums, p->nlen, linefeed, lfn, prefix, space);
 }
 
 #define test_print_bignum_sign(sign)  test_print_bignum_sign_ext(sign, true)
@@ -3777,25 +3782,25 @@ void test_lsl1b_bignum_self(void)
 #undef TEST_LSL1B_BIGNUM_VAL
 }
 
-bignum_t TV_NUMERATOR_1024b_0[] = {
+const bignum_t TV_NUMERATOR_1024b_0[] = {
     0x4369ae20, 0x29577b17, 0x58486b5a, 0x19d20572, 0x3f7f2036, 0x910a0724, 0xaf1583d5, 0x8bbfa569, 
     0x6d9b27c2, 0xc5f0b7f2, 0xb64cd781, 0x35772bea, 0xe8a7b4b4, 0xb2f102a3, 0xbde33e63, 0x92d3623e, 
     0x2b44bba5, 0xc05999bc, 0xdf9ef131, 0xf7f17c42, 0x48fa3269, 0x88d59f70, 0xbd054d17, 0x66900125, 
     0x193ba1a9, 0xc8766ff0, 0x4ef15d32, 0x15af50e9, 0x38891448, 0xb6afddd4, 0x90beb8c8, 0xb64fbc85, 
 };
-bignum_t TV_DENOMINATOR_1024b_0[] = {
+const bignum_t TV_DENOMINATOR_1024b_0[] = {
     0xf9d3b27b, 0x8cfa1316, 0x3ec62e31, 0xeb0ca221, 0x5a207330, 0x4c52f100, 0x2a7eebeb, 0x950f0c27, 
     0xfd13fe57, 0x1e98733b, 0x7d351fa8, 0x0022c21f, 0xa8e7ee49, 0x8eabde5d, 0xcfb8fe21, 0x095d2940, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_0[] = {
+const bignum_t TV_QUOTIENT_1024b_0[] = {
     0xae65dcf1, 0xe4d55616, 0x8a39ae15, 0x3e299c30, 0x0be397a4, 0x6e090208, 0xdafa658f, 0xef2f249d, 
     0xada23430, 0x58dcd9f4, 0xdddcd407, 0x74f501e1, 0xc527b7e3, 0xa8ccb137, 0x066fb7a1, 0x7836d323, 
     0x00000013, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_0[] = {
+const bignum_t TV_REMAINDER_1024b_0[] = {
     0x2135f455, 0xc127a75d, 0x230fbfd3, 0x7a0c5fd4, 0x1e6d12ac, 0xea276e96, 0xdf2421ee, 0x6ce4848a, 
     0x0144f4f8, 0x835f5bdc, 0x5cb2d774, 0x3deec3ed, 0xa77436eb, 0xe3e66287, 0x11577bf5, 0x02eb9703, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
@@ -3803,25 +3808,25 @@ bignum_t TV_REMAINDER_1024b_0[] = {
 };
 /****************************************************************************************************/
 
-bignum_t TV_NUMERATOR_1024b_1[] = {
+const bignum_t TV_NUMERATOR_1024b_1[] = {
     0xfaf1899d, 0xf3240f25, 0x3495f9e7, 0xcfc02f7d, 0x1d870e18, 0x959caba6, 0x9d460ee1, 0x91fa189f, 
     0x82bf2837, 0x8f58c1e8, 0xc371a10d, 0x75db1b2f, 0xe83c8e2a, 0x6805a562, 0x77e801c2, 0x77011aa0, 
     0xc30ae377, 0x59a3995a, 0xeacd51cc, 0x66154eff, 0xc0bf90e0, 0xe0c1e7d0, 0x799c3358, 0xb78f74bd, 
     0x45aa2467, 0xd3c1cff4, 0x2c145750, 0x408fa12d, 0xfaf0c207, 0x5e8dc681, 0x49cd5172, 0xc4e93a9c, 
 };
-bignum_t TV_DENOMINATOR_1024b_1[] = {
+const bignum_t TV_DENOMINATOR_1024b_1[] = {
     0x0e787209, 0xf60aa92f, 0x7300b29c, 0x5ae5227f, 0x980b9400, 0x8eb4459f, 0xa4a3bfbf, 0x83a577aa, 
     0x126d6da0, 0x3d79eff3, 0x91a2e7da, 0xa60ac8ba, 0x79e7b872, 0x25e34daa, 0x3d304e24, 0x88c5f495, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_1[] = {
+const bignum_t TV_QUOTIENT_1024b_1[] = {
     0x1bdfc9cc, 0xac2d9380, 0x6eb01bd9, 0x1decbd03, 0x82c5b3b0, 0x2f558ef1, 0xea9df955, 0x33eebc13, 
     0xcd103da5, 0x2e106968, 0xd48da85f, 0x6c1ce220, 0xcd9c5983, 0xff576ba7, 0x5e96f05d, 0x708f801c, 
     0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_1[] = {
+const bignum_t TV_REMAINDER_1024b_1[] = {
     0x98969971, 0xb001ccd7, 0x23544342, 0xc4c3788e, 0xd99348eb, 0x472a2c29, 0x9fe85669, 0x9c025b9d, 
     0xc27ed433, 0x1016747f, 0xf472b0c1, 0xc6839c22, 0xb74aa3d5, 0x8475d720, 0x76dc3a5c, 0x32be743d, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
@@ -3829,25 +3834,25 @@ bignum_t TV_REMAINDER_1024b_1[] = {
 };
 /****************************************************************************************************/
 
-bignum_t TV_NUMERATOR_1024b_2[] = {
+const bignum_t TV_NUMERATOR_1024b_2[] = {
     0x3820e0a9, 0xbc46364f, 0x033134af, 0x0b0f017b, 0xfec8eac5, 0x06c6fffd, 0xc0ab735c, 0x74f0cc2b, 
     0xe7e647ea, 0x6088005f, 0xc35b1b75, 0x29d38f2d, 0x6d3b6e0d, 0x8a9582ef, 0x813c6ae8, 0x145482b0, 
     0x28c175d9, 0x795e381a, 0x1ce50afc, 0xcc25e33b, 0x98dac9de, 0x87d13bcb, 0x9544d126, 0x6c4840b8, 
     0xdda4b3a4, 0x592bd7f0, 0x120bd11f, 0x8c258e79, 0x211ffedd, 0x1fab0ed6, 0xd9a73800, 0x2dd826b6, 
 };
-bignum_t TV_DENOMINATOR_1024b_2[] = {
+const bignum_t TV_DENOMINATOR_1024b_2[] = {
     0x439ed3eb, 0xb8dc904b, 0x1053dd11, 0x0c67019d, 0x8b274f94, 0xd121af1d, 0xebefba0a, 0xce38ba8e, 
     0x4953d964, 0x541ea44e, 0x075270c1, 0x894bf14e, 0x92c7782b, 0x686a9413, 0x17f12898, 0x378027c2, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_2[] = {
+const bignum_t TV_QUOTIENT_1024b_2[] = {
     0xc687dca0, 0xe44c97a9, 0x6d3f201b, 0x00bcfa47, 0xaf1933ae, 0xd37cf269, 0x679c536e, 0x6b5b4e52, 
     0x0fc5e12d, 0x6fd662c3, 0x65e8fde9, 0x8b2e6e58, 0xa3153f13, 0x3188e363, 0x13cacf04, 0xd375ba3a, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_2[] = {
+const bignum_t TV_REMAINDER_1024b_2[] = {
     0xf3d179c9, 0xcfd0555b, 0x401cd294, 0xabfbac76, 0xbc0386f0, 0x11c5e069, 0x269eb2d5, 0x9cc84abe, 
     0xc550e201, 0x8803d895, 0xd859705e, 0x167e6107, 0x51064615, 0x14f85c94, 0x8eaf2234, 0x127024a8, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
@@ -3855,25 +3860,25 @@ bignum_t TV_REMAINDER_1024b_2[] = {
 };
 /****************************************************************************************************/
 
-bignum_t TV_NUMERATOR_1024b_3[] = {
+const bignum_t TV_NUMERATOR_1024b_3[] = {
     0xa0926d45, 0x870f4cb0, 0x2fb5c028, 0x12bfbe38, 0x94ac8292, 0x7e38d912, 0xabaa9bd1, 0xe0d00b25, 
     0xb94556ea, 0x58be8753, 0xbc17160d, 0x223e96d5, 0xc9140710, 0xbc652978, 0x17bda4ac, 0xb29edd06, 
     0x1285c6c9, 0x40c9fe0a, 0x92a3bba9, 0x91cd3a07, 0xa2422259, 0xf38f8285, 0x22f7947d, 0x6837dc7f, 
     0x262af60d, 0x4117a18e, 0x53c9309b, 0x8c654a0b, 0xf6be08b2, 0xc4a2ece6, 0x9bc38c6d, 0x9618c589, 
 };
-bignum_t TV_DENOMINATOR_1024b_3[] = {
+const bignum_t TV_DENOMINATOR_1024b_3[] = {
     0x13794946, 0xd52a8165, 0x2fb7ad7b, 0x77b5ddf0, 0xf2cdc86a, 0xd7ec2e65, 0xba3d6a6d, 0xc2b5252c, 
     0xb7e71962, 0x41fe227f, 0x971dd036, 0x0b8989a6, 0x7d5e5c5e, 0x2e9ec4a6, 0x5659022f, 0x9d05982d, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_3[] = {
+const bignum_t TV_QUOTIENT_1024b_3[] = {
     0x84845e80, 0x3b50c21f, 0xaa757dc1, 0x4489ec98, 0xc43806a9, 0xb23ca303, 0x57425411, 0xd6694be5, 
     0xc7743723, 0x5921a2e2, 0xea3a93b8, 0xbda3662b, 0xae8b7bba, 0x1ede7eca, 0x1ca434ec, 0xf4b5af53, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_3[] = {
+const bignum_t TV_REMAINDER_1024b_3[] = {
     0x7aee1645, 0x330bfd34, 0xf2eafbc6, 0x87f59f70, 0x01150232, 0xb7426296, 0xb8807926, 0x5a3cbe55, 
     0x538d4d04, 0x0a3cd84a, 0xf3a16b0a, 0x68d3cbba, 0xcdbac9dc, 0xd1bd4f8d, 0x1996ac0f, 0x0b94d376, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
@@ -3881,25 +3886,25 @@ bignum_t TV_REMAINDER_1024b_3[] = {
 };
 /****************************************************************************************************/
 
-bignum_t TV_NUMERATOR_1024b_4[] = {
+const bignum_t TV_NUMERATOR_1024b_4[] = {
     0x4264c4a4, 0xf9eba54b, 0x9a4bbd26, 0x97fa6782, 0xe5b25b56, 0x31b376e5, 0x0067417d, 0x7c080fdf, 
     0xc859faf7, 0x72581148, 0xd60e1ff5, 0x0c7a32ea, 0xbfe9d15e, 0x0ae1cecc, 0xb171b8aa, 0x399fe3cd, 
     0x84d132cb, 0xd326ad0b, 0x8deb6f4e, 0x729d3988, 0xb1b21f2d, 0x725d4fe8, 0x7617f4f9, 0x2c40afec, 
     0xab27b620, 0xdffe5671, 0xf1b01a09, 0x86030dcb, 0x33b95816, 0xb0d5ae26, 0x1aa0395e, 0xd354ceb9, 
 };
-bignum_t TV_DENOMINATOR_1024b_4[] = {
+const bignum_t TV_DENOMINATOR_1024b_4[] = {
     0x6b979f34, 0xec6ac3f0, 0xc62ea9d3, 0xcef9564e, 0xed59d37e, 0x02aea1fb, 0x256f7eb8, 0x02e8fa54, 
     0x1ea84261, 0x6a2748ea, 0x50cde0a4, 0x57829c2f, 0xa2e92a07, 0xd1175505, 0xba6675dc, 0x1c4e49cd, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_4[] = {
+const bignum_t TV_QUOTIENT_1024b_4[] = {
     0x37c6d868, 0xc05e736b, 0xb33b0a5f, 0x53920afb, 0x3af619d1, 0xac7195dc, 0xc81deb93, 0x052b6dce, 
     0xdec23152, 0xc204efea, 0xc59099db, 0x89534e47, 0x25d943c2, 0x9a4c2e4c, 0xcf7bd76c, 0x774bf2df, 
     0x00000007, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_4[] = {
+const bignum_t TV_REMAINDER_1024b_4[] = {
     0x50403784, 0x1c2c7fa2, 0xe641e9b7, 0x1efc761b, 0xceee0c62, 0xb1bff1f4, 0x3b43a565, 0xe61d9046, 
     0x26e66d26, 0x79538463, 0x7ae45b68, 0xcd5cdce5, 0x5bf36d45, 0x8d77aa30, 0x7391e0b6, 0x1a711823, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
@@ -3907,25 +3912,25 @@ bignum_t TV_REMAINDER_1024b_4[] = {
 };
 /****************************************************************************************************/
 
-bignum_t TV_NUMERATOR_1024b_5[] = {
+const bignum_t TV_NUMERATOR_1024b_5[] = {
     0x7ff1a049, 0x45465c34, 0x7916b3a4, 0xda202fdf, 0xd6fb1151, 0xf30ad4e9, 0x478e634c, 0x915adb97, 
     0x46981d4c, 0xbcef47c9, 0x4a3ae092, 0x044f72f5, 0xcf4ad2ef, 0x430c194b, 0x89171091, 0x7f2fdd4b, 
     0x3c9d0192, 0x6c37a7da, 0xd6df304b, 0xb88b3a5d, 0xaf8c3cca, 0xba3845ab, 0xbfb44d41, 0xe0774189, 
     0xc88b97c8, 0xc01cc085, 0x69b42aa4, 0x8af1a721, 0x5252aa75, 0xf8a79a52, 0x4e85203a, 0x9863140f, 
 };
-bignum_t TV_DENOMINATOR_1024b_5[] = {
+const bignum_t TV_DENOMINATOR_1024b_5[] = {
     0x20a19afd, 0x64c5c88d, 0xd3496d3e, 0xf21f760a, 0x8e203ca2, 0x3c54370a, 0xc67c0256, 0x30f7c87f, 
     0x95fe1824, 0x448709c1, 0x1d17d10e, 0xc2322b5a, 0x9be3e81a, 0xadc996a9, 0xe8a07720, 0xcabc0151, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_5[] = {
+const bignum_t TV_QUOTIENT_1024b_5[] = {
     0xf89cb9b5, 0xf955c36b, 0x9a8451db, 0xe3da3c9e, 0x051519f0, 0x61d8bf41, 0xd47e4019, 0xd5e52ac0, 
     0x2f842c09, 0x5696224e, 0xd45436db, 0x42179c8a, 0xd0807408, 0x5de6dd7a, 0x4df1602a, 0xc06cb079, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_5[] = {
+const bignum_t TV_REMAINDER_1024b_5[] = {
     0x1a823668, 0xe249a479, 0x37d06135, 0xe018c89d, 0x04982da3, 0x2b9f7c78, 0xcc4dd976, 0x43580531, 
     0xb0381043, 0xddc8c64d, 0x296515d3, 0xc0f652b4, 0x94194be5, 0x39f7b160, 0xc7a7059a, 0x01ce11dd, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
@@ -3933,25 +3938,25 @@ bignum_t TV_REMAINDER_1024b_5[] = {
 };
 /****************************************************************************************************/
 
-bignum_t TV_NUMERATOR_1024b_6[] = {
+const bignum_t TV_NUMERATOR_1024b_6[] = {
     0x9575d4fb, 0x166940e5, 0x60aa4334, 0xde3768bb, 0x075475a2, 0x5d87f7f7, 0xbcc075a5, 0xd7e124c4, 
     0x86b43ec1, 0xe0b75b1d, 0xad47e79b, 0x84c910e1, 0x21d594e3, 0x49a970ac, 0xbced59c7, 0x3810eea9, 
     0x6e70f165, 0xe529a312, 0x59fe346f, 0x4f61e2c8, 0x20a66543, 0xfd21d7ba, 0x1f0bb404, 0xa0c2c86c, 
     0x97cdd148, 0x08e38369, 0x9e439e4e, 0x52d953ac, 0x4d3896d6, 0xcc83dce8, 0xb3c96103, 0x200a950d, 
 };
-bignum_t TV_DENOMINATOR_1024b_6[] = {
+const bignum_t TV_DENOMINATOR_1024b_6[] = {
     0x6f1c3162, 0x23f5177e, 0xb17060fa, 0x54175109, 0xf5b30688, 0xa2841f54, 0x62059f33, 0x4e871b69, 
     0x0e3dd3c6, 0xeabe3ffe, 0xd7342862, 0xe353b522, 0x87d911bb, 0x334e4c9a, 0x5b1489a9, 0x9871c599, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_6[] = {
+const bignum_t TV_QUOTIENT_1024b_6[] = {
     0x7b991b14, 0x621b4c09, 0xb7227639, 0x2d786ce2, 0x87440678, 0x70b2db42, 0x86a0ad87, 0xea0313b4, 
     0xf5c6b554, 0xb65383ad, 0x287f42b6, 0x615eec88, 0xe6c33306, 0x0ac9b310, 0x269bbeff, 0x35ce99d0, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_6[] = {
+const bignum_t TV_REMAINDER_1024b_6[] = {
     0x547aa353, 0xa3d94d47, 0x445e03f8, 0x53a25e43, 0x7dd1374f, 0x63a2ca2a, 0x945d4fbd, 0x27758ff6, 
     0xaddabf86, 0x78557eaa, 0x34771b8b, 0xc34af029, 0xcce4d9bc, 0xe7dd960f, 0x7ec77867, 0x7552e8fa, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
@@ -3959,32 +3964,58 @@ bignum_t TV_REMAINDER_1024b_6[] = {
 };
 /****************************************************************************************************/
 
-bignum_t TV_NUMERATOR_1024b_7[] = {
+const bignum_t TV_NUMERATOR_1024b_7[] = {
     0x77af3cce, 0x725b42b2, 0x593b282b, 0xf7274ace, 0x67a2f852, 0x54da40fa, 0x0f43a86a, 0xb26cb7b3, 
     0x5bafe94b, 0x00e2ac3c, 0xbdf81dd1, 0xd8cdd4bf, 0x960ae503, 0x297af2e1, 0x3aeabc5f, 0xf953d52b, 
     0xcf72c971, 0xeb85eba6, 0x2357a11d, 0xbd7bb78d, 0x5e642e49, 0xd31355c3, 0xb273708d, 0xa37e431c, 
     0x62856a9c, 0x33a9257f, 0x5caa59d0, 0x21e09f35, 0x07522266, 0x494170bf, 0x86e7b562, 0x1ac70979, 
 };
-bignum_t TV_DENOMINATOR_1024b_7[] = {
+const bignum_t TV_DENOMINATOR_1024b_7[] = {
     0xe5cad925, 0x82bc2ada, 0x8f3bd899, 0x3f708e05, 0x1dc3da78, 0x91e4db09, 0xe7a0132a, 0x8c611be8, 
     0x14b150a5, 0xf6d36ce4, 0xf4dcf064, 0x9d7d453b, 0x97c1b611, 0xe82a33c3, 0x8ba402c5, 0x268d82e4, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_QUOTIENT_1024b_7[] = {
+const bignum_t TV_QUOTIENT_1024b_7[] = {
     0xa473601a, 0xeb0ca473, 0x23f1319d, 0xe38dde3e, 0x519fc94e, 0xeea78b20, 0x73eb626c, 0x0b196866, 
     0x0158c20e, 0x0b87d796, 0x3f8697ba, 0xd20b0d3f, 0x7d804be3, 0x8770e211, 0x9a07d3a6, 0xb1cf24d9, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
-bignum_t TV_REMAINDER_1024b_7[] = {
+const bignum_t TV_REMAINDER_1024b_7[] = {
     0xd0084f0c, 0xcdaa6570, 0x423b9a7e, 0xc474ae2c, 0xcdfb33e1, 0xb5a0973d, 0x9d2a29b8, 0x45b8a995, 
     0x42b2ad7f, 0x3f317ccf, 0x4fd61c91, 0xb00c3c46, 0xb9e2259f, 0x734eae94, 0x6ced245b, 0x09b51f93, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
+/****************************************************************************************************/
 
-bignum_t* TV_LIST_NUMERATOR_1024b[] = {
+const bignum_t TV_NUMERATOR_1024b_8[] = {
+    0x3c5486e9, 0xabd9377b, 0x9479bcd1, 0x7bbe870e, 0x3d831a86, 0x7a0018ac, 0x64682e6a, 0x5b05ff72, 
+    0x00985985, 0x62ab7191, 0x3cf6242d, 0x32b7b4ac, 0x7b703bcf, 0xbef57053, 0x11225d9f, 0xe16d275c, 
+    0x11e10580, 0xa4738c76, 0x5de069b1, 0xed8f971e, 0x2668ffd2, 0x0fe45e70, 0x182006bb, 0xadf98d2d, 
+    0x09bfdb92, 0x18ad3267, 0xba758d9c, 0xf7a70524, 0x741d0f04, 0x2983016d, 0x3441a407, 0xc4e13a31, 
+};
+const bignum_t TV_DENOMINATOR_1024b_8[] = {
+    0x7dcda015, 0x6f957ad3, 0x2b290b07, 0x1422d010, 0x4d893fdf, 0x47760c40, 0xe27bb7b0, 0x07a65df1, 
+    0xd08473fd, 0xf43f19ed, 0x341f6824, 0x18494238, 0xc265d281, 0x8f09dbde, 0x83718592, 0xdf8a17e2, 
+    0x77b00e8a, 0x4c6bef28, 0x90818a58, 0x4ea8cacc, 0x7a100d9c, 0x7a0919e8, 0x80fe7a9e, 0x1b608891, 
+    0xbf921097, 0x570bfdff, 0x54e88c88, 0xf2a29056, 0x866db29e, 0x6a0176cc, 0x82ebfff1, 0x1e9e4b87, 
+};
+const bignum_t TV_QUOTIENT_1024b_8[] = {
+    0x00000006, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+const bignum_t TV_REMAINDER_1024b_8[] = {
+    0x4982c66b, 0x0e585686, 0x91837aa5, 0x02eda6ad, 0x6c4b9b4c, 0xcd3bcf2a, 0x1581e048, 0x2d1fcbc7, 
+    0x1d7da197, 0xa930d5fe, 0x0439b34f, 0xa100275b, 0xed0d4cc8, 0x64ba491a, 0xfc793c30, 0xa430980c, 
+    0x43c0ae3f, 0xd9ebf183, 0xfad72b9f, 0x159ad652, 0x4a08ae29, 0x33adc2fd, 0x12292704, 0x09b659c4, 
+    0x8c537808, 0x0e653e68, 0xbd02426a, 0x47d7a31e, 0x4d8adf4b, 0xad7a38a2, 0x22b9a45e, 0x0d2b7504, 
+};
+
+const bignum_t* TV_LIST_NUMERATOR_1024b[] = {
     TV_NUMERATOR_1024b_0,
     TV_NUMERATOR_1024b_1,
     TV_NUMERATOR_1024b_2,
@@ -3993,8 +4024,9 @@ bignum_t* TV_LIST_NUMERATOR_1024b[] = {
     TV_NUMERATOR_1024b_5,
     TV_NUMERATOR_1024b_6,
     TV_NUMERATOR_1024b_7,
+    TV_NUMERATOR_1024b_8,
 };
-bignum_t* TV_LIST_DENOMINATOR_1024b[] = {
+const bignum_t* TV_LIST_DENOMINATOR_1024b[] = {
     TV_DENOMINATOR_1024b_0,
     TV_DENOMINATOR_1024b_1,
     TV_DENOMINATOR_1024b_2,
@@ -4003,8 +4035,9 @@ bignum_t* TV_LIST_DENOMINATOR_1024b[] = {
     TV_DENOMINATOR_1024b_5,
     TV_DENOMINATOR_1024b_6,
     TV_DENOMINATOR_1024b_7,
+    TV_DENOMINATOR_1024b_8,
 };
-bignum_t* TV_LIST_QUOTIENT_1024b[] = {
+const bignum_t* TV_LIST_QUOTIENT_1024b[] = {
     TV_QUOTIENT_1024b_0,
     TV_QUOTIENT_1024b_1,
     TV_QUOTIENT_1024b_2,
@@ -4013,8 +4046,9 @@ bignum_t* TV_LIST_QUOTIENT_1024b[] = {
     TV_QUOTIENT_1024b_5,
     TV_QUOTIENT_1024b_6,
     TV_QUOTIENT_1024b_7,
+    TV_QUOTIENT_1024b_8,
 };
-bignum_t* TV_LIST_REMAINDER_1024b[] = {
+const bignum_t* TV_LIST_REMAINDER_1024b[] = {
     TV_REMAINDER_1024b_0,
     TV_REMAINDER_1024b_1,
     TV_REMAINDER_1024b_2,
@@ -4023,6 +4057,7 @@ bignum_t* TV_LIST_REMAINDER_1024b[] = {
     TV_REMAINDER_1024b_5,
     TV_REMAINDER_1024b_6,
     TV_REMAINDER_1024b_7,
+    TV_REMAINDER_1024b_8,
 };
 
 typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignum_s*);
@@ -4193,8 +4228,24 @@ void test_div_bignum_with_mod(void)
 
             test_memcmp0 = memcmp(quotient->nums, TV_LIST_QUOTIENT_1024b[i], quotient->size);
             test_memcmp1 = memcmp(remainder->nums, TV_LIST_REMAINDER_1024b[i], remainder->size);
-            printf("div_bignum_with_mod() divide is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
-            printf("div_bignum_with_mod() modulo is %s\r\n", ((test_memcmp1 == 0)?MES_PASS:MES_FAIL));
+            printf("[%lu] div_bignum_with_mod() divide is %s\r\n", i, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+            printf("[%lu] div_bignum_with_mod() modulo is %s\r\n", i, ((test_memcmp1 == 0)?MES_PASS:MES_FAIL));
+            if((test_memcmp0 != 0) || (test_memcmp1 != 0))
+            {
+                test_print_bignum(numerator, "numerator");
+                test_print_bignum(denominator, "denominator");
+                test_print_bignum(quotient, "quotient");
+                test_print_bignum(remainder, "remainder");
+#if 0 /* TEST */
+                printf("[ref quotient]\r\n");
+                printf("quotient->size: %lu\r\n", quotient->size);
+                test_print_bignum_array(TV_LIST_QUOTIENT_1024b[i], quotient->nlen);
+                printf("[ref remainder]\r\n");
+                printf("remainder->size: %lu\r\n", remainder->size);
+                test_print_bignum_array(TV_LIST_REMAINDER_1024b[i], remainder->nlen);
+#endif/* TEST */
+
+            }
             TEST_ASSERT((test_memcmp0 == 0) && (test_memcmp1 == 0));
         }
     }
@@ -4392,209 +4443,377 @@ void test_gcd_bignum(void)
 #undef TEST_GCD_BIGNUM_BIT_LEN
 }
 
+const ReturnType TEST_MIM_FR_0 = E_OK;
+const bignum_t TEST_MIM_NUM_A_0[] = {
+    0xf93aebfa, 0x9e703695, 0x099f8d99, 0x3cedab8d, 0x7a102514, 0x079267be, 0x5987565e, 0x62a8b168, 
+    0x315be29c, 0xb2cfcb19, 0xe5bb6e58, 0x2e21a819, 0x8ca832cd, 0xf7933b99, 0xf9501a91, 0x685bf8cb, 
+    0xf499b7db, 0xdba66982, 0xf1c061d7, 0xd71fe20a, 0xad63c714, 0x94a4f602, 0xdc8df411, 0xc844e9ed, 
+    0x22bcdea0, 0x1efd6247, 0xcd0fbec3, 0xb4a52ea0, 0xf86108f6, 0x108c05ff, 0xe6ec1af9, 0xa3ae3103, 
+};
+const bignum_t TEST_MIM_NUM_N_0[] = {
+    0x56c56a0f, 0x9074c3cc, 0x215d8481, 0xa8d502b2, 0x0aa1360b, 0x341a2d3b, 0x4a1b0647, 0x46edc937, 
+    0x009cb334, 0xf7901176, 0x4718ee95, 0xfbf0edf0, 0x5e059123, 0x06921fbe, 0x5d50ad26, 0xaba43e77, 
+    0x67ab40f1, 0xe65e3c51, 0x1a2e762a, 0x86161e63, 0x6de41baf, 0x6173763b, 0x9bbec424, 0xf3466202, 
+    0xf45af1a3, 0x57dbb82d, 0x9172092e, 0xd6178827, 0xde43fba3, 0x953fb771, 0x7d30fe7b, 0x03707660, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_0[] = {
+    0x49a13ac5, 0x048c186a, 0x12a8bc47, 0xf79be521, 0x0b3ec456, 0x3e180ac1, 0x6711c2c6, 0x1ab394a8, 
+    0x837548a4, 0x8ee8e18e, 0xe815a450, 0x6a1c6c78, 0x8c768fad, 0xc5da6a3c, 0x458f2d5b, 0x02dcb8ad, 
+    0x3554a202, 0xcecfc14d, 0x881fe362, 0x5b6f4f88, 0x4a082494, 0xc24c0032, 0x7bf71efe, 0xb6d8900f, 
+    0x65935f0c, 0x04ff483d, 0x81d542af, 0x241b22c4, 0x9bfe2e9a, 0x8e7c2657, 0xa22f7a4e, 0x003de6a5, 
+};
+
+const ReturnType TEST_MIM_FR_1 = E_OK;
+const bignum_t TEST_MIM_NUM_A_1[] = {
+    0x3c5486e9, 0xabd9377b, 0x9479bcd1, 0x7bbe870e, 0x3d831a86, 0x7a0018ac, 0x64682e6a, 0x5b05ff72, 
+    0x00985985, 0x62ab7191, 0x3cf6242d, 0x32b7b4ac, 0x7b703bcf, 0xbef57053, 0x11225d9f, 0xe16d275c, 
+    0x11e10580, 0xa4738c76, 0x5de069b1, 0xed8f971e, 0x2668ffd2, 0x0fe45e70, 0x182006bb, 0xadf98d2d, 
+    0x09bfdb92, 0x18ad3267, 0xba758d9c, 0xf7a70524, 0x741d0f04, 0x2983016d, 0x3441a407, 0xc4e13a31, 
+};
+const bignum_t TEST_MIM_NUM_N_1[] = {
+    0x7dcda015, 0x6f957ad3, 0x2b290b07, 0x1422d010, 0x4d893fdf, 0x47760c40, 0xe27bb7b0, 0x07a65df1, 
+    0xd08473fd, 0xf43f19ed, 0x341f6824, 0x18494238, 0xc265d281, 0x8f09dbde, 0x83718592, 0xdf8a17e2, 
+    0x77b00e8a, 0x4c6bef28, 0x90818a58, 0x4ea8cacc, 0x7a100d9c, 0x7a0919e8, 0x80fe7a9e, 0x1b608891, 
+    0xbf921097, 0x570bfdff, 0x54e88c88, 0xf2a29056, 0x866db29e, 0x6a0176cc, 0x82ebfff1, 0x1e9e4b87, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_1[] = {
+    0x924219bb, 0x671bc348, 0xe4852813, 0x0cb5c867, 0x048b7dd3, 0x228bdfd5, 0x0a070819, 0xb2fa9a0e, 
+    0x63eaaa8f, 0x37b1098b, 0xd6500c79, 0x6d7a4f69, 0xe12c94fe, 0x7e87c6b3, 0x38152123, 0x1a0ad841, 
+    0xf179d1a8, 0x0d0a0b8e, 0x380e5aa4, 0x13ae2173, 0x9022a8a5, 0x5080795a, 0xeda634d9, 0xac1b3653, 
+    0x3240adf9, 0x2fe8e2f7, 0x674ec54f, 0xe6383740, 0xcaf34776, 0x8e14c39e, 0xf1721d80, 0x12ad318f, 
+};
+
+const ReturnType TEST_MIM_FR_2 = E_HAS_NO_VALUE;
+const bignum_t TEST_MIM_NUM_A_2[] = {
+    0x8bd09f9e, 0x0e49eefe, 0xc09cdfcb, 0x59447a9b, 0x19cb2b9b, 0x0c4393fd, 0xa0935cc8, 0x850b35e6, 
+    0xd210dbd4, 0x95e15aca, 0xd5557d39, 0x922e9af7, 0xc2acf9c5, 0x54ceef8c, 0x32f4624c, 0x6bb7ff97, 
+    0xa53ec8db, 0x5b3a1f22, 0x93308f9c, 0xee265e29, 0xe3b0d257, 0x0d377fc1, 0x78402ce1, 0x06e3f72b, 
+    0xe1ab21bf, 0xdc3de540, 0x9e706d75, 0x238d96cc, 0x29073d68, 0x9d373ebc, 0x9615776a, 0x2e9cf96e, 
+};
+const bignum_t TEST_MIM_NUM_N_2[] = {
+    0x5b0f481a, 0xa2374c2d, 0x8641a7ba, 0xa5a9ce3d, 0xc8cfb00b, 0x596506ef, 0xebef7b7d, 0x8e198c74, 
+    0x01e929d4, 0x2fa42175, 0x06b5e5c8, 0xbeab5fb3, 0xfe867a0f, 0xfd58ec80, 0xdbe94767, 0xa76902d3, 
+    0xa1a9532b, 0x3cd04d74, 0xe5428632, 0xf4a3eee5, 0xe9f32a68, 0x7de64b16, 0x6658cf92, 0xfd0dc1d2, 
+    0x889eb614, 0x35c56f03, 0xda1a07f5, 0x5ecebef5, 0xfe47c1e8, 0x9f7b2d0c, 0xcf05d3fd, 0xa9cc1294, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_2[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
+const ReturnType TEST_MIM_FR_3 = E_HAS_NO_VALUE;
+const bignum_t TEST_MIM_NUM_A_3[] = {
+    0xa8bd34cc, 0xf8b3f5e3, 0xc709b570, 0xf4d07e12, 0xbb113e3b, 0xdf342aa0, 0x25694318, 0x20804d54, 
+    0x65c83d82, 0xa25d7b32, 0x426a6630, 0x20373ae5, 0x19dc4878, 0x8af81072, 0xa8b06254, 0x31c930af, 
+    0xa096916d, 0x3d42f40d, 0x3f80ac5a, 0x5f60b7e7, 0x71783cff, 0xa0fc714c, 0x8249acd3, 0x49b412dc, 
+    0xb0e94aa3, 0x99ee2c3e, 0xbfd86ed8, 0x241f3825, 0xc1959774, 0xdb619108, 0x195eaa3d, 0x606312bc, 
+};
+const bignum_t TEST_MIM_NUM_N_3[] = {
+    0x9b104c5c, 0x5134fe78, 0x91100c6c, 0xb9b52f45, 0xcf7a4bc7, 0x1aabdcdc, 0x43330986, 0x77a3961b, 
+    0x5b12b3e3, 0x1eac46b2, 0x98b0bd53, 0xb35165ec, 0x8d83ccb0, 0x2ea72ea8, 0x5271da37, 0x54c91471, 
+    0x7aafdcc8, 0x75985c22, 0x050d4819, 0x5eb95fae, 0xd3eb3c2b, 0xa101926a, 0xdef3736d, 0x4f32bc87, 
+    0xbbc9e198, 0x5630623d, 0x585c3eaa, 0xc8b7159d, 0xbb9ba251, 0xa25c9c35, 0x97804f0f, 0xa4e6b20b, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_3[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
+const ReturnType TEST_MIM_FR_4 = E_HAS_NO_VALUE;
+const bignum_t TEST_MIM_NUM_A_4[] = {
+    0x2fa24344, 0xfb337e32, 0x4b0ff990, 0x6c43ae19, 0xba82adfe, 0x02314333, 0x7961e378, 0xf18dfaad, 
+    0x6f20303d, 0x3f6b54ae, 0x668a7a4d, 0x27d3cd28, 0xade1557a, 0x10af1298, 0xa38911f6, 0x4895170b, 
+    0xf5b8b547, 0x56342309, 0xc5bdbe9d, 0x06ec908b, 0x7eb3cee5, 0xd68e63e0, 0x7f7a1874, 0x76c70f2f, 
+    0xce6b7fc4, 0x3f24a0a2, 0xea05e15e, 0x57f0f171, 0xa0d5a3bf, 0x7a766306, 0xaaf9f07b, 0xc420c1ff, 
+};
+const bignum_t TEST_MIM_NUM_N_4[] = {
+    0xe3928c40, 0x8a22b62c, 0x09742798, 0xd8606419, 0x0e783508, 0x1489ef99, 0xdfbf82df, 0x84a3df43, 
+    0x9767356b, 0x832289eb, 0xca8d96b1, 0x03a2edfb, 0xbc111b23, 0xe9d09a0a, 0x60c88f1d, 0xdae46b6f, 
+    0x8c724ba0, 0x860f94d5, 0x25509c2a, 0xad28f28a, 0x17693a0d, 0xf10139d4, 0x3852c9c9, 0xd5123635, 
+    0x57618482, 0x43dd7118, 0x97682d0d, 0x2d44911f, 0x9f44adcb, 0xb09145e7, 0x44e8e30f, 0x9b19fa19, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_4[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
+const ReturnType TEST_MIM_FR_5 = E_OK;
+const bignum_t TEST_MIM_NUM_A_5[] = {
+    0xf06c29db, 0x52e285db, 0xf09e4635, 0xd8d43afd, 0x65b9af3f, 0xf051b72f, 0xb908c2cf, 0xc102d0e6, 
+    0xd4b16ff9, 0x292694f4, 0xd819c5da, 0x3eb0edff, 0xcca3699d, 0xefbdf420, 0x9ca8c5b6, 0x8e5dab95, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+const bignum_t TEST_MIM_NUM_N_5[] = {
+    0x0e620e1a, 0x7d3789a2, 0x4d55504e, 0xdb8b053e, 0x8ea72e6e, 0xd87e6422, 0xbe742629, 0xeb4cd1d1, 
+    0x82f9afdf, 0x86ff3038, 0xbfd35481, 0xc79a5e59, 0xae55418c, 0xcf86d3a6, 0xcb8efafa, 0xaab7dacb, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_5[] = {
+    0x4812319d, 0xf7493842, 0x8d677e46, 0x8b38c5ef, 0x8c68d671, 0x13151e23, 0x749a958c, 0xf28ec6af, 
+    0x50f3b4bb, 0x009f4221, 0x34252b11, 0xd4487d3c, 0xe4608e9d, 0x201c0cec, 0x023becf5, 0x41770dd8, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
+const ReturnType TEST_MIM_FR_6 = E_OK;
+const bignum_t TEST_MIM_NUM_A_6[] = {
+    0x747e1fef, 0x390e9e4c, 0xea4e399d, 0x2b7eecb7, 0x1a3efab3, 0xd6796a9d, 0x5bd60157, 0x3063d940, 
+    0x44a4e2f8, 0x1d7eb280, 0xa207cceb, 0x6bcd85b8, 0x1d850c7f, 0xcdf3fe76, 0x4028c9ff, 0x9b708ca2, 
+    0xeedf146e, 0xb10b5dc6, 0xe1531229, 0x164c2097, 0xa233d12c, 0xcf7026cf, 0x920f98f0, 0x922d7f24, 
+    0x59800d93, 0x940a8b6a, 0x34755d9d, 0xaa4bc27d, 0x634c7e93, 0x9532bca5, 0x79274155, 0x530c55c0, 
+};
+const bignum_t TEST_MIM_NUM_N_6[] = {
+    0xccac8c62, 0xb560b618, 0x90ead613, 0x2b3a3598, 0x588e87b3, 0x98edc043, 0xc1121501, 0xcc141e6a, 
+    0xc298c0aa, 0x8978f976, 0x671a62cf, 0x4a925497, 0x1fa321db, 0xe3b790e1, 0x0fa4c9a5, 0x92dbb9e7, 
+    0xf0547479, 0x3c79cc6d, 0xc5a3932e, 0xc31035e8, 0x38e2b356, 0xe91b9a43, 0x4bf8bf63, 0xf2ddd478, 
+    0xb5e23148, 0x2cf15bfe, 0xd7f294ef, 0x209a02c9, 0xf8587db5, 0x7ae17317, 0xabc5da32, 0xf69da2ae, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_6[] = {
+    0xaf359aed, 0x4fe987c2, 0xfbadb9a4, 0xe6186ee7, 0x867eb832, 0xa158b1b7, 0x65c31233, 0x103d7eb4, 
+    0xb25d968d, 0x7ab2c810, 0x33f6eca6, 0x90d01190, 0x20168674, 0x196463c3, 0x2bf86377, 0x90721bfa, 
+    0x8f0e5383, 0x507b0b48, 0x221eb208, 0x3f2cc791, 0x0b1a7eae, 0xd0f4937b, 0xa035abe0, 0xc3f9a41c, 
+    0x074cbf59, 0x922edd2f, 0xfabbf8f5, 0x5ac1e067, 0x441c5f5e, 0xa3ad5f72, 0x686bba28, 0x06e6bd16, 
+};
+
+const ReturnType TEST_MIM_FR_7 = E_OK;
+const bignum_t TEST_MIM_NUM_A_7[] = {
+    0x7a66ca45, 0xef6ad63e, 0xa4b4f471, 0x6d6fb1e4, 0x4e996e23, 0xeac0ba7b, 0xfbedd72a, 0xd0249a8b, 
+    0xa34a8b65, 0xd292b461, 0x8d7647a8, 0x1bfae6f8, 0xcf6a9354, 0x77b92a4d, 0x8c72a701, 0xa65c9641, 
+    0x8249a621, 0x0355dc5b, 0x1b90cb23, 0x06368ab1, 0x6ad5a01d, 0xcce18fcb, 0x77595336, 0x0b1eb5ea, 
+    0xb78e675c, 0x66bae343, 0x60814bae, 0xf366b8d5, 0x235d3b58, 0x00f03fca, 0x7c784992, 0x5a8896fe, 
+};
+const bignum_t TEST_MIM_NUM_N_7[] = {
+    0x411116fd, 0xa7a7ccf9, 0xec072917, 0x39df6de1, 0x735d3da9, 0x0e744d7c, 0x948bec96, 0x7fef1382, 
+    0x22c00029, 0xe3c968cc, 0x72d0d191, 0xe7abaf3e, 0x685b08ec, 0xeb77cf55, 0x3d8002bb, 0x3ebc6f15, 
+    0x3c607d6f, 0x761f29e5, 0x39e8effa, 0x8b20939f, 0xf1f47b9c, 0x05dd6b4a, 0x82425d6d, 0x3bc0ffcc, 
+    0x6177207c, 0x44d79749, 0x257dbf86, 0xeeb19d52, 0x63e0a519, 0x7d69bd10, 0xe6ffab1a, 0x2621bfaa, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_7[] = {
+    0x12e4027c, 0x66b7ffbc, 0x356c94e6, 0x201e255a, 0xaf61ab75, 0x59b90095, 0x52c4c14a, 0x95fee112, 
+    0x5cf82df7, 0x0532c12a, 0xa72e795e, 0x36e02f6a, 0x8ef8a7ed, 0xc49b9ad8, 0xded17051, 0xa219de2a, 
+    0xbe7fbf0a, 0xd52999d3, 0xb6edfde3, 0xf69bafaf, 0x7d65fe7c, 0xc054eeac, 0xf5f20110, 0x28aaf72d, 
+    0xc52e7e4b, 0x717b9181, 0xac8fae39, 0xb0b51634, 0x254c9be6, 0xb5de513a, 0xb0020c3d, 0x05e66b53,
+};
+
+const ReturnType TEST_MIM_FR_8 = E_OK;
+const bignum_t TEST_MIM_NUM_A_8[] = {
+    0x5dccc61e, 0x9e93aab6, 0xd9fa4f13, 0xdf3cf749, 0x1873b4a5, 0xbefd63c8, 0x3e6b9f25, 0x60c1a442, 
+    0x21be8d6b, 0x4abf5137, 0xe923b9a0, 0x55c85fb0, 0xdc6d3b13, 0xc49a6b9f, 0x4d02060a, 0x15adc3aa, 
+    0x88366b50, 0x5dd2f5bc, 0x5f46f6ae, 0x69b40f55, 0xe945224a, 0x97aedf8d, 0x90e4b0e5, 0xc4a59274, 
+    0xba4cdcfd, 0x80171fd1, 0x6adf5d15, 0xb7d3936c, 0x42a018b5, 0xddda4ef8, 0x736dbeff, 0x4e371350, 
+};
+const bignum_t TEST_MIM_NUM_N_8[] = {
+    0xc00884ef, 0xb8401fa3, 0xe9221f7c, 0x68a0f6b3, 0x06ab400e, 0x8ee4858f, 0x94015143, 0x53e23864, 
+    0x5f14eabc, 0x85175409, 0x276e3a74, 0x3e8f0e30, 0xde453a4f, 0x036c29bf, 0xdf976d7a, 0x623279a5, 
+    0x6cc14663, 0x0ff1d99b, 0x43366013, 0xbd81c56e, 0xbf9bc600, 0x6ac207ef, 0x1a495974, 0x357c7bd2, 
+    0x5da13dc2, 0x296c9316, 0x616ca2f3, 0x671fee67, 0xa427bab4, 0x360ee9c2, 0x15505743, 0x944bccd2, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_8[] = {
+    0x0e8fdba5, 0xbb758970, 0x015b2a7c, 0xba48427c, 0x2488cf30, 0x20fd4839, 0x9e8473f8, 0x4cf6d58a, 
+    0x09a40ae2, 0xffb905e4, 0x9e2e1d16, 0x45777fab, 0x2c9547c5, 0x0ff1be22, 0x6095d45f, 0xb84b1059, 
+    0x6a570d9c, 0x87dd28fc, 0xe853796f, 0xbb0a9d2f, 0xfd66c4af, 0x5ea9d644, 0xdd80f348, 0x0c697724, 
+    0x595484f6, 0x7b21aae2, 0x2d9ba361, 0xd3b04665, 0x4c9abd1d, 0xce49e75b, 0xde381bd6, 0x1fde5b2c, 
+};
+
+const ReturnType TEST_MIM_FR_9 = E_OK;
+const bignum_t TEST_MIM_NUM_A_9[] = {
+    0xa93ac8d9, 0x95394ef4, 0xd48a6c44, 0xef159a59, 0x9caf7794, 0xce08d2f6, 0x218762fa, 0xcabcd4f1, 
+    0x9074f69c, 0x8925ad45, 0x725db019, 0xde61734a, 0xe17a10ea, 0xddaf82e3, 0xd5fe37e4, 0xa8a0ba0b, 
+    0xf63814b1, 0xdb7f5ec1, 0x584ddc0e, 0x3a36af4f, 0xa21bb0bf, 0x1680ca32, 0x0deb7e01, 0xeab58b39, 
+    0x61e0ed9f, 0x593c5f4b, 0x8bb1893b, 0xf8c5e738, 0xc99ae097, 0xacdf1aaa, 0xd2b9cb99, 0xf6bc6e56, 
+};
+const bignum_t TEST_MIM_NUM_N_9[] = {
+    0xa7579c5b, 0x360093fb, 0x55c1b21c, 0x314d8699, 0x11fae766, 0x9bbdda02, 0xfb6d76a5, 0x3ff129e4, 
+    0xc0e648c5, 0xf8f6e7db, 0x324db899, 0xa5639a3e, 0x83b65e81, 0xdd1e7338, 0xcdd88be9, 0x790ccab4, 
+    0xee39f312, 0x73e630da, 0x26a533e8, 0x4ecb09cd, 0x9fd28167, 0xdd7cf0f4, 0x30aa547c, 0x31aab71e, 
+    0x841fe3aa, 0xfbf70513, 0x05229c38, 0x0c53eda5, 0x63ab256f, 0x92412716, 0x9ac2eb7c, 0x4ccb6ca2, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_9[] = {
+    0xdb17f478, 0x8f212379, 0x95e8004d, 0xe7f2ecdb, 0x7be30c50, 0xa985267c, 0x1ba5ea1d, 0x0f7feb9e, 
+    0x373fd918, 0x227dfa46, 0x66b78d92, 0x9a832a2c, 0xf5356a9d, 0x7575c004, 0xbf6b39b2, 0x302ef886, 
+    0x279fa199, 0xb89737fb, 0x29732cdb, 0x508c29c1, 0xb74e638d, 0xad90109d, 0xd80d8ec5, 0x3884682f, 
+    0x1e28a00b, 0x5abc2775, 0xdf86c87b, 0x3c8b704a, 0xdb9592a4, 0x626a44d8, 0x63109624, 0x2b2e28f2, 
+};
+
+const ReturnType TEST_MIM_FR_A = E_OK;
+const bignum_t TEST_MIM_NUM_A_A[] = {
+    0xa712013a, 0xcdb5dbca, 0xc1e7ddee, 0x170ed4cb, 0xf0f87aa5, 0x33b1e050, 0x21672662, 0x4bbcc611, 
+    0x91f3cfc7, 0x995fa8aa, 0x505a4685, 0xbf67681a, 0x32b05fe2, 0xa265613f, 0x98c3cc87, 0x59e37f92, 
+    0xf9ebd64e, 0x03924a7e, 0xab53ec90, 0x376aba55, 0x596a1a1a, 0x02fbcf7b, 0x2e9abe9c, 0x8c887e3e, 
+    0xd3857354, 0x4dd617bd, 0x59f82a04, 0xfe9063e4, 0xf958fa7d, 0x66fb53ca, 0x50949612, 0x68dc1c14, 
+};
+const bignum_t TEST_MIM_NUM_N_A[] = {
+    0x4c3b628f, 0x7d9a1279, 0x20d6923c, 0x731f67f5, 0x2b6c7761, 0xdc9167ca, 0x112c26fd, 0xd27a0942, 
+    0xe41eb56b, 0x0362b8c7, 0x4024384b, 0x01b3439f, 0x842c1fba, 0x8461be87, 0x26968de4, 0x01f81096, 
+    0x8de617c5, 0x1a9048cf, 0x205bb480, 0xb1210ef7, 0xb5364d2e, 0xef39970b, 0xbb16cf24, 0xa5bc0edf, 
+    0xf532a225, 0x6b0fc2ea, 0x6e8b6a77, 0xa720ac79, 0x055c56f9, 0x11f495ed, 0x44cc0a65, 0x3ee98919, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_A[] = {
+    0x3155781d, 0x860f4215, 0x5ac1003d, 0xe7b620c1, 0x5e46f8aa, 0x5bd12018, 0x0a441c83, 0xd585cee2, 
+    0x1aacb514, 0x3bed7bef, 0x9574dac6, 0x20b816d4, 0x28bfdf9c, 0xd41a8310, 0x10e63621, 0xced07fbb, 
+    0x2a7d6e17, 0x67e365d0, 0x830139df, 0x7d1ed952, 0x447cea43, 0x157863bc, 0x97effeff, 0x9dc0819f, 
+    0x5dc6265e, 0x52bd9178, 0x32ccdd65, 0xd558a116, 0x3a62c6f7, 0x1d930a7e, 0x12cff19d, 0x13dc618a, 
+};
+
+const ReturnType TEST_MIM_FR_B = E_OK;
+const bignum_t TEST_MIM_NUM_A_B[] = {
+    0xa43c586b, 0x0fe172e8, 0x65af21f1, 0xf1dc2432, 0x119ff56a, 0x28f30bb7, 0x0ebc347f, 0x43dd06d7, 
+    0x47e7195f, 0x7c56c98b, 0x1ce206ea, 0x940dbe2a, 0x6aa6adb3, 0x379299b8, 0xa5464ecd, 0xb4e82355, 
+    0xc8fbcf3d, 0x83455298, 0x829f2758, 0x9916ade5, 0x1203bc5a, 0x234a9656, 0x39c890e4, 0xf0edb0b3, 
+    0x18b9e980, 0x939bfe3b, 0x0a153b25, 0x42a32be8, 0x3e54a7e8, 0x21619e3d, 0xe25b2a2e, 0x5ad248da, 
+};
+const bignum_t TEST_MIM_NUM_N_B[] = {
+    0x6c738b31, 0xaeff0e89, 0x31b91449, 0x28735c40, 0x4066c803, 0x9562c766, 0xcc77bdf1, 0x37264905, 
+    0x5ea399d5, 0xf10da3a8, 0xf723c6b7, 0x261f9622, 0xc566855e, 0x3e5ac84d, 0x8b0ad185, 0xefc2311a, 
+    0x724e65ca, 0xc0645b08, 0x43b78721, 0x7c69d71d, 0xa941d05c, 0x1ee89b98, 0x86a9f26c, 0xee766b23, 
+    0xd960c4d0, 0x4099c41f, 0x6983504b, 0x84e5ed27, 0x552d26bd, 0x2d7315c1, 0x2bb31c08, 0x58192987, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_B[] = {
+    0xf3322e45, 0x1dd9ef51, 0x78577a7a, 0x4f377e97, 0xd1229f61, 0x0cab820d, 0x53c5a157, 0x6e34bea7, 
+    0x7ceb4ae7, 0x046656c9, 0x082278ad, 0x0b1aa607, 0x65324c3b, 0xcc597023, 0xc65d04ba, 0x8452f522, 
+    0xc7fd76b2, 0x9fc6e4d2, 0x6abf648f, 0xc8c96dc6, 0xd7d12dc5, 0xf376f236, 0x39a01e53, 0x2b5f426b, 
+    0xf4736419, 0x7e8166a4, 0x5f6df605, 0xb4cdec3c, 0xaa9365cc, 0xe644cf12, 0xf399e309, 0x536e1902, 
+};
+
+const ReturnType TEST_MIM_FR_C = E_OK;
+const bignum_t TEST_MIM_NUM_A_C[] = {
+    0xef4d2575, 0xae11966e, 0x6150eebb, 0x55972c3c, 0xd42c635f, 0x10655708, 0xf5032cc6, 0x87454012, 
+    0xd4769266, 0xe4828729, 0xb146d275, 0x5e06ddfe, 0x48323240, 0x50589789, 0xd5455bc3, 0x025d8a9c, 
+    0x46d6d31d, 0xd02a595b, 0x2a82702b, 0x8e88884d, 0x44d6babb, 0x14942f51, 0x26e9da8a, 0x81284664, 
+    0x75c7ff1a, 0x8345f258, 0xb0adc762, 0x0b3e3550, 0x404f14ef, 0xce54e443, 0x22f43ebe, 0x9ea41d84, 
+};
+const bignum_t TEST_MIM_NUM_N_C[] = {
+    0x74136b1c, 0xc0f7595d, 0x7070a520, 0xca7baeda, 0x060acbc2, 0x6dd45faf, 0x218fc89d, 0x01c033e5, 
+    0xfc75d39f, 0x4dbc6d2c, 0xecbd2c12, 0x9db639da, 0xb3a3c104, 0xbd207720, 0x25deaf3f, 0x82269ee3, 
+    0x9e7e9c72, 0x1beb3b09, 0x4207a967, 0xe6dfbee2, 0x9f99827f, 0x385cb9f9, 0x4b5d3a68, 0x4bcd84d9, 
+    0x29e94c20, 0xee44d587, 0x60304b7e, 0x88460f09, 0x8a27df91, 0x00c38398, 0x974c20be, 0xc4e219a4, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_C[] = {
+    0xaf9b1a4d, 0x33fe64f8, 0x44528734, 0x205827fb, 0xd401c048, 0xfa0c240c, 0x08f67062, 0xcf40bfbc, 
+    0xade06848, 0xf5cc22a8, 0x030d9183, 0x4eca36f1, 0x015d9528, 0xbc4fa162, 0xcc0dd3c2, 0x23b32cc9, 
+    0xb8d28005, 0x8237d6f0, 0x8b098b3a, 0xcd8dc493, 0x82452f86, 0x4a6db772, 0x60cbc9c1, 0x9e4729f4, 
+    0xf1a921b1, 0xac1f9fc4, 0x0043f3ad, 0x02848fae, 0xbe8e2408, 0xf892a694, 0xeb4ae7c3, 0x88ae4485, 
+};
+
+const ReturnType TEST_MIM_FR_D = E_OK;
+const bignum_t TEST_MIM_NUM_A_D[] = {
+    0xe19c2ce9, 0x6e2b3d84, 0xc500bf9e, 0x9bba858e, 0x1ef22fb7, 0xf0753f1b, 0xc7fc35e2, 0xc86f5cdf, 
+    0x0caa0b88, 0xe77ad548, 0x23ac7b94, 0xb8be6600, 0xb0d6b195, 0xd2a04cf0, 0x609a9c81, 0x802909f8, 
+    0x5d8dd315, 0x3c4407a8, 0x835ff082, 0xeb3b1e56, 0xbf9b11cf, 0xdf913c5d, 0xd13f2bd8, 0x4a516835, 
+    0xe3a7de3b, 0x6820ece6, 0x33eb7fdc, 0x6c1e269d, 0x952bba38, 0xce74bdf6, 0x1d9fb4e8, 0x5867f11c, 
+};
+const bignum_t TEST_MIM_NUM_N_D[] = {
+    0xb53b0fcf, 0xd71e5bfb, 0x780a09db, 0x68e52930, 0xd9fd10e3, 0xb6a772cd, 0x42d34726, 0x079a3b38, 
+    0x45bdd64a, 0x0c1cdb31, 0x148527e4, 0x337c6a50, 0x480c7a7a, 0x12feb3ec, 0x3254d1fa, 0x563aef0c, 
+    0xf69bf7c5, 0xb603b8d2, 0x2fcb88df, 0x6c6247f2, 0xadb46ec1, 0x1cbfb221, 0x904e1484, 0xc8e78803, 
+    0x51be827f, 0x1908c13a, 0x3b48d349, 0xdca8aa1a, 0x3a895c18, 0x9356490f, 0x6023a45d, 0xac280a2d, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_D[] = {
+    0x15877acb, 0x2527411e, 0x951b454e, 0x00b1eebc, 0xa1e0aeb3, 0x873f6226, 0x2a107063, 0x5ed9d4ed, 
+    0x03a1a91e, 0x26f0c588, 0x94d6a02d, 0x13ecfb20, 0x7b2185cb, 0x17cd09ad, 0xa5d6fb6f, 0xa4a4914e, 
+    0xf150b827, 0x51e81993, 0x574fd04e, 0x2c782c65, 0x214b687b, 0xfc86128a, 0x6cbe12ba, 0xebf42bb6, 
+    0x34d29bd6, 0xbcf60306, 0x18dfd810, 0x957a2735, 0xc77109fa, 0x603199c0, 0x853e8364, 0x5c104818, 
+};
+
+const ReturnType TEST_MIM_FR_E = E_OK;
+const bignum_t TEST_MIM_NUM_A_E[] = {
+    0xf2c5ed61, 0xa80b4d6a, 0xe19c9208, 0xd7157139, 0x9699c663, 0x88b01623, 0x6efece95, 0x6afceb09, 
+    0x435cc1d9, 0x16eb670e, 0x33f788f9, 0x5c0a0cf9, 0xf6f2a3d3, 0x4f7fa3ba, 0x7abe7d71, 0x42e5ba69, 
+    0x8985417b, 0xa29f70a9, 0xf1d596f8, 0x754ee0a2, 0x3d6c4083, 0x558debe3, 0xd1cf4b68, 0x8013b405, 
+    0x9f0998f6, 0x0141a809, 0xe0f3173e, 0x7a5641f7, 0x65b8c281, 0x15ba45ad, 0x95e78990, 0x3415fa3e, 
+};
+const bignum_t TEST_MIM_NUM_N_E[] = {
+    0x9cd31e93, 0x049d14c6, 0x22e4902b, 0x539d3ad1, 0xa9b855fc, 0x2abf729a, 0x39bfa6fb, 0x336dd4a0, 
+    0xb8cf40f2, 0x80bc6d55, 0xcfa3a0fd, 0xd72240db, 0x2f81da95, 0x4759404c, 0x868118e6, 0xdebaeeec, 
+    0x8496892f, 0xf40452f6, 0xcdc3a7f2, 0x7ca5e5e7, 0x0bab26bf, 0x4c520466, 0x08d2d31c, 0xf1e68cc2, 
+    0x0c757c16, 0xc10079ce, 0x088ec321, 0x678533a8, 0xbf723059, 0x510bc535, 0x5a5ade98, 0x804b406a, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_E[] = {
+    0x400a165b, 0x53d3cb40, 0x0cbcd6ee, 0x22676fc2, 0xc88387f8, 0x02af0d0a, 0x1f862e18, 0x1e4292ee, 
+    0x6722af34, 0xf7ce8d16, 0xda6a7f78, 0x78b503f3, 0x2a574b04, 0x6a8854bc, 0x4bc33bac, 0x52dd70ce, 
+    0x4767adbc, 0xb34f9cbf, 0x7d6f362e, 0x8cec2017, 0x5987aac8, 0x5ae45854, 0x8786231d, 0x351573ba, 
+    0x4d970cfe, 0xa978e5c9, 0x09f94154, 0xfd5f2aff, 0xdb7ae25a, 0xafccc0ab, 0x85ea4e65, 0x36a69dcf, 
+};
+
+const ReturnType TEST_MIM_FR_F = E_HAS_NO_VALUE;
+const bignum_t TEST_MIM_NUM_A_F[] = {
+    0x2af073d0, 0x44355cbf, 0xf79d131c, 0xccdd82c7, 0x26ec2852, 0xac8896e9, 0xd47fdd49, 0xd14f4101, 
+    0x74fb3fb4, 0xb8b8309c, 0x0bb05544, 0x29d78dd7, 0x9e50c3b5, 0xa24ad859, 0xb677cab5, 0xc087c60b, 
+    0xa2348206, 0xf75aecb3, 0x18020a41, 0x4d42d998, 0xf5ec929c, 0x2098366a, 0x0cd60f00, 0xdbcc5ed5, 
+    0x937d00e0, 0x2d8ad8ec, 0x7a458ce2, 0x01c88765, 0x84f7b419, 0xeba48fea, 0x73f77a9e, 0xb94fc3d8, 
+};
+const bignum_t TEST_MIM_NUM_N_F[] = {
+    0xaf4cccc3, 0x87dcd7a4, 0xc9012163, 0xc2cac9a9, 0x6846c17d, 0xee53ea50, 0x3d624a65, 0xd0f6b10d, 
+    0x227f437d, 0x7da95b1a, 0x2546aa7c, 0xf1e81174, 0x23592ed2, 0x7e11ac19, 0x03bb73f6, 0xa2d3b224, 
+    0x0fc452f5, 0x2a8c6dad, 0x8b4fd317, 0xb67d37e4, 0x7fd9d666, 0x79fdeb83, 0x837db85e, 0x5f25506a, 
+    0x506ee9a3, 0x6d7afb56, 0xb2f9cace, 0x67687601, 0xcfe6424c, 0x8b49e32d, 0x060ec69c, 0xb9663316, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_F[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
+const ReturnType TEST_MIM_FR_10 = E_HAS_NO_VALUE;
+const bignum_t TEST_MIM_NUM_A_10[] = {
+    0x8cbcccd4, 0x9c072e2c, 0x69783446, 0xddf535cf, 0xee04621d, 0xd3891b85, 0x9e260b33, 0xc7d39ef3, 
+    0x96538f6a, 0x04325abe, 0x5d6daa8e, 0xfc3a62df, 0x4aea3ec5, 0x8d1d735a, 0x712b437e, 0x4b38ffe1, 
+    0x4ce18b8e, 0x745113e6, 0x9cd2bebd, 0xe6980c21, 0xa530824b, 0x74324df6, 0x72e65d90, 0xebbd1e5c, 
+    0x90379faa, 0x700488b2, 0x680cd647, 0x2e4ea5e3, 0x1dd37e27, 0x5b9205cb, 0xbfcd7862, 0x40aa8b96, 
+};
+const bignum_t TEST_MIM_NUM_N_10[] = {
+    0xdcd0e12a, 0xb14cd56a, 0x8e1959ab, 0x25bc67fe, 0xb0438fe5, 0xf70bd594, 0xe3b6d94d, 0x8e246064, 
+    0xab6af441, 0x755cb7c9, 0x0e037510, 0xc133c0dc, 0xe471764f, 0x98db7d4b, 0xba7c9156, 0x3248a0f1, 
+    0x5edeb294, 0x79d33a69, 0x8c87d6b0, 0xe64ebb96, 0x7dcabf31, 0x9215a53c, 0x274c9136, 0xc6599431, 
+    0xb0243747, 0x222af772, 0x64aeb1cd, 0x9e4afc6c, 0xf81b14bc, 0xef8b30b9, 0xf316d7c2, 0xb3b96f6c, 
+};
+const bignum_t TEST_MIM_NUM_REF_I_10[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
+const ReturnType TEST_MIM_FR_LIST[] = {
+    TEST_MIM_FR_0, TEST_MIM_FR_1, TEST_MIM_FR_2, TEST_MIM_FR_3, 
+    TEST_MIM_FR_4, TEST_MIM_FR_5, TEST_MIM_FR_6, TEST_MIM_FR_7, 
+    TEST_MIM_FR_8, TEST_MIM_FR_9, TEST_MIM_FR_A, TEST_MIM_FR_B, 
+    TEST_MIM_FR_C, TEST_MIM_FR_D, TEST_MIM_FR_E, TEST_MIM_FR_F, 
+    TEST_MIM_FR_10,
+};
+const bignum_t* TEST_MIM_NUM_A_LIST[] = {
+    TEST_MIM_NUM_A_0, TEST_MIM_NUM_A_1, TEST_MIM_NUM_A_2, TEST_MIM_NUM_A_3, 
+    TEST_MIM_NUM_A_4, TEST_MIM_NUM_A_5, TEST_MIM_NUM_A_6, TEST_MIM_NUM_A_7, 
+    TEST_MIM_NUM_A_8, TEST_MIM_NUM_A_9, TEST_MIM_NUM_A_A, TEST_MIM_NUM_A_B, 
+    TEST_MIM_NUM_A_C, TEST_MIM_NUM_A_D, TEST_MIM_NUM_A_E, TEST_MIM_NUM_A_F, 
+    TEST_MIM_NUM_A_10,
+};
+const bignum_t* TEST_MIM_NUM_N_LIST[] = {
+    TEST_MIM_NUM_N_0, TEST_MIM_NUM_N_1, TEST_MIM_NUM_N_2, TEST_MIM_NUM_N_3, 
+    TEST_MIM_NUM_N_4, TEST_MIM_NUM_N_5, TEST_MIM_NUM_N_6, TEST_MIM_NUM_N_7, 
+    TEST_MIM_NUM_N_8, TEST_MIM_NUM_N_9, TEST_MIM_NUM_N_A, TEST_MIM_NUM_N_B, 
+    TEST_MIM_NUM_N_C, TEST_MIM_NUM_N_D, TEST_MIM_NUM_N_E, TEST_MIM_NUM_N_F, 
+    TEST_MIM_NUM_N_10,
+};
+const bignum_t* TEST_MIM_NUM_REF_I_LIST[] = {
+    TEST_MIM_NUM_REF_I_0, TEST_MIM_NUM_REF_I_1, TEST_MIM_NUM_REF_I_2, TEST_MIM_NUM_REF_I_3, 
+    TEST_MIM_NUM_REF_I_4, TEST_MIM_NUM_REF_I_5, TEST_MIM_NUM_REF_I_6, TEST_MIM_NUM_REF_I_7, 
+    TEST_MIM_NUM_REF_I_8, TEST_MIM_NUM_REF_I_9, TEST_MIM_NUM_REF_I_A, TEST_MIM_NUM_REF_I_B, 
+    TEST_MIM_NUM_REF_I_C, TEST_MIM_NUM_REF_I_D, TEST_MIM_NUM_REF_I_E, TEST_MIM_NUM_REF_I_F, 
+    TEST_MIM_NUM_REF_I_10,
+};
+
 void test_mim_bignum(void)
 {
-#if 0 /* BackUp_to_Test_Results_for_test_mim_bignum */
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-a3ae3103 e6ec1af9 108c05ff f86108f6 b4a52ea0 cd0fbec3 1efd6247 22bcdea0 c844e9ed dc8df411 94a4f602 ad63c714 d71fe20a f1c061d7 dba66982 f499b7db 685bf8cb f9501a91 f7933b99 8ca832cd 2e21a819 e5bb6e58 b2cfcb19 315be29c 62a8b168 5987565e 079267be 7a102514 3cedab8d 099f8d99 9e703695 f93aebfa
-[num_n]
-03707660 7d30fe7b 953fb771 de43fba3 d6178827 9172092e 57dbb82d f45af1a3 f3466202 9bbec424 6173763b 6de41baf 86161e63 1a2e762a e65e3c51 67ab40f1 aba43e77 5d50ad26 06921fbe 5e059123 fbf0edf0 4718ee95 f7901176 009cb334 46edc937 4a1b0647 341a2d3b 0aa1360b a8d502b2 215d8481 9074c3cc 56c56a0f
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-********************************************************************************
-DIFF!!!
-3de6a5a22f7a4e8e7c26579bfe2e9a241b22c481d542af04ff483d65935f0cb6d8900f7bf71efec24c00324a0824945b6f4f88881fe362cecfc14d3554a20202dcb8ad458f2d5bc5da6a3c8c768fad6a1c6c78e815a4508ee8e18e837548a41ab394a86711c2c63e180ac10b3ec456f79be52112a8bc47048c186a49a13ac5
-********************************************************************************
-
-
-mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
-Process Time(mim_bignum): 0.000053
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-c4e13a31 3441a407 2983016d 741d0f04 f7a70524 ba758d9c 18ad3267 09bfdb92 adf98d2d 182006bb 0fe45e70 2668ffd2 ed8f971e 5de069b1 a4738c76 11e10580 e16d275c 11225d9f bef57053 7b703bcf 32b7b4ac 3cf6242d 62ab7191 00985985 5b05ff72 64682e6a 7a0018ac 3d831a86 7bbe870e 9479bcd1 abd9377b 3c5486e9
-[num_n]
-1e9e4b87 82ebfff1 6a0176cc 866db29e f2a29056 54e88c88 570bfdff bf921097 1b608891 80fe7a9e 7a0919e8 7a100d9c 4ea8cacc 90818a58 4c6bef28 77b00e8a df8a17e2 83718592 8f09dbde c265d281 18494238 341f6824 f43f19ed d08473fd 07a65df1 e27bb7b0 47760c40 4d893fdf 1422d010 2b290b07 6f957ad3 7dcda015
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-********************************************************************************
-DIFF!!!
-12ad318ff1721d808e14c39ecaf34776e6383740674ec54f2fe8e2f73240adf9ac1b3653eda634d95080795a9022a8a513ae2173380e5aa40d0a0b8ef179d1a81a0ad841381521237e87c6b3e12c94fe6d7a4f69d6500c7937b1098b63eaaa8fb2fa9a0e0a070819228bdfd5048b7dd30cb5c867e4852813671bc348924219bb
-********************************************************************************
-
-
-mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
-Process Time(mim_bignum): 0.002045
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-2e9cf96e 9615776a 9d373ebc 29073d68 238d96cc 9e706d75 dc3de540 e1ab21bf 06e3f72b 78402ce1 0d377fc1 e3b0d257 ee265e29 93308f9c 5b3a1f22 a53ec8db 6bb7ff97 32f4624c 54ceef8c c2acf9c5 922e9af7 d5557d39 95e15aca d210dbd4 850b35e6 a0935cc8 0c4393fd 19cb2b9b 59447a9b c09cdfcb 0e49eefe 8bd09f9e
-[num_n]
-a9cc1294 cf05d3fd 9f7b2d0c fe47c1e8 5ecebef5 da1a07f5 35c56f03 889eb614 fd0dc1d2 6658cf92 7de64b16 e9f32a68 f4a3eee5 e5428632 3cd04d74 a1a9532b a76902d3 dbe94767 fd58ec80 fe867a0f beab5fb3 06b5e5c8 2fa42175 01e929d4 8e198c74 ebef7b7d 596506ef c8cfb00b a5a9ce3d 8641a7ba a2374c2d 5b0f481a
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-********************************************************************************
-
-
-mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
-Process Time(mim_bignum): 0.002399
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-606312bc 195eaa3d db619108 c1959774 241f3825 bfd86ed8 99ee2c3e b0e94aa3 49b412dc 8249acd3 a0fc714c 71783cff 5f60b7e7 3f80ac5a 3d42f40d a096916d 31c930af a8b06254 8af81072 19dc4878 20373ae5 426a6630 a25d7b32 65c83d82 20804d54 25694318 df342aa0 bb113e3b f4d07e12 c709b570 f8b3f5e3 a8bd34cc
-[num_n]
-a4e6b20b 97804f0f a25c9c35 bb9ba251 c8b7159d 585c3eaa 5630623d bbc9e198 4f32bc87 def3736d a101926a d3eb3c2b 5eb95fae 050d4819 75985c22 7aafdcc8 54c91471 5271da37 2ea72ea8 8d83ccb0 b35165ec 98b0bd53 1eac46b2 5b12b3e3 77a3961b 43330986 1aabdcdc cf7a4bc7 b9b52f45 91100c6c 5134fe78 9b104c5c
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-********************************************************************************
-
-
-mim_bignum() = Code: 9, Error:E_HAS_NO_VALUE
-Process Time(mim_bignum): 0.002417
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-c420c1ff aaf9f07b 7a766306 a0d5a3bf 57f0f171 ea05e15e 3f24a0a2 ce6b7fc4 76c70f2f 7f7a1874 d68e63e0 7eb3cee5 06ec908b c5bdbe9d 56342309 f5b8b547 4895170b a38911f6 10af1298 ade1557a 27d3cd28 668a7a4d 3f6b54ae 6f20303d f18dfaad 7961e378 02314333 ba82adfe 6c43ae19 4b0ff990 fb337e32 2fa24344
-[num_n]
-9b19fa19 44e8e30f b09145e7 9f44adcb 2d44911f 97682d0d 43dd7118 57618482 d5123635 3852c9c9 f10139d4 17693a0d ad28f28a 25509c2a 860f94d5 8c724ba0 dae46b6f 60c88f1d e9d09a0a bc111b23 03a2edfb ca8d96b1 832289eb 9767356b 84a3df43 dfbf82df 1489ef99 0e783508 d8606419 09742798 8a22b62c e3928c40
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 8e5dab95 9ca8c5b6 efbdf420 cca3699d 3eb0edff d819c5da 292694f4 d4b16ff9 c102d0e6 b908c2cf f051b72f 65b9af3f d8d43afd f09e4635 52e285db f06c29db
-[num_n]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 aab7dacb cb8efafa cf86d3a6 ae55418c c79a5e59 bfd35481 86ff3038 82f9afdf eb4cd1d1 be742629 d87e6422 8ea72e6e db8b053e 4d55504e 7d3789a2 0e620e1a
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 41770dd8 023becf5 201c0cec e4608e9d d4487d3c 34252b11 009f4221 50f3b4bb f28ec6af 749a958c 13151e23 8c68d671 8b38c5ef 8d677e46 f7493842 4812319d
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-530c55c0 79274155 9532bca5 634c7e93 aa4bc27d 34755d9d 940a8b6a 59800d93 922d7f24 920f98f0 cf7026cf a233d12c 164c2097 e1531229 b10b5dc6 eedf146e 9b708ca2 4028c9ff cdf3fe76 1d850c7f 6bcd85b8 a207cceb 1d7eb280 44a4e2f8 3063d940 5bd60157 d6796a9d 1a3efab3 2b7eecb7 ea4e399d 390e9e4c 747e1fef
-[num_n]
-f69da2ae abc5da32 7ae17317 f8587db5 209a02c9 d7f294ef 2cf15bfe b5e23148 f2ddd478 4bf8bf63 e91b9a43 38e2b356 c31035e8 c5a3932e 3c79cc6d f0547479 92dbb9e7 0fa4c9a5 e3b790e1 1fa321db 4a925497 671a62cf 8978f976 c298c0aa cc141e6a c1121501 98edc043 588e87b3 2b3a3598 90ead613 b560b618 ccac8c62
-[a^-1 mod n(inverse mod n)]
-06e6bd16 686bba28 a3ad5f72 441c5f5e 5ac1e067 fabbf8f5 922edd2f 074cbf59 c3f9a41c a035abe0 d0f4937b 0b1a7eae 3f2cc791 221eb208 507b0b48 8f0e5383 90721bfa 2bf86377 196463c3 20168674 90d01190 33f6eca6 7ab2c810 b25d968d 103d7eb4 65c31233 a158b1b7 867eb832 e6186ee7 fbadb9a4 4fe987c2 af359aed
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-5a8896fe 7c784992 00f03fca 235d3b58 f366b8d5 60814bae 66bae343 b78e675c 0b1eb5ea 77595336 cce18fcb 6ad5a01d 06368ab1 1b90cb23 0355dc5b 8249a621 a65c9641 8c72a701 77b92a4d cf6a9354 1bfae6f8 8d7647a8 d292b461 a34a8b65 d0249a8b fbedd72a eac0ba7b 4e996e23 6d6fb1e4 a4b4f471 ef6ad63e 7a66ca45
-[num_n]
-2621bfaa e6ffab1a 7d69bd10 63e0a519 eeb19d52 257dbf86 44d79749 6177207c 3bc0ffcc 82425d6d 05dd6b4a f1f47b9c 8b20939f 39e8effa 761f29e5 3c607d6f 3ebc6f15 3d8002bb eb77cf55 685b08ec e7abaf3e 72d0d191 e3c968cc 22c00029 7fef1382 948bec96 0e744d7c 735d3da9 39df6de1 ec072917 a7a7ccf9 411116fd
-[a^-1 mod n(inverse mod n)]
-05e66b53 b0020c3d b5de513a 254c9be6 b0b51634 ac8fae39 717b9181 c52e7e4b 28aaf72d f5f20110 c054eeac 7d65fe7c f69bafaf b6edfde3 d52999d3 be7fbf0a a219de2a ded17051 c49b9ad8 8ef8a7ed 36e02f6a a72e795e 0532c12a 5cf82df7 95fee112 52c4c14a 59b90095 af61ab75 201e255a 356c94e6 66b7ffbc 12e4027c
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-4e371350 736dbeff ddda4ef8 42a018b5 b7d3936c 6adf5d15 80171fd1 ba4cdcfd c4a59274 90e4b0e5 97aedf8d e945224a 69b40f55 5f46f6ae 5dd2f5bc 88366b50 15adc3aa 4d02060a c49a6b9f dc6d3b13 55c85fb0 e923b9a0 4abf5137 21be8d6b 60c1a442 3e6b9f25 befd63c8 1873b4a5 df3cf749 d9fa4f13 9e93aab6 5dccc61e
-[num_n]
-944bccd2 15505743 360ee9c2 a427bab4 671fee67 616ca2f3 296c9316 5da13dc2 357c7bd2 1a495974 6ac207ef bf9bc600 bd81c56e 43366013 0ff1d99b 6cc14663 623279a5 df976d7a 036c29bf de453a4f 3e8f0e30 276e3a74 85175409 5f14eabc 53e23864 94015143 8ee4858f 06ab400e 68a0f6b3 e9221f7c b8401fa3 c00884ef
-[a^-1 mod n(inverse mod n)]
-1fde5b2c de381bd6 ce49e75b 4c9abd1d d3b04665 2d9ba361 7b21aae2 595484f6 0c697724 dd80f348 5ea9d644 fd66c4af bb0a9d2f e853796f 87dd28fc 6a570d9c b84b1059 6095d45f 0ff1be22 2c9547c5 45777fab 9e2e1d16 ffb905e4 09a40ae2 4cf6d58a 9e8473f8 20fd4839 2488cf30 ba48427c 015b2a7c bb758970 0e8fdba5
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-f6bc6e56 d2b9cb99 acdf1aaa c99ae097 f8c5e738 8bb1893b 593c5f4b 61e0ed9f eab58b39 0deb7e01 1680ca32 a21bb0bf 3a36af4f 584ddc0e db7f5ec1 f63814b1 a8a0ba0b d5fe37e4 ddaf82e3 e17a10ea de61734a 725db019 8925ad45 9074f69c cabcd4f1 218762fa ce08d2f6 9caf7794 ef159a59 d48a6c44 95394ef4 a93ac8d9
-[num_n]
-4ccb6ca2 9ac2eb7c 92412716 63ab256f 0c53eda5 05229c38 fbf70513 841fe3aa 31aab71e 30aa547c dd7cf0f4 9fd28167 4ecb09cd 26a533e8 73e630da ee39f312 790ccab4 cdd88be9 dd1e7338 83b65e81 a5639a3e 324db899 f8f6e7db c0e648c5 3ff129e4 fb6d76a5 9bbdda02 11fae766 314d8699 55c1b21c 360093fb a7579c5b
-[a^-1 mod n(inverse mod n)]
-2b2e28f2 63109624 626a44d8 db9592a4 3c8b704a df86c87b 5abc2775 1e28a00b 3884682f d80d8ec5 ad90109d b74e638d 508c29c1 29732cdb b89737fb 279fa199 302ef886 bf6b39b2 7575c004 f5356a9d 9a832a2c 66b78d92 227dfa46 373fd918 0f7feb9e 1ba5ea1d a985267c 7be30c50 e7f2ecdb 95e8004d 8f212379 db17f478
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-68dc1c14 50949612 66fb53ca f958fa7d fe9063e4 59f82a04 4dd617bd d3857354 8c887e3e 2e9abe9c 02fbcf7b 596a1a1a 376aba55 ab53ec90 03924a7e f9ebd64e 59e37f92 98c3cc87 a265613f 32b05fe2 bf67681a 505a4685 995fa8aa 91f3cfc7 4bbcc611 21672662 33b1e050 f0f87aa5 170ed4cb c1e7ddee cdb5dbca a712013a
-[num_n]
-3ee98919 44cc0a65 11f495ed 055c56f9 a720ac79 6e8b6a77 6b0fc2ea f532a225 a5bc0edf bb16cf24 ef39970b b5364d2e b1210ef7 205bb480 1a9048cf 8de617c5 01f81096 26968de4 8461be87 842c1fba 01b3439f 4024384b 0362b8c7 e41eb56b d27a0942 112c26fd dc9167ca 2b6c7761 731f67f5 20d6923c 7d9a1279 4c3b628f
-[a^-1 mod n(inverse mod n)]
-13dc618a 12cff19d 1d930a7e 3a62c6f7 d558a116 32ccdd65 52bd9178 5dc6265e 9dc0819f 97effeff 157863bc 447cea43 7d1ed952 830139df 67e365d0 2a7d6e17 ced07fbb 10e63621 d41a8310 28bfdf9c 20b816d4 9574dac6 3bed7bef 1aacb514 d585cee2 0a441c83 5bd12018 5e46f8aa e7b620c1 5ac1003d 860f4215 3155781d
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-5ad248da e25b2a2e 21619e3d 3e54a7e8 42a32be8 0a153b25 939bfe3b 18b9e980 f0edb0b3 39c890e4 234a9656 1203bc5a 9916ade5 829f2758 83455298 c8fbcf3d b4e82355 a5464ecd 379299b8 6aa6adb3 940dbe2a 1ce206ea 7c56c98b 47e7195f 43dd06d7 0ebc347f 28f30bb7 119ff56a f1dc2432 65af21f1 0fe172e8 a43c586b
-[num_n]
-58192987 2bb31c08 2d7315c1 552d26bd 84e5ed27 6983504b 4099c41f d960c4d0 ee766b23 86a9f26c 1ee89b98 a941d05c 7c69d71d 43b78721 c0645b08 724e65ca efc2311a 8b0ad185 3e5ac84d c566855e 261f9622 f723c6b7 f10da3a8 5ea399d5 37264905 cc77bdf1 9562c766 4066c803 28735c40 31b91449 aeff0e89 6c738b31
-[a^-1 mod n(inverse mod n)]
-536e1902 f399e309 e644cf12 aa9365cc b4cdec3c 5f6df605 7e8166a4 f4736419 2b5f426b 39a01e53 f376f236 d7d12dc5 c8c96dc6 6abf648f 9fc6e4d2 c7fd76b2 8452f522 c65d04ba cc597023 65324c3b 0b1aa607 082278ad 046656c9 7ceb4ae7 6e34bea7 53c5a157 0cab820d d1229f61 4f377e97 78577a7a 1dd9ef51 f3322e45
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-9ea41d84 22f43ebe ce54e443 404f14ef 0b3e3550 b0adc762 8345f258 75c7ff1a 81284664 26e9da8a 14942f51 44d6babb 8e88884d 2a82702b d02a595b 46d6d31d 025d8a9c d5455bc3 50589789 48323240 5e06ddfe b146d275 e4828729 d4769266 87454012 f5032cc6 10655708 d42c635f 55972c3c 6150eebb ae11966e ef4d2575
-[num_n]
-c4e219a4 974c20be 00c38398 8a27df91 88460f09 60304b7e ee44d587 29e94c20 4bcd84d9 4b5d3a68 385cb9f9 9f99827f e6dfbee2 4207a967 1beb3b09 9e7e9c72 82269ee3 25deaf3f bd207720 b3a3c104 9db639da ecbd2c12 4dbc6d2c fc75d39f 01c033e5 218fc89d 6dd45faf 060acbc2 ca7baeda 7070a520 c0f7595d 74136b1c
-[a^-1 mod n(inverse mod n)]
-88ae4485 eb4ae7c3 f892a694 be8e2408 02848fae 0043f3ad ac1f9fc4 f1a921b1 9e4729f4 60cbc9c1 4a6db772 82452f86 cd8dc493 8b098b3a 8237d6f0 b8d28005 23b32cc9 cc0dd3c2 bc4fa162 015d9528 4eca36f1 030d9183 f5cc22a8 ade06848 cf40bfbc 08f67062 fa0c240c d401c048 205827fb 44528734 33fe64f8 af9b1a4d
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-5867f11c 1d9fb4e8 ce74bdf6 952bba38 6c1e269d 33eb7fdc 6820ece6 e3a7de3b 4a516835 d13f2bd8 df913c5d bf9b11cf eb3b1e56 835ff082 3c4407a8 5d8dd315 802909f8 609a9c81 d2a04cf0 b0d6b195 b8be6600 23ac7b94 e77ad548 0caa0b88 c86f5cdf c7fc35e2 f0753f1b 1ef22fb7 9bba858e c500bf9e 6e2b3d84 e19c2ce9
-[num_n]
-ac280a2d 6023a45d 9356490f 3a895c18 dca8aa1a 3b48d349 1908c13a 51be827f c8e78803 904e1484 1cbfb221 adb46ec1 6c6247f2 2fcb88df b603b8d2 f69bf7c5 563aef0c 3254d1fa 12feb3ec 480c7a7a 337c6a50 148527e4 0c1cdb31 45bdd64a 079a3b38 42d34726 b6a772cd d9fd10e3 68e52930 780a09db d71e5bfb b53b0fcf
-[a^-1 mod n(inverse mod n)]
-5c104818 853e8364 603199c0 c77109fa 957a2735 18dfd810 bcf60306 34d29bd6 ebf42bb6 6cbe12ba fc86128a 214b687b 2c782c65 574fd04e 51e81993 f150b827 a4a4914e a5d6fb6f 17cd09ad 7b2185cb 13ecfb20 94d6a02d 26f0c588 03a1a91e 5ed9d4ed 2a107063 873f6226 a1e0aeb3 00b1eebc 951b454e 2527411e 15877acb
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-3415fa3e 95e78990 15ba45ad 65b8c281 7a5641f7 e0f3173e 0141a809 9f0998f6 8013b405 d1cf4b68 558debe3 3d6c4083 754ee0a2 f1d596f8 a29f70a9 8985417b 42e5ba69 7abe7d71 4f7fa3ba f6f2a3d3 5c0a0cf9 33f788f9 16eb670e 435cc1d9 6afceb09 6efece95 88b01623 9699c663 d7157139 e19c9208 a80b4d6a f2c5ed61
-[num_n]
-804b406a 5a5ade98 510bc535 bf723059 678533a8 088ec321 c10079ce 0c757c16 f1e68cc2 08d2d31c 4c520466 0bab26bf 7ca5e5e7 cdc3a7f2 f40452f6 8496892f debaeeec 868118e6 4759404c 2f81da95 d72240db cfa3a0fd 80bc6d55 b8cf40f2 336dd4a0 39bfa6fb 2abf729a a9b855fc 539d3ad1 22e4902b 049d14c6 9cd31e93
-[a^-1 mod n(inverse mod n)]
-36a69dcf 85ea4e65 afccc0ab db7ae25a fd5f2aff 09f94154 a978e5c9 4d970cfe 351573ba 8786231d 5ae45854 5987aac8 8cec2017 7d6f362e b34f9cbf 4767adbc 52dd70ce 4bc33bac 6a8854bc 2a574b04 78b503f3 da6a7f78 f7ce8d16 6722af34 1e4292ee 1f862e18 02af0d0a c88387f8 22676fc2 0cbcd6ee 53d3cb40 400a165b
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-b94fc3d8 73f77a9e eba48fea 84f7b419 01c88765 7a458ce2 2d8ad8ec 937d00e0 dbcc5ed5 0cd60f00 2098366a f5ec929c 4d42d998 18020a41 f75aecb3 a2348206 c087c60b b677cab5 a24ad859 9e50c3b5 29d78dd7 0bb05544 b8b8309c 74fb3fb4 d14f4101 d47fdd49 ac8896e9 26ec2852 ccdd82c7 f79d131c 44355cbf 2af073d0
-[num_n]
-b9663316 060ec69c 8b49e32d cfe6424c 67687601 b2f9cace 6d7afb56 506ee9a3 5f25506a 837db85e 79fdeb83 7fd9d666 b67d37e4 8b4fd317 2a8c6dad 0fc452f5 a2d3b224 03bb73f6 7e11ac19 23592ed2 f1e81174 2546aa7c 7da95b1a 227f437d d0f6b10d 3d624a65 ee53ea50 6846c17d c2cac9a9 c9012163 87dcd7a4 af4cccc3
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-********************************************************************************
-
-
-********************************************************************************
-TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://www.boxentriq.com/code-breaking/big-number-calculator'
-[num_a]
-40aa8b96 bfcd7862 5b9205cb 1dd37e27 2e4ea5e3 680cd647 700488b2 90379faa ebbd1e5c 72e65d90 74324df6 a530824b e6980c21 9cd2bebd 745113e6 4ce18b8e 4b38ffe1 712b437e 8d1d735a 4aea3ec5 fc3a62df 5d6daa8e 04325abe 96538f6a c7d39ef3 9e260b33 d3891b85 ee04621d ddf535cf 69783446 9c072e2c 8cbcccd4
-[num_n]
-b3b96f6c f316d7c2 ef8b30b9 f81b14bc 9e4afc6c 64aeb1cd 222af772 b0243747 c6599431 274c9136 9215a53c 7dcabf31 e64ebb96 8c87d6b0 79d33a69 5edeb294 3248a0f1 ba7c9156 98db7d4b e471764f c133c0dc 0e037510 755cb7c9 ab6af441 8e246064 e3b6d94d f70bd594 b0438fe5 25bc67fe 8e1959ab b14cd56a dcd0e12a
-[a^-1 mod n(inverse mod n)]
-00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
-********************************************************************************
-#endif /* BackUp_to_Test_Results_for_test_mim_bignum */
 #define TEST_MIM_BIGNUM_BIT_LEN   1024U
     char keyin;
     int test_memcmp0;
@@ -4622,29 +4841,52 @@ b3b96f6c f316d7c2 ef8b30b9 f81b14bc 9e4afc6c 64aeb1cd 222af772 b0243747 c6599431
     _KEYIN_DO_TEST_0_(keyin, "Test Manually?(y/n)");
     _COND_DO_TEST_0_(keyin) manually = true;
 
-#if 0 /* NO_MANUALL_YET */
     if(!manually)
     {
-        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
+        for(size_t i = 0UL; i < sizeof(TEST_MIM_FR_LIST)/sizeof(ReturnType); i++)
         {
-            memcpy(num_a->nums, TV_LIST_NUMERATOR_1024b[i], num_a->size);
-            memcpy(num_n->nums, TV_LIST_DENOMINATOR_1024b[i], num_n->size);
+            (void)memcpy(num_a->nums, TEST_MIM_NUM_A_LIST[i], num_a->size);
+            (void)memcpy(num_n->nums, TEST_MIM_NUM_N_LIST[i], num_n->size);
+            (void)memset(num_i->nums, 0xffU, num_i->size);
+            /* set test vector*/
 
-            /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-            TICK_TIME_START("div_bignum_with_mod");
-            if(fr = TEST_FUNCTION_NAME(...)) {
+            TICK_TIME_START("mim_bignum");
+            if(fr = mim_bignum(num_i, num_a, num_n)) {
+                printf("mim_bignum() = ");
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
+            test_memcmp0 = memcmp(num_i->nums, TEST_MIM_NUM_REF_I_LIST[i], num_i->size);
+            if(TEST_MIM_FR_LIST[i] != E_HAS_NO_VALUE)
+            {
+                printf("[%lu] mim_bignum() is %s\r\n", i, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+            }
+            else
+            {
+                printf("[%lu] mim_bignum() is %s\r\n", i, ((test_memcmp0 != 0)?MES_PASS:MES_FAIL));
+            }
 
-            test_memcmp0 = memcmp(num_i->nums, TV_LIST_QUOTIENT_1024b[i], quotient->size);
-            printf("TEST_FUNCTION_NAME() divide is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
-            TEST_ASSERT(test_memcmp0 == 0);
+            if(test_memcmp0 != 0)
+            {
+                if(TEST_MIM_FR_LIST[i] == E_HAS_NO_VALUE)
+                {
+                    printf("[E_HAS_NO_VALUE CASES: has no coprime]\r\n");
+                }
+                else
+                {
+                    printf("[IS ERROR]\r\n");
+                }
+                test_print_bignum(num_a, "num_a");
+                test_print_bignum(num_n, "num_n");
+                test_print_bignum(num_i, "a^-1 mod n(inverse mod n)");
+                printf("ref a^-1 mod n(inverse mod n)\r\n");
+                test_print_bignum_array(TEST_MIM_NUM_REF_I_LIST[i], num_i->nlen);
+            }
+            TEST_ASSERT((test_memcmp0 == 0) || (TEST_MIM_FR_LIST[i] == E_HAS_NO_VALUE));
         }
     }
     else
     {
-#endif/* NO_MANUALL_YET */
         for(size_t i = 0UL; i < 0x10UL; i++)
         {
             (void)memset(num_a->nums, 0U, num_a->size);
@@ -4677,9 +4919,7 @@ b3b96f6c f316d7c2 ef8b30b9 f81b14bc 9e4afc6c 64aeb1cd 222af772 b0243747 c6599431
             printf("********************************************************************************\n");
             _KEYIN_DO_TEST_0_(keyin, "check result(y)");
         }
-#if 0 /* NO_MANUALL_YET */
     }
-#endif/* NO_MANUALL_YET */
 #undef _KEYIN_DO_TEST_0_
 #undef _COND_DO_TEST_0_
 
