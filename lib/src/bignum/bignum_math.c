@@ -35,7 +35,7 @@ void _internal_print_bignum(bignum_s* p, const char* title, const char* funcName
 #else
 #define _DPRINTF_
 #define _PRINT_BIGNUM_(p, title)
-#define _DEBUG_SELECTIVES_
+#undef _DEBUG_SELECTIVES_
 #ifdef _DEBUG_SELECTIVES_
 #include <stdio.h>
 void _print_bignum_ext_(bignum_s* p, const char* title, const char* funcName, const int lineNum, const size_t lfn, const bool details)
