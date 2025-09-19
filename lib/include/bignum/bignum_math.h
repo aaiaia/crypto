@@ -88,10 +88,10 @@ static inline ReturnType gcd_bignum(bignum_s* r, bignum_s* s, bignum_s* t, const
     return gcd_bignum_ext(r, s, t, a, b, true);
 }
 
-/* mim_bignum and mim_bignum_ext is muliplicative inverse modular, 'bignum_s* r' is optional */
-ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard);
-static inline ReturnType mim_bignum(bignum_s* t, const bignum_s* a, const bignum_s* n)
+/* mmi_bignum and mmi_bignum_ext is muliplicative inverse modular, 'bignum_s* r' is optional */
+ReturnType mmi_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard);
+static inline ReturnType mmi_bignum(bignum_s* t, const bignum_s* a, const bignum_s* n)
 {
-    return mim_bignum_ext(t, NULL, a, n, true);
+    return mmi_bignum_ext(t, NULL, a, n, true);
 }
 #endif/* BIGNUM_MATH_H */

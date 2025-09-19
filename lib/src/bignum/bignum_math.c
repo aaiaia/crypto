@@ -983,7 +983,7 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
     return E_OK;
 }
 
-ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard) {
+ReturnType mmi_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard) {
     if((t != NULL) && (a != NULL) && (n != NULL)) {
         if((((a->bits) == (n->bits)) && ((a->bits) == (t->bits)))|| (!guard)) {
             ReturnType _fr_;
