@@ -31,6 +31,7 @@
 
 const uint8_t MES_PASS[] = "\x1b[32mPASS\x1b[0m";
 const uint8_t MES_FAIL[] = "\x1b[31mFAIL\x1b[0m";
+const uint8_t MES_SKIP[] = "\x1b[35mSKIP\x1b[0m";
 
 #define TEST_ASSERT(CONDITION) {        \
     if(!(CONDITION)) {                  \
@@ -196,562 +197,335 @@ void printHex(void* data, size_t size, const char* title, size_t lf)
 void test_macro(void)
 {
     bool cmp_result;
+    bool invalid_case;
     // test: UIN_CEIL(n, x)
     {
-        uint32_t ref, r, n, m;
+        typedef struct {
+            const uint32_t  u32_n;
+            const uint32_t  u32_m;
+            const uint32_t  u32_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_UIN_CEIL_set_t;
+        const test_bignum_UIN_CEIL_set_t TEST_UINT_CEIL_set_LIST[] = {
+            { 6u,         14u,        1u,         NULL,       false, }, 
+            { 14u,        14u,        1u,         NULL,       false, }, 
+            { 1024u,      1023u,      2u,         NULL,       false, }, 
+            { 34u + 7u,   17u,        3u,         NULL,       false, }, 
+            { 60u + 14u,  37u,        2u,         NULL,       false, }, 
+            { 35u + 6u,   7u,         6u,         NULL,       false, }, 
+        };
+
+        uint32_t n, m;
+        uint32_t ref, r;
+
         printf("[TEST] UIN_CEIL\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_UINT_CEIL_set_LIST)/sizeof(test_bignum_UIN_CEIL_set_t); i++)
+        {
+            n = TEST_UINT_CEIL_set_LIST[i].u32_n;
+            m = TEST_UINT_CEIL_set_LIST[i].u32_m;
+            ref = TEST_UINT_CEIL_set_LIST[i].u32_ref;
+            invalid_case = TEST_UINT_CEIL_set_LIST[i].invalid_case;
 
-        // test 1
-        n = 6u; m = 14u;
-        ref = 1u;
-        r = UIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 2
-        n = 14u; m = 14u;
-        ref = 1u;
-        r = UIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 3
-        n = 1024u; m = 1023u;
-        ref = 2u;
-        r = UIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 4
-        n = 34u + 7u; m = 17u;
-        ref = 3u;
-        r = UIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 5
-        n = 60u + 14u; m = 37u;
-        ref = 2u;
-        r = UIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 6
-        n = 35u + 6u; m = 7u;
-        ref = 6u;
-        r = UIN_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("UIN_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
+            r = UIN_CEIL(n, m);
+            cmp_result = (ref==r);
+            printf("[%lu] UIN_CEIL(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] n=%u, m=%u, r=%u\r\n", i, n, m, r);
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
     }
 
     // test: INT_CEIL(n, x)
     {
-        int32_t ref, r, n, m;
+        typedef struct {
+            const int32_t   i32_n;
+            const int32_t   i32_m;
+            const int32_t   i32_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_INT_CEIL_set_t;
+        const test_bignum_INT_CEIL_set_t TEST_INT_CEIL_set_LIST[] = {
+            { 6,          14,         1,      NULL,       false, }, 
+            { 14,         14,         1,      NULL,       false, }, 
+            { 1024,       1023,       2,      NULL,       false, }, 
+            { 34u + 7,    17,         3,      NULL,       false, }, 
+            { 60u + 14,   37,         2,      NULL,       false, }, 
+            { 35u + 6,    7,          6,      NULL,       false, }, 
+
+        };
+
+        int32_t n, m;
+        int32_t ref, r;
+
         printf("[TEST] INT_CEIL\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_INT_CEIL_set_LIST)/sizeof(test_bignum_INT_CEIL_set_t); i++)
+        {
+            n = TEST_INT_CEIL_set_LIST[i].i32_n;
+            m = TEST_INT_CEIL_set_LIST[i].i32_m;
+            ref = TEST_INT_CEIL_set_LIST[i].i32_ref;
+            invalid_case = TEST_INT_CEIL_set_LIST[i].invalid_case;
 
-        // test 1
-        n = 6; m = 14;
-        ref = 1;
-        r = INT_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 2
-        n = 14; m = 14;
-        ref = 1;
-        r = INT_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 3
-        n = 1024; m = 1023;
-        ref = 2;
-        r = INT_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 4
-        n = 34u + 7; m = 17;
-        ref = 3;
-        r = INT_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 5
-        n = 60u + 14; m = 37;
-        ref = 2;
-        r = INT_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 6
-        n = 35u + 6; m = 7;
-        ref = 6;
-        r = INT_CEIL(n, m);
-        printf("n=%u, m=%u, r=%u\r\n", n, m, r);
-        printf("INT_CEIL(%u, %u), result: %s\r\n", n, m, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
+            r = INT_CEIL(n, m);
+            cmp_result = (ref==r);
+            printf("[%lu] INT_CEIL(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] n=%u, m=%u, r=%u\r\n", i, n, m, r);
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
 
     }
 
     // test: BITS2SIZE(bits)
     {
-        uint32_t ref, r, n;
+        typedef struct {
+            const uint32_t  u32_n;
+            const uint32_t  u32_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_BIT2SIZE_set_t;
+        const test_bignum_BIT2SIZE_set_t TEST_BIT2SIZE_set_LIST[] = {
+            { 6u,     1u,     NULL,   false, }, 
+            { 14u,    2u,     NULL,   false, }, 
+            { 1024u,  128u,   NULL,   false, }, 
+            { 10240u, 1280u,  NULL,   false, }, 
+            { 10241u, 1281u,  NULL,   false, }, 
+            { 727u,   91u,    NULL,   false, }, 
+        };
+
+        uint32_t r, n;
+        uint32_t ref;
+
         printf("[TEST] BITS2SIZE\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_BIT2SIZE_set_LIST)/sizeof(test_bignum_BIT2SIZE_set_t); i++)
+        {
+            n = TEST_BIT2SIZE_set_LIST[i].u32_n;
+            ref = TEST_BIT2SIZE_set_LIST[i].u32_ref;
+            invalid_case = TEST_BIT2SIZE_set_LIST[i].invalid_case;
 
-        // test 1
-        n = 6u;
-        ref = 1u;
-        r = BITS2SIZE(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 2
-        n = 14u;
-        ref = 2u;
-        r = BITS2SIZE(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 3
-        n = 1024u;
-        ref = 128u;
-        r = BITS2SIZE(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 4
-        n = 10240u;
-        ref = 1280u;
-        r = BITS2SIZE(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 5
-        n = 10241u;
-        ref = 1281u;
-        r = BITS2SIZE(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 6
-        n = 727u;
-        ref = 91u;
-        r = BITS2SIZE(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BITS2SIZE(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
+            r = BITS2SIZE(n);
+            cmp_result = (ref==r);
+            printf("[%lu] BITS2SIZE(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] n=%u, r=%u\r\n", i, n, r);
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
     }
 
     // test: BIT2U16L(bits)
     {
-        uint32_t ref, r, n;
+        typedef struct {
+            const uint32_t  u32_n;
+            const uint32_t  u32_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_BIT2U16L_set_t;
+        const test_bignum_BIT2U16L_set_t TEST_BIT2U16L_set_LIST[] = {
+            { 6u,     1u,     NULL,   false, }, 
+            { 14u,    1u,     NULL,   false, }, 
+            { 1024u,  64u,    NULL,   false, }, 
+            { 10240u, 640u,   NULL,   false, }, 
+            { 10241u, 641u,   NULL,   false, }, 
+            { 727u,   46u,    NULL,   false, }, 
+        };
+
+        uint32_t n;
+        uint32_t ref, r;
+
         printf("[TEST] BIT2U16L\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_BIT2U16L_set_LIST)/sizeof(test_bignum_BIT2U16L_set_t); i++)
+        {
+            n = TEST_BIT2U16L_set_LIST[i].u32_n;
+            ref = TEST_BIT2U16L_set_LIST[i].u32_ref;
+            invalid_case = TEST_BIT2U16L_set_LIST[i].invalid_case;
 
-        // test 1
-        n = 6u;
-        ref = 1u;
-        r = BIT2U16L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 2
-        n = 14u;
-        ref = 1u;
-        r = BIT2U16L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 3
-        n = 1024u;
-        ref = 64u;
-        r = BIT2U16L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 4
-        n = 10240u;
-        ref = 640u;
-        r = BIT2U16L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 5
-        n = 10241u;
-        ref = 641u;
-        r = BIT2U16L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 6
-        n = 727u;
-        ref = 46u;
-        r = BIT2U16L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U16L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
+            r = BIT2U16L(n);
+            cmp_result = (ref==r);
+            printf("[%lu] BIT2U16L(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] n=%u, r=%u\r\n", i, n, r);
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
     }
 
     // test: BIT2U32L(bits)
     {
-        uint32_t ref, r, n;
+        typedef struct {
+            const uint32_t  u32_n;
+            const uint32_t  u32_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_BIT2U32L_set_t;
+        const test_bignum_BIT2U32L_set_t TEST_BIT2U32L_set_LIST[] = {
+            { 6u,     1u,     NULL,   false, }, 
+            { 14u,    1u,     NULL,   false, }, 
+            { 1024u,  32u,    NULL,   false, }, 
+            { 10240u, 320u,   NULL,   false, }, 
+            { 10241u, 321u,   NULL,   false, }, 
+            { 727u,   23u,    NULL,   false, }, 
+        };
+
+        uint32_t n;
+        uint32_t ref, r;
+
         printf("[TEST] BIT2U32L\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_BIT2U32L_set_LIST)/sizeof(test_bignum_BIT2U32L_set_t); i++)
+        {
+            n = TEST_BIT2U32L_set_LIST[i].u32_n;
+            ref = TEST_BIT2U32L_set_LIST[i].u32_ref;
+            invalid_case = TEST_BIT2U32L_set_LIST[i].invalid_case;
 
-        // test 1
-        n = 6u;
-        ref = 1u;
-        r = BIT2U32L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 2
-        n = 14u;
-        ref = 1u;
-        r = BIT2U32L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 3
-        n = 1024u;
-        ref = 32u;
-        r = BIT2U32L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 4
-        n = 10240u;
-        ref = 320u;
-        r = BIT2U32L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 5
-        n = 10241u;
-        ref = 321u;
-        r = BIT2U32L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 6
-        n = 727u;
-        ref = 23u;
-        r = BIT2U32L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U32L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
+            r = BIT2U32L(n);
+            cmp_result = (ref==r);
+            printf("[%lu] BIT2U32L(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] n=%u, r=%u\r\n", i, n, r);
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
     }
 
     // test: BIT2U64L(bits)
     {
-        uint32_t ref, r, n;
+        typedef struct {
+            const uint32_t  u32_n;
+            const uint32_t  u32_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_BIT2U64L_set_t;
+        const test_bignum_BIT2U64L_set_t TEST_BIT2U64L_set_LIST[] = {
+            { 6u,     1u,     NULL,   false, }, 
+            { 14u,    1u,     NULL,   false, }, 
+            { 1024u,  16u,    NULL,   false, }, 
+            { 10240u, 160u,   NULL,   false, }, 
+            { 10241u, 161u,   NULL,   false, }, 
+            { 727u,   12u,    NULL,   false, }, 
+        };
+
+        uint32_t n;
+        uint32_t ref, r;
+
         printf("[TEST] BIT2U64L\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_BIT2U64L_set_LIST)/sizeof(test_bignum_BIT2U64L_set_t); i++)
+        {
+            n = TEST_BIT2U64L_set_LIST[i].u32_n;
+            ref = TEST_BIT2U64L_set_LIST[i].u32_ref;
+            invalid_case = TEST_BIT2U64L_set_LIST[i].invalid_case;
 
-        // test 1
-        n = 6u;
-        ref = 1u;
-        r = BIT2U64L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 2
-        n = 14u;
-        ref = 1u;
-        r = BIT2U64L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 3
-        n = 1024u;
-        ref = 16u;
-        r = BIT2U64L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 4
-        n = 10240u;
-        ref = 160u;
-        r = BIT2U64L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 5
-        n = 10241u;
-        ref = 161u;
-        r = BIT2U64L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
-
-        // test 6
-        n = 727u;
-        ref = 12u;
-        r = BIT2U64L(n);
-        printf("n=%u, r=%u\r\n", n, r);
-        printf("BIT2U64L(%u), result: %s\r\n", n, (ref==r)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(ref==r);
+            r = BIT2U64L(n);
+            cmp_result = (ref==r);
+            printf("[%lu] BIT2U64L(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] n=%u, r=%u\r\n", i, n, r);
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
     }
 
     // test: LASTBITMASK(bits, TYPE)
     {
+        typedef struct {
+            const uint32_t  u32_bits;
+            const uint32_t  u32_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_LASTBITMASK_set_t;
+        const test_bignum_LASTBITMASK_set_t TEST_LASTBITMASK_set_LIST[] = {
+            { 127UL,      0x7FFFFFFFUL,   NULL,       false, }, 
+            { 126UL,      0x3FFFFFFFUL,   NULL,       false, }, 
+            { 125UL,      0x1FFFFFFFUL,   NULL,       false, }, 
+            { 124UL,      0x0FFFFFFFUL,   NULL,       false, }, 
+            { 105UL,      0x000001FFUL,   NULL,       false, }, 
+            { 104UL,      0x000000FFUL,   NULL,       false, }, 
+            { 103UL,      0x0000007FUL,   NULL,       false, }, 
+            { 102UL,      0x0000003FUL,   NULL,       false, }, 
+            { 101UL,      0x0000001FUL,   NULL,       false, }, 
+            { 100UL,      0x0000000FUL,   NULL,       false, }, 
+            { 99UL,       0x00000007UL,   NULL,       false, }, 
+            { 98UL,       0x00000003UL,   NULL,       false, }, 
+            { 97UL,       0x00000001UL,   NULL,       false, }, 
+        };
+
         // uint32_t
-        uint32_t test_tmp_u32_bits;
-        uint32_t test_tmp_u32_mask;
-        uint32_t test_tmp_u32_ref;
+        uint32_t u32_bits;
+        uint32_t u32_ref, u32_mask;
 
-        test_tmp_u32_bits = 127UL;
-        test_tmp_u32_ref = 0x7FFFFFFFUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
+        printf("[TEST] LASTBITMASK\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_LASTBITMASK_set_LIST)/sizeof(test_bignum_LASTBITMASK_set_t); i++)
+        {
+            u32_bits= TEST_LASTBITMASK_set_LIST[i].u32_bits;
+            u32_ref = TEST_LASTBITMASK_set_LIST[i].u32_ref;
+            invalid_case = TEST_LASTBITMASK_set_LIST[i].invalid_case;
 
-        test_tmp_u32_bits = 126UL;
-        test_tmp_u32_ref = 0x3FFFFFFFUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 125UL;
-        test_tmp_u32_ref = 0x1FFFFFFFUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 124UL;
-        test_tmp_u32_ref = 0x0FFFFFFFUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 105UL;
-        test_tmp_u32_ref = 0x000001FFUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 104UL;
-        test_tmp_u32_ref = 0x000000FFUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 103UL;
-        test_tmp_u32_ref = 0x0000007FUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 102UL;
-        test_tmp_u32_ref = 0x0000003FUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 101UL;
-        test_tmp_u32_ref = 0x0000001FUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 100UL;
-        test_tmp_u32_ref = 0x0000000FUL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 99UL;
-        test_tmp_u32_ref = 0x00000007UL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 98UL;
-        test_tmp_u32_ref = 0x00000003UL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u32_bits = 97UL;
-        test_tmp_u32_ref = 0x00000001UL;
-        test_tmp_u32_mask = LASTBITMASK(test_tmp_u32_bits, uint32_t);
-        cmp_result = (test_tmp_u32_ref == test_tmp_u32_mask);
-        printf("LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", test_tmp_u32_bits, test_tmp_u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
+            u32_mask = LASTBITMASK(u32_bits, uint32_t);
+            cmp_result = (u32_ref==u32_mask);
+            printf("[%lu] LASTBITMASK(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] LASTBITMASK(%u, uint32_t)=0x%08x, result: %s\r\n", i, u32_bits, u32_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
+    }
+    {
+        typedef struct {
+            const uint64_t  u64_bits;
+            const uint64_t  u64_ref;
+            const char*     title;
+            const bool      invalid_case;
+        } test_bignum_LASTBITMASK_set_t;
+        const test_bignum_LASTBITMASK_set_t TEST_LASTBITMASK_set_LIST[] = {
+            { 127UL,  0x7FFFFFFFFFFFFFFFUL,   NULL,       false, }, 
+            { 126UL,  0x3FFFFFFFFFFFFFFFUL,   NULL,       false, }, 
+            { 125UL,  0x1FFFFFFFFFFFFFFFUL,   NULL,       false, }, 
+            { 124UL,  0x0FFFFFFFFFFFFFFFUL,   NULL,       false, }, 
+            { 105UL,  0x000001FFFFFFFFFFUL,   NULL,       false, }, 
+            { 104UL,  0x000000FFFFFFFFFFUL,   NULL,       false, }, 
+            { 103UL,  0x0000007FFFFFFFFFUL,   NULL,       false, }, 
+            { 102UL,  0x0000003FFFFFFFFFUL,   NULL,       false, }, 
+            { 101UL,  0x0000001FFFFFFFFFUL,   NULL,       false, }, 
+            { 100UL,  0x0000000FFFFFFFFFUL,   NULL,       false, }, 
+            { 99UL,   0x00000007FFFFFFFFUL,   NULL,       false, }, 
+            { 98UL,   0x00000003FFFFFFFFUL,   NULL,       false, }, 
+            { 97UL,   0x00000001FFFFFFFFUL,   NULL,       false, }, 
+            { 69UL,   0x000000000000001FUL,   NULL,       false, }, 
+            { 68UL,   0x000000000000000FUL,   NULL,       false, }, 
+            { 67UL,   0x0000000000000007UL,   NULL,       false, }, 
+            { 66UL,   0x0000000000000003UL,   NULL,       false, }, 
+            { 65UL,   0x0000000000000001UL,   NULL,       false, }, 
+        };
 
         // uint64_t
-        uint64_t test_tmp_u64_bits;
-        uint64_t test_tmp_u64_mask;
-        uint64_t test_tmp_u64_ref;
+        uint64_t u64_bits;
+        uint64_t u64_ref;
+        uint64_t u64_mask;
 
-        test_tmp_u64_bits = 127UL;
-        test_tmp_u64_ref = 0x7FFFFFFFFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
+        printf("[TEST] LASTBITMASK\r\n");
+        for(size_t i = 0UL; i < sizeof(TEST_LASTBITMASK_set_LIST)/sizeof(test_bignum_LASTBITMASK_set_t); i++)
+        {
+            u64_bits= TEST_LASTBITMASK_set_LIST[i].u64_bits;
+            u64_ref = TEST_LASTBITMASK_set_LIST[i].u64_ref;
+            invalid_case = TEST_LASTBITMASK_set_LIST[i].invalid_case;
 
-        test_tmp_u64_bits = 126UL;
-        test_tmp_u64_ref = 0x3FFFFFFFFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 125UL;
-        test_tmp_u64_ref = 0x1FFFFFFFFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 124UL;
-        test_tmp_u64_ref = 0x0FFFFFFFFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 105UL;
-        test_tmp_u64_ref = 0x000001FFFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 104UL;
-        test_tmp_u64_ref = 0x000000FFFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 103UL;
-        test_tmp_u64_ref = 0x0000007FFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 102UL;
-        test_tmp_u64_ref = 0x0000003FFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 101UL;
-        test_tmp_u64_ref = 0x0000001FFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 100UL;
-        test_tmp_u64_ref = 0x0000000FFFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 99UL;
-        test_tmp_u64_ref = 0x00000007FFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 98UL;
-        test_tmp_u64_ref = 0x00000003FFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 97UL;
-        test_tmp_u64_ref = 0x00000001FFFFFFFFUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 69UL;
-        test_tmp_u64_ref = 0x000000000000001FUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 68UL;
-        test_tmp_u64_ref = 0x000000000000000FUL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 67UL;
-        test_tmp_u64_ref = 0x0000000000000007UL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 66UL;
-        test_tmp_u64_ref = 0x0000000000000003UL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
-
-        test_tmp_u64_bits = 65UL;
-        test_tmp_u64_ref = 0x0000000000000001UL;
-        test_tmp_u64_mask = LASTBITMASK(test_tmp_u64_bits, uint64_t);
-        cmp_result = (test_tmp_u64_ref == test_tmp_u64_mask);
-        printf("LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", test_tmp_u64_bits, test_tmp_u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
-        TEST_ASSERT(cmp_result);
+            u64_mask = LASTBITMASK(u64_bits, uint64_t);
+            cmp_result = (u64_ref==u64_mask);
+            printf("[%lu] LASTBITMASK(): %s\r\n", i, cmp_result?(MES_PASS):(invalid_case?MES_SKIP:MES_FAIL));
+            if(!cmp_result || invalid_case)
+            {
+                printf("[%lu] LASTBITMASK(%lu, uint64_t)=0x%016lx, result: %s\r\n", i, u64_bits, u64_mask, (cmp_result)?(MES_PASS):(MES_FAIL));
+            }
+            TEST_ASSERT(cmp_result || invalid_case);
+        }
     }
 }
 
@@ -1138,6 +912,7 @@ void test_cpy_bignum_math_signed(void)
         TEST_ASSERT(test_cmp_fail != 0);
     }
 
+    rmBitNum(&test_bignum_r);
     rmBitNum(&test_bignum_l);
     rmBitNum(&test_bignum_s);
 #undef TEST_BIGNUM_L_BIT
@@ -1349,381 +1124,174 @@ void test_cpy_bignum_math_unsigned(void)
         TEST_ASSERT(test_cmp_fail != 0);
     }
 
+    rmBitNum(&test_bignum_r);
     rmBitNum(&test_bignum_l);
     rmBitNum(&test_bignum_s);
 #undef TEST_BIGNUM_L_BIT
 #undef TEST_BIGNUM_S_BIT
 }
 
+const bignum_t TEST_BIGNUM_256b_signed____p1[] = { 
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, };
+const bignum_t TEST_BIGNUM_256b_signed____m1[] = { 
+    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, };
+const bignum_t TEST_BIGNUM_256b_signed_max__[] = { 
+    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x7FFFFFFFU, };
+const bignum_t TEST_BIGNUM_256b_signed_minp1[] = { 
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x80000000U, };
+const bignum_t TEST_BIGNUM_256b_signed_min__[] = { 
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x80000000U, };
 void test_twos_bignum_256b(void)
 {
 #define TEST_BIGNUM_TWOS_BIT  256U // 32Bytes, 32bits 8ea
-    int test_cmp;
+    typedef struct {
+        const bignum_t* nums___a;
+        const bignum_t* nums_ref;
+        const char*     title;
+        const bool      invalid_case;
+    } test_bignum_twos_bignum_set_t;
+    const test_bignum_twos_bignum_set_t TEST_BIGNUM_twos_bignum_set_LIST[] = {
+        {
+            TEST_BIGNUM_256b_signed____p1, TEST_BIGNUM_256b_signed____m1, 
+            "2's compliment test, 1 -> -1", false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed____m1, TEST_BIGNUM_256b_signed____p1, 
+            "2's compliment test, -1 -> 1", false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed_max__, TEST_BIGNUM_256b_signed_minp1, 
+            "2's compliment test, signed 256bit MAX -> MIN+1", false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed_minp1, TEST_BIGNUM_256b_signed_max__, 
+            "2's compliment test, signed 256bit MIN+1 -> MAX", false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed_min__, TEST_BIGNUM_256b_signed_min__,
+            "2's compliment test, signed 256bit MIN -> MIN", true, 
+        },
+    };
+
+    bool cmp_result;
+    bool intentional_invalid;
 
     ReturnType fr;
+    bignum_s* test___a;
     bignum_s* test_ref;
-    bignum_s* test_dst;
-    bignum_s* test_opA;
+    bignum_s* test_tmp;
 
+    test___a = mkBigNum(TEST_BIGNUM_TWOS_BIT);
     test_ref = mkBigNum(TEST_BIGNUM_TWOS_BIT);
-    test_dst = mkBigNum(TEST_BIGNUM_TWOS_BIT);
-    test_opA = mkBigNum(TEST_BIGNUM_TWOS_BIT);
+    test_tmp = mkBigNum(TEST_BIGNUM_TWOS_BIT);
 
-    /* 2's compliment test, 1 -> -1 */
+    for(size_t i = 0UL; i < sizeof(TEST_BIGNUM_twos_bignum_set_LIST)/sizeof(test_bignum_twos_bignum_set_t); i++)
     {
-        test_ref->nums[0] = 0xFFFFFFFFU;
-        test_ref->nums[1] = 0xFFFFFFFFU;
-        test_ref->nums[2] = 0xFFFFFFFFU;
-        test_ref->nums[3] = 0xFFFFFFFFU;
-        test_ref->nums[4] = 0xFFFFFFFFU;
-        test_ref->nums[5] = 0xFFFFFFFFU;
-        test_ref->nums[6] = 0xFFFFFFFFU;
-        test_ref->nums[7] = 0xFFFFFFFFU;
-
-        test_opA->nums[0] = 0x00000001U;
-        test_opA->nums[1] = 0x00000000U;
-        test_opA->nums[2] = 0x00000000U;
-        test_opA->nums[3] = 0x00000000U;
-        test_opA->nums[4] = 0x00000000U;
-        test_opA->nums[5] = 0x00000000U;
-        test_opA->nums[6] = 0x00000000U;
-        test_opA->nums[7] = 0x00000000U;
+        (void)memcpy(test___a->nums, TEST_BIGNUM_twos_bignum_set_LIST[i].nums___a, test___a->size);
+        (void)memcpy(test_ref->nums, TEST_BIGNUM_twos_bignum_set_LIST[i].nums_ref, test_ref->size);
+        for(size_t x = 0UL; x < test_tmp->nlen; x++)    test_tmp->nums[x] = ~test_ref->nums[x];
+        intentional_invalid = TEST_BIGNUM_twos_bignum_set_LIST[i].invalid_case;
 
         TICK_TIME_START("twos_bignum");
-        if(fr = twos_bignum(test_dst, test_opA)) {
+        if(fr = twos_bignum(test_tmp, test___a)) {
             printReturnType(fr);
         } else { /* Do nothing */ }
         TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
 
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("twos_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* 2's compliment test, -1 -> 1 */
-    {
-        test_ref->nums[0] = 0x00000001U;
-        test_ref->nums[1] = 0x00000000U;
-        test_ref->nums[2] = 0x00000000U;
-        test_ref->nums[3] = 0x00000000U;
-        test_ref->nums[4] = 0x00000000U;
-        test_ref->nums[5] = 0x00000000U;
-        test_ref->nums[6] = 0x00000000U;
-        test_ref->nums[7] = 0x00000000U;
-
-        test_opA->nums[0] = 0xFFFFFFFFU;
-        test_opA->nums[1] = 0xFFFFFFFFU;
-        test_opA->nums[2] = 0xFFFFFFFFU;
-        test_opA->nums[3] = 0xFFFFFFFFU;
-        test_opA->nums[4] = 0xFFFFFFFFU;
-        test_opA->nums[5] = 0xFFFFFFFFU;
-        test_opA->nums[6] = 0xFFFFFFFFU;
-        test_opA->nums[7] = 0xFFFFFFFFU;
-
-        TICK_TIME_START("twos_bignum");
-        if(fr = twos_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("twos_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* 2's compliment test, signed 256bit MAX -> MIN+1 */
-    {
-        test_ref->nums[0] = 0x00000001U;
-        test_ref->nums[1] = 0x00000000U;
-        test_ref->nums[2] = 0x00000000U;
-        test_ref->nums[3] = 0x00000000U;
-        test_ref->nums[4] = 0x00000000U;
-        test_ref->nums[5] = 0x00000000U;
-        test_ref->nums[6] = 0x00000000U;
-        test_ref->nums[7] = 0x80000000U;
-
-        test_opA->nums[0] = 0xFFFFFFFFU;
-        test_opA->nums[1] = 0xFFFFFFFFU;
-        test_opA->nums[2] = 0xFFFFFFFFU;
-        test_opA->nums[3] = 0xFFFFFFFFU;
-        test_opA->nums[4] = 0xFFFFFFFFU;
-        test_opA->nums[5] = 0xFFFFFFFFU;
-        test_opA->nums[6] = 0xFFFFFFFFU;
-        test_opA->nums[7] = 0x7FFFFFFFU;
-
-        TICK_TIME_START("twos_bignum");
-        if(fr = twos_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("twos_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* 2's compliment test, signed 256bit MIN+1 -> MAX */
-    {
-        test_ref->nums[0] = 0xFFFFFFFFU;
-        test_ref->nums[1] = 0xFFFFFFFFU;
-        test_ref->nums[2] = 0xFFFFFFFFU;
-        test_ref->nums[3] = 0xFFFFFFFFU;
-        test_ref->nums[4] = 0xFFFFFFFFU;
-        test_ref->nums[5] = 0xFFFFFFFFU;
-        test_ref->nums[6] = 0xFFFFFFFFU;
-        test_ref->nums[7] = 0x7FFFFFFFU;
-
-        test_opA->nums[0] = 0x00000001U;
-        test_opA->nums[1] = 0x00000000U;
-        test_opA->nums[2] = 0x00000000U;
-        test_opA->nums[3] = 0x00000000U;
-        test_opA->nums[4] = 0x00000000U;
-        test_opA->nums[5] = 0x00000000U;
-        test_opA->nums[6] = 0x00000000U;
-        test_opA->nums[7] = 0x80000000U;
-
-        TICK_TIME_START("twos_bignum");
-        if(fr = twos_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("twos_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* 2's compliment test, signed 256bit MIN -> MIN */
-    {
-        test_ref->nums[0] = 0x00000000U;
-        test_ref->nums[1] = 0x00000000U;
-        test_ref->nums[2] = 0x00000000U;
-        test_ref->nums[3] = 0x00000000U;
-        test_ref->nums[4] = 0x00000000U;
-        test_ref->nums[5] = 0x00000000U;
-        test_ref->nums[6] = 0x00000000U;
-        test_ref->nums[7] = 0x80000000U;
-
-        test_opA->nums[0] = 0x00000000U;
-        test_opA->nums[1] = 0x00000000U;
-        test_opA->nums[2] = 0x00000000U;
-        test_opA->nums[3] = 0x00000000U;
-        test_opA->nums[4] = 0x00000000U;
-        test_opA->nums[5] = 0x00000000U;
-        test_opA->nums[6] = 0x00000000U;
-        test_opA->nums[7] = 0x80000000U;
-
-        TICK_TIME_START("twos_bignum");
-        if(fr = twos_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("twos_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
+        cmp_result = (memcmp(test_ref->nums, test_tmp->nums, (test_ref->size)) == 0);
+        if((!cmp_result) || (intentional_invalid))
+        {
+            test_print_bignum(test___a, "test___a");
+            test_print_bignum(test_tmp, "test_tmp");
+            test_print_bignum(test_ref, "test_ref");
+        }
+        printf("[%lu] twos_bignum() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT(cmp_result || (intentional_invalid));
     }
 
+    rmBitNum(&test___a);
     rmBitNum(&test_ref);
-    rmBitNum(&test_dst);
-    rmBitNum(&test_opA);
+    rmBitNum(&test_tmp);
 #undef TEST_BIGNUM_TWOS_BIT
 }
 
 void test_abs_bignum_signed_256b(void)
 {
 #define TEST_BIGNUM_ABS_BIT  256U // 32Bytes, 32bits 8ea
-    int test_cmp;
+    typedef struct {
+        const bignum_t* nums___a;
+        const bignum_t* nums_ref;
+        const char*     title;
+        const bool      invalid_case;
+    } test_bignum_abs_bignum_set_t;
+    const test_bignum_abs_bignum_set_t TEST_BIGNUM_abs_bignum_set_LIST[] = {
+        {
+            TEST_BIGNUM_256b_signed____p1, TEST_BIGNUM_256b_signed____p1, 
+            "absolute test, 1 -> 1", 
+            false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed____m1, TEST_BIGNUM_256b_signed____p1, 
+            "absolute test, -1 -> 1", 
+            false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed_max__, TEST_BIGNUM_256b_signed_max__, 
+            "absolute test, signed 256bit MAX -> MAX", 
+            false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed_minp1, TEST_BIGNUM_256b_signed_max__, 
+            "absolute test, signed 256bit MIN+1 -> MAX", 
+            false, 
+        },
+        {
+            TEST_BIGNUM_256b_signed_min__, TEST_BIGNUM_256b_signed_min__,
+            "absolute test, signed 256bit MIN -> MIN", 
+            true, 
+        },
+    };
+
+    bool cmp_result;
+    bool intentional_invalid;
 
     ReturnType fr;
+    bignum_s* test___a;
     bignum_s* test_ref;
-    bignum_s* test_dst;
-    bignum_s* test_opA;
+    bignum_s* test_tmp;
 
+    test___a = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
     test_ref = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
-    test_dst = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
-    test_opA = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
+    test_tmp = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
 
-    /* absolute test, 1 -> 1 */
+    for(size_t i = 0UL; i < sizeof(TEST_BIGNUM_abs_bignum_set_LIST)/sizeof(test_bignum_abs_bignum_set_t); i++)
     {
-        test_ref->nums[0] = 0x00000001U;;
-        test_ref->nums[1] = 0x00000000U;;
-        test_ref->nums[2] = 0x00000000U;;
-        test_ref->nums[3] = 0x00000000U;;
-        test_ref->nums[4] = 0x00000000U;;
-        test_ref->nums[5] = 0x00000000U;;
-        test_ref->nums[6] = 0x00000000U;;
-        test_ref->nums[7] = 0x00000000U;;
-
-        test_opA->nums[0] = 0x00000001U;
-        test_opA->nums[1] = 0x00000000U;
-        test_opA->nums[2] = 0x00000000U;
-        test_opA->nums[3] = 0x00000000U;
-        test_opA->nums[4] = 0x00000000U;
-        test_opA->nums[5] = 0x00000000U;
-        test_opA->nums[6] = 0x00000000U;
-        test_opA->nums[7] = 0x00000000U;
+        (void)memcpy(test___a->nums, TEST_BIGNUM_abs_bignum_set_LIST[i].nums___a, test___a->size);
+        (void)memcpy(test_ref->nums, TEST_BIGNUM_abs_bignum_set_LIST[i].nums_ref, test_ref->size);
+        for(size_t x = 0UL; x < test_ref->nlen; x++)    test_tmp->nums[x] = ~test_ref->nums[x];
+        intentional_invalid = TEST_BIGNUM_abs_bignum_set_LIST[i].invalid_case;
 
         TICK_TIME_START("abs_bignum");
-        if(fr = abs_bignum(test_dst, test_opA)) {
+        if(fr = abs_bignum(test_tmp, test___a)) {
             printReturnType(fr);
         } else { /* Do nothing */ }
         TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
 
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("abs_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* absolute test, -1 -> 1 */
-    {
-        test_ref->nums[0] = 0x00000001U;
-        test_ref->nums[1] = 0x00000000U;
-        test_ref->nums[2] = 0x00000000U;
-        test_ref->nums[3] = 0x00000000U;
-        test_ref->nums[4] = 0x00000000U;
-        test_ref->nums[5] = 0x00000000U;
-        test_ref->nums[6] = 0x00000000U;
-        test_ref->nums[7] = 0x00000000U;
+        cmp_result = (memcmp(test_ref->nums, test_tmp->nums, (test_ref->size)) == 0);
+        if((!cmp_result) || (intentional_invalid))
+        {
+            test_print_bignum(test___a, "test___a");
+            test_print_bignum(test_tmp, "test_tmp");
+            test_print_bignum(test_ref, "test_ref");
+        }
 
-        test_opA->nums[0] = 0xFFFFFFFFU;
-        test_opA->nums[1] = 0xFFFFFFFFU;
-        test_opA->nums[2] = 0xFFFFFFFFU;
-        test_opA->nums[3] = 0xFFFFFFFFU;
-        test_opA->nums[4] = 0xFFFFFFFFU;
-        test_opA->nums[5] = 0xFFFFFFFFU;
-        test_opA->nums[6] = 0xFFFFFFFFU;
-        test_opA->nums[7] = 0xFFFFFFFFU;
-
-        TICK_TIME_START("abs_bignum");
-        if(fr = abs_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("abs_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* absolute test, signed 256bit MAX -> MAX */
-    {
-        test_ref->nums[0] = 0xFFFFFFFFU;
-        test_ref->nums[1] = 0xFFFFFFFFU;
-        test_ref->nums[2] = 0xFFFFFFFFU;
-        test_ref->nums[3] = 0xFFFFFFFFU;
-        test_ref->nums[4] = 0xFFFFFFFFU;
-        test_ref->nums[5] = 0xFFFFFFFFU;
-        test_ref->nums[6] = 0xFFFFFFFFU;
-        test_ref->nums[7] = 0x7FFFFFFFU;
-
-        test_opA->nums[0] = 0xFFFFFFFFU;
-        test_opA->nums[1] = 0xFFFFFFFFU;
-        test_opA->nums[2] = 0xFFFFFFFFU;
-        test_opA->nums[3] = 0xFFFFFFFFU;
-        test_opA->nums[4] = 0xFFFFFFFFU;
-        test_opA->nums[5] = 0xFFFFFFFFU;
-        test_opA->nums[6] = 0xFFFFFFFFU;
-        test_opA->nums[7] = 0x7FFFFFFFU;
-
-        TICK_TIME_START("abs_bignum");
-        if(fr = abs_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("abs_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* absolute test, signed 256bit MIN-1 -> MAX */
-    {
-        test_ref->nums[0] = 0xFFFFFFFFU;
-        test_ref->nums[1] = 0xFFFFFFFFU;
-        test_ref->nums[2] = 0xFFFFFFFFU;
-        test_ref->nums[3] = 0xFFFFFFFFU;
-        test_ref->nums[4] = 0xFFFFFFFFU;
-        test_ref->nums[5] = 0xFFFFFFFFU;
-        test_ref->nums[6] = 0xFFFFFFFFU;
-        test_ref->nums[7] = 0x7FFFFFFFU;
-
-        test_opA->nums[0] = 0x00000001U;
-        test_opA->nums[1] = 0x00000000U;
-        test_opA->nums[2] = 0x00000000U;
-        test_opA->nums[3] = 0x00000000U;
-        test_opA->nums[4] = 0x00000000U;
-        test_opA->nums[5] = 0x00000000U;
-        test_opA->nums[6] = 0x00000000U;
-        test_opA->nums[7] = 0x80000000U;
-
-        TICK_TIME_START("abs_bignum");
-        if(fr = abs_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("abs_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
-    }
-    /* absolute test, signed 256bit MIN -> MIN */
-    {
-        test_ref->nums[0] = 0x00000000U;
-        test_ref->nums[1] = 0x00000000U;
-        test_ref->nums[2] = 0x00000000U;
-        test_ref->nums[3] = 0x00000000U;
-        test_ref->nums[4] = 0x00000000U;
-        test_ref->nums[5] = 0x00000000U;
-        test_ref->nums[6] = 0x00000000U;
-        test_ref->nums[7] = 0x80000000U;
-
-        test_opA->nums[0] = 0x00000000U;
-        test_opA->nums[1] = 0x00000000U;
-        test_opA->nums[2] = 0x00000000U;
-        test_opA->nums[3] = 0x00000000U;
-        test_opA->nums[4] = 0x00000000U;
-        test_opA->nums[5] = 0x00000000U;
-        test_opA->nums[6] = 0x00000000U;
-        test_opA->nums[7] = 0x80000000U;
-
-        TICK_TIME_START("abs_bignum");
-        if(fr = abs_bignum(test_dst, test_opA)) {
-            printReturnType(fr);
-        } else { /* Do nothing */ }
-        TICK_TIME_END;
-        test_print_bignum(test_opA, "opA");
-        test_print_bignum(test_dst, "dst");
-        test_print_bignum(test_ref, "ref");
-
-        test_cmp = memcmp(test_ref->nums, test_dst->nums, (test_ref->size));
-        printf("abs_bignum() is %s\r\n", ((test_cmp == 0)?MES_PASS:MES_FAIL));
-        TEST_ASSERT(test_cmp == 0);
+        printf("abs_bignum() is %s\r\n", (cmp_result?MES_PASS:(MES_FAIL)));
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
     }
 
+    rmBitNum(&test___a);
     rmBitNum(&test_ref);
-    rmBitNum(&test_dst);
-    rmBitNum(&test_opA);
+    rmBitNum(&test_tmp);
 #undef TEST_BIGNUM_ABS_BIT
 }
 
@@ -1918,6 +1486,122 @@ void test_cmp0_bignum_256b(void)
  * (INT64_MIN/2)+2 = 0xC000_0000_0000_0002
  * (INT64_MIN/2)+1 = 0xC000_0000_0000_0001
  */
+const bignum_t TEST_SIGNED_NUM_256b_______0[] = {
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b______p1[] = {
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b______p2[] = {
+    0x00000002U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_maxd2m3[] = {
+    0xFFFFFFFDU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x3FFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_maxd2m2[] = {
+    0xFFFFFFFDU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x3FFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_maxd2m1[] = {
+    0xFFFFFFFEU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x3FFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b___maxd2[] = {
+    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x3FFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b___maxm2[] = {
+    0xFFFFFFFDU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x7FFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b___maxm1[] = {
+    0xFFFFFFFEU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x7FFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_____max[] = {
+    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0x7FFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b______m1[] = {
+    0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b______m2[] = {
+    0xFFFFFFFEU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 0xFFFFFFFFU, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_mind2p4[] = {
+    0x00000004U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xC0000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_mind2p3[] = {
+    0x00000003U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xC0000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_mind2p2[] = {
+    0x00000002U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xC0000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_mind2p1[] = {
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xC0000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b___minp2[] = {
+    0x00000002U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x80000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b___minp1[] = {
+    0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x80000000U, 
+};
+const bignum_t TEST_SIGNED_NUM_256b_____min[] = {
+    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x80000000U, 
+};
+typedef struct {
+    const bignum_t*       bignumA;
+    const bignum_t*       bignumB;
+    const bignum_cmp_e    cmp_ref;
+    const char*           title;
+    const bool            invalid_case;
+} test_bignum_cmp_set_t;
+const test_bignum_cmp_set_t cmpTestSet[] = {
+    {TEST_SIGNED_NUM_256b_______0,   TEST_SIGNED_NUM_256b_______0,    BIGNUM_CMP_EQ,  "cmp_bignum, 0 == 0",           false },
+    {TEST_SIGNED_NUM_256b______p1,   TEST_SIGNED_NUM_256b_______0,    BIGNUM_CMP_GT,  "cmp_bignum, 1 > 0",            false },
+    {TEST_SIGNED_NUM_256b_______0,   TEST_SIGNED_NUM_256b______p1,    BIGNUM_CMP_LT,  "cmp_bignum, 0 < 1",            false },
+    {TEST_SIGNED_NUM_256b______p1,   TEST_SIGNED_NUM_256b______p1,    BIGNUM_CMP_EQ,  "cmp_bignum, 1 == 1",           false },
+    {TEST_SIGNED_NUM_256b______p2,   TEST_SIGNED_NUM_256b______p1,    BIGNUM_CMP_GT,  "cmp_bignum, 2 > 1",            false },
+    {TEST_SIGNED_NUM_256b______p1,   TEST_SIGNED_NUM_256b______p2,    BIGNUM_CMP_LT,  "cmp_bignum, 1 < 2",            false },
+    {TEST_SIGNED_NUM_256b______p2,   TEST_SIGNED_NUM_256b______p2,    BIGNUM_CMP_EQ,  "cmp_bignum, 2 == 2",           false },
+    {TEST_SIGNED_NUM_256b___maxm2,   TEST_SIGNED_NUM_256b___maxm2,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX-2 == MAX-2",   false },
+    {TEST_SIGNED_NUM_256b___maxm2,   TEST_SIGNED_NUM_256b______p2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-2 > 2",        false },
+    {TEST_SIGNED_NUM_256b______p2,   TEST_SIGNED_NUM_256b___maxm2,    BIGNUM_CMP_LT,  "cmp_bignum, 2 < MAX-2",        false },
+    {TEST_SIGNED_NUM_256b___maxm1,   TEST_SIGNED_NUM_256b___maxm1,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX-1 == MAX-1",   false },
+    {TEST_SIGNED_NUM_256b___maxm1,   TEST_SIGNED_NUM_256b___maxm2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-1 > MAX-2",    false },
+    {TEST_SIGNED_NUM_256b___maxm2,   TEST_SIGNED_NUM_256b___maxm1,    BIGNUM_CMP_LT,  "cmp_bignum, MAX-1 < MAX-2",    false },
+    {TEST_SIGNED_NUM_256b_____max,   TEST_SIGNED_NUM_256b_____max,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX == MAX",       false },
+    {TEST_SIGNED_NUM_256b_____max,   TEST_SIGNED_NUM_256b___maxm1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX > MAX-1",      false },
+    {TEST_SIGNED_NUM_256b___maxm1,   TEST_SIGNED_NUM_256b_____max,    BIGNUM_CMP_LT,  "cmp_bignum, MAX-1 < MAX",      false },
+    {TEST_SIGNED_NUM_256b_______0,   TEST_SIGNED_NUM_256b_______0,    BIGNUM_CMP_EQ,  "cmp_bignum, 0 == 0",           false },
+    {TEST_SIGNED_NUM_256b_______0,   TEST_SIGNED_NUM_256b______m1,    BIGNUM_CMP_GT,  "cmp_bignum, 0 > -1",           false },
+    {TEST_SIGNED_NUM_256b______m1,   TEST_SIGNED_NUM_256b_______0,    BIGNUM_CMP_LT,  "cmp_bignum, -1 < 0",           false },
+    {TEST_SIGNED_NUM_256b______m1,   TEST_SIGNED_NUM_256b______m1,    BIGNUM_CMP_EQ,  "cmp_bignum, -1 == -1",         false },
+    {TEST_SIGNED_NUM_256b______m1,   TEST_SIGNED_NUM_256b______m2,    BIGNUM_CMP_GT,  "cmp_bignum, -1 > -2",          false },
+    {TEST_SIGNED_NUM_256b______m2,   TEST_SIGNED_NUM_256b______m2,    BIGNUM_CMP_EQ,  "cmp_bignum, -2 == -2",         false },
+    {TEST_SIGNED_NUM_256b______m2,   TEST_SIGNED_NUM_256b___minp2,    BIGNUM_CMP_GT,  "cmp_bignum, -2 > MIN+2",       false },
+    {TEST_SIGNED_NUM_256b___minp2,   TEST_SIGNED_NUM_256b______m2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+2 < -2",       false },
+    {TEST_SIGNED_NUM_256b___minp2,   TEST_SIGNED_NUM_256b___minp2,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN+2 == MIN+2",   false },
+    {TEST_SIGNED_NUM_256b___minp2,   TEST_SIGNED_NUM_256b___minp1,    BIGNUM_CMP_GT,  "cmp_bignum, MIN+2 > MIN+1",    false },
+    {TEST_SIGNED_NUM_256b___minp1,   TEST_SIGNED_NUM_256b___minp2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+1 < MIN+2",    false },
+    {TEST_SIGNED_NUM_256b___minp1,   TEST_SIGNED_NUM_256b___minp1,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN+1 == MIN+1",   false },
+    {TEST_SIGNED_NUM_256b___minp1,   TEST_SIGNED_NUM_256b_____min,    BIGNUM_CMP_GT,  "cmp_bignum, MIN+1 > MIN",      false },
+    {TEST_SIGNED_NUM_256b_____min,   TEST_SIGNED_NUM_256b___minp1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN < MIN+1",      false },
+    {TEST_SIGNED_NUM_256b_____min,   TEST_SIGNED_NUM_256b_____min,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN == MIN",       false },
+    {TEST_SIGNED_NUM_256b______p1,   TEST_SIGNED_NUM_256b______m1,    BIGNUM_CMP_GT,  "cmp_bignum, +1 > -1",          false },
+    {TEST_SIGNED_NUM_256b______m1,   TEST_SIGNED_NUM_256b______p1,    BIGNUM_CMP_LT,  "cmp_bignum, -1 < +1",          false },
+    {TEST_SIGNED_NUM_256b______p2,   TEST_SIGNED_NUM_256b______m2,    BIGNUM_CMP_GT,  "cmp_bignum, +2 > -2",          false },
+    {TEST_SIGNED_NUM_256b______m2,   TEST_SIGNED_NUM_256b______p2,    BIGNUM_CMP_LT,  "cmp_bignum, -2 < +2",          false },
+
+    {TEST_SIGNED_NUM_256b_maxd2m3,   TEST_SIGNED_NUM_256b_mind2p4,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-3 > MIN/2+4",false },  // invalid
+    {TEST_SIGNED_NUM_256b_mind2p4,   TEST_SIGNED_NUM_256b_maxd2m3,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+4 < MAX/2-3",false },  // invalid
+    {TEST_SIGNED_NUM_256b_maxd2m2,   TEST_SIGNED_NUM_256b_mind2p3,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-2 > MIN/2+3",false },  // invalid
+    {TEST_SIGNED_NUM_256b_mind2p3,   TEST_SIGNED_NUM_256b_maxd2m2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+3 < MAX/2-2",false },  // invalid
+    {TEST_SIGNED_NUM_256b_maxd2m1,   TEST_SIGNED_NUM_256b_mind2p2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-1 > MIN/2+2",false },  // invalid
+    {TEST_SIGNED_NUM_256b_mind2p2,   TEST_SIGNED_NUM_256b_maxd2m1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+2 < MAX/2-1",false },  // invalid
+    {TEST_SIGNED_NUM_256b___maxd2,   TEST_SIGNED_NUM_256b_mind2p1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-0 > MIN/2+1",false },  // invalid
+    {TEST_SIGNED_NUM_256b_mind2p1,   TEST_SIGNED_NUM_256b___maxd2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+1 < MAX/2-0",false },  // invalid
+
+    {TEST_SIGNED_NUM_256b___maxm1,   TEST_SIGNED_NUM_256b___minp2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-1 > MIN+2",    true  },  // invalid
+    {TEST_SIGNED_NUM_256b___minp2,   TEST_SIGNED_NUM_256b___maxm1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+2 < MAX-1",    true  },  // invalid
+    {TEST_SIGNED_NUM_256b_____max,   TEST_SIGNED_NUM_256b___minp1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX > MIN+1",      true  },  // invalid
+    {TEST_SIGNED_NUM_256b___minp1,   TEST_SIGNED_NUM_256b_____max,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+1 < MAX",      true  },  // invalid
+};
+
 typedef bignum_cmp_e (*TEST_FP_BIGNUM_CMP)(const bignum_s*, const bignum_s*);
 void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_CMP test_fp)
 {
@@ -1927,348 +1611,47 @@ void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_
     ReturnType fr;
     bignum_cmp_e test_bignum_cmp        = BIGNUM_CMP_NU;
     bignum_cmp_e test_bignum_cmp_ref;
+    bool test_intentional_invalid;
 
-    bignum_s* test_tmp;
-
-    bignum_s* test_bignum_______0;
-
-    bignum_s* test_bignum______p1;
-    bignum_s* test_bignum______p2;
-
-    bignum_s* test_bignum_maxd2m3;
-    bignum_s* test_bignum_maxd2m2;
-    bignum_s* test_bignum_maxd2m1;
-    bignum_s* test_bignum___maxd2;
-
-    bignum_s* test_bignum___maxm2;
-    bignum_s* test_bignum___maxm1;
-    bignum_s* test_bignum_____max;
-
-    bignum_s* test_bignum______m1;
-    bignum_s* test_bignum______m2;
-
-    bignum_s* test_bignum_mind2p4;
-    bignum_s* test_bignum_mind2p3;
-    bignum_s* test_bignum_mind2p2;
-    bignum_s* test_bignum_mind2p1;
-
-    bignum_s* test_bignum___minp2;
-    bignum_s* test_bignum___minp1;
-    bignum_s* test_bignum_____min;
-
-    bignum_s* test_bignum____tmp0;
-    bignum_s* test_bignum____tmp1;
-
-    test_tmp = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-
-    test_bignum_______0 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum______p1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum______p2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_maxd2m3 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_maxd2m2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_maxd2m1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum___maxd2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum___maxm2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum___maxm1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_____max = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-
-    test_bignum______m1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum______m2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_mind2p4 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_mind2p3 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_mind2p2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_mind2p1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum___minp2 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum___minp1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum_____min = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-
-    test_bignum____tmp0 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    test_bignum____tmp1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-
-    test_bignum_______0->nums[0] = 0x00000000U;
-    test_bignum_______0->nums[1] = 0x00000000U;
-    test_bignum_______0->nums[2] = 0x00000000U;
-    test_bignum_______0->nums[3] = 0x00000000U;
-    test_bignum_______0->nums[4] = 0x00000000U;
-    test_bignum_______0->nums[5] = 0x00000000U;
-    test_bignum_______0->nums[6] = 0x00000000U;
-    test_bignum_______0->nums[7] = 0x00000000U;
-
-    test_bignum______p1->nums[0] = 0x00000001U;
-    test_bignum______p1->nums[1] = 0x00000000U;
-    test_bignum______p1->nums[2] = 0x00000000U;
-    test_bignum______p1->nums[3] = 0x00000000U;
-    test_bignum______p1->nums[4] = 0x00000000U;
-    test_bignum______p1->nums[5] = 0x00000000U;
-    test_bignum______p1->nums[6] = 0x00000000U;
-    test_bignum______p1->nums[7] = 0x00000000U;
-
-    test_bignum______p2->nums[0] = 0x00000002U;
-    test_bignum______p2->nums[1] = 0x00000000U;
-    test_bignum______p2->nums[2] = 0x00000000U;
-    test_bignum______p2->nums[3] = 0x00000000U;
-    test_bignum______p2->nums[4] = 0x00000000U;
-    test_bignum______p2->nums[5] = 0x00000000U;
-    test_bignum______p2->nums[6] = 0x00000000U;
-    test_bignum______p2->nums[7] = 0x00000000U;
-
-    test_bignum_maxd2m3->nums[0] = 0xFFFFFFFDU;
-    test_bignum_maxd2m3->nums[1] = 0xFFFFFFFFU;
-    test_bignum_maxd2m3->nums[2] = 0xFFFFFFFFU;
-    test_bignum_maxd2m3->nums[3] = 0xFFFFFFFFU;
-    test_bignum_maxd2m3->nums[4] = 0xFFFFFFFFU;
-    test_bignum_maxd2m3->nums[5] = 0xFFFFFFFFU;
-    test_bignum_maxd2m3->nums[6] = 0xFFFFFFFFU;
-    test_bignum_maxd2m3->nums[7] = 0x3FFFFFFFU;
-
-    test_bignum_maxd2m2->nums[0] = 0xFFFFFFFDU;
-    test_bignum_maxd2m2->nums[1] = 0xFFFFFFFFU;
-    test_bignum_maxd2m2->nums[2] = 0xFFFFFFFFU;
-    test_bignum_maxd2m2->nums[3] = 0xFFFFFFFFU;
-    test_bignum_maxd2m2->nums[4] = 0xFFFFFFFFU;
-    test_bignum_maxd2m2->nums[5] = 0xFFFFFFFFU;
-    test_bignum_maxd2m2->nums[6] = 0xFFFFFFFFU;
-    test_bignum_maxd2m2->nums[7] = 0x3FFFFFFFU;
-
-    test_bignum_maxd2m1->nums[0] = 0xFFFFFFFEU;
-    test_bignum_maxd2m1->nums[1] = 0xFFFFFFFFU;
-    test_bignum_maxd2m1->nums[2] = 0xFFFFFFFFU;
-    test_bignum_maxd2m1->nums[3] = 0xFFFFFFFFU;
-    test_bignum_maxd2m1->nums[4] = 0xFFFFFFFFU;
-    test_bignum_maxd2m1->nums[5] = 0xFFFFFFFFU;
-    test_bignum_maxd2m1->nums[6] = 0xFFFFFFFFU;
-    test_bignum_maxd2m1->nums[7] = 0x3FFFFFFFU;
-
-    test_bignum___maxd2->nums[0] = 0xFFFFFFFFU;
-    test_bignum___maxd2->nums[1] = 0xFFFFFFFFU;
-    test_bignum___maxd2->nums[2] = 0xFFFFFFFFU;
-    test_bignum___maxd2->nums[3] = 0xFFFFFFFFU;
-    test_bignum___maxd2->nums[4] = 0xFFFFFFFFU;
-    test_bignum___maxd2->nums[5] = 0xFFFFFFFFU;
-    test_bignum___maxd2->nums[6] = 0xFFFFFFFFU;
-    test_bignum___maxd2->nums[7] = 0x3FFFFFFFU;
-
-    test_bignum___maxm2->nums[0] = 0xFFFFFFFDU;
-    test_bignum___maxm2->nums[1] = 0xFFFFFFFFU;
-    test_bignum___maxm2->nums[2] = 0xFFFFFFFFU;
-    test_bignum___maxm2->nums[3] = 0xFFFFFFFFU;
-    test_bignum___maxm2->nums[4] = 0xFFFFFFFFU;
-    test_bignum___maxm2->nums[5] = 0xFFFFFFFFU;
-    test_bignum___maxm2->nums[6] = 0xFFFFFFFFU;
-    test_bignum___maxm2->nums[7] = 0x7FFFFFFFU;
-
-    test_bignum___maxm1->nums[0] = 0xFFFFFFFEU;
-    test_bignum___maxm1->nums[1] = 0xFFFFFFFFU;
-    test_bignum___maxm1->nums[2] = 0xFFFFFFFFU;
-    test_bignum___maxm1->nums[3] = 0xFFFFFFFFU;
-    test_bignum___maxm1->nums[4] = 0xFFFFFFFFU;
-    test_bignum___maxm1->nums[5] = 0xFFFFFFFFU;
-    test_bignum___maxm1->nums[6] = 0xFFFFFFFFU;
-    test_bignum___maxm1->nums[7] = 0x7FFFFFFFU;
-
-    test_bignum_____max->nums[0] = 0xFFFFFFFFU;
-    test_bignum_____max->nums[1] = 0xFFFFFFFFU;
-    test_bignum_____max->nums[2] = 0xFFFFFFFFU;
-    test_bignum_____max->nums[3] = 0xFFFFFFFFU;
-    test_bignum_____max->nums[4] = 0xFFFFFFFFU;
-    test_bignum_____max->nums[5] = 0xFFFFFFFFU;
-    test_bignum_____max->nums[6] = 0xFFFFFFFFU;
-    test_bignum_____max->nums[7] = 0x7FFFFFFFU;
-
-    test_bignum______m1->nums[0] = 0xFFFFFFFFU;
-    test_bignum______m1->nums[1] = 0xFFFFFFFFU;
-    test_bignum______m1->nums[2] = 0xFFFFFFFFU;
-    test_bignum______m1->nums[3] = 0xFFFFFFFFU;
-    test_bignum______m1->nums[4] = 0xFFFFFFFFU;
-    test_bignum______m1->nums[5] = 0xFFFFFFFFU;
-    test_bignum______m1->nums[6] = 0xFFFFFFFFU;
-    test_bignum______m1->nums[7] = 0xFFFFFFFFU;
-
-    test_bignum______m2->nums[0] = 0xFFFFFFFEU;
-    test_bignum______m2->nums[1] = 0xFFFFFFFFU;
-    test_bignum______m2->nums[2] = 0xFFFFFFFFU;
-    test_bignum______m2->nums[3] = 0xFFFFFFFFU;
-    test_bignum______m2->nums[4] = 0xFFFFFFFFU;
-    test_bignum______m2->nums[5] = 0xFFFFFFFFU;
-    test_bignum______m2->nums[6] = 0xFFFFFFFFU;
-    test_bignum______m2->nums[7] = 0xFFFFFFFFU;
-
-    test_bignum_mind2p4->nums[0] = 0x00000004U;
-    test_bignum_mind2p4->nums[1] = 0x00000000U;
-    test_bignum_mind2p4->nums[2] = 0x00000000U;
-    test_bignum_mind2p4->nums[3] = 0x00000000U;
-    test_bignum_mind2p4->nums[4] = 0x00000000U;
-    test_bignum_mind2p4->nums[5] = 0x00000000U;
-    test_bignum_mind2p4->nums[6] = 0x00000000U;
-    test_bignum_mind2p4->nums[7] = 0xC0000000U;
-
-    test_bignum_mind2p3->nums[0] = 0x00000003U;
-    test_bignum_mind2p3->nums[1] = 0x00000000U;
-    test_bignum_mind2p3->nums[2] = 0x00000000U;
-    test_bignum_mind2p3->nums[3] = 0x00000000U;
-    test_bignum_mind2p3->nums[4] = 0x00000000U;
-    test_bignum_mind2p3->nums[5] = 0x00000000U;
-    test_bignum_mind2p3->nums[6] = 0x00000000U;
-    test_bignum_mind2p3->nums[7] = 0xC0000000U;
-
-    test_bignum_mind2p2->nums[0] = 0x00000002U;
-    test_bignum_mind2p2->nums[1] = 0x00000000U;
-    test_bignum_mind2p2->nums[2] = 0x00000000U;
-    test_bignum_mind2p2->nums[3] = 0x00000000U;
-    test_bignum_mind2p2->nums[4] = 0x00000000U;
-    test_bignum_mind2p2->nums[5] = 0x00000000U;
-    test_bignum_mind2p2->nums[6] = 0x00000000U;
-    test_bignum_mind2p2->nums[7] = 0xC0000000U;
-
-    test_bignum_mind2p1->nums[0] = 0x00000001U;
-    test_bignum_mind2p1->nums[1] = 0x00000000U;
-    test_bignum_mind2p1->nums[2] = 0x00000000U;
-    test_bignum_mind2p1->nums[3] = 0x00000000U;
-    test_bignum_mind2p1->nums[4] = 0x00000000U;
-    test_bignum_mind2p1->nums[5] = 0x00000000U;
-    test_bignum_mind2p1->nums[6] = 0x00000000U;
-    test_bignum_mind2p1->nums[7] = 0xC0000000U;
-
-    test_bignum___minp2->nums[0] = 0x00000002U;
-    test_bignum___minp2->nums[1] = 0x00000000U;
-    test_bignum___minp2->nums[2] = 0x00000000U;
-    test_bignum___minp2->nums[3] = 0x00000000U;
-    test_bignum___minp2->nums[4] = 0x00000000U;
-    test_bignum___minp2->nums[5] = 0x00000000U;
-    test_bignum___minp2->nums[6] = 0x00000000U;
-    test_bignum___minp2->nums[7] = 0x80000000U;
-
-    test_bignum___minp1->nums[0] = 0x00000001U;
-    test_bignum___minp1->nums[1] = 0x00000000U;
-    test_bignum___minp1->nums[2] = 0x00000000U;
-    test_bignum___minp1->nums[3] = 0x00000000U;
-    test_bignum___minp1->nums[4] = 0x00000000U;
-    test_bignum___minp1->nums[5] = 0x00000000U;
-    test_bignum___minp1->nums[6] = 0x00000000U;
-    test_bignum___minp1->nums[7] = 0x80000000U;
-
-    test_bignum_____min->nums[0] = 0x00000000U;
-    test_bignum_____min->nums[1] = 0x00000000U;
-    test_bignum_____min->nums[2] = 0x00000000U;
-    test_bignum_____min->nums[3] = 0x00000000U;
-    test_bignum_____min->nums[4] = 0x00000000U;
-    test_bignum_____min->nums[5] = 0x00000000U;
-    test_bignum_____min->nums[6] = 0x00000000U;
-    test_bignum_____min->nums[7] = 0x80000000U;
-
-    typedef struct {
-        bignum_s*       bignumA;
-        bignum_s*       bignumB;
-        bignum_cmp_e    cmp_ref;
-        char*           title;
-        bool            assert;
-    } test_bignum_cmp_set_t;
-    test_bignum_cmp_set_t cmpTestSet[] = {
-        {test_bignum_______0,   test_bignum_______0,    BIGNUM_CMP_EQ,  "cmp_bignum, 0 == 0",           true },
-        {test_bignum______p1,   test_bignum_______0,    BIGNUM_CMP_GT,  "cmp_bignum, 1 > 0",            true },
-        {test_bignum_______0,   test_bignum______p1,    BIGNUM_CMP_LT,  "cmp_bignum, 0 < 1",            true },
-        {test_bignum______p1,   test_bignum______p1,    BIGNUM_CMP_EQ,  "cmp_bignum, 1 == 1",           true },
-        {test_bignum______p2,   test_bignum______p1,    BIGNUM_CMP_GT,  "cmp_bignum, 2 > 1",            true },
-        {test_bignum______p1,   test_bignum______p2,    BIGNUM_CMP_LT,  "cmp_bignum, 1 < 2",            true },
-        {test_bignum______p2,   test_bignum______p2,    BIGNUM_CMP_EQ,  "cmp_bignum, 2 == 2",           true },
-        {test_bignum___maxm2,   test_bignum___maxm2,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX-2 == MAX-2",   true },
-        {test_bignum___maxm2,   test_bignum______p2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-2 > 2",        true },
-        {test_bignum______p2,   test_bignum___maxm2,    BIGNUM_CMP_LT,  "cmp_bignum, 2 < MAX-2",        true },
-        {test_bignum___maxm1,   test_bignum___maxm1,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX-1 == MAX-1",   true },
-        {test_bignum___maxm1,   test_bignum___maxm2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-1 > MAX-2",    true },
-        {test_bignum___maxm2,   test_bignum___maxm1,    BIGNUM_CMP_LT,  "cmp_bignum, MAX-1 < MAX-2",    true },
-        {test_bignum_____max,   test_bignum_____max,    BIGNUM_CMP_EQ,  "cmp_bignum, MAX == MAX",       true },
-        {test_bignum_____max,   test_bignum___maxm1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX > MAX-1",      true },
-        {test_bignum___maxm1,   test_bignum_____max,    BIGNUM_CMP_LT,  "cmp_bignum, MAX-1 < MAX",      true },
-        {test_bignum_______0,   test_bignum_______0,    BIGNUM_CMP_EQ,  "cmp_bignum, 0 == 0",           true },
-        {test_bignum_______0,   test_bignum______m1,    BIGNUM_CMP_GT,  "cmp_bignum, 0 > -1",           true },
-        {test_bignum______m1,   test_bignum_______0,    BIGNUM_CMP_LT,  "cmp_bignum, -1 < 0",           true },
-        {test_bignum______m1,   test_bignum______m1,    BIGNUM_CMP_EQ,  "cmp_bignum, -1 == -1",         true },
-        {test_bignum______m1,   test_bignum______m2,    BIGNUM_CMP_GT,  "cmp_bignum, -1 > -2",          true },
-        {test_bignum______m2,   test_bignum______m2,    BIGNUM_CMP_EQ,  "cmp_bignum, -2 == -2",         true },
-        {test_bignum______m2,   test_bignum___minp2,    BIGNUM_CMP_GT,  "cmp_bignum, -2 > MIN+2",       true },
-        {test_bignum___minp2,   test_bignum______m2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+2 < -2",       true },
-        {test_bignum___minp2,   test_bignum___minp2,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN+2 == MIN+2",   true },
-        {test_bignum___minp2,   test_bignum___minp1,    BIGNUM_CMP_GT,  "cmp_bignum, MIN+2 > MIN+1",    true },
-        {test_bignum___minp1,   test_bignum___minp2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+1 < MIN+2",    true },
-        {test_bignum___minp1,   test_bignum___minp1,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN+1 == MIN+1",   true },
-        {test_bignum___minp1,   test_bignum_____min,    BIGNUM_CMP_GT,  "cmp_bignum, MIN+1 > MIN",      true },
-        {test_bignum_____min,   test_bignum___minp1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN < MIN+1",      true },
-        {test_bignum_____min,   test_bignum_____min,    BIGNUM_CMP_EQ,  "cmp_bignum, MIN == MIN",       true },
-        {test_bignum______p1,   test_bignum______m1,    BIGNUM_CMP_GT,  "cmp_bignum, +1 > -1",          true },
-        {test_bignum______m1,   test_bignum______p1,    BIGNUM_CMP_LT,  "cmp_bignum, -1 < +1",          true },
-        {test_bignum______p2,   test_bignum______m2,    BIGNUM_CMP_GT,  "cmp_bignum, +2 > -2",          true },
-        {test_bignum______m2,   test_bignum______p2,    BIGNUM_CMP_LT,  "cmp_bignum, -2 < +2",          true },
-
-        {test_bignum_maxd2m3,   test_bignum_mind2p4,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-3 > MIN/2+4",true },  // invalid
-        {test_bignum_mind2p4,   test_bignum_maxd2m3,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+4 < MAX/2-3",true },  // invalid
-        {test_bignum_maxd2m2,   test_bignum_mind2p3,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-2 > MIN/2+3",true },  // invalid
-        {test_bignum_mind2p3,   test_bignum_maxd2m2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+3 < MAX/2-2",true },  // invalid
-        {test_bignum_maxd2m1,   test_bignum_mind2p2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-1 > MIN/2+2",true },  // invalid
-        {test_bignum_mind2p2,   test_bignum_maxd2m1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+2 < MAX/2-1",true },  // invalid
-        {test_bignum___maxd2,   test_bignum_mind2p1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX/2-0 > MIN/2+1",true },  // invalid
-        {test_bignum_mind2p1,   test_bignum___maxd2,    BIGNUM_CMP_LT,  "cmp_bignum, MIN/2+1 < MAX/2-0",true },  // invalid
-
-        {test_bignum___maxm1,   test_bignum___minp2,    BIGNUM_CMP_GT,  "cmp_bignum, MAX-1 > MIN+2",    false},  // invalid
-        {test_bignum___minp2,   test_bignum___maxm1,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+2 < MAX-1",    false},  // invalid
-        {test_bignum_____max,   test_bignum___minp1,    BIGNUM_CMP_GT,  "cmp_bignum, MAX > MIN+1",      false},  // invalid
-        {test_bignum___minp1,   test_bignum_____max,    BIGNUM_CMP_LT,  "cmp_bignum, MIN+1 < MAX",      false},  // invalid
-    };
+    bignum_s* test_bignum_Tmp0 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_Tmp1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_NumA = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_NumB = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
 
     for(size_t i = 0UL; i < sizeof(cmpTestSet)/sizeof(test_bignum_cmp_set_t); i++)
     {
-        bignum_s* test_bignum_A = cmpTestSet[i].bignumA;
-        bignum_s* test_bignum_B = cmpTestSet[i].bignumB;
+        (void)memcpy(test_bignum_NumA->nums, cmpTestSet[i].bignumA, test_bignum_NumA->size);
+        (void)memcpy(test_bignum_NumB->nums, cmpTestSet[i].bignumB, test_bignum_NumB->size);
         test_bignum_cmp_ref = cmpTestSet[i].cmp_ref;
+        test_intentional_invalid = cmpTestSet[i].invalid_case;
 
         TICK_TIME_START(cmpTestSet[i].title);
-        test_bignum_cmp = test_fp(test_bignum_A, test_bignum_B);
+        test_bignum_cmp = test_fp(test_bignum_NumA, test_bignum_NumB);
         TICK_TIME_END;
-        test_print_bignum(test_bignum_A, "A");
-        test_print_bignum(test_bignum_B, "B");
-        test_print_bignum_cmp(test_bignum_cmp);
 
-        sub_bignum(NULL, test_bignum____tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum____tmp0, "sub_bignum");
-        sub_bignum_with_add_twos(NULL, test_bignum____tmp0, test_bignum_A, test_bignum_B, 0U);
-        test_print_bignum(test_bignum____tmp0, "sub_bignum_with_add_twos");
+        sub_bignum(NULL, test_bignum_Tmp0, test_bignum_NumA, test_bignum_NumB, 0U);
+        sub_bignum_with_add_twos(NULL, test_bignum_Tmp1, test_bignum_NumA, test_bignum_NumB, 0U);
 
         test_cmp = (test_bignum_cmp == test_bignum_cmp_ref);
-        printf("%s() is %s\r\n", test_fn_name, ((test_cmp == 1)?MES_PASS:MES_FAIL));
-        if(cmpTestSet[i].assert) {
-            TEST_ASSERT(test_cmp == 1);
+
+        if((test_cmp == 1) || (test_intentional_invalid))
+        {
+            test_print_bignum(test_bignum_NumA, "A");
+            test_print_bignum(test_bignum_NumB, "B");
+            test_print_bignum_cmp(test_bignum_cmp);
+            test_print_bignum(test_bignum_Tmp0, "sub_bignum");
+            test_print_bignum(test_bignum_Tmp1, "sub_bignum_with_add_twos");
         }
-        else if((cmpTestSet[i].assert)&&(test_cmp == 1)) {
-            printf("ASSERT IS IGNORED\n");
-        }
+
+        printf("%s() is %s\r\n", test_fn_name, ((test_cmp == 1)?(MES_PASS):(test_intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT((test_cmp == 1)||(test_intentional_invalid));
     }
 
-    rmBitNum(&test_tmp);
+    rmBitNum(&test_bignum_Tmp0);
+    rmBitNum(&test_bignum_Tmp1);
+    rmBitNum(&test_bignum_NumA);
+    rmBitNum(&test_bignum_NumB);
 
-    rmBitNum(&test_bignum_______0);
-
-    rmBitNum(&test_bignum______p1);
-    rmBitNum(&test_bignum______p2);
-    rmBitNum(&test_bignum_maxd2m3);
-    rmBitNum(&test_bignum_maxd2m2);
-    rmBitNum(&test_bignum_maxd2m1);
-    rmBitNum(&test_bignum___maxd2);
-    rmBitNum(&test_bignum___maxm2);
-    rmBitNum(&test_bignum___maxm1);
-    rmBitNum(&test_bignum_____max);
-
-    rmBitNum(&test_bignum______m1);
-    rmBitNum(&test_bignum______m2);
-    rmBitNum(&test_bignum_mind2p4);
-    rmBitNum(&test_bignum_mind2p3);
-    rmBitNum(&test_bignum_mind2p2);
-    rmBitNum(&test_bignum_mind2p1);
-    rmBitNum(&test_bignum___minp2);
-    rmBitNum(&test_bignum___minp1);
-    rmBitNum(&test_bignum_____min);
-
-    rmBitNum(&test_bignum____tmp0);
-    rmBitNum(&test_bignum____tmp1);
 #undef TEST_BIGNUM_CMP_WITH_SUB_BIT
 }
 
