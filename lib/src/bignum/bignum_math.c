@@ -986,6 +986,7 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
 ReturnType mmi_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard) {
     if((t != NULL) && (a != NULL) && (n != NULL)) {
         if((((a->bits) == (n->bits)) && ((a->bits) == (t->bits)))|| (!guard)) {
+            bool has_value;
             ReturnType _fr_;
             bignum_sign_e _sign_of_o_t_;
             bignum_sign_e _sign_of_o_r_;
@@ -1039,6 +1040,7 @@ ReturnType mmi_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
 #if 0 /* OLD_R_IS_UNSIGNED_NUMBER_BECAUSE_REMAINDER_CAN_NOT_BE_NEGATIVE_VALUES */
             if(((_o_r_is_0_ == BIGNUM_CMP_ZO) || (_o_r_is_1_ == BIGNUM_CMP_ON)) || (_sign_of_o_t_ == BIGNUM_SIGN_NEG))
 #else
+            // _o_r_ is remainder, positive value
             if((_o_r_is_0_ == BIGNUM_CMP_ZO) || (_o_r_is_1_ == BIGNUM_CMP_ON))
 #endif/* OLD_R_IS_UNSIGNED_NUMBER_BECAUSE_REMAINDER_CAN_NOT_BE_NEGATIVE_VALUES */
             {
@@ -1061,6 +1063,11 @@ ReturnType mmi_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
                 {
                     /* has error */ _DPRINTF_("%s, line:%d, _sign_of_o_t_: %d\n", __func__, __LINE__, _sign_of_o_t_);
                 }
+                has_value = true;
+            }
+            else
+            {
+                has_value = false;
             }
 
             if(r != NULL)   if((_fr_ = cpy_bignum_math(r, _o_r_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
@@ -1071,6 +1078,8 @@ ReturnType mmi_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
             if(rmBitNum(&_n_r_) != 0)  { /* Memory leakage? */ };
             if(rmBitNum(&_o_t_) != 0)  { /* Memory leakage? */ };
             if(rmBitNum(&_n_t_) != 0)  { /* Memory leakage? */ };
+
+            if(!has_value)  return E_HAS_NO_VALUE;
         } else {
             return E_ERROR_BIGNUM_LENGTH;
         }
