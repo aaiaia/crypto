@@ -1913,19 +1913,19 @@ void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST
     const test_bignum_mul_bignum_set_t TEST_BIGNUM_mul_bignum_set_LIST[] = {
         {
             TEST_BIGNUM_1024b_Num_MUL___A_0, TEST_BIGNUM_1024b_Num_MUL___B_0, TEST_BIGNUM_1024b_Num_MUL_Ref_0,
-            NULL, true,
+            NULL, false,
         },
         {
             TEST_BIGNUM_1024b_Num_MUL___A_1, TEST_BIGNUM_1024b_Num_MUL___B_1, TEST_BIGNUM_1024b_Num_MUL_Ref_1,
-            NULL, true,
+            NULL, false,
         },
         {
             TEST_BIGNUM_1024b_Num_MUL___A_2, TEST_BIGNUM_1024b_Num_MUL___B_2, TEST_BIGNUM_1024b_Num_MUL_Ref_2,
-            NULL, true,
+            NULL, false,
         },
         {
             TEST_BIGNUM_1024b_Num_MUL___A_3, TEST_BIGNUM_1024b_Num_MUL___B_3, TEST_BIGNUM_1024b_Num_MUL_Ref_3,
-            NULL, true,
+            NULL, false,
         },
         {
             TEST_BIGNUM_1024b_Num_MUL___A_4, TEST_BIGNUM_1024b_Num_MUL___B_4, TEST_BIGNUM_1024b_Num_MUL_Ref_4,
@@ -3289,49 +3289,52 @@ const bignum_t TV_REMAINDER_1024b_8[] = {
     0x8c537808, 0x0e653e68, 0xbd02426a, 0x47d7a31e, 0x4d8adf4b, 0xad7a38a2, 0x22b9a45e, 0x0d2b7504, 
 };
 
-const bignum_t* TV_LIST_NUMERATOR_1024b[] = {
-    TV_NUMERATOR_1024b_0,
-    TV_NUMERATOR_1024b_1,
-    TV_NUMERATOR_1024b_2,
-    TV_NUMERATOR_1024b_3,
-    TV_NUMERATOR_1024b_4,
-    TV_NUMERATOR_1024b_5,
-    TV_NUMERATOR_1024b_6,
-    TV_NUMERATOR_1024b_7,
-    TV_NUMERATOR_1024b_8,
-};
-const bignum_t* TV_LIST_DENOMINATOR_1024b[] = {
-    TV_DENOMINATOR_1024b_0,
-    TV_DENOMINATOR_1024b_1,
-    TV_DENOMINATOR_1024b_2,
-    TV_DENOMINATOR_1024b_3,
-    TV_DENOMINATOR_1024b_4,
-    TV_DENOMINATOR_1024b_5,
-    TV_DENOMINATOR_1024b_6,
-    TV_DENOMINATOR_1024b_7,
-    TV_DENOMINATOR_1024b_8,
-};
-const bignum_t* TV_LIST_QUOTIENT_1024b[] = {
-    TV_QUOTIENT_1024b_0,
-    TV_QUOTIENT_1024b_1,
-    TV_QUOTIENT_1024b_2,
-    TV_QUOTIENT_1024b_3,
-    TV_QUOTIENT_1024b_4,
-    TV_QUOTIENT_1024b_5,
-    TV_QUOTIENT_1024b_6,
-    TV_QUOTIENT_1024b_7,
-    TV_QUOTIENT_1024b_8,
-};
-const bignum_t* TV_LIST_REMAINDER_1024b[] = {
-    TV_REMAINDER_1024b_0,
-    TV_REMAINDER_1024b_1,
-    TV_REMAINDER_1024b_2,
-    TV_REMAINDER_1024b_3,
-    TV_REMAINDER_1024b_4,
-    TV_REMAINDER_1024b_5,
-    TV_REMAINDER_1024b_6,
-    TV_REMAINDER_1024b_7,
-    TV_REMAINDER_1024b_8,
+typedef struct {
+    const bignum_t* ref_q;
+    const bignum_t* ref_r;
+    const bignum_t* ref_n;
+    const bignum_t* ref_d;
+    const char* title;
+    const bool invalid_case;
+} test_mul_bignum_with_mod_value_set;
+
+test_mul_bignum_with_mod_value_set TEST_mul_bignum_with_mod_value_set_LIST[] = {
+    {
+        TV_QUOTIENT_1024b_0, TV_REMAINDER_1024b_0, TV_NUMERATOR_1024b_0, TV_DENOMINATOR_1024b_0, 
+        NULL, true,
+    },
+    {
+        TV_QUOTIENT_1024b_1, TV_REMAINDER_1024b_1, TV_NUMERATOR_1024b_1, TV_DENOMINATOR_1024b_1, 
+        NULL, true,
+    },
+    {
+        TV_QUOTIENT_1024b_2, TV_REMAINDER_1024b_2, TV_NUMERATOR_1024b_2, TV_DENOMINATOR_1024b_2, 
+        NULL, false,
+    },
+    {
+        TV_QUOTIENT_1024b_3, TV_REMAINDER_1024b_3, TV_NUMERATOR_1024b_3, TV_DENOMINATOR_1024b_3, 
+        NULL, false,
+    },
+    {
+        TV_QUOTIENT_1024b_4, TV_REMAINDER_1024b_4, TV_NUMERATOR_1024b_4, TV_DENOMINATOR_1024b_4, 
+        NULL, false,
+    },
+    {
+        TV_QUOTIENT_1024b_5, TV_REMAINDER_1024b_5, TV_NUMERATOR_1024b_5, TV_DENOMINATOR_1024b_5, 
+        NULL, false,
+    },
+    {
+        TV_QUOTIENT_1024b_6, TV_REMAINDER_1024b_6, TV_NUMERATOR_1024b_6, TV_DENOMINATOR_1024b_6, 
+        NULL, false,
+    },
+    {
+        TV_QUOTIENT_1024b_7, TV_REMAINDER_1024b_7, TV_NUMERATOR_1024b_7, TV_DENOMINATOR_1024b_7, 
+        NULL, false,
+    },
+    {
+        TV_QUOTIENT_1024b_8, TV_REMAINDER_1024b_8, TV_NUMERATOR_1024b_8, TV_DENOMINATOR_1024b_8, 
+        NULL, false,
+    },
 };
 
 typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignum_s*);
@@ -3339,7 +3342,8 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
 {
 #define TEST_MUL_BIGNUM_BIT_LEN   1024U
     char keyin;
-    int test_memcmp0;
+    bool cmp_result;
+    bool intentional_invalid;
     ReturnType fr;
 
     bool manually = false;
@@ -3368,13 +3372,13 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
         bignum_s* addedNumber = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
         bignum_s* productAddRem = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
 
-        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
+        for(size_t i = 0UL; i < sizeof(TEST_mul_bignum_with_mod_value_set_LIST)/sizeof(test_mul_bignum_with_mod_value_set); i++)
         {
-            memcpy(multiplier->nums, TV_LIST_QUOTIENT_1024b[i], multiplier->size);
-            memcpy(multiplicand->nums, TV_LIST_DENOMINATOR_1024b[i], multiplicand->size);
+            memcpy(multiplier->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_q, multiplier->size);
+            memcpy(multiplicand->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_d, multiplicand->size);
 
-            memcpy(addedNumber->nums, TV_LIST_REMAINDER_1024b[i], addedNumber->size);
-
+            memcpy(addedNumber->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_r, addedNumber->size);
+            intentional_invalid = TEST_mul_bignum_with_mod_value_set_LIST[i].invalid_case;
 
             TICK_TIME_START(test_fn_name);
             fr = test_fp(product, multiplier, multiplicand);
@@ -3384,20 +3388,20 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
             printReturnType(fr);
 #endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
 
-            if(fr = add_bignum(NULL, productAddRem, product, addedNumber, 0U)) {
+            if((fr = add_bignum(NULL, productAddRem, product, addedNumber, 0U)) != E_OK) {
                 printReturnType(fr);
             } else { /* Do nothing */ }
 
-            test_memcmp0 = memcmp(productAddRem->nums, TV_LIST_NUMERATOR_1024b[i], productAddRem->size);
-            if(test_memcmp0 != 0)
+            cmp_result = (memcmp(productAddRem->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_n, productAddRem->size) == 0);
+            if(!cmp_result)
             {
                 test_print_bignum(multiplier, "multiplier");
                 test_print_bignum(multiplicand, "multiplicand");
                 test_print_bignum(product, "product");
             }
-            printf("[%lu] %s() then add to remainder is %s\r\n", i, test_fn_name, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+            printf("[%lu] %s() then add to remainder is %s\r\n", i, test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
 #if 0 /*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
-            TEST_ASSERT(test_memcmp0 == 0);
+            TEST_ASSERT(cmp_result);
 #endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
         }
 
@@ -3488,10 +3492,10 @@ void test_div_bignum_with_mod(void)
 
     if(!manually)
     {
-        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
+        for(size_t i = 0UL; i < sizeof(TEST_mul_bignum_with_mod_value_set_LIST)/sizeof(test_mul_bignum_with_mod_value_set); i++)
         {
-            memcpy(numerator->nums, TV_LIST_NUMERATOR_1024b[i], numerator->size);
-            memcpy(denominator->nums, TV_LIST_DENOMINATOR_1024b[i], denominator->size);
+            memcpy(numerator->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_n, numerator->size);
+            memcpy(denominator->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_d, denominator->size);
 
             /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
             TICK_TIME_START("div_bignum_with_mod");
@@ -3500,8 +3504,8 @@ void test_div_bignum_with_mod(void)
             } else { /* Do nothing */ }
             TICK_TIME_END;
 
-            test_memcmp0 = memcmp(quotient->nums, TV_LIST_QUOTIENT_1024b[i], quotient->size);
-            test_memcmp1 = memcmp(remainder->nums, TV_LIST_REMAINDER_1024b[i], remainder->size);
+            test_memcmp0 = memcmp(quotient->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_q, quotient->size);
+            test_memcmp1 = memcmp(remainder->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_r, remainder->size);
             printf("[%lu] div_bignum_with_mod() divide is %s\r\n", i, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
             printf("[%lu] div_bignum_with_mod() modulo is %s\r\n", i, ((test_memcmp1 == 0)?MES_PASS:MES_FAIL));
             if((test_memcmp0 != 0) || (test_memcmp1 != 0))
@@ -3513,10 +3517,10 @@ void test_div_bignum_with_mod(void)
 #if 0 /* TEST */
                 printf("[ref quotient]\r\n");
                 printf("quotient->size: %lu\r\n", quotient->size);
-                test_print_bignum_array(TV_LIST_QUOTIENT_1024b[i], quotient->nlen);
+                test_print_bignum_array(TEST_mul_bignum_with_mod_value_set_LIST[i].ref_q, quotient->nlen);
                 printf("[ref remainder]\r\n");
                 printf("remainder->size: %lu\r\n", remainder->size);
-                test_print_bignum_array(TV_LIST_REMAINDER_1024b[i], remainder->nlen);
+                test_print_bignum_array(TEST_mul_bignum_with_mod_value_set_LIST[i].ref_r, remainder->nlen);
 #endif/* TEST */
 
             }
@@ -3623,10 +3627,10 @@ void test_gcd_bignum(void)
 #if 0 /* NO_MANUALL_YET */
     if(!manually)
     {
-        for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
+        for(size_t i = 0UL; i < sizeof(TEST_mul_bignum_with_mod_value_set_LIST)/sizeof(test_mul_bignum_with_mod_value_set); i++)
         {
-            memcpy(num_a->nums, TV_LIST_NUMERATOR_1024b[i], num_a->size);
-            memcpy(num_b->nums, TV_LIST_DENOMINATOR_1024b[i], num_b->size);
+            memcpy(num_a->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_n, num_a->size);
+            memcpy(num_b->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_d, num_b->size);
 
             /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
             TICK_TIME_START("div_bignum_with_mod");
@@ -3635,8 +3639,8 @@ void test_gcd_bignum(void)
             } else { /* Do nothing */ }
             TICK_TIME_END;
 
-            test_memcmp0 = memcmp(num_g->nums, TV_LIST_QUOTIENT_1024b[i], quotient->size);
-            test_memcmp1 = memcmp(num_s->nums, TV_LIST_REMAINDER_1024b[i], num_s->size);
+            test_memcmp0 = memcmp(num_g->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_q, quotient->size);
+            test_memcmp1 = memcmp(num_s->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_r, num_s->size);
             printf("TEST_FUNCTION_NAME() divide is %s\r\n", ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
             printf("TEST_FUNCTION_NAME() modulo is %s\r\n", ((test_memcmp1 == 0)?MES_PASS:MES_FAIL));
             TEST_ASSERT((test_memcmp0 == 0) && (test_memcmp1 == 0));
@@ -3717,7 +3721,6 @@ void test_gcd_bignum(void)
 #undef TEST_GCD_BIGNUM_BIT_LEN
 }
 
-const ReturnType TEST_MMI_FR_0 = E_OK;
 const bignum_t TEST_MMI_NUM_A_0[] = {
     0xf93aebfa, 0x9e703695, 0x099f8d99, 0x3cedab8d, 0x7a102514, 0x079267be, 0x5987565e, 0x62a8b168, 
     0x315be29c, 0xb2cfcb19, 0xe5bb6e58, 0x2e21a819, 0x8ca832cd, 0xf7933b99, 0xf9501a91, 0x685bf8cb, 
@@ -3737,7 +3740,6 @@ const bignum_t TEST_MMI_NUM_REF_I_0[] = {
     0x65935f0c, 0x04ff483d, 0x81d542af, 0x241b22c4, 0x9bfe2e9a, 0x8e7c2657, 0xa22f7a4e, 0x003de6a5, 
 };
 
-const ReturnType TEST_MMI_FR_1 = E_OK;
 const bignum_t TEST_MMI_NUM_A_1[] = {
     0x3c5486e9, 0xabd9377b, 0x9479bcd1, 0x7bbe870e, 0x3d831a86, 0x7a0018ac, 0x64682e6a, 0x5b05ff72, 
     0x00985985, 0x62ab7191, 0x3cf6242d, 0x32b7b4ac, 0x7b703bcf, 0xbef57053, 0x11225d9f, 0xe16d275c, 
@@ -3757,7 +3759,6 @@ const bignum_t TEST_MMI_NUM_REF_I_1[] = {
     0x3240adf9, 0x2fe8e2f7, 0x674ec54f, 0xe6383740, 0xcaf34776, 0x8e14c39e, 0xf1721d80, 0x12ad318f, 
 };
 
-const ReturnType TEST_MMI_FR_2 = E_HAS_NO_VALUE;
 const bignum_t TEST_MMI_NUM_A_2[] = {
     0x8bd09f9e, 0x0e49eefe, 0xc09cdfcb, 0x59447a9b, 0x19cb2b9b, 0x0c4393fd, 0xa0935cc8, 0x850b35e6, 
     0xd210dbd4, 0x95e15aca, 0xd5557d39, 0x922e9af7, 0xc2acf9c5, 0x54ceef8c, 0x32f4624c, 0x6bb7ff97, 
@@ -3777,7 +3778,6 @@ const bignum_t TEST_MMI_NUM_REF_I_2[] = {
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
 
-const ReturnType TEST_MMI_FR_3 = E_HAS_NO_VALUE;
 const bignum_t TEST_MMI_NUM_A_3[] = {
     0xa8bd34cc, 0xf8b3f5e3, 0xc709b570, 0xf4d07e12, 0xbb113e3b, 0xdf342aa0, 0x25694318, 0x20804d54, 
     0x65c83d82, 0xa25d7b32, 0x426a6630, 0x20373ae5, 0x19dc4878, 0x8af81072, 0xa8b06254, 0x31c930af, 
@@ -3797,7 +3797,6 @@ const bignum_t TEST_MMI_NUM_REF_I_3[] = {
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
 
-const ReturnType TEST_MMI_FR_4 = E_HAS_NO_VALUE;
 const bignum_t TEST_MMI_NUM_A_4[] = {
     0x2fa24344, 0xfb337e32, 0x4b0ff990, 0x6c43ae19, 0xba82adfe, 0x02314333, 0x7961e378, 0xf18dfaad, 
     0x6f20303d, 0x3f6b54ae, 0x668a7a4d, 0x27d3cd28, 0xade1557a, 0x10af1298, 0xa38911f6, 0x4895170b, 
@@ -3817,7 +3816,6 @@ const bignum_t TEST_MMI_NUM_REF_I_4[] = {
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
 
-const ReturnType TEST_MMI_FR_5 = E_OK;
 const bignum_t TEST_MMI_NUM_A_5[] = {
     0xf06c29db, 0x52e285db, 0xf09e4635, 0xd8d43afd, 0x65b9af3f, 0xf051b72f, 0xb908c2cf, 0xc102d0e6, 
     0xd4b16ff9, 0x292694f4, 0xd819c5da, 0x3eb0edff, 0xcca3699d, 0xefbdf420, 0x9ca8c5b6, 0x8e5dab95, 
@@ -3837,7 +3835,6 @@ const bignum_t TEST_MMI_NUM_REF_I_5[] = {
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
 
-const ReturnType TEST_MMI_FR_6 = E_OK;
 const bignum_t TEST_MMI_NUM_A_6[] = {
     0x747e1fef, 0x390e9e4c, 0xea4e399d, 0x2b7eecb7, 0x1a3efab3, 0xd6796a9d, 0x5bd60157, 0x3063d940, 
     0x44a4e2f8, 0x1d7eb280, 0xa207cceb, 0x6bcd85b8, 0x1d850c7f, 0xcdf3fe76, 0x4028c9ff, 0x9b708ca2, 
@@ -3857,7 +3854,6 @@ const bignum_t TEST_MMI_NUM_REF_I_6[] = {
     0x074cbf59, 0x922edd2f, 0xfabbf8f5, 0x5ac1e067, 0x441c5f5e, 0xa3ad5f72, 0x686bba28, 0x06e6bd16, 
 };
 
-const ReturnType TEST_MMI_FR_7 = E_OK;
 const bignum_t TEST_MMI_NUM_A_7[] = {
     0x7a66ca45, 0xef6ad63e, 0xa4b4f471, 0x6d6fb1e4, 0x4e996e23, 0xeac0ba7b, 0xfbedd72a, 0xd0249a8b, 
     0xa34a8b65, 0xd292b461, 0x8d7647a8, 0x1bfae6f8, 0xcf6a9354, 0x77b92a4d, 0x8c72a701, 0xa65c9641, 
@@ -3877,7 +3873,6 @@ const bignum_t TEST_MMI_NUM_REF_I_7[] = {
     0xc52e7e4b, 0x717b9181, 0xac8fae39, 0xb0b51634, 0x254c9be6, 0xb5de513a, 0xb0020c3d, 0x05e66b53,
 };
 
-const ReturnType TEST_MMI_FR_8 = E_OK;
 const bignum_t TEST_MMI_NUM_A_8[] = {
     0x5dccc61e, 0x9e93aab6, 0xd9fa4f13, 0xdf3cf749, 0x1873b4a5, 0xbefd63c8, 0x3e6b9f25, 0x60c1a442, 
     0x21be8d6b, 0x4abf5137, 0xe923b9a0, 0x55c85fb0, 0xdc6d3b13, 0xc49a6b9f, 0x4d02060a, 0x15adc3aa, 
@@ -3897,7 +3892,6 @@ const bignum_t TEST_MMI_NUM_REF_I_8[] = {
     0x595484f6, 0x7b21aae2, 0x2d9ba361, 0xd3b04665, 0x4c9abd1d, 0xce49e75b, 0xde381bd6, 0x1fde5b2c, 
 };
 
-const ReturnType TEST_MMI_FR_9 = E_OK;
 const bignum_t TEST_MMI_NUM_A_9[] = {
     0xa93ac8d9, 0x95394ef4, 0xd48a6c44, 0xef159a59, 0x9caf7794, 0xce08d2f6, 0x218762fa, 0xcabcd4f1, 
     0x9074f69c, 0x8925ad45, 0x725db019, 0xde61734a, 0xe17a10ea, 0xddaf82e3, 0xd5fe37e4, 0xa8a0ba0b, 
@@ -3917,7 +3911,6 @@ const bignum_t TEST_MMI_NUM_REF_I_9[] = {
     0x1e28a00b, 0x5abc2775, 0xdf86c87b, 0x3c8b704a, 0xdb9592a4, 0x626a44d8, 0x63109624, 0x2b2e28f2, 
 };
 
-const ReturnType TEST_MMI_FR_A = E_OK;
 const bignum_t TEST_MMI_NUM_A_A[] = {
     0xa712013a, 0xcdb5dbca, 0xc1e7ddee, 0x170ed4cb, 0xf0f87aa5, 0x33b1e050, 0x21672662, 0x4bbcc611, 
     0x91f3cfc7, 0x995fa8aa, 0x505a4685, 0xbf67681a, 0x32b05fe2, 0xa265613f, 0x98c3cc87, 0x59e37f92, 
@@ -3937,7 +3930,6 @@ const bignum_t TEST_MMI_NUM_REF_I_A[] = {
     0x5dc6265e, 0x52bd9178, 0x32ccdd65, 0xd558a116, 0x3a62c6f7, 0x1d930a7e, 0x12cff19d, 0x13dc618a, 
 };
 
-const ReturnType TEST_MMI_FR_B = E_OK;
 const bignum_t TEST_MMI_NUM_A_B[] = {
     0xa43c586b, 0x0fe172e8, 0x65af21f1, 0xf1dc2432, 0x119ff56a, 0x28f30bb7, 0x0ebc347f, 0x43dd06d7, 
     0x47e7195f, 0x7c56c98b, 0x1ce206ea, 0x940dbe2a, 0x6aa6adb3, 0x379299b8, 0xa5464ecd, 0xb4e82355, 
@@ -3957,7 +3949,6 @@ const bignum_t TEST_MMI_NUM_REF_I_B[] = {
     0xf4736419, 0x7e8166a4, 0x5f6df605, 0xb4cdec3c, 0xaa9365cc, 0xe644cf12, 0xf399e309, 0x536e1902, 
 };
 
-const ReturnType TEST_MMI_FR_C = E_OK;
 const bignum_t TEST_MMI_NUM_A_C[] = {
     0xef4d2575, 0xae11966e, 0x6150eebb, 0x55972c3c, 0xd42c635f, 0x10655708, 0xf5032cc6, 0x87454012, 
     0xd4769266, 0xe4828729, 0xb146d275, 0x5e06ddfe, 0x48323240, 0x50589789, 0xd5455bc3, 0x025d8a9c, 
@@ -3977,7 +3968,6 @@ const bignum_t TEST_MMI_NUM_REF_I_C[] = {
     0xf1a921b1, 0xac1f9fc4, 0x0043f3ad, 0x02848fae, 0xbe8e2408, 0xf892a694, 0xeb4ae7c3, 0x88ae4485, 
 };
 
-const ReturnType TEST_MMI_FR_D = E_OK;
 const bignum_t TEST_MMI_NUM_A_D[] = {
     0xe19c2ce9, 0x6e2b3d84, 0xc500bf9e, 0x9bba858e, 0x1ef22fb7, 0xf0753f1b, 0xc7fc35e2, 0xc86f5cdf, 
     0x0caa0b88, 0xe77ad548, 0x23ac7b94, 0xb8be6600, 0xb0d6b195, 0xd2a04cf0, 0x609a9c81, 0x802909f8, 
@@ -3997,7 +3987,6 @@ const bignum_t TEST_MMI_NUM_REF_I_D[] = {
     0x34d29bd6, 0xbcf60306, 0x18dfd810, 0x957a2735, 0xc77109fa, 0x603199c0, 0x853e8364, 0x5c104818, 
 };
 
-const ReturnType TEST_MMI_FR_E = E_OK;
 const bignum_t TEST_MMI_NUM_A_E[] = {
     0xf2c5ed61, 0xa80b4d6a, 0xe19c9208, 0xd7157139, 0x9699c663, 0x88b01623, 0x6efece95, 0x6afceb09, 
     0x435cc1d9, 0x16eb670e, 0x33f788f9, 0x5c0a0cf9, 0xf6f2a3d3, 0x4f7fa3ba, 0x7abe7d71, 0x42e5ba69, 
@@ -4017,7 +4006,6 @@ const bignum_t TEST_MMI_NUM_REF_I_E[] = {
     0x4d970cfe, 0xa978e5c9, 0x09f94154, 0xfd5f2aff, 0xdb7ae25a, 0xafccc0ab, 0x85ea4e65, 0x36a69dcf, 
 };
 
-const ReturnType TEST_MMI_FR_F = E_HAS_NO_VALUE;
 const bignum_t TEST_MMI_NUM_A_F[] = {
     0x2af073d0, 0x44355cbf, 0xf79d131c, 0xccdd82c7, 0x26ec2852, 0xac8896e9, 0xd47fdd49, 0xd14f4101, 
     0x74fb3fb4, 0xb8b8309c, 0x0bb05544, 0x29d78dd7, 0x9e50c3b5, 0xa24ad859, 0xb677cab5, 0xc087c60b, 
@@ -4037,7 +4025,6 @@ const bignum_t TEST_MMI_NUM_REF_I_F[] = {
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
 
-const ReturnType TEST_MMI_FR_10 = E_HAS_NO_VALUE;
 const bignum_t TEST_MMI_NUM_A_10[] = {
     0x8cbcccd4, 0x9c072e2c, 0x69783446, 0xddf535cf, 0xee04621d, 0xd3891b85, 0x9e260b33, 0xc7d39ef3, 
     0x96538f6a, 0x04325abe, 0x5d6daa8e, 0xfc3a62df, 0x4aea3ec5, 0x8d1d735a, 0x712b437e, 0x4b38ffe1, 
@@ -4058,39 +4045,101 @@ const bignum_t TEST_MMI_NUM_REF_I_10[] = {
 };
 
 const ReturnType TEST_MMI_FR_LIST[] = {
-    TEST_MMI_FR_0, TEST_MMI_FR_1, TEST_MMI_FR_2, TEST_MMI_FR_3, 
-    TEST_MMI_FR_4, TEST_MMI_FR_5, TEST_MMI_FR_6, TEST_MMI_FR_7, 
-    TEST_MMI_FR_8, TEST_MMI_FR_9, TEST_MMI_FR_A, TEST_MMI_FR_B, 
-    TEST_MMI_FR_C, TEST_MMI_FR_D, TEST_MMI_FR_E, TEST_MMI_FR_F, 
-    TEST_MMI_FR_10,
 };
 const bignum_t* TEST_MMI_NUM_A_LIST[] = {
-    TEST_MMI_NUM_A_0, TEST_MMI_NUM_A_1, TEST_MMI_NUM_A_2, TEST_MMI_NUM_A_3, 
-    TEST_MMI_NUM_A_4, TEST_MMI_NUM_A_5, TEST_MMI_NUM_A_6, TEST_MMI_NUM_A_7, 
-    TEST_MMI_NUM_A_8, TEST_MMI_NUM_A_9, TEST_MMI_NUM_A_A, TEST_MMI_NUM_A_B, 
-    TEST_MMI_NUM_A_C, TEST_MMI_NUM_A_D, TEST_MMI_NUM_A_E, TEST_MMI_NUM_A_F, 
-    TEST_MMI_NUM_A_10,
 };
 const bignum_t* TEST_MMI_NUM_N_LIST[] = {
-    TEST_MMI_NUM_N_0, TEST_MMI_NUM_N_1, TEST_MMI_NUM_N_2, TEST_MMI_NUM_N_3, 
-    TEST_MMI_NUM_N_4, TEST_MMI_NUM_N_5, TEST_MMI_NUM_N_6, TEST_MMI_NUM_N_7, 
-    TEST_MMI_NUM_N_8, TEST_MMI_NUM_N_9, TEST_MMI_NUM_N_A, TEST_MMI_NUM_N_B, 
-    TEST_MMI_NUM_N_C, TEST_MMI_NUM_N_D, TEST_MMI_NUM_N_E, TEST_MMI_NUM_N_F, 
-    TEST_MMI_NUM_N_10,
 };
 const bignum_t* TEST_MMI_NUM_REF_I_LIST[] = {
-    TEST_MMI_NUM_REF_I_0, TEST_MMI_NUM_REF_I_1, TEST_MMI_NUM_REF_I_2, TEST_MMI_NUM_REF_I_3, 
-    TEST_MMI_NUM_REF_I_4, TEST_MMI_NUM_REF_I_5, TEST_MMI_NUM_REF_I_6, TEST_MMI_NUM_REF_I_7, 
-    TEST_MMI_NUM_REF_I_8, TEST_MMI_NUM_REF_I_9, TEST_MMI_NUM_REF_I_A, TEST_MMI_NUM_REF_I_B, 
-    TEST_MMI_NUM_REF_I_C, TEST_MMI_NUM_REF_I_D, TEST_MMI_NUM_REF_I_E, TEST_MMI_NUM_REF_I_F, 
-    TEST_MMI_NUM_REF_I_10,
+};
+
+typedef struct {
+    const bignum_t* ref_num_a;
+    const bignum_t* ref_num_n;
+    const bignum_t* ref_num_i;
+    const ReturnType ref_fr;
+    const char* title;
+    const bool invalid_case;
+} test_mmi_bignum_set;
+
+const test_mmi_bignum_set TEST_mmi_bignum_set_LIST[] = {
+    {
+        TEST_MMI_NUM_A_0, TEST_MMI_NUM_N_0, TEST_MMI_NUM_REF_I_0, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_1, TEST_MMI_NUM_N_1, TEST_MMI_NUM_REF_I_1, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_2, TEST_MMI_NUM_N_2, TEST_MMI_NUM_REF_I_2, E_HAS_NO_VALUE, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_3, TEST_MMI_NUM_N_3, TEST_MMI_NUM_REF_I_3, E_HAS_NO_VALUE, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_4, TEST_MMI_NUM_N_4, TEST_MMI_NUM_REF_I_4, E_HAS_NO_VALUE, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_5, TEST_MMI_NUM_N_5, TEST_MMI_NUM_REF_I_5, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_6, TEST_MMI_NUM_N_6, TEST_MMI_NUM_REF_I_6, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_7, TEST_MMI_NUM_N_7, TEST_MMI_NUM_REF_I_7, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_8, TEST_MMI_NUM_N_8, TEST_MMI_NUM_REF_I_8, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_9, TEST_MMI_NUM_N_9, TEST_MMI_NUM_REF_I_9, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_A, TEST_MMI_NUM_N_A, TEST_MMI_NUM_REF_I_A, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_B, TEST_MMI_NUM_N_B, TEST_MMI_NUM_REF_I_B, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_C, TEST_MMI_NUM_N_C, TEST_MMI_NUM_REF_I_C, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_D, TEST_MMI_NUM_N_D, TEST_MMI_NUM_REF_I_D, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_E, TEST_MMI_NUM_N_E, TEST_MMI_NUM_REF_I_E, E_OK, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_F, TEST_MMI_NUM_N_F, TEST_MMI_NUM_REF_I_F, E_HAS_NO_VALUE, 
+        NULL, false,
+    },
+    {
+        TEST_MMI_NUM_A_10,TEST_MMI_NUM_N_10,TEST_MMI_NUM_REF_I_10,E_HAS_NO_VALUE,
+        NULL, false,
+    },
 };
 
 void test_mmi_bignum(void)
 {
 #define TEST_MMI_BIGNUM_BIT_LEN   1024U
     char keyin;
-    int test_memcmp0;
+    bool cmp_result;
+    bool cmp_fr;
+    bool intentional_invalid;
     ReturnType fr;
 
     bignum_s* num_a = mkBigNum(TEST_MMI_BIGNUM_BIT_LEN);
@@ -4117,12 +4166,13 @@ void test_mmi_bignum(void)
 
     if(!manually)
     {
-        for(size_t i = 0UL; i < sizeof(TEST_MMI_FR_LIST)/sizeof(ReturnType); i++)
+        for(size_t i = 0UL; i < sizeof(TEST_mmi_bignum_set_LIST)/sizeof(test_mmi_bignum_set); i++)
         {
-            (void)memcpy(num_a->nums, TEST_MMI_NUM_A_LIST[i], num_a->size);
-            (void)memcpy(num_n->nums, TEST_MMI_NUM_N_LIST[i], num_n->size);
-            (void)memset(num_i->nums, 0xffU, num_i->size);
             /* set test vector*/
+            (void)memcpy(num_a->nums, TEST_mmi_bignum_set_LIST[i].ref_num_a, num_a->size);
+            (void)memcpy(num_n->nums, TEST_mmi_bignum_set_LIST[i].ref_num_n, num_n->size);
+            (void)memset(num_i->nums, 0xffU, num_i->size);
+            intentional_invalid = TEST_mmi_bignum_set_LIST[i].invalid_case;
 
             TICK_TIME_START("mmi_bignum");
             if(fr = mmi_bignum(num_i, num_a, num_n)) {
@@ -4130,33 +4180,26 @@ void test_mmi_bignum(void)
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
-            test_memcmp0 = memcmp(num_i->nums, TEST_MMI_NUM_REF_I_LIST[i], num_i->size);
-            if(TEST_MMI_FR_LIST[i] != E_HAS_NO_VALUE)
+            if(fr != E_HAS_NO_VALUE)
             {
-                printf("[%lu] mmi_bignum() is %s\r\n", i, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+                cmp_result = (memcmp(num_i->nums, TEST_mmi_bignum_set_LIST[i].ref_num_i, num_i->size) == 0);
             }
             else
             {
-                printf("[%lu] mmi_bignum() is %s\r\n", i, ((test_memcmp0 != 0)?MES_PASS:MES_FAIL));
+                cmp_result = true;
             }
+            cmp_fr = (TEST_mmi_bignum_set_LIST[i].ref_fr == fr);
 
-            if(test_memcmp0 != 0)
+            if((!cmp_result) || (!cmp_fr))
             {
-                if(TEST_MMI_FR_LIST[i] == E_HAS_NO_VALUE)
-                {
-                    printf("[E_HAS_NO_VALUE CASES: has no coprime]\r\n");
-                }
-                else
-                {
-                    printf("[IS ERROR]\r\n");
-                }
                 test_print_bignum(num_a, "num_a");
                 test_print_bignum(num_n, "num_n");
                 test_print_bignum(num_i, "a^-1 mod n(inverse mod n)");
                 printf("ref a^-1 mod n(inverse mod n)\r\n");
-                test_print_bignum_array(TEST_MMI_NUM_REF_I_LIST[i], num_i->nlen);
+                test_print_bignum_array(TEST_mmi_bignum_set_LIST[i].ref_num_i, num_i->nlen);
             }
-            TEST_ASSERT((test_memcmp0 == 0) || (TEST_MMI_FR_LIST[i] == E_HAS_NO_VALUE));
+            printf("[%lu] mmi_bignum() is %s\r\n", i, (((cmp_result) && (cmp_fr))?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT(((cmp_result) && (cmp_fr)) || (intentional_invalid));
         }
     }
     else
