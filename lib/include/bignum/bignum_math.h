@@ -32,13 +32,21 @@ static inline ReturnType cpy_bignum_math(bignum_s* d, const bignum_s* s)
 }
 
 ReturnType twos_bignum(bignum_s* d, const bignum_s* s);
-ReturnType abs_bignum(bignum_s* d, const bignum_s* s);
+ReturnType abs_bignum_ext(bignum_s* d, const bignum_s* s, const bool ignoreType);
+static inline ReturnType abs_bignum(bignum_s* d, const bignum_s* s)
+{
+    return abs_bignum_ext(d, s, false);
+}
+static inline ReturnType abs_bignum_signed(bignum_s* d, const bignum_s* s)
+{
+    return abs_bignum_ext(d, s, true);
+}
 bignum_sign_e sign_bignum_ext(const bignum_s* s, const bool ignoreType);
 static inline bignum_sign_e sign_bignum(const bignum_s* s)
 {
     return sign_bignum_ext(s, false);
 }
-static inline bignum_sign_e sign_bignum_unsafe(const bignum_s* s)
+static inline bignum_sign_e sign_bignum_signed(const bignum_s* s)
 {
     return sign_bignum_ext(s, true);
 }
@@ -52,14 +60,14 @@ static inline bignum_cmp_e cmp_bignum_logical(const bignum_s* s0, const bignum_s
 {
     return cmp_bignum_logical_ext(s0, s1, false);
 }
-static inline bignum_cmp_e cmp_bignum_logical_unsafe(const bignum_s* s0, const bignum_s* s1)
+static inline bignum_cmp_e cmp_bignum_logical_unsigned(const bignum_s* s0, const bignum_s* s1)
 {
     return cmp_bignum_logical_ext(s0, s1, true);
 }
-ReturnType add_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
+ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 bignum_t add_bignum_carry_loc(bignum_s* d, const bignum_t v, const size_t idx);
-ReturnType sub_bignum(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
-ReturnType sub_bignum_with_add_twos(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
+ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
+ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
 ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
 ReturnType mul_bignum_nbs_up2dn_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
@@ -82,16 +90,55 @@ static inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const big
     return div_bignum_with_mod_nbs_ext(q, r, n, d, true);   // bit length guard
 }
 
+static inline ReturnType div_bignum(bignum_s* q, const bignum_s* n, const bignum_s* d)
+{
+    return div_bignum_with_mod_nbs_ext(q, NULL, n, d, true);   // bit length guard
+}
+
+static inline ReturnType mod_bignum(bignum_s* r, const bignum_s* n, const bignum_s* d)
+{
+    return div_bignum_with_mod_nbs_ext(NULL, r, n, d, true);   // bit length guard
+}
+
+/*
+ * aim_bignum and aim_bignum_ext is additive inverse modular
+ * Additive inverse in modulo: (x + y) mod p = 0
+ * example) (-87) mod 97 is have to meet (87 + (-87)) mod 97 = 0
+ * To figuring out, convert (-87) to 'x' then formula: (87 + 'x') mod 97 = 0
+ * Easy way to finding value add modulo p(=97) both side then (87 + 'x' + 97) mod 97 = (97) mod 97 = 0
+ * So, getting Additive inverse method (p - |n|) mod p
+ */
+ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, const bool guard);
+static inline ReturnType aim_bignum(bignum_s* x, const bignum_s* n, const bignum_s* p)
+{
+    return aim_bignum_ext(x, n, p, true);
+}
+static inline ReturnType aim_bignum_unsafe(bignum_s* x, const bignum_s* n, const bignum_s* p)
+{
+    return aim_bignum_ext(x, n, p, false);
+}
+
 ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b, const bool guard);
 static inline ReturnType gcd_bignum(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b)
 {
     return gcd_bignum_ext(r, s, t, a, b, true);
 }
 
-/* mmi_bignum and mmi_bignum_ext is muliplicative inverse modular, 'bignum_s* r' is optional */
-ReturnType mmi_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard);
-static inline ReturnType mmi_bignum(bignum_s* t, const bignum_s* a, const bignum_s* n)
+/*
+ * mim_bignum and mim_bignum_ext is muliplicative inverse modular, 'bignum_s* r' is optional
+ * multiplicative inverse in modulo: (x * y) mod p = 1
+ * example) 18^(-1) mod 97 is have to meet (18*18^(-1)) mod 97 = 1
+ * To figuring out, convert 18^(-1) to 'x', then formula: (18*'x') mod 97 = 1
+ * 'x' can become 1 ~ 96, insert all of x into (18*'x') mod 97 and formaula become equal to '1'
+ * The only value is 'x' is 89, so 18^(-1) is same with 89 in modulo
+ */
+ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard);
+static inline ReturnType mim_bignum(bignum_s* t, const bignum_s* a, const bignum_s* n)
 {
-    return mmi_bignum_ext(t, NULL, a, n, true);
+    return mim_bignum_ext(t, NULL, a, n, true);
+}
+static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const bignum_s* n)
+{
+    return mim_bignum_ext(t, NULL, a, n, false);
 }
 #endif/* BIGNUM_MATH_H */
