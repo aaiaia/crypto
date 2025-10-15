@@ -1463,8 +1463,8 @@ void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_
         test_bignum_cmp = test_fp(test_bignum_NumA, test_bignum_NumB);
         TICK_TIME_END;
 
-        sub_bignum(NULL, test_bignum_Tmp0, test_bignum_NumA, test_bignum_NumB, 0U);
-        sub_bignum_with_add_twos(NULL, test_bignum_Tmp1, test_bignum_NumA, test_bignum_NumB, 0U);
+        sub_bignum_ext(NULL, test_bignum_Tmp0, test_bignum_NumA, test_bignum_NumB, 0U);
+        sub_bignum_with_add_twos_ext(NULL, test_bignum_Tmp1, test_bignum_NumA, test_bignum_NumB, 0U);
 
         cmp_result = (test_bignum_cmp == test_bignum_cmp_ref);
 
@@ -1473,8 +1473,8 @@ void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_
             test_print_bignum(test_bignum_NumA, "A");
             test_print_bignum(test_bignum_NumB, "B");
             test_print_bignum_cmp(test_bignum_cmp);
-            test_print_bignum(test_bignum_Tmp0, "sub_bignum");
-            test_print_bignum(test_bignum_Tmp1, "sub_bignum_with_add_twos");
+            test_print_bignum(test_bignum_Tmp0, "sub_bignum_ext");
+            test_print_bignum(test_bignum_Tmp1, "sub_bignum_with_add_twos_ext");
         }
 
         printf("%s() is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(test_intentional_invalid?MES_SKIP:MES_FAIL)));
@@ -1506,7 +1506,7 @@ void test_sub_bignum_unsigned_127b(void)
     test_dst = mkBigNum(TEST_BIGNUM_127BIT);
     test_ref = mkBigNum(TEST_BIGNUM_127BIT);
 
-    /* add_bignum test */
+    /* add_bignum_ext test */
     for(unsigned int i = 0u; i < TV_U32_ADD_NUM; i++) {
         memset(test_opA->nums, 0x0u, (test_opA->size));
         memset(test_opB->nums, 0x0u, (test_opB->size));
@@ -1517,8 +1517,8 @@ void test_sub_bignum_unsigned_127b(void)
         memcpy(test_ref->nums, TV_u32_add_refList[i], TV_u32_add_lenList[i]);
         test_co = BIGNUM_MAX;
 
-        TICK_TIME_START("add_bignum");
-        add_bignum(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i]);
+        TICK_TIME_START("add_bignum_ext");
+        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i]);
         TICK_TIME_END;
         cmp_result = (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
         if(!cmp_result)
@@ -1530,7 +1530,7 @@ void test_sub_bignum_unsigned_127b(void)
             printf("[ref carry]\r\nc=0x%08x\r\n", TV_u32_add_carryInList[i]);
             printf("[out carry]\r\nc=0x%08x\r\n", test_co);
         }
-        printf("add_bignum() is %s\r\n", ((cmp_result)?MES_PASS:MES_FAIL));
+        printf("add_bignum_ext() is %s\r\n", ((cmp_result)?MES_PASS:MES_FAIL));
         TEST_ASSERT(cmp_result);
     }
 
@@ -1590,8 +1590,8 @@ void test_add_bignum_unsigned_256b(void) {
         test_ci = 0;
         test_co = 0;
 
-        TICK_TIME_START("add_bignum");
-        add_bignum(&test_co, test_dst, test_opA, test_opB, test_ci);
+        TICK_TIME_START("add_bignum_ext");
+        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, test_ci);
         TICK_TIME_END;
         cmp_result = (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
         if((!cmp_result))
@@ -1604,7 +1604,7 @@ void test_add_bignum_unsigned_256b(void) {
             printf("[carry out]\r\nc=0x%08x\r\n", test_co);
 
         }
-        printf("add_bignum() is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        printf("add_bignum_ext() is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
         TEST_ASSERT((cmp_result) || (intentional_invalid));
     }
 
@@ -3344,6 +3344,8 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
 
     bool manually = false;
 
+    bignum_s* reference = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+
     bignum_s* multiplier = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
     bignum_s* multiplicand = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
     bignum_s* product = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
@@ -3365,15 +3367,17 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
 
     if(!manually)
     {
-        bignum_s* addedNumber = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
+        bignum_s* remainder = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
         bignum_s* productAddRem = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
 
         for(size_t i = 0UL; i < sizeof(TV_LIST_REMAINDER_1024b)/sizeof(bignum_t*); i++)
         {
+            memcpy(reference->nums, TV_LIST_NUMERATOR_1024b[i], reference->size);
+
             memcpy(multiplier->nums, TV_LIST_QUOTIENT_1024b[i], multiplier->size);
             memcpy(multiplicand->nums, TV_LIST_DENOMINATOR_1024b[i], multiplicand->size);
 
-            memcpy(addedNumber->nums, TV_LIST_REMAINDER_1024b[i], addedNumber->size);
+            memcpy(remainder->nums, TV_LIST_REMAINDER_1024b[i], remainder->size);
 
 
             TICK_TIME_START(test_fn_name);
@@ -3384,16 +3388,20 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
             printReturnType(fr);
 #endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
 
-            if(fr = add_bignum(NULL, productAddRem, product, addedNumber, 0U)) {
+            if(fr = add_bignum_ext(NULL, productAddRem, product, remainder, 0U)) {
                 printReturnType(fr);
             } else { /* Do nothing */ }
 
-            test_memcmp0 = memcmp(productAddRem->nums, TV_LIST_NUMERATOR_1024b[i], productAddRem->size);
+            test_memcmp0 = memcmp(productAddRem->nums, reference->nums, productAddRem->size);
             if(test_memcmp0 != 0)
             {
+                test_print_bignum(reference, "reference");
+
                 test_print_bignum(multiplier, "multiplier");
                 test_print_bignum(multiplicand, "multiplicand");
                 test_print_bignum(product, "product");
+                test_print_bignum(remainder, "remainder");
+                test_print_bignum(productAddRem, "productAddRem");
             }
             printf("[%lu] %s() then add to remainder is %s\r\n", i, test_fn_name, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
 #if 0 /*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
@@ -3402,7 +3410,7 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
         }
 
         rmBitNum(&productAddRem);
-        rmBitNum(&addedNumber);
+        rmBitNum(&remainder);
     }
     else
     {
@@ -3450,6 +3458,7 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
     }
 #undef _KEYIN_DO_TEST_0_
 #undef _COND_DO_TEST_0_
+    rmBitNum(&reference);
 
     rmBitNum(&multiplier);
     rmBitNum(&multiplicand);
@@ -3689,7 +3698,7 @@ void test_gcd_bignum(void)
 
         if((fr = mul_bignum_unsafe(prod_as, num_a, num_s)) != E_OK)     { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
         if((fr = mul_bignum_unsafe(prod_bt, num_b, num_t)) != E_OK)     { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
-        if((fr = add_bignum(NULL, sum, prod_as, prod_bt, 0UL)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = add_bignum_ext(NULL, sum, prod_as, prod_bt, 0UL)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
         test_print_bignum(prod_as, "prod_as");
         test_print_bignum(prod_bt, "prod_bt");
         test_print_bignum(num_b, "num_b");
@@ -4124,20 +4133,20 @@ void test_mmi_bignum(void)
             (void)memset(num_i->nums, 0xffU, num_i->size);
             /* set test vector*/
 
-            TICK_TIME_START("mmi_bignum");
-            if(fr = mmi_bignum(num_i, num_a, num_n)) {
-                printf("mmi_bignum() = ");
+            TICK_TIME_START("mim_bignum");
+            if(fr = mim_bignum(num_i, num_a, num_n)) {
+                printf("mim_bignum() = ");
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
             test_memcmp0 = memcmp(num_i->nums, TEST_MMI_NUM_REF_I_LIST[i], num_i->size);
             if(TEST_MMI_FR_LIST[i] != E_HAS_NO_VALUE)
             {
-                printf("[%lu] mmi_bignum() is %s\r\n", i, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
+                printf("[%lu] mim_bignum() is %s\r\n", i, ((test_memcmp0 == 0)?MES_PASS:MES_FAIL));
             }
             else
             {
-                printf("[%lu] mmi_bignum() is %s\r\n", i, ((test_memcmp0 != 0)?MES_PASS:MES_FAIL));
+                printf("[%lu] mim_bignum() is %s\r\n", i, ((test_memcmp0 != 0)?MES_PASS:MES_FAIL));
             }
 
             if(test_memcmp0 != 0)
@@ -4178,9 +4187,9 @@ void test_mmi_bignum(void)
                 ((uint8_t*)num_n->nums)[byte] = (rand()&0xFFU);
             }
 
-            TICK_TIME_START("mmi_bignum");
-            if(fr = mmi_bignum(num_i, num_a, num_n)) {
-                printf("mmi_bignum() = ");
+            TICK_TIME_START("mim_bignum");
+            if(fr = mim_bignum(num_i, num_a, num_n)) {
+                printf("mim_bignum() = ");
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
@@ -7002,19 +7011,19 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum)]\r\n");
+    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum_ext)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_unsigned_256b("sub_bignum", sub_bignum);
-    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum)]\r\n");
+    test_sub_bignum_unsigned_256b("sub_bignum_ext", sub_bignum_ext);
+    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum_ext)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos)]\r\n");
+    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos_ext)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_unsigned_256b("sub_bignum_with_add_twos", sub_bignum_with_add_twos);
-    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos)]\r\n");
+    test_sub_bignum_unsigned_256b("sub_bignum_with_add_twos_ext", sub_bignum_with_add_twos_ext);
+    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos_ext)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
