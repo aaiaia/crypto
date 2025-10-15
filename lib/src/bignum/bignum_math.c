@@ -233,7 +233,7 @@ bignum_cmp_e cmp_bignum_with_sub_add_twos(const bignum_s* s0, const bignum_s* s1
         cmp = BIGNUM_CMP_ER; // error
     }
 
-    rmBitNum(&tmp);
+    rmBigNum(&tmp);
 
     return cmp;
 }
@@ -458,7 +458,7 @@ ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_
 }
 
 #define MACRO_MULTIPLIER_COMMON_CLOSE(D, S1, S0, T) { \
-    rmBitNum(&(T)); \
+    rmBigNum(&(T)); \
 }
 // idea notes.
 // s0 accumulates then shift left
@@ -608,8 +608,8 @@ ReturnType mul_bignum_nbs_up2dn_ext(bignum_s* d, const bignum_s* s1, const bignu
                     if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
                 }
 
-                if(rmBitNum(&_s0m2_) != 0)  { /* Memory leakage? */ };
-                if(rmBitNum(&_prod_) != 0)  { /* Memory leakage? */ };
+                if(rmBigNum(&_s0m2_) != 0)  { /* Memory leakage? */ };
+                if(rmBigNum(&_prod_) != 0)  { /* Memory leakage? */ };
             }
             else
             {
@@ -718,8 +718,8 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
                     if(_fr_ != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
                 }
 
-                if(rmBitNum(&_s0m2_) != 0)  { /* Memory leakage? */ };
-                if(rmBitNum(&_prod_) != 0)  { /* Memory leakage? */ };
+                if(rmBigNum(&_s0m2_) != 0)  { /* Memory leakage? */ };
+                if(rmBigNum(&_prod_) != 0)  { /* Memory leakage? */ };
             }
             else
             {
@@ -895,9 +895,9 @@ ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s*
                     if(q != NULL)   _fr_ = cpy_bignum_math(q, _quot_);
                 }
 
-                if(rmBitNum(&_temp_) != 0)  { /* Memory leakage? */ };
-                if(rmBitNum(&_d_m2_) != 0)  { /* Memory leakage? */ };
-                if(rmBitNum(&_quot_) != 0)  { /* Memory leakage? */ };
+                if(rmBigNum(&_temp_) != 0)  { /* Memory leakage? */ };
+                if(rmBigNum(&_d_m2_) != 0)  { /* Memory leakage? */ };
+                if(rmBigNum(&_quot_) != 0)  { /* Memory leakage? */ };
 
                 return _fr_;
             }
@@ -925,7 +925,7 @@ ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, con
 
             abs_bignum_signed(abs_n, n);
             if(cmp_bignum_logical(abs_n, p) == BIGNUM_CMP_GT) {
-                rmBitNum(&abs_n);
+                rmBigNum(&abs_n);
                 return E_NOT_IMPL;
             } else { /* Valid case */ }
 
@@ -934,11 +934,11 @@ ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, con
             } else if(signOf_n  == BIGNUM_SIGN_NEG) {
                 sub_bignum(x, p, abs_n);
             } else {
-                rmBitNum(&abs_n);
+                rmBigNum(&abs_n);
                 return E_ERROR_RUNTIME;
             }
 
-            rmBitNum(&abs_n);
+            rmBigNum(&abs_n);
         } else {
             return E_ERROR_BIGNUM_LENGTH;
         }
@@ -1052,14 +1052,14 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
             if(cpy_bignum_math(r, _o_r_) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
             _PRINT_BIGNUM_(_o_r_, "greatest common divisor");
 
-            if(rmBitNum(&_tmp_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_quo_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_o_r_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&___r_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_o_s_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&___s_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_o_t_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&___t_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_tmp_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_quo_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_o_r_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&___r_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_o_s_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&___s_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_o_t_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&___t_) != 0)  { /* Memory leakage? */ };
         } else {
             return E_ERROR_BIGNUM_LENGTH;
         }
@@ -1158,12 +1158,12 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
 
             if(r != NULL)   if((_fr_ = cpy_bignum_math(r, _o_r_)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
 
-            if(rmBitNum(&_tmp_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_quo_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_o_r_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_n_r_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_o_t_) != 0)  { /* Memory leakage? */ };
-            if(rmBitNum(&_n_t_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_tmp_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_quo_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_o_r_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_n_r_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_o_t_) != 0)  { /* Memory leakage? */ };
+            if(rmBigNum(&_n_t_) != 0)  { /* Memory leakage? */ };
 
             if(!has_value)  return E_HAS_NO_VALUE;
         } else {
