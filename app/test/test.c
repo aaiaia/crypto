@@ -3369,14 +3369,12 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
 
         for(size_t i = 0UL; i < sizeof(TEST_mul_bignum_with_mod_value_set_LIST)/sizeof(test_mul_bignum_with_mod_value_set); i++)
         {
-            memcpy(reference->nums, TV_LIST_NUMERATOR_1024b[i], reference->size);
+            memcpy(reference->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_n, reference->size);
 
-            memcpy(multiplier->nums, TV_LIST_QUOTIENT_1024b[i], multiplier->size);
-            memcpy(multiplicand->nums, TV_LIST_DENOMINATOR_1024b[i], multiplicand->size);
+            memcpy(multiplier->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_q, multiplier->size);
+            memcpy(multiplicand->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_d, multiplicand->size);
 
-            memcpy(remainder->nums, TV_LIST_REMAINDER_1024b[i], remainder->size);
-
-            memcpy(addedNumber->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_r, addedNumber->size);
+            memcpy(remainder->nums, TEST_mul_bignum_with_mod_value_set_LIST[i].ref_r, remainder->size);
             intentional_invalid = TEST_mul_bignum_with_mod_value_set_LIST[i].invalid_case;
 
             TICK_TIME_START(test_fn_name);
@@ -3391,8 +3389,8 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
                 printReturnType(fr);
             } else { /* Do nothing */ }
 
-            test_memcmp0 = memcmp(productAddRem->nums, reference->nums, productAddRem->size);
-            if(test_memcmp0 != 0)
+            cmp_result = (memcmp(productAddRem->nums, reference->nums, productAddRem->size) == 0);
+            if(!cmp_result)
             {
                 test_print_bignum(reference, "reference");
 
