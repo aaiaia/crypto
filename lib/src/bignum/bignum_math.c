@@ -920,19 +920,27 @@ ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, con
     if((x != NULL) && (n != NULL) && (p != NULL)) {
         if((((n->bits) == (p->bits)) && ((x->bits) == (p->bits)))|| (!guard)) {
             bool errFlags;
-            const bignum_sign_e signOf_n = sign_bignum_signed(n);
+            bignum_sign_e signOf_n = BIGNUM_SIGN_NU;
+            bignum_cmp_e cmp_n_with_p = BIGNUM_CMP_NU;
             bignum_s* abs_n = mkBigNum(n->bits);
 
             abs_bignum_signed(abs_n, n);
-            if(cmp_bignum_logical(abs_n, p) == BIGNUM_CMP_GT) {
-                rmBigNum(&abs_n);
-                return E_NOT_IMPL;
-            } else { /* Valid case */ }
+            cmp_n_with_p = cmp_bignum_logical(abs_n, p);
+            signOf_n = sign_bignum_signed(n);
 
             if(signOf_n  == BIGNUM_SIGN_POS) {
-                cpy_bignum_math(x, abs_n);
+                if((cmp_n_with_p == BIGNUM_CMP_GT) || (cmp_n_with_p == BIGNUM_CMP_EQ)) {
+                    sub_bignum(x, abs_n, p);
+                } else {
+                    cpy_bignum_math(x, abs_n);
+                }
             } else if(signOf_n  == BIGNUM_SIGN_NEG) {
-                sub_bignum(x, p, abs_n);
+                if((cmp_n_with_p == BIGNUM_CMP_GT) || (cmp_n_with_p == BIGNUM_CMP_EQ)) {
+                    rmBigNum(&abs_n);
+                    return E_NOT_IMPL;
+                } else {
+                    sub_bignum(x, p, abs_n);
+                }
             } else {
                 rmBigNum(&abs_n);
                 return E_ERROR_RUNTIME;
@@ -1153,6 +1161,8 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
             }
             else
             {
+                _DPRINTF_("clr_bignum(t)\r\n");
+                if((_fr_ = clr_bignum(t)) != E_OK) { /* has error */ _DPRINTF_("%s, line:%d, _fr_: %d\n", __func__, __LINE__, _fr_); };
                 has_value = false;
             }
 
