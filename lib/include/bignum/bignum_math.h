@@ -65,9 +65,21 @@ static inline bignum_cmp_e cmp_bignum_logical_unsigned(const bignum_s* s0, const
     return cmp_bignum_logical_ext(s0, s1, true);
 }
 ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
+static inline ReturnType add_bignum(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+{
+    return add_bignum_ext(NULL, d, s0, s1, 0U);
+}
 bignum_t add_bignum_carry_loc(bignum_s* d, const bignum_t v, const size_t idx);
 ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
+static inline ReturnType sub_bignum(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+{
+    return sub_bignum_ext(NULL, d, s0, s1, 0U);
+}
 ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
+static inline ReturnType sub_bignum_with_add_twos(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+{
+    return sub_bignum_with_add_twos_ext(NULL, d, s0, s1, 0U);
+}
 ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
 ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
 ReturnType mul_bignum_nbs_up2dn_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
