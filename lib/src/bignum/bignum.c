@@ -15,7 +15,7 @@ bignum_s* mkBigNum_ext(const size_t bits, const bignum_type_e type) {
     return p;
 }
 
-int rmBitNum(bignum_s** p) {
+int rmBigNum(bignum_s** p) {
     int fs = 0;
     if((void*)p!=NULL) {
         if((void*)(*p)!=NULL) {

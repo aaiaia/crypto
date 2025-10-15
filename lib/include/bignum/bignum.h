@@ -63,6 +63,6 @@ static inline bignum_s* mkBigNum_signed(const size_t bits)
 {
     return mkBigNum_ext(bits, BIGNUM_TYPE_SIGNED);
 }
-int rmBitNum(bignum_s** p);
+int rmBigNum(bignum_s** p);
 
 #endif/* BIGNUM_H */
