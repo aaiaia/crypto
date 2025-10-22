@@ -820,9 +820,9 @@ void test_cpy_bignum_math_signed(void)
     bignum_s* test_bignum_l;    // long
     bignum_s* test_bignum_s;    // short
 
-    test_bignum_r = mkBigNum_signed(TEST_BIGNUM_L_BIT);
-    test_bignum_l = mkBigNum_signed(TEST_BIGNUM_L_BIT);
-    test_bignum_s = mkBigNum_signed(TEST_BIGNUM_S_BIT);
+    test_bignum_r = mkBigNum(TEST_BIGNUM_L_BIT);
+    test_bignum_l = mkBigNum(TEST_BIGNUM_L_BIT);
+    test_bignum_s = mkBigNum(TEST_BIGNUM_S_BIT);
 
     for(size_t i = 0UL; i < sizeof(TEST_cpy_bignum_set_LIST)/sizeof(test_cpy_bignum_set_t); i++)
     {
@@ -834,8 +834,8 @@ void test_cpy_bignum_math_signed(void)
             memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
             intentional_fail = TEST_cpy_bignum_set_LIST[i].invalid_case;
 
-            TICK_TIME_START("cpy_bignum_math(long, short)");
-            if(fr = cpy_bignum_math(test_bignum_l, test_bignum_s)) {
+            TICK_TIME_START("cpy_bignum_signed_safe(long, short)");
+            if(fr = cpy_bignum_signed_safe(test_bignum_l, test_bignum_s)) {
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
@@ -846,7 +846,7 @@ void test_cpy_bignum_math_signed(void)
                 test_print_bignum(test_bignum_s, "short");
                 test_print_bignum(test_bignum_l, "long");
             }
-            printf("[%lu] signed: cpy_bignum_math() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
+            printf("[%lu] signed: cpy_bignum_signed_safe() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
             TEST_ASSERT((cmp_result) || (intentional_fail));
         }
         else if( TEST_cpy_bignum_set_LIST[i].cpy_type == cpyL2S)
@@ -857,8 +857,8 @@ void test_cpy_bignum_math_signed(void)
             memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
             intentional_fail = TEST_cpy_bignum_set_LIST[i].invalid_case;
 
-            TICK_TIME_START("cpy_bignum_math(short, long)");
-            if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            TICK_TIME_START("cpy_bignum_signed_unsafe(short, long)");
+            if(fr = cpy_bignum_signed_unsafe(test_bignum_s, test_bignum_l)) {
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
@@ -869,12 +869,12 @@ void test_cpy_bignum_math_signed(void)
                 test_print_bignum(test_bignum_l, "long");
                 test_print_bignum(test_bignum_s, "short");
             }
-            printf("[%lu] signed: cpy_bignum_math() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
+            printf("[%lu] signed: cpy_bignum_signed_unsafe() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
             TEST_ASSERT((cmp_result) || (intentional_fail));
         }
         else
         {
-            printf("[%lu] signed: testcase for cpy_bignum_math() is %s\r\n", i, MES_FAIL);
+            printf("[%lu] signed: testcase for cpy_bignum_signed_safe() is %s\r\n", i, MES_FAIL);
         }
     }
 
@@ -908,9 +908,9 @@ void test_cpy_bignum_math_unsigned(void)
     bignum_s* test_bignum_l;    // long
     bignum_s* test_bignum_s;    // short
 
-    test_bignum_r = mkBigNum_unsigned(TEST_BIGNUM_L_BIT);
-    test_bignum_l = mkBigNum_unsigned(TEST_BIGNUM_L_BIT);
-    test_bignum_s = mkBigNum_unsigned(TEST_BIGNUM_S_BIT);
+    test_bignum_r = mkBigNum(TEST_BIGNUM_L_BIT);
+    test_bignum_l = mkBigNum(TEST_BIGNUM_L_BIT);
+    test_bignum_s = mkBigNum(TEST_BIGNUM_S_BIT);
 
     for(size_t i = 0UL; i < sizeof(TEST_cpy_bignum_set_LIST)/sizeof(test_cpy_bignum_set_t); i++)
     {
@@ -922,8 +922,8 @@ void test_cpy_bignum_math_unsigned(void)
             memset(test_bignum_l->nums, 0x0u, (test_bignum_l->size));
             intentional_fail = TEST_cpy_bignum_set_LIST[i].invalid_case;
 
-            TICK_TIME_START("cpy_bignum_math(long, short)");
-            if(fr = cpy_bignum_math(test_bignum_l, test_bignum_s)) {
+            TICK_TIME_START("cpy_bignum_unsigned_safe(long, short)");
+            if(fr = cpy_bignum_unsigned_safe(test_bignum_l, test_bignum_s)) {
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
@@ -934,7 +934,7 @@ void test_cpy_bignum_math_unsigned(void)
                 test_print_bignum(test_bignum_s, "short");
                 test_print_bignum(test_bignum_l, "long");
             }
-            printf("[%lu] unsigned: cpy_bignum_math() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
+            printf("[%lu] unsigned: cpy_bignum_unsigned_safe() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
             TEST_ASSERT((cmp_result) || (intentional_fail));
         }
         else if( TEST_cpy_bignum_set_LIST[i].cpy_type == cpyL2S)
@@ -945,8 +945,8 @@ void test_cpy_bignum_math_unsigned(void)
             memset(test_bignum_s->nums, 0x0u, (test_bignum_s->size));
             intentional_fail = TEST_cpy_bignum_set_LIST[i].invalid_case;
 
-            TICK_TIME_START("cpy_bignum_math(short, long)");
-            if(fr = cpy_bignum_math(test_bignum_s, test_bignum_l)) {
+            TICK_TIME_START("cpy_bignum_signed_unsafe(short, long)");
+            if(fr = cpy_bignum_signed_unsafe(test_bignum_s, test_bignum_l)) {
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
@@ -957,12 +957,12 @@ void test_cpy_bignum_math_unsigned(void)
                 test_print_bignum(test_bignum_l, "long");
                 test_print_bignum(test_bignum_s, "short");
             }
-            printf("[%lu] unsigned: cpy_bignum_math() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
+            printf("[%lu] unsigned: cpy_bignum_signed_unsafe() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_fail?MES_SKIP:MES_FAIL)));
             TEST_ASSERT((cmp_result) || (intentional_fail));
         }
         else
         {
-            printf("[%lu] unsigned: testcase for cpy_bignum_math() is %s\r\n", i, MES_FAIL);
+            printf("[%lu] unsigned: testcase for cpy_bignum_signed_safe() is %s\r\n", i, MES_FAIL);
         }
     }
 
@@ -1113,9 +1113,9 @@ void test_abs_bignum_signed_256b(void)
     bignum_s* test_ref;
     bignum_s* test_tmp;
 
-    test___a = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
-    test_ref = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
-    test_tmp = mkBigNum_signed(TEST_BIGNUM_ABS_BIT);
+    test___a = mkBigNum(TEST_BIGNUM_ABS_BIT);
+    test_ref = mkBigNum(TEST_BIGNUM_ABS_BIT);
+    test_tmp = mkBigNum(TEST_BIGNUM_ABS_BIT);
 
     for(size_t i = 0UL; i < sizeof(TEST_BIGNUM_abs_bignum_set_LIST)/sizeof(test_bignum_abs_bignum_set_t); i++)
     {
@@ -1160,12 +1160,12 @@ void test_sign_bignum_256b(void)
 
     /* type: unsigned int, significant bit is 1'b0 */
     {
-        test_bignum = mkBigNum_unsigned(TEST_BIGNUM_SIGN_BIT);
+        test_bignum = mkBigNum(TEST_BIGNUM_SIGN_BIT);
         test_bignum->nums[test_bignum->nlen-1U] = 0U;
         test_sign_ref = BIGNUM_SIGN_POS;
 
-        TICK_TIME_START("sign_bignum, unsigned int, significant bit is 1'b0");
-        test_sign = sign_bignum(test_bignum);
+        TICK_TIME_START("sign_bignum_unsigned, unsigned int, significant bit is 1'b0");
+        test_sign = sign_bignum_unsigned(test_bignum);
         TICK_TIME_END;
 
         cmp_result = (test_sign == test_sign_ref);
@@ -1174,7 +1174,7 @@ void test_sign_bignum_256b(void)
             test_print_bignum(test_bignum, "bignum");
             test_print_bignum_sign(test_sign);
         }
-        printf("sign_bignum(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
+        printf("sign_bignum_unsigned(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
         TEST_ASSERT(cmp_result);
 
         rmBigNum(&test_bignum);
@@ -1182,12 +1182,12 @@ void test_sign_bignum_256b(void)
 
     /* type: unsigned int, significant bit is 1'b1 */
     {
-        test_bignum = mkBigNum_unsigned(TEST_BIGNUM_SIGN_BIT);
+        test_bignum = mkBigNum(TEST_BIGNUM_SIGN_BIT);
         test_bignum->nums[test_bignum->nlen-1U] = BIGNUM_MAX;
         test_sign_ref = BIGNUM_SIGN_POS;
 
-        TICK_TIME_START("sign_bignum, unsigned int, significant bit is 1'b1");
-        test_sign = sign_bignum(test_bignum);
+        TICK_TIME_START("sign_bignum_unsigned, unsigned int, significant bit is 1'b1");
+        test_sign = sign_bignum_unsigned(test_bignum);
         TICK_TIME_END;
 
         cmp_result = (test_sign == test_sign_ref);
@@ -1196,7 +1196,7 @@ void test_sign_bignum_256b(void)
             test_print_bignum(test_bignum, "bignum");
             test_print_bignum_sign(test_sign);
         }
-        printf("sign_bignum(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
+        printf("sign_bignum_unsigned(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
         TEST_ASSERT(cmp_result);
 
         rmBigNum(&test_bignum);
@@ -1204,12 +1204,12 @@ void test_sign_bignum_256b(void)
 
     /* type: signed int, significant bit is 1'b0 */
     {
-        test_bignum = mkBigNum_signed(TEST_BIGNUM_SIGN_BIT);
+        test_bignum = mkBigNum(TEST_BIGNUM_SIGN_BIT);
         test_bignum->nums[test_bignum->nlen-1U] = 0U;
         test_sign_ref = BIGNUM_SIGN_POS;
 
-        TICK_TIME_START("sign_bignum, signed int, significant bit is 1'b0");
-        test_sign = sign_bignum(test_bignum);
+        TICK_TIME_START("sign_bignum_signed, signed int, significant bit is 1'b0");
+        test_sign = sign_bignum_signed(test_bignum);
         TICK_TIME_END;
 
         cmp_result = (test_sign == test_sign_ref);
@@ -1218,7 +1218,7 @@ void test_sign_bignum_256b(void)
             test_print_bignum(test_bignum, "bignum");
             test_print_bignum_sign(test_sign);
         }
-        printf("sign_bignum(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
+        printf("sign_bignum_signed(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
         TEST_ASSERT(cmp_result);
 
         rmBigNum(&test_bignum);
@@ -1226,12 +1226,12 @@ void test_sign_bignum_256b(void)
 
     /* type: unsigned int, significant bit is 1'b1 */
     {
-        test_bignum = mkBigNum_signed(TEST_BIGNUM_SIGN_BIT);
+        test_bignum = mkBigNum(TEST_BIGNUM_SIGN_BIT);
         test_bignum->nums[test_bignum->nlen-1U] = BIGNUM_MAX;
         test_sign_ref = BIGNUM_SIGN_NEG;
 
-        TICK_TIME_START("sign_bignum, signed int, significant bit is 1'b1");
-        test_sign = sign_bignum(test_bignum);
+        TICK_TIME_START("sign_bignum_signed, signed int, significant bit is 1'b1");
+        test_sign = sign_bignum_signed(test_bignum);
         TICK_TIME_END;
 
         cmp_result = (test_sign == test_sign_ref);
@@ -1240,7 +1240,7 @@ void test_sign_bignum_256b(void)
             test_print_bignum(test_bignum, "bignum");
             test_print_bignum_sign(test_sign);
         }
-        printf("sign_bignum(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
+        printf("sign_bignum_signed(): %s\r\n", ((cmp_result)?(MES_PASS):(MES_FAIL)));
         TEST_ASSERT(cmp_result);
 
         rmBigNum(&test_bignum);
@@ -1447,10 +1447,10 @@ void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_
     bignum_cmp_e test_bignum_cmp_ref;
     bool test_intentional_invalid;
 
-    bignum_s* test_bignum_Tmp0 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    bignum_s* test_bignum_Tmp1 = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    bignum_s* test_bignum_NumA = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
-    bignum_s* test_bignum_NumB = mkBigNum_signed(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_Tmp0 = mkBigNum(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_Tmp1 = mkBigNum(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_NumA = mkBigNum(TEST_BIGNUM_CMP_WITH_SUB_BIT);
+    bignum_s* test_bignum_NumB = mkBigNum(TEST_BIGNUM_CMP_WITH_SUB_BIT);
 
     for(size_t i = 0UL; i < sizeof(cmpTestSet)/sizeof(test_bignum_cmp_set_t); i++)
     {
@@ -1575,10 +1575,10 @@ void test_add_bignum_unsigned_256b(void) {
     bignum_s* test_dst;
     bignum_s* test_ref;
 
-    test_opA = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
-    test_opB = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
-    test_dst = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
-    test_ref = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_opA = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opB = mkBigNum(TEST_BIGNUM_256BIT);
+    test_dst = mkBigNum(TEST_BIGNUM_256BIT);
+    test_ref = mkBigNum(TEST_BIGNUM_256BIT);
 
     /* Add test */
     for(size_t i = 0UL; i <sizeof(TEST_BIGNUM_add_bignum_set_LIST)/sizeof(test_bignum_add_bignum_set_t); i++)
@@ -1647,10 +1647,10 @@ void test_sub_bignum_unsigned_256b(const char* test_fn_name, const TEST_FP_BIGNU
     bignum_s* test_dst;
     bignum_s* test_ref;
 
-    test_opA = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
-    test_opB = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
-    test_dst = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
-    test_ref = mkBigNum_unsigned(TEST_BIGNUM_256BIT);
+    test_opA = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opB = mkBigNum(TEST_BIGNUM_256BIT);
+    test_dst = mkBigNum(TEST_BIGNUM_256BIT);
+    test_ref = mkBigNum(TEST_BIGNUM_256BIT);
 
     /* Sub test */
     for(size_t i = 0UL; i < sizeof(TEST_BIGNUM_sub_bignum_set_LIST)/sizeof(test_bignum_sub_bignum_set_t); i++)
@@ -1792,10 +1792,10 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_4[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
-    0x00000006U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
-    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
-    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
-    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -98
 
 const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_5[] = {
@@ -1815,10 +1815,10 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_5[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
-    0x00000006U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
-    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
-    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
-    0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
+    0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -98
 
 typedef struct {
@@ -1971,11 +1971,40 @@ void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST
     rmBigNum(&test_ref);
 }
 
+const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_00000000_to_12345678[] = {
+    0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
+    0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
+    0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
+    0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
+};
+const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_87654321_to_12345678[] = {
+    0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
+    0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
+    0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
+    0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
+};
+const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_99999999_to_66666666[] = {
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+};
+const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_00800000_to_FFFFFFFF_at_3[] = {
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x007FFFFF, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+
 #define TEST_ADD_BIGNUM_CARRY_LOC_BIT_LEN 1024U
 void test_add_bignum_carry_loc(void)
 {
+    const char test_fn_name[] = "add_bignum_carry_loc";
+
     bignum_s* test_opA;
     bignum_t test_opB;
+    bool cmp_result;
+    bool intentional_invalid;
 
     test_opA = mkBigNum(TEST_ADD_BIGNUM_CARRY_LOC_BIT_LEN);
     (void)memset(test_opA->nums, 0x0U, test_opA->size);
@@ -1983,41 +2012,71 @@ void test_add_bignum_carry_loc(void)
 
     /* Set first stage 1 */
     test_opB = 0x12345678U;
+    intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
         bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    test_print_bignum(test_opA, "add loc result of opA");
+    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_00000000_to_12345678, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
 
     /* Set first stage 2 */
     test_opB = 0x87654321U;
+    intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
         bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
+    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_87654321_to_12345678, (test_opA->size)) == 0);
+    if((!cmp_result))
     test_print_bignum(test_opA, "add loc result of opA");
+    {
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
 
     /* Set first stage 3 */
     test_opB = 0x66666666U;
+    intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
         bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    test_print_bignum(test_opA, "add loc result of opA");
+    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_99999999_to_66666666, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
 
     /* Set first stage 4 */
     test_opB = 0x00800000U;
+    intentional_invalid = false;
     bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
-    test_print_bignum(test_opA, "Final Stage, add loc result of opA");
+    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_00800000_to_FFFFFFFF_at_3, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "Final Stage, add loc result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
 
     rmBigNum(&test_opA);
 }
@@ -2063,7 +2122,7 @@ void test_mul_bignum_bs_nn(void)
         test_print_bignum(test_dst, "dst");
         test_print_bignum(test_ref, "ref");
     }
-    printf("mul_bignum_1bs() is %s\r\n", ((test_cmp)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    printf("mul_bignum_signed_1bs() is %s\r\n", ((test_cmp)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
     TEST_ASSERT((test_cmp) || (intentional_invalid));
 
     rmBigNum(&test_opA);
@@ -4062,9 +4121,9 @@ typedef struct {
     const ReturnType ref_fr;
     const char* title;
     const bool invalid_case;
-} test_mmi_bignum_set;
+} test_mim_bignum_set;
 
-const test_mmi_bignum_set TEST_mmi_bignum_set_LIST[] = {
+const test_mim_bignum_set TEST_mim_bignum_set_LIST[] = {
     {
         TEST_MMI_NUM_A_0, TEST_MMI_NUM_N_0, TEST_MMI_NUM_REF_I_0, E_OK, 
         NULL, false,
@@ -4135,7 +4194,7 @@ const test_mmi_bignum_set TEST_mmi_bignum_set_LIST[] = {
     },
 };
 
-void test_mmi_bignum(void)
+void test_mim_bignum(void)
 {
 #define TEST_MMI_BIGNUM_BIT_LEN   1024U
     char keyin;
@@ -4168,13 +4227,13 @@ void test_mmi_bignum(void)
 
     if(!manually)
     {
-        for(size_t i = 0UL; i < sizeof(TEST_mmi_bignum_set_LIST)/sizeof(test_mmi_bignum_set); i++)
+        for(size_t i = 0UL; i < sizeof(TEST_mim_bignum_set_LIST)/sizeof(test_mim_bignum_set); i++)
         {
             /* set test vector*/
-            (void)memcpy(num_a->nums, TEST_mmi_bignum_set_LIST[i].ref_num_a, num_a->size);
-            (void)memcpy(num_n->nums, TEST_mmi_bignum_set_LIST[i].ref_num_n, num_n->size);
+            (void)memcpy(num_a->nums, TEST_mim_bignum_set_LIST[i].ref_num_a, num_a->size);
+            (void)memcpy(num_n->nums, TEST_mim_bignum_set_LIST[i].ref_num_n, num_n->size);
             (void)memset(num_i->nums, 0xffU, num_i->size);
-            intentional_invalid = TEST_mmi_bignum_set_LIST[i].invalid_case;
+            intentional_invalid = TEST_mim_bignum_set_LIST[i].invalid_case;
 
             TICK_TIME_START("mim_bignum");
             if(fr = mim_bignum(num_i, num_a, num_n)) {
@@ -4184,13 +4243,13 @@ void test_mmi_bignum(void)
             TICK_TIME_END;
             if(fr != E_HAS_NO_VALUE)
             {
-                cmp_result = (memcmp(num_i->nums, TEST_mmi_bignum_set_LIST[i].ref_num_i, num_i->size) == 0);
+                cmp_result = (memcmp(num_i->nums, TEST_mim_bignum_set_LIST[i].ref_num_i, num_i->size) == 0);
             }
             else
             {
                 cmp_result = true;
             }
-            cmp_fr = (TEST_mmi_bignum_set_LIST[i].ref_fr == fr);
+            cmp_fr = (TEST_mim_bignum_set_LIST[i].ref_fr == fr);
 
             if((!cmp_result) || (!cmp_fr))
             {
@@ -4198,9 +4257,9 @@ void test_mmi_bignum(void)
                 test_print_bignum(num_n, "num_n");
                 test_print_bignum(num_i, "a^-1 mod n(inverse mod n)");
                 printf("ref a^-1 mod n(inverse mod n)\r\n");
-                test_print_bignum_array(TEST_mmi_bignum_set_LIST[i].ref_num_i, num_i->nlen);
+                test_print_bignum_array(TEST_mim_bignum_set_LIST[i].ref_num_i, num_i->nlen);
             }
-            printf("[%lu] mmi_bignum() is %s\r\n", i, (((cmp_result) && (cmp_fr))?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            printf("[%lu] mim_bignum() is %s\r\n", i, (((cmp_result) && (cmp_fr))?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
             TEST_ASSERT(((cmp_result) && (cmp_fr)) || (intentional_invalid));
         }
     }
@@ -6936,6 +6995,418 @@ void test_SP800_38B_cmac_aes_imVal(void)
 }
 #endif /* TEST_CMAC */
 
+#ifdef TEST_SECP256K1_SECG
+#define _EC_BITS_   256U
+void test_EC_ALGEBRAIC_SUM(bignum_s* xR, bignum_s* yR, const bignum_s* xP, const bignum_s* yP, const bignum_s* xQ, const bignum_s* yQ, const bignum_s* p, const bignum_s* a)
+{
+#define __FUNC_RETURN_WRAPPING__(FR_VAR, FUNC) { \
+    if(((FR_VAR) = (FUNC)) != E_OK) \
+    { \
+        /* has error */ \
+        printf("[ERROR] %s, line:%d, _fr_: %d\n", __func__, __LINE__, (FR_VAR)); \
+    } \
+}
+
+    bool slope_is_INFINITE = false;
+    bool point_is_IDENTITY = false;
+    ReturnType fr;
+
+    if((cmp0_bignum(xP) == BIGNUM_CMP_ZO) && (cmp0_bignum(yP) == BIGNUM_CMP_ZO)) {
+        printf("[INFO] Point P is IDENTITY ELEMENTS\r\n");
+        point_is_IDENTITY |= true;
+    }
+    if((cmp0_bignum(xQ) == BIGNUM_CMP_ZO) && (cmp0_bignum(yQ) == BIGNUM_CMP_ZO)) {
+        printf("[INFO] Point Q is IDENTITY ELEMENTS\r\n");
+        point_is_IDENTITY |= true;
+    }
+
+    test_print_bignum(xP, "| | | | | xP | | | | |");
+    test_print_bignum(yP, "| | | | | yP | | | | |");
+    test_print_bignum(xQ, "| | | | | xQ | | | | |");
+    test_print_bignum(yQ, "| | | | | yQ | | | | |");
+    test_print_bignum(p, "| | | | | p | | | | |");
+    test_print_bignum(a, "| | | | | a | | | | |");
+
+    if(!point_is_IDENTITY) {
+        bignum_cmp_e cmp_x = cmp_bignum_logical(xP, xQ);
+        bignum_cmp_e cmp_y = cmp_bignum_logical(yP, yQ);
+
+        bignum_s* tmp_m = mkBigNum(_EC_BITS_);
+        bignum_s* tmp_x = mkBigNum(_EC_BITS_);
+        bignum_s* tmp_y = mkBigNum(_EC_BITS_);
+
+        if(!((cmp_x == BIGNUM_CMP_EQ) && (cmp_y == BIGNUM_CMP_EQ)))
+        {
+            /* P != Q */
+            printf("P != Q\n");
+
+            bignum_s* t_mul  = mkBigNum(_EC_BITS_<<1U); // bit extended m
+
+            bignum_s* dy  = mkBigNum(_EC_BITS_);
+            bignum_s* dx  = mkBigNum(_EC_BITS_);
+            bignum_s* dxi = mkBigNum(_EC_BITS_);
+
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(dy, yP, yQ));
+            test_print_bignum(dy, "| | | | | dy = yP - yQ | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(dy, dy, p));
+            test_print_bignum(dy, "| | | | | dy = (yP - yQ) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(dx, xP, xQ));
+            test_print_bignum(dx, "| | | | | dx = xP - xQ | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(dx, dx, p));
+            test_print_bignum(dx, "| | | | | dx = (xP - xQ) mod p | | | | |");
+
+            __FUNC_RETURN_WRAPPING__(fr, mim_bignum(dxi, dx, p));
+            test_print_bignum(dxi, "| | | | | dx^(-1) = (xP - xQ)^(-1) mod p | | | | |");
+            if(fr == E_HAS_NO_VALUE) {
+                printf("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
+                slope_is_INFINITE = true;
+            }
+
+            if(!slope_is_INFINITE) {
+                __FUNC_RETURN_WRAPPING__(fr, mul_bignum_unsafe(t_mul, dy, dxi));
+                test_print_bignum(t_mul, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) | | | | |");
+                __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(tmp_m, t_mul, p));
+                test_print_bignum(tmp_m, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) mod p | | | | |");
+            }
+
+            rmBigNum(&t_mul);
+
+            rmBigNum(&dy);
+            rmBigNum(&dx);
+            rmBigNum(&dxi);
+        }
+        else
+        {
+            /* P == Q */
+            printf("P == Q\n");
+
+            bignum_s* t_mul = mkBigNum(_EC_BITS_<<1U);
+
+            bignum_s* pow_x = mkBigNum(_EC_BITS_);
+            bignum_s* numer = mkBigNum(_EC_BITS_);
+            bignum_s* denom = mkBigNum(_EC_BITS_);
+
+            // x^2
+            __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, xP, xP));
+            test_print_bignum(t_mul, "| | | | | xP^2 | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(pow_x, t_mul, p));
+            test_print_bignum(pow_x, "| | | | | (xP^2) mod p  | | | | |");
+
+            // x^2 + a
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum(numer, pow_x, a));
+            test_print_bignum(numer, "| | | | | xP^2 + a | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(numer, numer, p));
+            test_print_bignum(numer, "| | | | | (xP^2 + a) mod p | | | | |");
+            // 2 * x^2
+            __FUNC_RETURN_WRAPPING__(fr, asl1b_bignum_self(pow_x, NULL, 0U));
+            test_print_bignum(pow_x, "| | | | | 2 * xP^2 | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(pow_x, pow_x, p));
+            test_print_bignum(pow_x, "| | | | | (2 * xP^2) mod p | | | | |");
+            // (x^2 + a) += (2 * x^2)
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum(numer, numer, pow_x));
+            test_print_bignum(numer, "| | | | | (3 * xP^2) + a | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(numer, numer, p));
+            test_print_bignum(numer, "| | | | | ((3 * xP^2) + a) mod p | | | | |");
+
+            // 2 * y
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum(denom, yP, yP));
+            test_print_bignum(denom, "| | | | | 2 * yP | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(denom, denom, p));
+            test_print_bignum(denom, "| | | | | (2 * yP) mod p | | | | |");
+
+            __FUNC_RETURN_WRAPPING__(fr, mim_bignum(denom, denom, p));
+            test_print_bignum(denom, "| | | | | (2 * yP)^(-1) mod p | | | | |");
+            if(fr == E_HAS_NO_VALUE) {
+                printf("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
+                slope_is_INFINITE = true;
+            }
+
+            if(!slope_is_INFINITE) {
+                __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, numer, denom));
+                test_print_bignum(t_mul, "| | | | | ((3 * xP^2) + a) * (2 * yP)^(-1) | | | | |");
+                __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(tmp_m, t_mul, p));
+                test_print_bignum(tmp_m, "| | | | | (((3 * xP^2) + a) * (2 * yP)^(-1)) mod p | | | | |");
+            }
+
+            rmBigNum(&t_mul);
+
+            rmBigNum(&pow_x);
+            rmBigNum(&numer);
+            rmBigNum(&denom);
+        }
+        test_print_bignum(tmp_m, "| | | | | m | | | | |");
+
+        {
+            bignum_s* t_mul = mkBigNum(_EC_BITS_<<1U);
+
+            bignum_s* pow_m = mkBigNum(_EC_BITS_);
+
+            // m^2
+            __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, tmp_m, tmp_m));
+            test_print_bignum(t_mul, "| | | | | m^2 | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(pow_m, t_mul, p));
+            test_print_bignum(pow_m, "| | | | | m^2 mod p | | | | |");
+
+            // m^2 - xP
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(tmp_x, pow_m, xP));
+            test_print_bignum(tmp_x, "| | | | | m^2 - xP | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_x, tmp_x, p));
+            test_print_bignum(tmp_x, "| | | | | (m^2 - xP) mod p| | | | |");
+            // m(^2 - xP) - xQ
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(tmp_x, tmp_x, xQ));
+            test_print_bignum(tmp_x, "| | | | | m^2 - xP - xQ | | | | |");
+            // ( m(^2 - xP) - xQ ) mod p
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_x, tmp_x, p));
+            test_print_bignum(tmp_x, "| | | | | (m^2 - xP - xQ) mod p | | | | |");
+
+            rmBigNum(&t_mul);
+
+            rmBigNum(&pow_m);
+        }
+        test_print_bignum(tmp_x, "| | | | | xR | | | | |");
+
+        {
+            bignum_s* t_mul = mkBigNum(_EC_BITS_<<1U);
+
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(tmp_y, tmp_x, xP));
+            test_print_bignum(tmp_y, "| | | | | xR - xP | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_y, tmp_y, p));
+            test_print_bignum(tmp_y, "| | | | | (xR - xP) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, tmp_m, tmp_y));
+            test_print_bignum(t_mul, "| | | | | m(xR - xP) | | | | |");
+
+            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(tmp_y, t_mul, p));
+            test_print_bignum(tmp_y, "| | | | | m(xR - xP) mod p | | | | |");
+
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum(tmp_y, yP, tmp_y));
+            test_print_bignum(tmp_y, "| | | | | yP + m(xR - xP) | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_y, tmp_y, p));
+            test_print_bignum(tmp_y, "| | | | | ( yP + m(xR - xP) ) mod p | | | | |");
+
+            rmBigNum(&t_mul);
+        }
+        test_print_bignum(tmp_y, "| | | | | yR | | | | |");
+
+        // -yR
+        __FUNC_RETURN_WRAPPING__(fr, twos_bignum(tmp_y, tmp_y));
+        test_print_bignum(tmp_y, "| | | | | (-yR) | | | | |");
+
+        // (-yR) mod p
+        __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_y, tmp_y, p));
+        test_print_bignum(tmp_y, "| | | | | (-yR) mod p | | | | |");
+
+        if(!slope_is_INFINITE) {
+            __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_signed_safe(xR, tmp_x));
+            __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_signed_safe(yR, tmp_y));
+        } else {
+            printf("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
+            __FUNC_RETURN_WRAPPING__(fr, clr_bignum(xR));
+            __FUNC_RETURN_WRAPPING__(fr, clr_bignum(yR));
+        }
+
+        rmBigNum(&tmp_m);
+        rmBigNum(&tmp_x);
+        rmBigNum(&tmp_y);
+    } else {
+        printf("[INFO] Point P op Q was Identity Elements, just adding two points\r\n");
+        __FUNC_RETURN_WRAPPING__(fr, add_bignum(xR, xP, xQ));
+        __FUNC_RETURN_WRAPPING__(fr, add_bignum(yR, yP, yQ));
+    }
+#undef __FUNC_RETURN_WRAPPING__
+}
+
+const uint32_t SECP256K1_calc_p[]  = { \
+    0xfffffc2fU, 0xfffffffeU, 0xffffffffU,  0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, };
+const uint32_t SECP256K1_calc_xG[] = { \
+    0x16f81798U, 0x59f2815bU, 0x2dce28d9U,  0x029bfcdbU, 0xce870b07U, 0x55a06295U, 0xf9dcbbacU, 0x79be667eU, };
+const uint32_t SECP256K1_calc_yG[] = { \
+    0xfb10d4b8U, 0x9c47d08fU, 0xa6855419U,  0xfd17b448U, 0x0e1108a8U, 0x5da4fbfcU, 0x26a3c465U, 0x483ada77U, };
+const uint32_t SECP256K1_calc_n[]  = { \
+    0xd0364141U, 0xbfd25e8cU, 0xaf48a03bU,  0xbaaedce6U, 0xfffffffeU, 0xffffffffU, 0xffffffffU, 0xffffffffU, };
+const char ref_test_SECP256K1_calcaulation[] = "[REFERENCES]\nElliptic Curve Cryptography: ECDH and ECDSA\n[Link] https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/";
+void test_SECP256K1_calcaulation(void)
+{
+    char c;
+        bignum_s* xP = mkBigNum(_EC_BITS_);
+        bignum_s* yP = mkBigNum(_EC_BITS_);
+        bignum_s* a = mkBigNum(_EC_BITS_);
+        bignum_s* b = mkBigNum(_EC_BITS_);
+        bignum_s* p = mkBigNum(_EC_BITS_);
+
+        bignum_s* xNP = mkBigNum(_EC_BITS_);
+        bignum_s* yNP = mkBigNum(_EC_BITS_);
+
+        clr_bignum(xP);
+        clr_bignum(yP);
+        clr_bignum(a);
+        clr_bignum(b);
+        clr_bignum(p);
+
+        xP->nums[0] = 3;
+        yP->nums[0] = 6;
+        a->nums[0] = 2;
+        b->nums[0] = 3;
+        p->nums[0] = 97;
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xP, yP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:2*xP");
+        test_print_bignum(yNP, "yNP:2*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:3*xP");
+        test_print_bignum(yNP, "yNP:3*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:4*xP");
+        test_print_bignum(yNP, "yNP:4*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:5*xP");
+        test_print_bignum(yNP, "yNP:5*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:6*xP");
+        test_print_bignum(yNP, "yNP:6*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:7*xP");
+        test_print_bignum(yNP, "yNP:7*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:8*xP");
+        test_print_bignum(yNP, "yNP:8*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:9*xP");
+        test_print_bignum(yNP, "yNP:9*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:10*xP");
+        test_print_bignum(yNP, "yNP:10*yP");
+
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        printf("============================================================\r\n");
+        c = getchar();
+        c = getchar();
+
+        test_EC_ALGEBRAIC_SUM(xNP, yNP, \
+                xNP, yNP, \
+                xP, yP, \
+                p, a);
+        test_print_bignum(xNP, "xNP:11*xP");
+        test_print_bignum(yNP, "yNP:11*yP");
+
+        rmBigNum(&xP);
+        rmBigNum(&yP);
+        rmBigNum(&a);
+        rmBigNum(&b);
+        rmBigNum(&p);
+
+        rmBigNum(&xNP);
+        rmBigNum(&yNP);
+
+    /* 
+     * EC Curve formula
+     * y^2 = x^3 + a * x + b
+     * [PRIME NUMVER FOR MODULO]
+     * p  = 0xffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f
+     * [COEFFICIENT X^1]
+     * a  = 0
+     * [COEFFICIENT X^0]
+     * b  = 7
+     * [BASE POINT]
+     * xG = 0x79be667e f9dcbbac 55a06295 ce870b07 029bfcdb 2dce28d9 59f2815b 16f81798
+     * yG = 0x483ada77 26a3c465 5da4fbfc 0e1108a8 fd17b448 a6855419 9c47d08f fb10d4b8
+     * [n(hP)==0]
+     * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
+     * h  = 1
+     */
+}
+#undef _EC_BITS_
+#endif /* TEST_SECP256K1_SECG */
+
 #define _KEYIN_DO_TEST_(c, TEST_FUNC_NAME) { \
     (c) = '\0'; \
     do { \
@@ -7071,11 +7542,11 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
+    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed_1bs)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum_1bs", mul_bignum_1bs);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_1bs)]\r\n");
+    test_mul_bignum_1024b("mul_bignum_signed_1bs", mul_bignum_signed_1bs);
+    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed_1bs)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -7208,11 +7679,11 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mmi_bignum()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mmi_bignum");
+    printf("[test start: test_mim_bignum()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mim_bignum");
     _COND_DO_TEST_(keyin)
-    test_mmi_bignum();
-    printf("[test   end: test_mmi_bignum()]\r\n");
+    test_mim_bignum();
+    printf("[test   end: test_mim_bignum()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -7302,6 +7773,12 @@ int main(int argc, char** argv) {
         printf("arg[%d]:%s, ", i, argv[i]);
     }
     printf("\r\n");
+
+#if 1 /* TEST_SECP256K1_SECG */
+    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_calcaulation");
+    _COND_DO_TEST_(keyin)
+    test_SECP256K1_calcaulation();
+#endif/* TEST_SECP256K1_SECG */
 
     _KEYIN_DO_TEST_(keyin, "test_sequence");
     _COND_DO_TEST_(keyin)
