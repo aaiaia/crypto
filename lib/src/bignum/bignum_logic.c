@@ -6,48 +6,33 @@
 
 ReturnType inv_bignum(bignum_s* n)
 {
-    if(n != NULL)
+    if(!(n != NULL))    return E_ERROR_NULL;
+
+    for(size_t i = 0UL; i < n->nlen; i++)
     {
-        for(size_t i = 0UL; i < n->nlen; i++)
-        {
-            n->nums[i] = ~n->nums[i];
-        }
-    }
-    else
-    {
-        return E_ERROR_NULL;
+        n->nums[i] = ~n->nums[i];
     }
     return E_OK;
 }
 
 ReturnType set_bignum(bignum_s* n)
 {
-    if(n != NULL)
+    if(!(n != NULL))    return E_ERROR_NULL;
+
+    for(size_t i = 0UL; i < n->nlen; i++)
     {
-        for(size_t i = 0UL; i < n->nlen; i++)
-        {
-            n->nums[i] = BIGNUM_MAX;
-        }
-    }
-    else
-    {
-        return E_ERROR_NULL;
+        n->nums[i] = BIGNUM_MAX;
     }
     return E_OK;
 }
 
 ReturnType clr_bignum(bignum_s* n)
 {
-    if(n != NULL)
+    if(!(n != NULL))    return E_ERROR_NULL;
+
+    for(size_t i = 0UL; i < n->nlen; i++)
     {
-        for(size_t i = 0UL; i < n->nlen; i++)
-        {
-            n->nums[i] = 0U;
-        }
-    }
-    else
-    {
-        return E_ERROR_NULL;
+        n->nums[i] = 0U;
     }
     return E_OK;
 }
@@ -331,203 +316,171 @@ ReturnType srb_bignum_self_ext(bignum_s* d, const size_t blen, const bool arith)
 
 ReturnType mlw_bignum_self_ext(bignum_s* d, const size_t lml, const bool arith)
 {
-    if(d != NULL)
+    if(!(d != NULL))    return E_ERROR_NULL;
+
+    if(lml != 0UL)
     {
-        if(lml != 0UL)
+        const bignum_t signBitMask = d->nums[d->nlen-1ul] & (1u<<(BIGNUM_BITS-1u));
+
+        /* Move condition */
+        /* dii: destination inverse index, sii: source inverse index */
+        for(size_t dii=(d->nlen-1UL), sii=(d->nlen-lml-1UL); dii>=lml; dii--, sii--)
         {
-            const bignum_t signBitMask = d->nums[d->nlen-1ul] & (1u<<(BIGNUM_BITS-1u));
+            d->nums[dii] = d->nums[sii];
+        }
+        /* clear forward index */
+        for(size_t cfi=0UL; cfi<lml; cfi++)
+        {
+            d->nums[cfi] = 0x0UL;    // clear right side
+        }
 
-            /* Move condition */
-            /* dii: destination inverse index, sii: source inverse index */
-            for(size_t dii=(d->nlen-1UL), sii=(d->nlen-lml-1UL); dii>=lml; dii--, sii--)
+        if(arith)
+        {
+            if((d->nums[d->nlen] & (1u<<(BIGNUM_BITS-1u))) != signBitMask)
             {
-                d->nums[dii] = d->nums[sii];
-            }
-            /* clear forward index */
-            for(size_t cfi=0UL; cfi<lml; cfi++)
-            {
-                d->nums[cfi] = 0x0UL;    // clear right side
-            }
-
-            if(arith)
-            {
-                if((d->nums[d->nlen] & (1u<<(BIGNUM_BITS-1u))) != signBitMask)
-                {
-                    return E_ERROR_BIGNUM_SIGN;
-                }
+                return E_ERROR_BIGNUM_SIGNBIT;
             }
         }
-        else
-        {
-            /* Not move condition */
-        }
-        return E_OK;
     }
     else
     {
-        return E_ERROR_NULL;
+        /* Not move condition */
     }
+    return E_OK;
 }
 ReturnType mrw_bignum_self_ext(bignum_s* d, const size_t lmr, const bool arith)
 {
-    if(d != NULL)
-    {
-        if(lmr != 0UL)
-        {
-            bignum_t signBitMask;
+    if(!(d != NULL))    return E_ERROR_NULL;
 
-            if(!arith)
-            {
-                signBitMask = 0U;
-            }
-            else
-            {
-                if(d->nums[d->nlen-1ul] & (1u<<(BIGNUM_BITS-1u)))
-                {
-                    signBitMask = BIGNUM_MAX;
-                }
-                else
-                {
-                    signBitMask = 0u;
-                }
-            }
-            /* Move condition */
-            /* dfi: destination forward index, sfi: source forward index */
-            for(size_t dfi=0UL, sfi=lmr; sfi<(d->nlen); dfi++, sfi++)
-            {
-                d->nums[dfi] = d->nums[sfi];
-            }
-            /* cii: clear inverse index */
-            for(size_t cii=(d->nlen-1U); cii>(d->nlen-lmr-1U); cii--)
-            {
-                d->nums[cii] = signBitMask;    // clear left side
-            }
+    if(lmr != 0UL)
+    {
+        bignum_t signBitMask;
+
+        if(!arith)
+        {
+            signBitMask = 0U;
         }
         else
         {
-            /* Not move condition */
+            if(d->nums[d->nlen-1ul] & (1u<<(BIGNUM_BITS-1u)))
+            {
+                signBitMask = BIGNUM_MAX;
+            }
+            else
+            {
+                signBitMask = 0u;
+            }
         }
-        return E_OK;
+        /* Move condition */
+        /* dfi: destination forward index, sfi: source forward index */
+        for(size_t dfi=0UL, sfi=lmr; sfi<(d->nlen); dfi++, sfi++)
+        {
+            d->nums[dfi] = d->nums[sfi];
+        }
+        /* cii: clear inverse index */
+        for(size_t cii=(d->nlen-1U); cii>(d->nlen-lmr-1U); cii--)
+        {
+            d->nums[cii] = signBitMask;    // clear left side
+        }
     }
     else
     {
-        return E_ERROR_NULL;
+        /* Not move condition */
     }
+    return E_OK;
 }
 
 ReturnType slnb_bignum_self_ext(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lslb, const bool arith)
 {
-    if(d != NULL)
+    if(!(d != NULL))            return E_ERROR_NULL;
+    if(!(BIGNUM_BITS > lslb))   return E_ERROR_ARGS;
+
+    const size_t lsrb = BIGNUM_BITS - lslb;
+    bignum_t c;
+    const bignum_t signBitMask = d->nums[d->nlen-1ul] & (1u<<(BIGNUM_BITS-1u));
+
+    if(lslb != 0U)
     {
-        if(BIGNUM_BITS > lslb)
+        c = ci;
+        for(size_t fi = 0U; fi != d->nlen; fi++)
         {
-            const size_t lsrb = BIGNUM_BITS - lslb;
-            bignum_t c;
-            const bignum_t signBitMask = d->nums[d->nlen-1ul] & (1u<<(BIGNUM_BITS-1u));
-
-            if(lslb != 0U)
-            {
-                c = ci;
-                for(size_t fi = 0U; fi != d->nlen; fi++)
-                {
-                    bignum_t tmp = d->nums[fi];
-                    d->nums[fi] = ((d->nums[fi] << lslb) | c);
-                    c = (tmp >> lsrb);
-                }
-
-                if(arith)
-                {
-                    if((d->nums[d->nlen] & (1u<<(BIGNUM_BITS-1u))) != signBitMask)
-                    {
-                        return E_ERROR_BIGNUM_SIGN;
-                    }
-                }
-            }
-            else
-            {
-                c = 0U;
-            }
-
-            if(co != NULL)
-            {
-                *co = c;
-            }
-            else
-            {
-                /* Do nothing */
-            }
+            bignum_t tmp = d->nums[fi];
+            d->nums[fi] = ((d->nums[fi] << lslb) | c);
+            c = (tmp >> lsrb);
         }
-        else
+
+        if(arith)
         {
-            return E_ERROR_ARGS;
+            if((d->nums[d->nlen] & (1u<<(BIGNUM_BITS-1u))) != signBitMask)
+            {
+                return E_ERROR_BIGNUM_SIGNBIT;
+            }
         }
     }
     else
     {
-        return E_ERROR_NULL;
+        c = 0U;
+    }
+
+    if(co != NULL)
+    {
+        *co = c;
+    }
+    else
+    {
+        /* Do nothing */
     }
     return E_OK;
 }
 
 ReturnType srnb_bignum_self_ext(bignum_s* d, bignum_t* co, const bignum_t ci, const size_t lsrb, const bool arith)
 {
-    if(d != NULL)
+    if(!(d != NULL))            return E_ERROR_NULL;
+    if(!(BIGNUM_BITS > lsrb))   return E_ERROR_ARGS;
+
+    const size_t lslb = BIGNUM_BITS - lsrb;
+    bignum_t c;
+    bignum_t signBitMask;
+
+    if(!arith)
     {
-        if(BIGNUM_BITS > lsrb)
-        {
-            const size_t lslb = BIGNUM_BITS - lsrb;
-            bignum_t c;
-            bignum_t signBitMask;
-
-            if(!arith)
-            {
-                signBitMask = 0x0U;
-            }
-            else
-            {
-                if(d->nums[d->nlen-1UL] & (1U<<(BIGNUM_BITS-1U)))
-                {
-                    signBitMask = (BIGNUM_MAX << lslb);
-                }
-                else
-                {
-                    signBitMask = 0U;
-                }
-            }
-
-            if(lsrb != 0U)
-            {
-                c = ci;
-                for(size_t ii = d->nlen-1U; ii != SIZE_MAX ; ii--)
-                {
-                    bignum_t tmp = d->nums[ii];
-                    d->nums[ii] = ((d->nums[ii] >> lsrb) | c);
-                    c = (tmp << lslb);
-                }
-                d->nums[d->nlen-1U] |= signBitMask; // arith matic shift
-            }
-            else
-            {
-                c = 0U;
-            }
-
-            if(co != NULL)
-            {
-                *co = c;
-            }
-            else
-            {
-                /* Do nothing */
-            }
-        }
-        else
-        {
-            return E_ERROR_ARGS;
-        }
+        signBitMask = 0x0U;
     }
     else
     {
-        return E_ERROR_NULL;
+        if(d->nums[d->nlen-1UL] & (1U<<(BIGNUM_BITS-1U)))
+        {
+            signBitMask = (BIGNUM_MAX << lslb);
+        }
+        else
+        {
+            signBitMask = 0U;
+        }
+    }
+
+    if(lsrb != 0U)
+    {
+        c = ci;
+        for(size_t ii = d->nlen-1U; ii != SIZE_MAX ; ii--)
+        {
+            bignum_t tmp = d->nums[ii];
+            d->nums[ii] = ((d->nums[ii] >> lsrb) | c);
+            c = (tmp << lslb);
+        }
+        d->nums[d->nlen-1U] |= signBitMask; // arith matic shift
+    }
+    else
+    {
+        c = 0U;
+    }
+
+    if(co != NULL)
+    {
+        *co = c;
+    }
+    else
+    {
+        /* Do nothing */
     }
     return E_OK;
 }
