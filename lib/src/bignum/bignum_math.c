@@ -119,7 +119,7 @@ ReturnType twos_bignum(bignum_s* d, const bignum_s* s)
     ret = inv_bignum(d);
     if(ret != E_OK) return ret;
 
-    (void)add_bignum_carry_loc(d, 1UL, 0UL);
+    (void)add_bignum_carry_loc_unsigned(d, 1UL, 0UL);
 
     ret = E_OK;
 
@@ -311,13 +311,36 @@ ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const b
     return E_OK;
 }
 
-bignum_t add_bignum_carry_loc(bignum_s* d, const bignum_t v, const size_t idx) {
+bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
     bignum_t _s;
     bignum_t _c = v;
+    bignum_t SIGN_EXT = ((BIGNUM_SIGN_BIT(v) != 0U) && (!ign_sign))?(BIGNUM_MAX):(0U);
 
     for(size_t i = idx; i < d->nlen; i++) {
         _s = d->nums[i] + _c;
         _c = (_s < d->nums[i]);
+        _c += SIGN_EXT;  // sign bits
+        d->nums[i] = _s;
+        if(_c != 0UL) {
+            continue;
+        }
+        else {
+            break;
+        }
+    }
+
+    return _c;
+}
+
+bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
+    bignum_t _s;
+    bignum_t _c = v;
+    const bignum_t SIGN_EXT = ((BIGNUM_SIGN_BIT(v) != 0U) && (!ign_sign))?(BIGNUM_MAX):(0U);;
+
+    for(size_t i = idx; i < d->nlen; i++) {
+        _s = d->nums[i] - _c;
+        _c = (_s > d->nums[i]);
+        _c += SIGN_EXT;  // sign bits
         d->nums[i] = _s;
         if(_c != 0UL) {
             continue;

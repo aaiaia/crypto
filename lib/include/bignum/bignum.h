@@ -28,6 +28,7 @@ typedef uint32_t    bignum_t;
 #else
 #error "NOT_IMPLEMENTS_YET"
 #endif
+#define BIGNUM_SIGN_BIT(v)      ((v)>>(BIGNUM_BITS-1UL))
 #define BIGNUM_MSB_MASK         (1UL<<(BIGNUM_BITS-1UL))
 #define BIGNUM_LSB_MASK         (1UL)
 #else

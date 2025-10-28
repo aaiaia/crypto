@@ -88,7 +88,24 @@ static inline ReturnType add_bignum(bignum_s* d, const bignum_s* s0, const bignu
 {
     return add_bignum_ext(NULL, d, s0, s1, 0U);
 }
-bignum_t add_bignum_carry_loc(bignum_s* d, const bignum_t v, const size_t idx);
+bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
+static inline bignum_t add_bignum_carry_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return add_bignum_carry_loc_ext(d, v, idx, false);
+}
+static inline bignum_t add_bignum_carry_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return add_bignum_carry_loc_ext(d, v, idx, true);
+}
+bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
+static inline bignum_t sub_bignum_carry_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return sub_bignum_carry_loc_ext(d, v, idx, false);
+}
+static inline bignum_t sub_bignum_carry_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return sub_bignum_carry_loc_ext(d, v, idx, true);
+}
 ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 static inline ReturnType sub_bignum(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {

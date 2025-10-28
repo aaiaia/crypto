@@ -1971,55 +1971,67 @@ void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST
     rmBigNum(&test_ref);
 }
 
-const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_00000000_to_12345678[] = {
+const uint32_t TV_BIGNUM_CARRY_LOC_00000000_all_unsigned[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+const uint32_t TV_BIGNUM_CARRY_LOC_12345678_all_unsigned[] = {
     0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
     0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
     0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
     0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 0x12345678, 
 };
-const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_87654321_to_12345678[] = {
+const uint32_t TV_BIGNUM_CARRY_LOC_99999999_all_unsigned[] = {
     0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
     0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
     0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
     0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 0x99999999, 
 };
-const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_99999999_to_66666666[] = {
+const uint32_t TV_BIGNUM_CARRY_LOC_FFFFFFFF_all_unsigned[] = {
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
 };
-const uint32_t TV_ADD_BIGNUM_CARRY_LOC_add_00800000_to_FFFFFFFF_at_3[] = {
+const uint32_t TV_BIGNUM_CARRY_LOC_00800000_at3_unsigned[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00800000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+const uint32_t TV_BIGNUM_CARRY_LOC_FFFFFFFF_at012_007FFFFF_at3_unsigned[] = {
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x007FFFFF, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
 };
 
-#define TEST_ADD_BIGNUM_CARRY_LOC_BIT_LEN 1024U
-void test_add_bignum_carry_loc(void)
+#define TEST_BIGNUM_CARRY_LOC_BIT_LEN 1024U
+void test_add_bignum_carry_loc_unsigned(void)
 {
-    const char test_fn_name[] = "add_bignum_carry_loc";
+    const char test_fn_name[] = "add_bignum_carry_loc_unsigned";
 
     bignum_s* test_opA;
     bignum_t test_opB;
     bool cmp_result;
     bool intentional_invalid;
 
-    test_opA = mkBigNum(TEST_ADD_BIGNUM_CARRY_LOC_BIT_LEN);
-    (void)memset(test_opA->nums, 0x0U, test_opA->size);
-    test_print_bignum(test_opA, "cleared opA");
+    test_opA = mkBigNum(TEST_BIGNUM_CARRY_LOC_BIT_LEN);
+    (void)memcpy(test_opA->nums, TV_BIGNUM_CARRY_LOC_00000000_all_unsigned, test_opA->size);
+    test_print_bignum(test_opA, "set opA");
 
     /* Set first stage 1 */
     test_opB = 0x12345678U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_00000000_to_12345678, (test_opA->size)) == 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_12345678_all_unsigned, (test_opA->size)) == 0);
     if((!cmp_result))
     {
         test_print_bignum(test_opA, "add loc result of opA");
@@ -2031,12 +2043,12 @@ void test_add_bignum_carry_loc(void)
     test_opB = 0x87654321U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_87654321_to_12345678, (test_opA->size)) == 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_99999999_all_unsigned, (test_opA->size)) == 0);
     if((!cmp_result))
     test_print_bignum(test_opA, "add loc result of opA");
     {
@@ -2049,12 +2061,12 @@ void test_add_bignum_carry_loc(void)
     test_opB = 0x66666666U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, i);
+        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
     }
-    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_99999999_to_66666666, (test_opA->size)) == 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_FFFFFFFF_all_unsigned, (test_opA->size)) == 0);
     if((!cmp_result))
     {
         test_print_bignum(test_opA, "add loc result of opA");
@@ -2066,14 +2078,299 @@ void test_add_bignum_carry_loc(void)
     /* Set first stage 4 */
     test_opB = 0x00800000U;
     intentional_invalid = false;
-    bignum_t tmp = add_bignum_carry_loc(test_opA, test_opB, 3);
+    bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
-    cmp_result = (memcmp(test_opA->nums, TV_ADD_BIGNUM_CARRY_LOC_add_00800000_to_FFFFFFFF_at_3, (test_opA->size)) == 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_FFFFFFFF_at012_007FFFFF_at3_unsigned, (test_opA->size)) == 0);
     if((!cmp_result))
     {
         test_print_bignum(test_opA, "Final Stage, add loc result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    rmBigNum(&test_opA);
+}
+void test_sub_bignum_carry_loc_unsigned(void)
+{
+    const char test_fn_name[] = "sub_bignum_carry_loc_unsigned";
+
+    bignum_s* test_opA;
+    bignum_t test_opB;
+    bool cmp_result;
+    bool intentional_invalid;
+
+    test_opA = mkBigNum(TEST_BIGNUM_CARRY_LOC_BIT_LEN);
+    (void)memcpy(test_opA->nums, TV_BIGNUM_CARRY_LOC_FFFFFFFF_at012_007FFFFF_at3_unsigned, test_opA->size);
+    test_print_bignum(test_opA, "set opA");
+
+    /* Set first stage 4 */
+    test_opB = 0x00800000U;
+    intentional_invalid = false;
+    bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, 3);
+    if(tmp) {
+        printf("carry = %u \r\n", tmp);
+    }
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_FFFFFFFF_all_unsigned, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "Final Stage, add loc result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 3 */
+    test_opB = 0x66666666U;
+    intentional_invalid = false;
+    for(size_t i = 0UL; i < test_opA->nlen; i++) {
+        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_99999999_all_unsigned, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 2 */
+    test_opB = 0x87654321U;
+    intentional_invalid = false;
+    for(size_t i = 0UL; i < test_opA->nlen; i++) {
+        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_12345678_all_unsigned, (test_opA->size)) == 0);
+    if((!cmp_result))
+    test_print_bignum(test_opA, "add loc result of opA");
+    {
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 1 */
+    test_opB = 0x12345678U;
+    intentional_invalid = false;
+    for(size_t i = 0UL; i < test_opA->nlen; i++) {
+        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        if(tmp) {
+            printf("[%lu] carry = %u \r\n", i, tmp);
+        }
+    }
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_00000000_all_unsigned, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    rmBigNum(&test_opA);
+}
+const uint32_t TV_BIGNUM_CARRY_LOC_0_signed[] = {
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 
+};
+const uint32_t TV_BIGNUM_CARRY_LOC_m1_signed[] = {
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+};
+const uint32_t TV_BIGNUM_CARRY_LOC_m2_signed[] = {
+    0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+};
+const uint32_t TV_BIGNUM_CARRY_LOC_m3_signed[] = {
+    0xFFFFFFFD, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+};
+const uint32_t TV_BIGNUM_CARRY_LOC_m4294967297[] = {
+    0xFFFFFFFF, 0xFFFFFFFE, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
+};
+void test_add_bignum_carry_loc_signed(void)
+{
+    const char test_fn_name[] = "add_bignum_carry_loc_signed";
+
+    bignum_s* test_opA;
+    bignum_t test_opB;
+    bool cmp_result;
+    bool intentional_invalid;
+
+    test_opA = mkBigNum(TEST_BIGNUM_CARRY_LOC_BIT_LEN);
+    (void)memcpy(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, test_opA->size);
+    test_print_bignum(test_opA, "set opA");
+
+    /* Set first stage 1 */
+    test_opB = 0xFFFFFFFF;  //  m1 at idx 1 == m4294967296
+    intentional_invalid = false;
+    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m4294967297, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 2 */
+    test_opB = 0x00000001;  // p1 at idx 1 == p4294967296
+    intentional_invalid = false;
+    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 3 */
+    test_opB = 0xFFFFFFFE;  // m2
+    intentional_invalid = false;
+    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m3_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 4 */
+    test_opB = 0x00000001;  // p1
+    intentional_invalid = false;
+    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m2_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 5 */
+    test_opB = 0x00000001;  // p1
+    intentional_invalid = false;
+    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 6 */
+    test_opB = 0x00000001;  // p1
+    intentional_invalid = false;
+    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_0_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "add loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    rmBigNum(&test_opA);
+}
+void test_sub_bignum_carry_loc_signed(void)
+{
+    const char test_fn_name[] = "sub_bignum_carry_loc_signed";
+
+    bignum_s* test_opA;
+    bignum_t test_opB;
+    bool cmp_result;
+    bool intentional_invalid;
+
+    test_opA = mkBigNum(TEST_BIGNUM_CARRY_LOC_BIT_LEN);
+    (void)memcpy(test_opA->nums, TV_BIGNUM_CARRY_LOC_0_signed, test_opA->size);
+    test_print_bignum(test_opA, "set opA");
+
+    /* Set first stage 6 */
+    test_opB = 0x00000001;  // p1
+    intentional_invalid = false;
+    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "sub loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 5 */
+    test_opB = 0x00000001;  // p1
+    intentional_invalid = false;
+    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m2_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "sub loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 4 */
+    test_opB = 0x00000001;  // p1
+    intentional_invalid = false;
+    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m3_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "sub loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 3 */
+    test_opB = 0xFFFFFFFE;  // m2
+    intentional_invalid = false;
+    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "sub loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 2 */
+    test_opB = 0x00000001;  // p1 at idx 1 == p4294967296
+    intentional_invalid = false;
+    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m4294967297, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "sub loc signed result of opA");
+    }
+    printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    TEST_ASSERT((cmp_result) || (intentional_invalid));
+
+    /* Set first stage 1 */
+    test_opB = 0xFFFFFFFF;  //  m1 at idx 1 == m4294967296
+    intentional_invalid = false;
+    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
+    if((!cmp_result))
+    {
+        test_print_bignum(test_opA, "sub loc signed result of opA");
     }
     printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
     TEST_ASSERT((cmp_result) || (intentional_invalid));
@@ -6996,9 +7293,6 @@ void test_SP800_38B_cmac_aes_imVal(void)
 #endif /* TEST_CMAC */
 
 #ifdef TEST_SECP256K1_SECG
-#define _EC_BITS_   256U
-void test_EC_ALGEBRAIC_SUM(bignum_s* xR, bignum_s* yR, const bignum_s* xP, const bignum_s* yP, const bignum_s* xQ, const bignum_s* yQ, const bignum_s* p, const bignum_s* a)
-{
 #define __FUNC_RETURN_WRAPPING__(FR_VAR, FUNC) { \
     if(((FR_VAR) = (FUNC)) != E_OK) \
     { \
@@ -7007,6 +7301,9 @@ void test_EC_ALGEBRAIC_SUM(bignum_s* xR, bignum_s* yR, const bignum_s* xP, const
     } \
 }
 
+#define _EC_BITS_   256U
+void test_EC_ALGEBRAIC_SUM(bignum_s* xR, bignum_s* yR, const bignum_s* xP, const bignum_s* yP, const bignum_s* xQ, const bignum_s* yQ, const bignum_s* p, const bignum_s* a)
+{
     bool slope_is_INFINITE = false;
     bool point_is_IDENTITY = false;
     ReturnType fr;
@@ -7212,8 +7509,133 @@ void test_EC_ALGEBRAIC_SUM(bignum_s* xR, bignum_s* yR, const bignum_s* xP, const
         __FUNC_RETURN_WRAPPING__(fr, add_bignum(xR, xP, xQ));
         __FUNC_RETURN_WRAPPING__(fr, add_bignum(yR, yP, yQ));
     }
-#undef __FUNC_RETURN_WRAPPING__
 }
+
+#define WNAF_MAX            UINT8_MAX
+#define WNAF_BITS           8U
+#define signMsk_WNAF(WLEN)  ((1U)<<((WLEN)-1U))
+#define signExt_WNAF(WLEN)  ((WNAF_MAX)<<(WLEN))
+#define bitMask_WNAF(WLEN)  ((WNAF_MAX)>>(WNAF_BITS-(WLEN)))
+typedef uint8_t uwnaf;
+typedef int8_t  swnaf;
+
+typedef struct {
+    size_t          bits;   // bit width length
+    size_t          vLen;   // valid bit length
+    uwnaf           window;
+    uwnaf           signMsk;
+    uwnaf           signExt;
+    uwnaf           wNafMsk;
+    union {
+        uwnaf*      ui;
+        swnaf*      si;
+        void*       vp;
+    }wnaf;
+}wnaf_s;
+
+wnaf_s* mkWNAF(const size_t w, const size_t bits)
+{
+    if(!((8U > w) && (w > 1U))) return NULL; // 8 > w > 1, 7~2
+    wnaf_s* p = (wnaf_s*)malloc(sizeof(wnaf_s));
+    p->bits = (bits+1U);
+    p->vLen = 0UL;
+    p->window = w;
+    p->signMsk = signMsk_WNAF(w);
+    p->signExt = signExt_WNAF(w);
+    p->wNafMsk = bitMask_WNAF(w);
+    p->wnaf.ui = (uwnaf*)calloc(bits, sizeof(uwnaf));
+}
+
+int rmWNAF(wnaf_s** p)
+{
+    if((void*)p == NULL)   return -1;
+    if((void*)(*p) == NULL)return -1;
+
+    free((*p)->wnaf.ui);
+    free((*p));
+    (*p) = (wnaf_s*)NULL;
+    return 0;
+}
+
+void test_print_wNAF_ext(const wnaf_s* p, const char* title, const bool linefeed, const bool detail) {
+    if(!(p != NULL))    return; // NULL
+
+    if(title != NULL)   printf("[%s]\r\n", title);
+    if(detail) {
+        printf("window length = %u\r\n",    p->window);
+        printf("signMsk:0x%08x, ",          p->signMsk);
+        printf("signExt:0x%08x, ",          p->signExt);
+        printf("wNafMsk:0x%08x\r\n",        p->wNafMsk);
+    }
+
+    printf("{");
+    for(size_t i = (p->bits-1U); i < SIZE_MAX; i--)
+    {
+        printf("%d,", p->wnaf.si[i]);
+    }
+    printf("}[%lu bits][valid bit length: %lu]", p->bits, p->vLen);
+    if(linefeed)    printf("\r\n");
+}
+static inline void test_print_wNAF(const wnaf_s* p, const char* title) {
+    return test_print_wNAF_ext(p, title, true, false);
+}
+static inline void test_print_wNAF_info(const wnaf_s* p, const char* title) {
+    return test_print_wNAF_ext(p, title, true, true);
+}
+
+void test_conv_bignum_to_wNAF(wnaf_s* dst, const bignum_s* src)
+{
+    ReturnType fr;
+    size_t clrIdx = SIZE_MAX;
+
+    if(!((dst != NULL) && (src != NULL)))   return; // NULL
+    if(!(dst->bits == (src->bits + 1U)))    return; // bit length must fit with source(src)
+
+    bignum_s* tmp_d = mkBigNum(dst->bits);
+    __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_unsigned_safe(tmp_d, src));
+
+    for(size_t i = 0UL; i < tmp_d->bits; i++)
+    {
+        bignum_cmp_e cmp_d;
+
+        printf("[%lu] ", i);
+        test_print_bignum(tmp_d, "tmp_d");
+        if(tmp_d->nums[0]&0x1U) {
+            // d mods 2^w
+            uwnaf signExt = (((uwnaf)tmp_d->nums[0])&(dst->signMsk))?(dst->signExt):(0U);
+            dst->wnaf.ui[i] = (((uwnaf)tmp_d->nums[0])&(dst->wNafMsk));
+            dst->wnaf.ui[i] |= signExt;
+            printf("d[%lu] 0x%08x\t\n", i, ((bignum_t)dst->wnaf.si[i]));
+            sub_bignum_carry_loc_signed(tmp_d, ((bignum_t)dst->wnaf.si[i]), 0U);
+            test_print_bignum(tmp_d, "substracted tmp_d");
+        }
+        else {
+            dst->wnaf.ui[i] = 0U;
+        }
+        __FUNC_RETURN_WRAPPING__(fr, lsrb_bignum_self(tmp_d, 1U));
+        cmp_d = cmp0_bignum(tmp_d);
+        if(cmp_d == BIGNUM_CMP_ZO) {
+            dst->vLen = (i + 1UL);
+            break;
+        }
+        else if(cmp_d == BIGNUM_CMP_NZ) {
+            continue;
+        } else {
+            /* has error or invalid cases */
+            dst->vLen = 0UL;
+            break;
+        }
+    }
+    printf("[end] ");
+    test_print_bignum(tmp_d, "tmp_d");
+
+    for(size_t i = dst->vLen; i < tmp_d->bits; i++) {
+        dst->wnaf.ui[i] = 0U;
+    }
+
+    rmBigNum(&tmp_d);
+}
+#undef __FUNC_RETURN_WRAPPING__
 
 const uint32_t SECP256K1_calc_p[]  = { \
     0xfffffc2fU, 0xfffffffeU, 0xffffffffU,  0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, };
@@ -7403,6 +7825,23 @@ void test_SECP256K1_calcaulation(void)
      * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
      * h  = 1
      */
+
+    printf("============================================================\r\n");
+    printf("============================================================\r\n");
+    printf("============================================================\r\n");
+
+    size_t window = 3;
+    bignum_s* bignum_d = mkBigNum(_EC_BITS_);
+    wnaf_s* wnaf_d = mkWNAF(window, _EC_BITS_);
+
+    clr_bignum(bignum_d);
+    bignum_d->nums[0] = 151U;
+
+    test_conv_bignum_to_wNAF(wnaf_d, bignum_d);
+    test_print_wNAF_info(wnaf_d, "bignum to wnaf");
+
+    rmBigNum(&bignum_d);
+    rmWNAF(&wnaf_d);
 }
 #undef _EC_BITS_
 #endif /* TEST_SECP256K1_SECG */
@@ -7534,12 +7973,34 @@ void test_sequence(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_add_bignum_carry_loc()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc");
+    printf("[test start: test_add_bignum_carry_loc_unsigned()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc_unsigned");
     _COND_DO_TEST_(keyin)
-    test_add_bignum_carry_loc();
-    printf("[test   end: test_add_bignum_carry_loc()]\r\n");
+    test_add_bignum_carry_loc_unsigned();
+    printf("[test   end: test_add_bignum_carry_loc_unsigned()]\r\n");
     printf("================================================================================\n");
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_sub_bignum_carry_loc_unsigned()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_carry_loc_unsigned");
+    _COND_DO_TEST_(keyin)
+    test_sub_bignum_carry_loc_unsigned();
+    printf("[test   end: test_sub_bignum_carry_loc_unsigned()]\r\n");
+    printf("================================================================================\n");
+    //printf("--------------------------------------------------------------------------------\n");
+    //printf("[test start: test_add_bignum_carry_loc_signed()]\r\n");
+    //_KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc_signed");
+    //_COND_DO_TEST_(keyin)
+    //test_add_bignum_carry_loc_signed();
+    //printf("[test   end: test_add_bignum_carry_loc_signed()]\r\n");
+    //printf("================================================================================\n");
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_sub_bignum_carry_loc_signed()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_carry_loc_signed");
+    _COND_DO_TEST_(keyin)
+    test_sub_bignum_carry_loc_signed();
+    printf("[test   end: test_sub_bignum_carry_loc_signed()]\r\n");
+    printf("================================================================================\n");
+
 
     printf("--------------------------------------------------------------------------------\n");
     printf("[test start: test_mul_bignum_1024b(mul_bignum_signed_1bs)]\r\n");
