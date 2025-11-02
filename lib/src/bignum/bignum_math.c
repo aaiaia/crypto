@@ -110,7 +110,7 @@ ReturnType cpy_bignum_ext(bignum_s* d, const bignum_s* s, const bool ign_sign, c
     return E_OK;
 }
 
-ReturnType twos_bignum(bignum_s* d, const bignum_s* s)
+ReturnType cpy_bignum_twos_safe(bignum_s* d, const bignum_s* s)
 {
     ReturnType ret = E_NOT_OK;
     ret = cpy_bignum_signed_safe(d, s);
@@ -126,13 +126,13 @@ ReturnType twos_bignum(bignum_s* d, const bignum_s* s)
     return ret;
 }
 
-ReturnType abs_bignum_ext(bignum_s* d, const bignum_s* s, const bool ign_sign)
+ReturnType cpy_bignum_abs_safe_ext(bignum_s* d, const bignum_s* s, const bool ign_sign)
 {
     if((d == NULL) || (s == NULL))  return E_ERROR_NULL;
 
     if(BIGNUM_SIGN_MASK(s, ign_sign)) // negative
     {
-        return twos_bignum(d, s);
+        return cpy_bignum_twos_safe(d, s);
     }
     else
     {
@@ -785,7 +785,7 @@ ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, con
     bignum_cmp_e cmp_n_with_p = BIGNUM_CMP_NU;
     bignum_s* abs_n = mkBigNum(n->bits);
 
-    abs_bignum_signed(abs_n, n);
+    cpy_bignum_abs_signed_safe(abs_n, n);
     cmp_n_with_p = cmp_bignum_logical(abs_n, p);
     signOf_n = sign_bignum_signed(n);
 

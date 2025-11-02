@@ -43,15 +43,15 @@ static inline ReturnType cpy_bignum_unsigned_unsafe(bignum_s* d, const bignum_s*
     return cpy_bignum_ext(d, s, true, true);
 }
 
-ReturnType twos_bignum(bignum_s* d, const bignum_s* s);
-ReturnType abs_bignum_ext(bignum_s* d, const bignum_s* s, const bool ignoreType);
-static inline ReturnType abs_bignum(bignum_s* d, const bignum_s* s)
+ReturnType cpy_bignum_twos_safe(bignum_s* d, const bignum_s* s);
+ReturnType cpy_bignum_abs_safe_ext(bignum_s* d, const bignum_s* s, const bool ignoreType);
+static inline ReturnType cpy_bignum_abs_safe(bignum_s* d, const bignum_s* s)
 {
-    return abs_bignum_ext(d, s, false);
+    return cpy_bignum_abs_safe_ext(d, s, false);
 }
-static inline ReturnType abs_bignum_signed(bignum_s* d, const bignum_s* s)
+static inline ReturnType cpy_bignum_abs_signed_safe(bignum_s* d, const bignum_s* s)
 {
-    return abs_bignum_ext(d, s, false);
+    return cpy_bignum_abs_safe_ext(d, s, false);
 }
 bignum_sign_e sign_bignum_ext(const bignum_s* s, const bool ignoreType);
 static inline bignum_sign_e sign_bignum_signed(const bignum_s* s)
