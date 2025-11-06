@@ -16,7 +16,7 @@
 #include "bignum/bignum.h"
 #include "common/returnType.h"
 
-#include "bignum/bignum_math.h"
+#include "bignum/bignum_alu.h"
 #include "bignum/bignum_logic.h"
 
 #include "test/vector.h"
