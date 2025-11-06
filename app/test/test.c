@@ -71,6 +71,7 @@ static bool g_clkOvf;
 
 #define test_print_bignum_value_only(p) test_print_bignum_ext(p, NULL, false, 0UL, false, true, false)
 #define test_print_bignum(p, title) test_print_bignum_ext(p, title, true, 0UL, false, false, true)
+#define test_print_bignum_info(p, title) test_print_bignum_ext(p, title, true, 0UL, true, false, true)
 #define test_print_bignum_array(nums, nlen) test_print_bignum_array_ext(nums, nlen, true, 0UL, false, true)
 static inline void test_print_bignum_array_ext(const bignum_t* nums, const size_t nlen, const bool linefeed, const size_t lfn, const bool prefix, const bool space)
 {
@@ -994,7 +995,7 @@ const bignum_t TEST_BIGNUM_256b_RandomNum_______A_0[] = { 0x90ABCDEFU, 0x1234567
 const bignum_t TEST_BIGNUM_256b_RandomNum_______B_0[] = { 0x76543210U, 0xFEDCBA98U, 0x76543210U, 0xFEDCBA98U, 0x76543210U, 0xFEDCBA98U, 0x76543210U, 0xFEDCBA98U, };
 const bignum_t TEST_BIGNUM_256b_RandomNum_Add_A_B_0[] = { 0x06ffffffU, 0x11111111U, 0x07000000U, 0x11111111U, 0x07000000U, 0x11111111U, 0x07000000U, 0x11111111U, };
 
-void test_twos_bignum_256b(void)
+void test_cpy_bignum_twos_signed_256b(void)
 {
 #define TEST_BIGNUM_TWOS_BIT  256U // 32Bytes, 32bits 8ea
     typedef struct {
@@ -1045,8 +1046,8 @@ void test_twos_bignum_256b(void)
         for(size_t x = 0UL; x < test_tmp->nlen; x++)    test_tmp->nums[x] = ~test_ref->nums[x];
         intentional_invalid = TEST_BIGNUM_twos_bignum_set_LIST[i].invalid_case;
 
-        TICK_TIME_START("cpy_bignum_twos_safe");
-        if(fr = cpy_bignum_twos_safe(test_tmp, test___a)) {
+        TICK_TIME_START("cpy_bignum_twos_signed_safe");
+        if(fr = cpy_bignum_twos_signed_safe(test_tmp, test___a)) {
             printReturnType(fr);
         } else { /* Do nothing */ }
         TICK_TIME_END;
@@ -1058,7 +1059,7 @@ void test_twos_bignum_256b(void)
             test_print_bignum(test_tmp, "test_tmp");
             test_print_bignum(test_ref, "test_ref");
         }
-        printf("[%lu] cpy_bignum_twos_safe() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        printf("[%lu] cpy_bignum_twos_signed_safe() is %s\r\n", i, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
         TEST_ASSERT(cmp_result || (intentional_invalid));
     }
 
@@ -1463,7 +1464,7 @@ void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_
         test_bignum_cmp = test_fp(test_bignum_NumA, test_bignum_NumB);
         TICK_TIME_END;
 
-        sub_bignum(test_bignum_Tmp0, test_bignum_NumA, test_bignum_NumB);
+        sub_bignum_signed_unsafe(test_bignum_Tmp0, test_bignum_NumA, test_bignum_NumB);
         sub_bignum_with_add_twos_ext(NULL, test_bignum_Tmp1, test_bignum_NumA, test_bignum_NumB, 0U);
 
         cmp_result = (test_bignum_cmp == test_bignum_cmp_ref);
@@ -1473,7 +1474,7 @@ void test_cmp_bignum_signed_256b(const char* test_fn_name, const TEST_FP_BIGNUM_
             test_print_bignum(test_bignum_NumA, "A");
             test_print_bignum(test_bignum_NumB, "B");
             test_print_bignum_cmp(test_bignum_cmp);
-            test_print_bignum(test_bignum_Tmp0, "sub_bignum");
+            test_print_bignum(test_bignum_Tmp0, "sub_bignum_signed_unsafe");
             test_print_bignum(test_bignum_Tmp1, "sub_bignum_with_add_twos_ext");
         }
 
@@ -1506,6 +1507,8 @@ void test_sub_bignum_unsigned_127b(void)
     test_dst = mkBigNum(TEST_BIGNUM_127BIT);
     test_ref = mkBigNum(TEST_BIGNUM_127BIT);
 
+    const bool ign_sign = true;
+
     /* add_bignum_ext test */
     for(unsigned int i = 0u; i < TV_U32_ADD_NUM; i++) {
         memset(test_opA->nums, 0x0u, (test_opA->size));
@@ -1518,7 +1521,7 @@ void test_sub_bignum_unsigned_127b(void)
         test_co = BIGNUM_MAX;
 
         TICK_TIME_START("add_bignum_ext");
-        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i]);
+        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i], ign_sign);
         TICK_TIME_END;
         cmp_result = (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
         if(!cmp_result)
@@ -1580,6 +1583,8 @@ void test_add_bignum_unsigned_256b(void) {
     test_dst = mkBigNum(TEST_BIGNUM_256BIT);
     test_ref = mkBigNum(TEST_BIGNUM_256BIT);
 
+    const bool ign_sign = true;
+
     /* Add test */
     for(size_t i = 0UL; i <sizeof(TEST_BIGNUM_add_bignum_set_LIST)/sizeof(test_bignum_add_bignum_set_t); i++)
     {
@@ -1591,7 +1596,7 @@ void test_add_bignum_unsigned_256b(void) {
         test_co = 0;
 
         TICK_TIME_START("add_bignum_ext");
-        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, test_ci);
+        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, test_ci, ign_sign);
         TICK_TIME_END;
         cmp_result = (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
         if((!cmp_result))
@@ -3703,10 +3708,10 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
     bignum_s* multiplicand = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
     bignum_s* product = mkBigNum(TEST_MUL_BIGNUM_BIT_LEN);
 
-#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
-        printf("%s: ", (TEST_FUNC_NAME)); \
+        printf("%s: ", (TEST_NAME)); \
         (c) = getchar(); \
         getchar(); \
         if('A' <= (c) && (c) <= 'Z')    break; \
@@ -3741,7 +3746,7 @@ void test_mul_bignum_sameBignumLength_with_mod_value(const char* test_fn_name, c
             printReturnType(fr);
 #endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
 
-            if(fr = add_bignum(productAddRem, product, remainder)) {
+            if(fr = add_bignum_signed_unsafe(productAddRem, product, remainder)) {
                 printReturnType(fr);
             } else { /* Do nothing */ }
 
@@ -3833,10 +3838,10 @@ void test_div_bignum_with_mod(void)
 
     bool manually = true;
 
-#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
-        printf("%s: ", (TEST_FUNC_NAME)); \
+        printf("%s: ", (TEST_NAME)); \
         (c) = getchar(); \
         getchar(); \
         if('A' <= (c) && (c) <= 'Z')    break; \
@@ -3967,10 +3972,10 @@ void test_gcd_bignum(void)
 
     bool manually = true;
 
-#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
-        printf("%s: ", (TEST_FUNC_NAME)); \
+        printf("%s: ", (TEST_NAME)); \
         (c) = getchar(); \
         getchar(); \
         if('A' <= (c) && (c) <= 'Z')    break; \
@@ -4049,14 +4054,14 @@ void test_gcd_bignum(void)
         test_print_bignum(num_s, "coef s");
         test_print_bignum(num_t, "coef t");
 
-        if((fr = mul_bignum_unsafe(prod_as, num_a, num_s)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
-        if((fr = mul_bignum_unsafe(prod_bt, num_b, num_t)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
-        if((fr = add_bignum(sum, prod_as, prod_bt)) != E_OK)        { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = mul_bignum_signed_unsafe(prod_as, num_a, num_s)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = mul_bignum_signed_unsafe(prod_bt, num_b, num_t)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = add_bignum_signed_unsafe(sum, prod_as, prod_bt)) != E_OK)        { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
         test_print_bignum(prod_as, "prod_as");
         test_print_bignum(prod_bt, "prod_bt");
         test_print_bignum(num_b, "num_b");
 
-        num_cmp = cmp_bignum_logical(sum, num_g);
+        num_cmp = cmp_bignum_logical_signed_safe(sum, num_g);
         printf("a*s+b*t=gcd(a,b) is %s\r\n", ((num_cmp == BIGNUM_CMP_EQ)?MES_PASS:MES_FAIL));
 
 
@@ -4507,10 +4512,10 @@ void test_mim_bignum(void)
 
     bool manually = true;
 
-#define _KEYIN_DO_TEST_0_(c, TEST_FUNC_NAME) { \
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
-        printf("%s: ", (TEST_FUNC_NAME)); \
+        printf("%s: ", (TEST_NAME)); \
         (c) = getchar(); \
         getchar(); \
         if('A' <= (c) && (c) <= 'Z')    break; \
@@ -7308,252 +7313,300 @@ void test_SP800_38B_cmac_aes_imVal(void)
 
 #define _EC_BITS_   256U
 /*
- * ec_sumPoints_ext
+ * ec_addPoints_ext
  * xR, yR: Result of ec point addition(sum)
  * xP, yP: Operand ec point P
  * xQ, yQ: Operand ec point Q
  * a: coeffient of ec curve, y^2 = x^3 + a*x + b
  * p: prime number for modulo p(mod p)
  */
-void ec_sumPoints_ext(bignum_s* xR, bignum_s* yR, \
+#if 0 /* ec_addPoints_ext */
+#define _DPRINTF_                   printf
+#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
+#else
+#define _DPRINTF_
+#define _PRINT_BIGNUM_(p, title)
+#endif/* ec_addPoints_ext */
+void ec_addPoints_ext(bignum_s* xR, bignum_s* yR, \
         const bignum_s* xP, const bignum_s* yP, \
+        const bool nQ, \
         const bignum_s* xQ, const bignum_s* yQ, \
-        const size_t ec_bits, const bignum_s* a, const bignum_s* p)
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
+        const bool ign_sign)
 {
+#define BIT_P1(ec_bits)  (ec_bits+1UL)
     bool slope_is_INFINITE = false;
     bool point_is_IDENTITY = false;
     ReturnType fr;
 
     if((cmp0_bignum(xP) == BIGNUM_CMP_ZO) && (cmp0_bignum(yP) == BIGNUM_CMP_ZO)) {
-        printf("[INFO] Point P is IDENTITY ELEMENTS\r\n");
+        _DPRINTF_("[INFO] Point P is IDENTITY ELEMENTS\r\n");
         point_is_IDENTITY |= true;
     }
     if((cmp0_bignum(xQ) == BIGNUM_CMP_ZO) && (cmp0_bignum(yQ) == BIGNUM_CMP_ZO)) {
-        printf("[INFO] Point Q is IDENTITY ELEMENTS\r\n");
+        _DPRINTF_("[INFO] Point Q is IDENTITY ELEMENTS\r\n");
         point_is_IDENTITY |= true;
     }
 
-    test_print_bignum(xP, "| | | | | xP | | | | |");
-    test_print_bignum(yP, "| | | | | yP | | | | |");
-    test_print_bignum(xQ, "| | | | | xQ | | | | |");
-    test_print_bignum(yQ, "| | | | | yQ | | | | |");
-    test_print_bignum(p, "| | | | | p | | | | |");
-    test_print_bignum(a, "| | | | | a | | | | |");
+    _PRINT_BIGNUM_(xP, "| | | | | xP | | | | |");
+    _PRINT_BIGNUM_(yP, "| | | | | yP | | | | |");
+    _DPRINTF_("[INFO] Point Q is %s\r\n", nQ?"Negative":"Positive");
+    _PRINT_BIGNUM_(xQ, "| | | | | xQ | | | | |");
+    _PRINT_BIGNUM_(yQ, "| | | | | yQ | | | | |");
+    _PRINT_BIGNUM_(p, "| | | | | p | | | | |");
+    _PRINT_BIGNUM_(a, "| | | | | a | | | | |");
 
     if(!point_is_IDENTITY) {
-        bignum_cmp_e cmp_x = cmp_bignum_logical(xP, xQ);
-        bignum_cmp_e cmp_y = cmp_bignum_logical(yP, yQ);
+        bignum_cmp_e cmp_x = cmp_bignum_logical_safe_ext(xP, xQ, ign_sign);
+        bignum_cmp_e cmp_y = cmp_bignum_logical_safe_ext(yP, yQ, ign_sign);
+        _DPRINTF_("[INFO] Point P and Q are %s\r\n", ((cmp_x == BIGNUM_CMP_EQ) && (cmp_y == BIGNUM_CMP_EQ))?"Same":"Diff");
 
-        bignum_s* tmp_m = mkBigNum(ec_bits);
-        bignum_s* tmp_x = mkBigNum(ec_bits);
-        bignum_s* tmp_y = mkBigNum(ec_bits);
+        bignum_s* bitEx_p1_m = mkBigNum(BIT_P1(ec_bits));
+        bignum_s* bitEx_p1_x = mkBigNum(BIT_P1(ec_bits));
+        bignum_s* bitEx_p1_y = mkBigNum(BIT_P1(ec_bits));
+
+        bignum_s* bitEx_p1_p = mkBigNum(BIT_P1(ec_bits));
+        cpy_bignum_unsigned_unsafe(bitEx_p1_p, p);
+        _PRINT_BIGNUM_(bitEx_p1_p, "| | | | | bitEx_p1_p | | | | |");
 
         if(!((cmp_x == BIGNUM_CMP_EQ) && (cmp_y == BIGNUM_CMP_EQ)))
         {
             /* P != Q */
-            printf("P != Q\n");
+            _DPRINTF_("P != Q\n");
 
-            bignum_s* t_mul  = mkBigNum(ec_bits<<1U); // bit extended m
+            bignum_s* bitEx_x2_mul  = mkBigNum(ec_bits<<1U); // bit extended m
 
-            bignum_s* dy  = mkBigNum(ec_bits);
-            bignum_s* dx  = mkBigNum(ec_bits);
-            bignum_s* dxi = mkBigNum(ec_bits);
+            bignum_s* bitEx_p1_dy  = mkBigNum(BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
+            bignum_s* bitEx_p1_dx  = mkBigNum(BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
+            bignum_s* bitEx_p1_dxi = mkBigNum(BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
 
-            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(dy, yP, yQ));
-            test_print_bignum(dy, "| | | | | dy = yP - yQ | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(dy, dy, p));
-            test_print_bignum(dy, "| | | | | dy = (yP - yQ) mod p | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(dx, xP, xQ));
-            test_print_bignum(dx, "| | | | | dx = xP - xQ | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(dx, dx, p));
-            test_print_bignum(dx, "| | | | | dx = (xP - xQ) mod p | | | | |");
+            if(!nQ) {
+                __FUNC_RETURN_WRAPPING__(fr, sub_bignum_unsigned_unsafe(bitEx_p1_dy, yP, yQ));// bit expended, unsigned to sign
+            } else {
+                __FUNC_RETURN_WRAPPING__(fr, add_bignum_unsigned_unsafe(bitEx_p1_dy, yP, yQ));// bit expended, unsigned to sign
+            }
+                _PRINT_BIGNUM_(bitEx_p1_dy, "| | | | | bitEx_p1_dy = yP - yQ | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_dy, bitEx_p1_dy, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_dy, "| | | | | bitEx_p1_dy = (yP - yQ) mod bitEx_p1_p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum_unsigned_unsafe(bitEx_p1_dx, xP, xQ));// bit expended, unsigned to sign
+            _PRINT_BIGNUM_(bitEx_p1_dx, "| | | | | bitEx_p1_dx = xP - xQ | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_dx, bitEx_p1_dx, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_dx, "| | | | | bitEx_p1_dx = (xP - xQ) mod bitEx_p1_p | | | | |");
 
-            __FUNC_RETURN_WRAPPING__(fr, mim_bignum(dxi, dx, p));
-            test_print_bignum(dxi, "| | | | | dx^(-1) = (xP - xQ)^(-1) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mim_bignum_unsafe(bitEx_p1_dxi, bitEx_p1_dx, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_dxi, "| | | | | bitEx_p1_dx^(-1) = (xP - xQ)^(-1) mod bitEx_p1_p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
-                printf("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
+                _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
                 slope_is_INFINITE = true;
             }
 
             if(!slope_is_INFINITE) {
-                __FUNC_RETURN_WRAPPING__(fr, mul_bignum_unsafe(t_mul, dy, dxi));
-                test_print_bignum(t_mul, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) | | | | |");
-                __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(tmp_m, t_mul, p));
-                test_print_bignum(tmp_m, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) mod p | | | | |");
+                __FUNC_RETURN_WRAPPING__(fr, mul_bignum_unsigned_unsafe(bitEx_x2_mul, bitEx_p1_dy, bitEx_p1_dxi));
+                _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) | | | | |");
+                __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(bitEx_p1_m, bitEx_x2_mul, p));
+                _PRINT_BIGNUM_(bitEx_p1_m, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) mod p | | | | |");
             }
 
-            rmBigNum(&t_mul);
+            rmBigNum(&bitEx_x2_mul);
 
-            rmBigNum(&dy);
-            rmBigNum(&dx);
-            rmBigNum(&dxi);
+            rmBigNum(&bitEx_p1_dy);
+            rmBigNum(&bitEx_p1_dx);
+            rmBigNum(&bitEx_p1_dxi);
         }
         else
         {
-            /* P == Q */
-            printf("P == Q\n");
+            /* P == Q, xP == xQ, yP == yQ*/
+            _DPRINTF_("P == Q\n");
 
-            bignum_s* t_mul = mkBigNum(ec_bits<<1U);
+            bignum_s* bitEx_x2_mul = mkBigNum(ec_bits<<1U);
 
-            bignum_s* pow_x = mkBigNum(ec_bits);
-            bignum_s* numer = mkBigNum(ec_bits);
-            bignum_s* denom = mkBigNum(ec_bits);
+            bignum_s* bitEx_p1_pow_x = mkBigNum(BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
+            bignum_s* bitEx_p1_numer = mkBigNum(BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
+            bignum_s* bitEx_p1_denom = mkBigNum(BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
 
             // x^2
-            __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, xP, xP));
-            test_print_bignum(t_mul, "| | | | | xP^2 | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(pow_x, t_mul, p));
-            test_print_bignum(pow_x, "| | | | | (xP^2) mod p  | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mul_bignum_unsigned(bitEx_x2_mul, xP, xP));
+            _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | xP^2 | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(bitEx_p1_pow_x, bitEx_x2_mul, p));
+            _PRINT_BIGNUM_(bitEx_p1_pow_x, "| | | | | (xP^2) mod p  | | | | |");
 
             // x^2 + a
-            __FUNC_RETURN_WRAPPING__(fr, add_bignum(numer, pow_x, a));
-            test_print_bignum(numer, "| | | | | xP^2 + a | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(numer, numer, p));
-            test_print_bignum(numer, "| | | | | (xP^2 + a) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum_unsigned_unsafe(bitEx_p1_numer, bitEx_p1_pow_x, a));
+            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | xP^2 + a | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_numer, bitEx_p1_numer, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | (xP^2 + a) mod bitEx_p1_p | | | | |");
             // 2 * x^2
-            __FUNC_RETURN_WRAPPING__(fr, asl1b_bignum_self(pow_x, NULL, 0U));
-            test_print_bignum(pow_x, "| | | | | 2 * xP^2 | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(pow_x, pow_x, p));
-            test_print_bignum(pow_x, "| | | | | (2 * xP^2) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, asl1b_bignum_self(bitEx_p1_pow_x, NULL, 0U));
+            _PRINT_BIGNUM_(bitEx_p1_pow_x, "| | | | | 2 * xP^2 | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_pow_x, bitEx_p1_pow_x, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_pow_x, "| | | | | (2 * xP^2) mod bitEx_p1_p | | | | |");
             // (x^2 + a) += (2 * x^2)
-            __FUNC_RETURN_WRAPPING__(fr, add_bignum(numer, numer, pow_x));
-            test_print_bignum(numer, "| | | | | (3 * xP^2) + a | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(numer, numer, p));
-            test_print_bignum(numer, "| | | | | ((3 * xP^2) + a) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum_signed_unsafe(bitEx_p1_numer, bitEx_p1_numer, bitEx_p1_pow_x));
+            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | (3 * xP^2) + a | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_numer, bitEx_p1_numer, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | ((3 * xP^2) + a) mod bitEx_p1_p | | | | |");
 
             // 2 * y
-            __FUNC_RETURN_WRAPPING__(fr, add_bignum(denom, yP, yP));
-            test_print_bignum(denom, "| | | | | 2 * yP | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(denom, denom, p));
-            test_print_bignum(denom, "| | | | | (2 * yP) mod p | | | | |");
+#if 0 /* P_IS_Q_AND_Q_IS_NEGATIVE_DOUBLING */
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum_unsigned_unsafe(bitEx_p1_denom, yP, yP));
+#else
+            if(!nQ) {
+                cpy_bignum_unsigned_unsafe(bitEx_p1_denom, yP);
+                _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | bitEx_p1_denom(yP, 1bit extention) | | | | |");
+            } else {
+                cpy_bignum_twos_signed_unsafe(bitEx_p1_denom, yP);
+                _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | -bitEx_p1_denom(-yP, 1bit extention) | | | | |");
+            }
+            __FUNC_RETURN_WRAPPING__(fr, asl1b_bignum_self(bitEx_p1_denom, NULL, 0U));
+#endif/* P_IS_Q_AND_Q_IS_NEGATIVE_DOUBLING */
+            _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | 2 * yP | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_denom, bitEx_p1_denom, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | (2 * yP) mod bitEx_p1_p | | | | |");
 
-            __FUNC_RETURN_WRAPPING__(fr, mim_bignum(denom, denom, p));
-            test_print_bignum(denom, "| | | | | (2 * yP)^(-1) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mim_bignum_unsafe(bitEx_p1_denom, bitEx_p1_denom, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | (2 * yP)^(-1) mod bitEx_p1_p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
-                printf("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
+                _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
                 slope_is_INFINITE = true;
             }
 
             if(!slope_is_INFINITE) {
-                __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, numer, denom));
-                test_print_bignum(t_mul, "| | | | | ((3 * xP^2) + a) * (2 * yP)^(-1) | | | | |");
-                __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(tmp_m, t_mul, p));
-                test_print_bignum(tmp_m, "| | | | | (((3 * xP^2) + a) * (2 * yP)^(-1)) mod p | | | | |");
+                __FUNC_RETURN_WRAPPING__(fr, mul_bignum_unsigned(bitEx_x2_mul, bitEx_p1_numer, bitEx_p1_denom));
+                _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | ((3 * xP^2) + a) * (2 * yP)^(-1) | | | | |");
+                __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(bitEx_p1_m, bitEx_x2_mul, p));
+                _PRINT_BIGNUM_(bitEx_p1_m, "| | | | | (((3 * xP^2) + a) * (2 * yP)^(-1)) mod p | | | | |");
             }
 
-            rmBigNum(&t_mul);
+            rmBigNum(&bitEx_x2_mul);
 
-            rmBigNum(&pow_x);
-            rmBigNum(&numer);
-            rmBigNum(&denom);
+            rmBigNum(&bitEx_p1_pow_x);
+            rmBigNum(&bitEx_p1_numer);
+            rmBigNum(&bitEx_p1_denom);
         }
-        test_print_bignum(tmp_m, "| | | | | m | | | | |");
+        _PRINT_BIGNUM_(bitEx_p1_m, "| | | | | m | | | | |");
 
+        /* Get xR */
         {
-            bignum_s* t_mul = mkBigNum(ec_bits<<1U);
+            bignum_s* bitEx_x2_mul = mkBigNum(ec_bits<<1U);
 
-            bignum_s* pow_m = mkBigNum(ec_bits);
+            bignum_s* bitEx_p1_pow_m = mkBigNum(BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
 
             // m^2
-            __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, tmp_m, tmp_m));
-            test_print_bignum(t_mul, "| | | | | m^2 | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(pow_m, t_mul, p));
-            test_print_bignum(pow_m, "| | | | | m^2 mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mul_bignum_unsigned(bitEx_x2_mul, bitEx_p1_m, bitEx_p1_m));
+            _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | m^2 | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(bitEx_p1_pow_m, bitEx_x2_mul, p));
+            _PRINT_BIGNUM_(bitEx_p1_pow_m, "| | | | | m^2 mod p | | | | |");
 
             // m^2 - xP
-            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(tmp_x, pow_m, xP));
-            test_print_bignum(tmp_x, "| | | | | m^2 - xP | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_x, tmp_x, p));
-            test_print_bignum(tmp_x, "| | | | | (m^2 - xP) mod p| | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum_unsigned_unsafe(bitEx_p1_x, bitEx_p1_pow_m, xP));
+            _PRINT_BIGNUM_(xP, "| | | | | xP | | | | |");
+            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | m^2 - xP | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_x, bitEx_p1_x, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | (m^2 - xP) mod bitEx_p1_p| | | | |");
             // m(^2 - xP) - xQ
-            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(tmp_x, tmp_x, xQ));
-            test_print_bignum(tmp_x, "| | | | | m^2 - xP - xQ | | | | |");
-            // ( m(^2 - xP) - xQ ) mod p
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_x, tmp_x, p));
-            test_print_bignum(tmp_x, "| | | | | (m^2 - xP - xQ) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum_unsigned_unsafe(bitEx_p1_x, bitEx_p1_x, xQ));
+            _PRINT_BIGNUM_(xQ, "| | | | | xQ | | | | |");
+            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | m^2 - xP - xQ | | | | |");
+            // ( m(^2 - xP) - xQ ) mod bitEx_p1_p
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_x, bitEx_p1_x, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | (m^2 - xP - xQ) mod bitEx_p1_p | | | | |");
 
-            rmBigNum(&t_mul);
+            rmBigNum(&bitEx_x2_mul);
 
-            rmBigNum(&pow_m);
+            rmBigNum(&bitEx_p1_pow_m);
         }
-        test_print_bignum(tmp_x, "| | | | | xR | | | | |");
+        _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | xR(bitEx_p1_x) | | | | |");
 
+        /* Get yR */
         {
-            bignum_s* t_mul = mkBigNum(ec_bits<<1U);
+            bignum_s* bitEx_x2_mul = mkBigNum(ec_bits<<1U);
 
-            __FUNC_RETURN_WRAPPING__(fr, sub_bignum(tmp_y, tmp_x, xP));
-            test_print_bignum(tmp_y, "| | | | | xR - xP | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_y, tmp_y, p));
-            test_print_bignum(tmp_y, "| | | | | (xR - xP) mod p | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, mul_bignum(t_mul, tmp_m, tmp_y));
-            test_print_bignum(t_mul, "| | | | | m(xR - xP) | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, sub_bignum_unsigned_unsafe(bitEx_p1_y, bitEx_p1_x, xP));
+            _PRINT_BIGNUM_(xP, "| | | | | xP | | | | |");
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | xR - xP | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (xR - xP) mod bitEx_p1_p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mul_bignum_unsigned(bitEx_x2_mul, bitEx_p1_m, bitEx_p1_y));
+            _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | m(xR - xP) | | | | |");
 
-            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(tmp_y, t_mul, p));
-            test_print_bignum(tmp_y, "| | | | | m(xR - xP) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(bitEx_p1_y, bitEx_x2_mul, p));
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | m(xR - xP) mod p | | | | |");
 
-            __FUNC_RETURN_WRAPPING__(fr, add_bignum(tmp_y, yP, tmp_y));
-            test_print_bignum(tmp_y, "| | | | | yP + m(xR - xP) | | | | |");
-            __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_y, tmp_y, p));
-            test_print_bignum(tmp_y, "| | | | | ( yP + m(xR - xP) ) mod p | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, add_bignum_unsigned_unsafe(bitEx_p1_y, yP, bitEx_p1_y));
+            _PRINT_BIGNUM_(yP, "| | | | | yP | | | | |");
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | yP + m(xR - xP) | | | | |");
+            __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | ( yP + m(xR - xP) ) mod bitEx_p1_p | | | | |");
 
-            rmBigNum(&t_mul);
+            rmBigNum(&bitEx_x2_mul);
         }
-        test_print_bignum(tmp_y, "| | | | | yR | | | | |");
+        _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | yR | | | | |");
 
         // -yR
-        __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_twos_safe(tmp_y, tmp_y));
-        test_print_bignum(tmp_y, "| | | | | (-yR) | | | | |");
+        __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_twos_signed_safe(bitEx_p1_y, bitEx_p1_y));
+        _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) | | | | |");
 
-        // (-yR) mod p
-        __FUNC_RETURN_WRAPPING__(fr, aim_bignum(tmp_y, tmp_y, p));
-        test_print_bignum(tmp_y, "| | | | | (-yR) mod p | | | | |");
+        // (-yR) mod bitEx_p1_p
+        __FUNC_RETURN_WRAPPING__(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
+        _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) mod bitEx_p1_p | | | | |");
 
         if(!slope_is_INFINITE) {
-            __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_signed_safe(xR, tmp_x));
-            __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_signed_safe(yR, tmp_y));
+            __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_unsigned_unsafe(xR, bitEx_p1_x));
+            __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_unsigned_unsafe(yR, bitEx_p1_y));
         } else {
-            printf("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
+            _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
+            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | x (INFINITE, clear to 0) | | | | |");
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | y (INFINITE, clear to 0) | | | | |");
             __FUNC_RETURN_WRAPPING__(fr, clr_bignum(xR));
             __FUNC_RETURN_WRAPPING__(fr, clr_bignum(yR));
         }
 
-        rmBigNum(&tmp_m);
-        rmBigNum(&tmp_x);
-        rmBigNum(&tmp_y);
+        rmBigNum(&bitEx_p1_m);
+        rmBigNum(&bitEx_p1_x);
+        rmBigNum(&bitEx_p1_y);
+
+        rmBigNum(&bitEx_p1_p);
     } else {
-        printf("[INFO] Point P or Q was Identity Elements, just adding two points\r\n");
-        __FUNC_RETURN_WRAPPING__(fr, add_bignum(xR, xP, xQ));
-        __FUNC_RETURN_WRAPPING__(fr, add_bignum(yR, yP, yQ));
+        _DPRINTF_("[INFO] Point P or Q was Identity Elements, just adding two points\r\n");
+        __FUNC_RETURN_WRAPPING__(fr, add_bignum_unsigned_unsafe(xR, xP, xQ));
+        __FUNC_RETURN_WRAPPING__(fr, add_bignum_unsigned_unsafe(yR, yP, yQ));
     }
+#undef BIT_P1
 }
+#ifdef _DPRINTF_
+#undef _DPRINTF_
+#endif /* _DPRINTF_ */
+#ifdef _PRINT_BIGNUM_
+#undef _PRINT_BIGNUM_
+#endif /* _PRINT_BIGNUM_ */
 
 static inline void ec_doublePoints(bignum_s* xP, bignum_s* yP, \
-        const size_t ec_bits, const bignum_s* a, const bignum_s* p)
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
+        const bool ign_sign)
 {
-    ec_sumPoints_ext(xP, yP, xP, yP, xP, yP, ec_bits, a, p);
+    const bool nQ = false;
+    ec_addPoints_ext(xP, yP, xP, yP, nQ, xP, yP, ec_bits, a, p, ign_sign);
 }
-static inline void ec_sumPoints(bignum_s* xR, bignum_s* yR, \
+#define BIT_EXTEND(ec_bits)  (ec_bits)
+static inline void ec_addPoints(bignum_s* xR, bignum_s* yR, \
         const bignum_s* xP, const bignum_s* yP, \
         const bignum_s* xQ, const bignum_s* yQ, \
-        const size_t ec_bits, const bignum_s* a, const bignum_s* p)
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
+        const bool ign_sign)
 {
-    bignum_s* sum_yQ = mkBigNum(ec_bits);
-
-    cpy_bignum_unsigned_safe(sum_yQ, yQ);
-    ec_sumPoints_ext(xR, yR, xP, yP, xQ, sum_yQ, ec_bits, a, p);
-    rmBigNum(&sum_yQ);
+    const bool nQ = false;
+    ec_addPoints_ext(xR, yR, xP, yP, nQ, xQ, yQ, ec_bits, a, p, ign_sign);
 }
 static inline void ec_subPoints(bignum_s* xR, bignum_s* yR, \
         const bignum_s* xP, const bignum_s* yP, \
         const bignum_s* xQ, const bignum_s* yQ, \
-        const size_t ec_bits, const bignum_s* a, const bignum_s* p)
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
+        const bool ign_sign)
 {
-    bignum_s* sub_yQ = mkBigNum(ec_bits);
-
-    cpy_bignum_twos_safe(sub_yQ, yQ);
-    ec_sumPoints_ext(xR, yR, xP, yP, xQ, sub_yQ, ec_bits, a, p);
-    rmBigNum(&sub_yQ);
+    const bool nQ = true;
+    ec_addPoints_ext(xR, yR, xP, yP, nQ, xQ, yQ, ec_bits, a, p, ign_sign);
 }
+#undef BIT_EXTEND
 
 #define WNAF_MAX            UINT8_MAX
 #define WNAF_BITS           8U
@@ -7654,6 +7707,13 @@ static inline void test_print_wNAF_info(const wnaf_s* p, const char* title) {
 
 void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
 {
+#if 0 /* convBigNum_wNAF */
+#define _DPRINTF_                   printf
+#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
+#else
+#define _DPRINTF_
+#define _PRINT_BIGNUM_(p, title)
+#endif/* convBigNum_wNAF */
     ReturnType fr;
     size_t clrIdx = SIZE_MAX;
 
@@ -7667,16 +7727,21 @@ void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
     {
         bignum_cmp_e cmp_d;
 
-        printf("[%lu] ", i);
-        test_print_bignum(tmp_d, "tmp_d");
+        _DPRINTF_("[%lu] ", i);
+        _PRINT_BIGNUM_(tmp_d, "tmp_d");
         if(tmp_d->nums[0]&0x1U) {
             // d mods 2^w
-            uwnaf signExt = (((uwnaf)tmp_d->nums[0])&(dst->signMsk))?(dst->signExt):(0U);
             dst->wnaf.ui[i] = (((uwnaf)tmp_d->nums[0])&(dst->wNafMsk));
-            dst->wnaf.ui[i] |= signExt;
-            printf("d[%lu] 0x%08x\t\n", i, ((bignum_t)dst->wnaf.si[i]));
+            _DPRINTF_("d mods 2^w: 0x%02x, ", dst->wnaf.ui[i]);
+            // (d mod 2^w) >= 2^(w−1) -> meas that negative?
+            if(dst->wnaf.ui[i] & dst->signMsk)
+            {
+                dst->wnaf.ui[i]-=(dst->signMsk<<1U);
+                _DPRINTF_("(d mod 2^w) - 2^w: 0x%02x \r\n", dst->wnaf.ui[i]);
+            }
+            _DPRINTF_("[%lu] 0x%08x\t\n", i, ((bignum_t)dst->wnaf.si[i]));
             sub_bignum_carry_loc_signed(tmp_d, ((bignum_t)dst->wnaf.si[i]), 0U);
-            test_print_bignum(tmp_d, "substracted tmp_d");
+            _PRINT_BIGNUM_(tmp_d, "substracted tmp_d");
         }
         else {
             dst->wnaf.ui[i] = 0U;
@@ -7695,14 +7760,16 @@ void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
             break;
         }
     }
-    printf("[end] ");
-    test_print_bignum(tmp_d, "tmp_d");
+    _DPRINTF_("[end] ");
+    _PRINT_BIGNUM_(tmp_d, "tmp_d");
 
     for(size_t i = dst->vLen; i < tmp_d->bits; i++) {
         dst->wnaf.ui[i] = 0U;
     }
 
     rmBigNum(&tmp_d);
+#undef _DPRINTF_
+#undef _PRINT_BIGNUM_
 }
 
 /* getWNAF_preCompupte_lengh: Pre-Compute Length by Window Size(length) */
@@ -7791,7 +7858,7 @@ static inline void test_print_wNAF_PreCompute_info(const wnaf_pre_compute_ec_s* 
 }
 
 /*
- * ec_sumPoints_ext
+ * ec_adsbPoints_ext
  * pc: pre-computation
  * xP, yP: Result of ec point doubling
  * ec_bits: bit length of ec point
@@ -7802,27 +7869,38 @@ static inline void test_print_wNAF_PreCompute_info(const wnaf_pre_compute_ec_s* 
 void ec_preCompute_WNAF(wnaf_pre_compute_ec_s* pc, \
         const bignum_s* xP, const bignum_s* yP, \
         const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
-        const uwnaf w)
+        const uwnaf w, const bool ign_sign)
 {
+#if 0 /* ec_preCompute_WNAF */
+#define _DPRINTF_                   printf
+#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
+#else
+#define _DPRINTF_
+#define _PRINT_BIGNUM_(p, title)
+#endif/* ec_preCompute_WNAF */
     if(!((pc != NULL) && (xP != NULL) && (yP != NULL) && (p != NULL) && (a != NULL)))   return; // NULL pointer
     if(!((xP->bits == ec_bits) && (yP->bits == ec_bits))) return; // x and y of point have to be same.
-    bignum_s* x2R, * y2R;
+    bignum_s* x2P, * y2P;
 
-    x2R = mkBigNum(ec_bits);
-    y2R = mkBigNum(ec_bits);
+    x2P = mkBigNum(ec_bits);
+    y2P = mkBigNum(ec_bits);
 
-    ec_sumPoints_ext(x2R, y2R, xP, yP, xP, yP, ec_bits, a, p);
+    ec_addPoints(x2P, y2P, xP, yP, xP, yP, ec_bits, a, p, ign_sign);
 
+    _PRINT_BIGNUM_(x2P, "x2P");
+    _PRINT_BIGNUM_(y2P, "y2P");
     cpy_bignum_unsigned_safe(pc->x[0], xP);
     cpy_bignum_unsigned_safe(pc->y[0], yP);
 
     for(uwnaf i = 1U; i < pc->l; i++)
     {
-        ec_sumPoints_ext(pc->x[i], pc->y[i], pc->x[i-1], pc->y[i-1], x2R, y2R, ec_bits, a, p);
+        ec_addPoints(pc->x[i], pc->y[i], pc->x[i-1], pc->y[i-1], x2P, y2P, ec_bits, a, p, ign_sign);
     }
 
-    rmBigNum(&x2R);
-    rmBigNum(&y2R);
+    rmBigNum(&x2P);
+    rmBigNum(&y2P);
+#undef _DPRINTF_
+#undef _PRINT_BIGNUM_
 }
 
 void ec_scalarMul_WNAF(
@@ -7830,8 +7908,19 @@ void ec_scalarMul_WNAF(
         const bignum_s* d, \
         const bignum_s* xP, const bignum_s* yP, \
         const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
-        const uwnaf w)
+        const uwnaf w, const bool ign_sign)
 {
+#if 0 /* ec_scalarMul_WNAF */
+#define _DPRINTF_                   printf
+#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
+#define _PRINT_wNAF_INFO_(p, title) test_print_wNAF_info(p, title)
+#define _PRINT_wNAF_(p, title)      test_print_wNAF_PreCompute_info(p, title)
+#else
+#define _DPRINTF_
+#define _PRINT_BIGNUM_(p, title)
+#define _PRINT_wNAF_INFO_(p, title)
+#define _PRINT_wNAF_(p, title)
+#endif/* ec_scalarMul_WNAF */
     uwnaf wnaf_idx;
     wnaf_s* wnaf_d = mkWNAF(w, ec_bits);
     wnaf_pre_compute_ec_s* wnaf_pc = mkWNAF_preCompute_ec(w, ec_bits);
@@ -7840,37 +7929,53 @@ void ec_scalarMul_WNAF(
     clr_bignum(ydP);
 
     convBigNum_wNAF(wnaf_d, d);
-    test_print_bignum(d, "d in ec_scalarMul_WNAF()");
-    test_print_wNAF_info(wnaf_d, "bignum to wnaf");
-    ec_preCompute_WNAF(wnaf_pc, xP, yP, ec_bits, a, p, w);
-    test_print_wNAF_PreCompute_info(wnaf_pc, "Pre-Computation in ec_scalarMul_WNAF()");
+    _PRINT_BIGNUM_(d, "d in ec_scalarMul_WNAF()");
+    _PRINT_wNAF_INFO_(wnaf_d, "bignum to wnaf");
+    ec_preCompute_WNAF(wnaf_pc, xP, yP, ec_bits, a, p, w, ign_sign);
+    _PRINT_wNAF_(wnaf_pc, "Pre-Computation in ec_scalarMul_WNAF()");
 
     for(size_t i = (wnaf_d->bits - 1UL); i != SIZE_MAX; i--)
     {
+        ec_doublePoints(xdP, ydP, ec_bits, a, p, ign_sign);
+        _DPRINTF_("bit=%lu, ", i); _PRINT_BIGNUM_(xdP, "doubled xdP");
+        _DPRINTF_("bit=%lu, ", i); _PRINT_BIGNUM_(ydP, "doubled ydP");
+
         if(wnaf_d->wnaf.ui[i] != 0U)
         {
-            ec_doublePoints(xdP, ydP, ec_bits, a, p);
-
             wnaf_idx = getWNAF_index(wnaf_d->wnaf.ui[i]);
+
+            _DPRINTF_("[INFO] @%s, Line:%d, [OPERAND A]\r\n", __func__, __LINE__);
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(xdP, "xdP");
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(ydP, "ydP");
+
             if(!isNegWNAF(wnaf_d->wnaf.ui[i]))
             {
                 // sum ec point
-                ec_sumPoints(xdP, ydP, xdP, ydP, \
-                        wnaf_pc->x[wnaf_idx], wnaf_pc->y[wnaf_idx], \
-                        ec_bits, a, p);
+                _DPRINTF_("[ec_addPoints]\r\n");
+                ec_addPoints(xdP, ydP, xdP, ydP, wnaf_pc->x[wnaf_idx], wnaf_pc->y[wnaf_idx], ec_bits, a, p, ign_sign);
             }
             else
             {
                 // sub ec point
-                ec_subPoints(xdP, ydP, xdP, ydP, \
-                        wnaf_pc->x[wnaf_idx], wnaf_pc->y[wnaf_idx], \
-                        ec_bits, a, p);
+                _DPRINTF_("[ec_subPoints]\r\n");
+                ec_subPoints(xdP, ydP, xdP, ydP, wnaf_pc->x[wnaf_idx], wnaf_pc->y[wnaf_idx], ec_bits, a, p, ign_sign);
             }
+            _DPRINTF_("[INFO] @%s, Line:%d, [OPERAND B]\r\n", __func__, __LINE__);
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(wnaf_pc->x[wnaf_idx], "x(2^(w-1)-1)P");
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(wnaf_pc->y[wnaf_idx], "y(2^(w-1)-1)P");
+
+            _DPRINTF_("[INFO] @%s, Line:%d, [RESULT]\r\n", __func__, __LINE__);
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(xdP, "xdP");
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(ydP, "ydP");
         }
     }
 
     rmWNAF(&wnaf_d);
     rmWNAF_preCompute_ec(&wnaf_pc);
+#undef _DPRINTF_
+#undef _PRINT_BIGNUM_
+#undef _PRINT_wNAF_INFO_
+#undef _PRINT_wNAF_
 }
 #undef __FUNC_RETURN_WRAPPING__
 
@@ -7878,67 +7983,68 @@ void ec_scalarMul_WNAF(
  * TITLE simple ec point addition testvectors
  * ref: https://andrea.corbellini.name/2015/05/23/elliptic-curve-cryptography-finite-fields-and-discrete-logarithms
  */
-const uint32_t test_simple_ec_point_addition_coef_a[] = {
+const uint32_t test_simple_ec_point_coef_a[] = {
     2, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_coef_b[] = {
+const uint32_t test_simple_ec_point_coef_b[] = {
     3, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_prime[] = {
+const uint32_t test_simple_ec_point_prime[] = {
     97, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_0xP[] = {
+const uint32_t test_simple_ec_point_0xP[] = {
     0, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_0yP[] = {
+const uint32_t test_simple_ec_point_0yP[] = {
     0, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_1xP[] = {
+const uint32_t test_simple_ec_point_1xP[] = {
     3, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_1yP[] = {
+const uint32_t test_simple_ec_point_1yP[] = {
     6, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_2xP[] = {
+const uint32_t test_simple_ec_point_2xP[] = {
     80, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_2yP[] = {
+const uint32_t test_simple_ec_point_2yP[] = {
     10, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_3xP[] = {
+const uint32_t test_simple_ec_point_3xP[] = {
     80, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_3yP[] = {
+const uint32_t test_simple_ec_point_3yP[] = {
     87, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_4xP[] = {
+const uint32_t test_simple_ec_point_4xP[] = {
     3, 0, 0, 0, 0, 0, 0, 0,
 };
-const uint32_t test_simple_ec_point_addition_4yP[] = {
+const uint32_t test_simple_ec_point_4yP[] = {
     91, 0, 0, 0, 0, 0, 0, 0,
 };
 
-const uint32_t* test_simple_ec_point_addition_mod_5_x_LIST[] = {
-    test_simple_ec_point_addition_0xP,
-    test_simple_ec_point_addition_1xP,
-    test_simple_ec_point_addition_2xP,
-    test_simple_ec_point_addition_3xP,
-    test_simple_ec_point_addition_4xP,
+const uint32_t* test_simple_ec_point_add_mod_5_x_LIST[] = {
+    test_simple_ec_point_0xP,
+    test_simple_ec_point_1xP,
+    test_simple_ec_point_2xP,
+    test_simple_ec_point_3xP,
+    test_simple_ec_point_4xP,
 };
-const uint32_t* test_simple_ec_point_addition_mod_5_y_LIST[] = {
-    test_simple_ec_point_addition_0yP,
-    test_simple_ec_point_addition_1yP,
-    test_simple_ec_point_addition_2yP,
-    test_simple_ec_point_addition_3yP,
-    test_simple_ec_point_addition_4yP,
+const uint32_t* test_simple_ec_point_add_mod_5_y_LIST[] = {
+    test_simple_ec_point_0yP,
+    test_simple_ec_point_1yP,
+    test_simple_ec_point_2yP,
+    test_simple_ec_point_3yP,
+    test_simple_ec_point_4yP,
 };
 void test_simple_ec_point_addition(void)
 {
-    const char* test_fn_name = "ec_sumPoints";
+    const char* test_fn_name = "ec_addPoints";
     bool cmp_result;
     bool intentional_invalid;
     uint32_t d, mod_d;
     const uint32_t mod_m = 5U;
+    const bool ign_sign = true;
 
     bignum_s* coef_a = mkBigNum(_EC_BITS_);
     bignum_s* coef_b = mkBigNum(_EC_BITS_);
@@ -7950,30 +8056,32 @@ void test_simple_ec_point_addition(void)
     bignum_s* xNP = mkBigNum(_EC_BITS_);
     bignum_s* yNP = mkBigNum(_EC_BITS_);
 
-    (void)memcpy(xP->nums, test_simple_ec_point_addition_1xP, xP->size);
-    (void)memcpy(yP->nums, test_simple_ec_point_addition_1yP, yP->size);
+    (void)memcpy(xP->nums, test_simple_ec_point_1xP, xP->size);
+    (void)memcpy(yP->nums, test_simple_ec_point_1yP, yP->size);
 
-    (void)memcpy(coef_a->nums, test_simple_ec_point_addition_coef_a, coef_a->size);
-    (void)memcpy(coef_b->nums, test_simple_ec_point_addition_coef_b, coef_b->size);
-    (void)memcpy(prime->nums, test_simple_ec_point_addition_prime, prime->size);
+    (void)memcpy(coef_a->nums, test_simple_ec_point_coef_a, coef_a->size);
+    (void)memcpy(coef_b->nums, test_simple_ec_point_coef_b, coef_b->size);
+    (void)memcpy(prime->nums, test_simple_ec_point_prime, prime->size);
 
-    clr_bignum(xNP);
-    clr_bignum(yNP);
+    (void)memcpy(xNP->nums, test_simple_ec_point_0xP, xNP->size);
+    (void)memcpy(yNP->nums, test_simple_ec_point_0yP, yNP->size);
 
     for(d = 1U; d < 12U; d++)
     {
         mod_d = d % mod_m;
         intentional_invalid = false;
-        ec_sumPoints(xNP, yNP, xNP, yNP, xP, yP, _EC_BITS_, coef_a, prime);
+        ec_addPoints(xNP, yNP, xNP, yNP, xP, yP, _EC_BITS_, coef_a, prime, ign_sign);
         cmp_result = false;
-        cmp_result |= (memcmp(xNP->nums, test_simple_ec_point_addition_mod_5_x_LIST[mod_d], (xNP->size)) == 0);
-        cmp_result &= (memcmp(yNP->nums, test_simple_ec_point_addition_mod_5_y_LIST[mod_d], (yNP->size)) == 0);
+        cmp_result |= (memcmp(xNP->nums, test_simple_ec_point_add_mod_5_x_LIST[mod_d], (xNP->size)) == 0);
+        cmp_result &= (memcmp(yNP->nums, test_simple_ec_point_add_mod_5_y_LIST[mod_d], (yNP->size)) == 0);
         if((!cmp_result))
         {
             printf("[coordinates of %uP]\r\n", d);
             test_print_bignum(xNP, "xNP");
             test_print_bignum(yNP, "yNP");
         }
+
+        printf("%uP, ", d);
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
         TEST_ASSERT((cmp_result) || (intentional_invalid));
 
@@ -7988,17 +8096,227 @@ void test_simple_ec_point_addition(void)
     rmBigNum(&xNP);
     rmBigNum(&yNP);
 }
+const uint32_t test_simple2_ec_point_coef_a[] = {
+    1, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_coef_b[] = {
+    6, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_prime[] = {
+    11, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_xP[] = {
+    2, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_yP[] = {
+    7, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_xQ[] = {
+    5, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_yQ[] = {
+    2, 0, 0, 0, 0, 0, 0, 0,
+};
+
+const uint32_t test_simple2_ec_point_P_p_Q_xR[] = {
+    8, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_P_p_Q_yR[] = {
+    3, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_P_m_Q_xR[] = {
+    2, 0, 0, 0, 0, 0, 0, 0,
+};
+const uint32_t test_simple2_ec_point_P_m_Q_yR[] = {
+    4, 0, 0, 0, 0, 0, 0, 0,
+};
+
+void test_simple2_ec_point_addition(void)
+{
+
+    const char* test_fn_name = "ec_addPoints";
+    bool cmp_result;
+    bool intentional_invalid;
+    const uint32_t mod_m = 5U;
+    const bool ign_sign = true;
+
+    bignum_s* coef_a = mkBigNum(_EC_BITS_);
+    bignum_s* coef_b = mkBigNum(_EC_BITS_);
+    bignum_s* prime = mkBigNum(_EC_BITS_);
+
+    bignum_s* xP = mkBigNum(_EC_BITS_);
+    bignum_s* yP = mkBigNum(_EC_BITS_);
+    bignum_s* xQ = mkBigNum(_EC_BITS_);
+    bignum_s* yQ = mkBigNum(_EC_BITS_);
+
+    bignum_s* xR = mkBigNum(_EC_BITS_);
+    bignum_s* yR = mkBigNum(_EC_BITS_);
+
+    (void)memcpy(coef_a->nums, test_simple2_ec_point_coef_a, coef_a->size);
+    (void)memcpy(coef_b->nums, test_simple2_ec_point_coef_b, coef_b->size);
+    (void)memcpy(prime->nums, test_simple2_ec_point_prime, prime->size);
+
+    {
+        (void)memcpy(xP->nums, test_simple2_ec_point_xP, xP->size);
+        (void)memcpy(yP->nums, test_simple2_ec_point_yP, yP->size);
+        (void)memcpy(xQ->nums, test_simple2_ec_point_xQ, xQ->size);
+        (void)memcpy(yQ->nums, test_simple2_ec_point_yQ, yQ->size);
+
+        intentional_invalid = false;
+        ec_addPoints(xR, yR, xP, yP, xQ, yQ, _EC_BITS_, coef_a, prime, false);
+        cmp_result = false;
+        cmp_result |= (memcmp(xR->nums, test_simple2_ec_point_P_p_Q_xR, (xR->size)) == 0);
+        cmp_result &= (memcmp(yR->nums, test_simple2_ec_point_P_p_Q_yR, (yR->size)) == 0);
+        if((!cmp_result))
+        {
+            printf("[coordinates]\r\n");
+            test_print_bignum(xR, "xR");
+            test_print_bignum(yR, "yR");
+        }
+        printf("P + Q = R, %s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+    }
+    {
+        (void)memcpy(xP->nums, test_simple2_ec_point_xQ, xP->size);
+        (void)memcpy(yP->nums, test_simple2_ec_point_yQ, yP->size);
+        (void)memcpy(xQ->nums, test_simple2_ec_point_xP, xQ->size);
+        (void)memcpy(yQ->nums, test_simple2_ec_point_yP, yQ->size);
+
+        intentional_invalid = false;
+        ec_addPoints(xR, yR, xP, yP, xQ, yQ, _EC_BITS_, coef_a, prime, ign_sign);
+        cmp_result = false;
+        cmp_result |= (memcmp(xR->nums, test_simple2_ec_point_P_p_Q_xR, (xR->size)) == 0);
+        cmp_result &= (memcmp(yR->nums, test_simple2_ec_point_P_p_Q_yR, (yR->size)) == 0);
+        if((!cmp_result))
+        {
+            printf("[coordinates]\r\n");
+            test_print_bignum(xR, "xR");
+            test_print_bignum(yR, "yR");
+        }
+        printf("Q + P = R, %s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+    }
+    {
+        (void)memcpy(xP->nums, test_simple2_ec_point_P_m_Q_xR, xP->size);
+        (void)memcpy(yP->nums, test_simple2_ec_point_P_m_Q_yR, yP->size);
+        (void)memcpy(xQ->nums, test_simple2_ec_point_xQ, xQ->size);
+        (void)memcpy(yQ->nums, test_simple2_ec_point_yQ, yQ->size);
+
+        intentional_invalid = false;
+        ec_addPoints(xR, yR, xP, yP, xQ, yQ, _EC_BITS_, coef_a, prime, ign_sign);
+        cmp_result = false;
+        cmp_result |= (memcmp(xR->nums, test_simple2_ec_point_xP, (xR->size)) == 0);
+        cmp_result &= (memcmp(yR->nums, test_simple2_ec_point_yP, (yR->size)) == 0);
+        if((!cmp_result))
+        {
+            printf("[coordinates]\r\n");
+            test_print_bignum(xR, "xR");
+            test_print_bignum(yR, "yR");
+        }
+        printf("(P - Q) + Q = P, %s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+    }
+
+    rmBigNum(&coef_a);
+    rmBigNum(&coef_b);
+    rmBigNum(&prime);
+
+    rmBigNum(&xP);
+    rmBigNum(&yP);
+    rmBigNum(&xQ);
+    rmBigNum(&yQ);
+
+    rmBigNum(&xR);
+    rmBigNum(&yR);
+}
+void test_simple2_ec_point_substraction(void)
+{
+    const char* test_fn_name = "ec_subPoints";
+    bool cmp_result;
+    bool intentional_invalid;
+    const uint32_t mod_m = 5U;
+    const bool ign_sign = true;
+
+    bignum_s* coef_a = mkBigNum(_EC_BITS_);
+    bignum_s* coef_b = mkBigNum(_EC_BITS_);
+    bignum_s* prime = mkBigNum(_EC_BITS_);
+
+    bignum_s* xP = mkBigNum(_EC_BITS_);
+    bignum_s* yP = mkBigNum(_EC_BITS_);
+    bignum_s* xQ = mkBigNum(_EC_BITS_);
+    bignum_s* yQ = mkBigNum(_EC_BITS_);
+
+    bignum_s* xR = mkBigNum(_EC_BITS_);
+    bignum_s* yR = mkBigNum(_EC_BITS_);
+
+    (void)memcpy(coef_a->nums, test_simple2_ec_point_coef_a, coef_a->size);
+    (void)memcpy(coef_b->nums, test_simple2_ec_point_coef_b, coef_b->size);
+    (void)memcpy(prime->nums, test_simple2_ec_point_prime, prime->size);
+
+    {
+        (void)memcpy(xP->nums, test_simple2_ec_point_xP, xP->size);
+        (void)memcpy(yP->nums, test_simple2_ec_point_yP, yP->size);
+        (void)memcpy(xQ->nums, test_simple2_ec_point_xQ, xQ->size);
+        (void)memcpy(yQ->nums, test_simple2_ec_point_yQ, yQ->size);
+
+        intentional_invalid = false;
+        ec_subPoints(xR, yR, xP, yP, xQ, yQ, _EC_BITS_, coef_a, prime, ign_sign);
+        cmp_result = false;
+        cmp_result |= (memcmp(xR->nums, test_simple2_ec_point_P_m_Q_xR, (xR->size)) == 0);
+        cmp_result &= (memcmp(yR->nums, test_simple2_ec_point_P_m_Q_yR, (yR->size)) == 0);
+        if((!cmp_result))
+        {
+            printf("[coordinates]\r\n");
+            test_print_bignum(xR, "xR");
+            test_print_bignum(yR, "yR");
+        }
+        printf("P - Q = R, %s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+    }
+    {
+        (void)memcpy(xP->nums, test_simple2_ec_point_P_p_Q_xR, xP->size);
+        (void)memcpy(yP->nums, test_simple2_ec_point_P_p_Q_yR, yP->size);
+        (void)memcpy(xQ->nums, test_simple2_ec_point_xQ, xQ->size);
+        (void)memcpy(yQ->nums, test_simple2_ec_point_yQ, yQ->size);
+
+        intentional_invalid = false;
+        ec_subPoints(xR, yR, xP, yP, xQ, yQ, _EC_BITS_, coef_a, prime, ign_sign);
+        cmp_result = false;
+        cmp_result |= (memcmp(xR->nums, test_simple2_ec_point_xP, (xR->size)) == 0);
+        cmp_result &= (memcmp(yR->nums, test_simple2_ec_point_yP, (yR->size)) == 0);
+        if((!cmp_result))
+        {
+            printf("[coordinates]\r\n");
+            test_print_bignum(xR, "xR");
+            test_print_bignum(yR, "yR");
+        }
+        printf("(P + Q) - Q = P%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+    }
+
+    rmBigNum(&coef_a);
+    rmBigNum(&coef_b);
+    rmBigNum(&prime);
+
+    rmBigNum(&xP);
+    rmBigNum(&yP);
+    rmBigNum(&xQ);
+    rmBigNum(&yQ);
+
+    rmBigNum(&xR);
+    rmBigNum(&yR);
+}
 const uint32_t* test_simple_ec_point_doubling_mod_5_x_LIST[] = {
-    test_simple_ec_point_addition_1xP,
-    test_simple_ec_point_addition_2xP,
-    test_simple_ec_point_addition_4xP,
-    test_simple_ec_point_addition_3xP,
+    test_simple_ec_point_1xP,
+    test_simple_ec_point_2xP,
+    test_simple_ec_point_4xP,
+    test_simple_ec_point_3xP,
 };
 const uint32_t* test_simple_ec_point_doubling_mod_5_y_LIST[] = {
-    test_simple_ec_point_addition_1yP,//0x00000001
-    test_simple_ec_point_addition_2yP,//0x00000002
-    test_simple_ec_point_addition_4yP,//0x00000004
-    test_simple_ec_point_addition_3yP,//0x00000008
+    test_simple_ec_point_1yP,//0x00000001
+    test_simple_ec_point_2yP,//0x00000002
+    test_simple_ec_point_4yP,//0x00000004
+    test_simple_ec_point_3yP,//0x00000008
 };
 void test_simple_ec_point_doubling(void)
 {
@@ -8007,6 +8325,7 @@ void test_simple_ec_point_doubling(void)
     bool intentional_invalid;
     uint32_t d, mod_d;
     const uint32_t mod_m = 4U;
+    const bool ign_sign = true;
 
     bignum_s* coef_a = mkBigNum(_EC_BITS_);
     bignum_s* coef_b = mkBigNum(_EC_BITS_);
@@ -8015,27 +8334,28 @@ void test_simple_ec_point_doubling(void)
     bignum_s* x2NP = mkBigNum(_EC_BITS_);
     bignum_s* y2NP = mkBigNum(_EC_BITS_);
 
-    (void)memcpy(x2NP->nums, test_simple_ec_point_addition_1xP, x2NP->size);
-    (void)memcpy(y2NP->nums, test_simple_ec_point_addition_1yP, y2NP->size);
+    (void)memcpy(x2NP->nums, test_simple_ec_point_1xP, x2NP->size);
+    (void)memcpy(y2NP->nums, test_simple_ec_point_1yP, y2NP->size);
 
-    (void)memcpy(coef_a->nums, test_simple_ec_point_addition_coef_a, coef_a->size);
-    (void)memcpy(coef_b->nums, test_simple_ec_point_addition_coef_b, coef_b->size);
-    (void)memcpy(prime->nums, test_simple_ec_point_addition_prime, prime->size);
+    (void)memcpy(coef_a->nums, test_simple_ec_point_coef_a, coef_a->size);
+    (void)memcpy(coef_b->nums, test_simple_ec_point_coef_b, coef_b->size);
+    (void)memcpy(prime->nums, test_simple_ec_point_prime, prime->size);
 
     for(d = 1U; d < 12U; d++)
     {
         mod_d = d % mod_m;
         intentional_invalid = false;
-        ec_doublePoints(x2NP, y2NP, _EC_BITS_, coef_a, prime);
+        ec_doublePoints(x2NP, y2NP, _EC_BITS_, coef_a, prime, ign_sign);
         cmp_result = false;
         cmp_result |= (memcmp(x2NP->nums, test_simple_ec_point_doubling_mod_5_x_LIST[mod_d], (x2NP->size)) == 0);
         cmp_result &= (memcmp(y2NP->nums, test_simple_ec_point_doubling_mod_5_y_LIST[mod_d], (y2NP->size)) == 0);
         if((!cmp_result))
         {
-            printf("[coordinates of %uP, tv list[%u]]\r\n", 1U<<d, d);
+            printf("[coordinates of %uP, tv list[%u]]\r\n", (1U<<d), d);
             test_print_bignum(x2NP, "x2NP");
             test_print_bignum(y2NP, "y2NP");
         }
+        printf("%6uP, ", (1u<<d));
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
         TEST_ASSERT((cmp_result) || (intentional_invalid));
 
@@ -8086,8 +8406,48 @@ void test_simple_nwaf(void)
     rmWNAF(&wnaf_d);
 }
 
+const uint32_t TV_simple_wnaf_number_2[8] = {
+    2329,
+};
+const char TV_simple_wnaf_256_p1_bits_2[256+1] = {
+    -1,0,0,3,0,0,0,1,
+};
+void test_simple_nwaf_2(void)
+{
+    const char* test_fn_name = "convBigNum_wNAF";
+    bool cmp_result;
+    bool intentional_invalid;
+
+    uwnaf window = 4;
+    bignum_s* bignum_d = mkBigNum(_EC_BITS_);
+    wnaf_s* wnaf_d = mkWNAF(window, _EC_BITS_);
+
+    (void)memcpy(bignum_d->nums, TV_simple_wnaf_number_2, bignum_d->size);
+
+    {
+        intentional_invalid = false;
+        convBigNum_wNAF(wnaf_d, bignum_d);
+#if 0 /* JUST_TEST_NOT_COMPARE */
+        cmp_result = (memcmp(wnaf_d->wnaf.vp, TV_simple_wnaf_256_p1_bits_2, wnaf_d->size) == 0);
+        if((!cmp_result))
+        {
+            test_print_wNAF_info(wnaf_d, "bignum to wnaf");
+        }
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        test_print_wNAF_info(wnaf_d, "bignum to wnaf");
+#endif/* JUST_TEST_NOT_COMPARE */
+    }
+
+    rmBigNum(&bignum_d);
+    rmWNAF(&wnaf_d);
+}
+
 void test_simple_nwaf_pre_compute(void)
 {
+    const bool ign_sign = false;
+
     uwnaf window = 6;
 
     wnaf_pre_compute_ec_s* wnaf_pc = mkWNAF_preCompute_ec(window, _EC_BITS_);
@@ -8097,13 +8457,16 @@ void test_simple_nwaf_pre_compute(void)
     bignum_s* coef_a = mkBigNum(_EC_BITS_);
     bignum_s* prime = mkBigNum(_EC_BITS_);
 
-    (void)memcpy(xP->nums, test_simple_ec_point_addition_1xP, xP->size);
-    (void)memcpy(yP->nums, test_simple_ec_point_addition_1yP, yP->size);
-    (void)memcpy(coef_a->nums, test_simple_ec_point_addition_coef_a, coef_a->size);
-    (void)memcpy(prime->nums, test_simple_ec_point_addition_prime, prime->size);
+    (void)memcpy(xP->nums, test_simple_ec_point_1xP, xP->size);
+    (void)memcpy(yP->nums, test_simple_ec_point_1yP, yP->size);
+    (void)memcpy(coef_a->nums, test_simple_ec_point_coef_a, coef_a->size);
+    (void)memcpy(prime->nums, test_simple_ec_point_prime, prime->size);
 
-    ec_preCompute_WNAF(wnaf_pc, xP, yP, _EC_BITS_, coef_a, prime, window);
+    ec_preCompute_WNAF(wnaf_pc, xP, yP, _EC_BITS_, coef_a, prime, window, ign_sign);
+#if 0 /* JUST_TEST_NOT_COMPARE */
+#else
     test_print_wNAF_PreCompute_info(wnaf_pc, "Pre-Computation, w is 5, {1, 3, 5, ..., 2^w - 1}, l = 2^(w-2)");
+#endif/* JUST_TEST_NOT_COMPARE */
 
     rmWNAF_preCompute_ec(&wnaf_pc);
 
@@ -8113,7 +8476,7 @@ void test_simple_nwaf_pre_compute(void)
     rmBigNum(&prime);
 }
 
-const uint32_t SECP256K1_calc_p[]  = { \
+const uint32_t SECP256K1_calc_p[] = { \
     0xfffffc2f, 0xfffffffe, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, };
 const uint32_t SECP256K1_calc_a[]  = { \
     0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
@@ -8123,12 +8486,140 @@ const uint32_t SECP256K1_calc_xG[] = { \
     0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e, };
 const uint32_t SECP256K1_calc_yG[] = { \
     0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77, };
+
 const uint32_t SECP256K1_calc_n[]  = { \
     0xd0364141, 0xbfd25e8c, 0xaf48a03b, 0xbaaedce6, 0xfffffffe, 0xffffffff, 0xffffffff, 0xffffffff, };
-const char ref_test_SECP256K1_calcaulation[] = "[REFERENCES]\nElliptic Curve Cryptography: ECDH and ECDSA\n[Link] https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/";
-void test_SECP256K1_calcaulation(void)
+
+const uint32_t SECP256K1_calc_1d[]  = { \
+    0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_2d[]  = { \
+    0x00000002, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_3d[]  = { \
+    0x00000003, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_4d[]  = { \
+    0x00000004, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_5d[]  = { \
+    0x00000005, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_10d[]  = { \
+    0x0000000a, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_100d[]  = { \
+    0x00000064, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_1000d[]  = { \
+    0x000003e8, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_1000000d[]  = { \
+    0x000f4240, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+
+const uint32_t SECP256K1_calc_x0G[] = { \
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_y0G[] = { \
+    0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_x1G[] = { \
+    0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e, };
+const uint32_t SECP256K1_calc_y1G[] = { \
+    0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77, };
+const uint32_t SECP256K1_calc_x2G[] = { \
+    0x5c709ee5, 0xabac09b9, 0x8cef3ca7, 0x5c778e4b, 0x95c07cd8, 0x3045406e, 0x41ed7d6d, 0xc6047f94, };
+const uint32_t SECP256K1_calc_y2G[] = { \
+    0x50cfe52a, 0x236431a9, 0x3266d0e1, 0xf7f63265, 0x466ceaee, 0xa3c58419, 0xa63dc339, 0x1ae168fe, };
+const uint32_t SECP256K1_calc_x3G[] = { \
+    0xbce036f9, 0x8601f113, 0x836f99b0, 0xb531c845, 0xf89d5229, 0x49344f85, 0x9258c310, 0xf9308a01, };
+const uint32_t SECP256K1_calc_y3G[] = { \
+    0x84b8e672, 0x6cb9fd75, 0x34c2231b, 0x6500a999, 0x2a37f356, 0x0fe337e6, 0x632de814, 0x388f7b0f, };
+const uint32_t SECP256K1_calc_x4G[] = { \
+    0xe8c4cd13, 0x74fa94ab, 0x0ee07584, 0xcc6c1390, 0x930b1404, 0x581e4904, 0xc10d80f3, 0xe493dbf1, };
+const uint32_t SECP256K1_calc_y4G[] = { \
+    0x47739922, 0xcfe97bdc, 0xbfbdfe40, 0xd967ae33, 0x8ea51448, 0x5642e209, 0xa0d455b7, 0x51ed993e, };
+const uint32_t SECP256K1_calc_x5G[] = { \
+    0xb240efe4, 0xcba8d569, 0xdc619ab7, 0xe88b84bd, 0x0a5c5128, 0x55b4a725, 0x1a072093, 0x2f8bde4d, };
+const uint32_t SECP256K1_calc_y5G[] = { \
+    0xa6ac62d6, 0xdca87d3a, 0xab0d6840, 0xf788271b, 0xa6c9c426, 0xd4dba9dd, 0x36e5e3d6, 0xd8ac2226, };
+const uint32_t SECP256K1_calc_x6G[] = { \
+    0x60297556, 0x2f057a14, 0x8568a18b, 0x82f6472f, 0x355235d3, 0x20453a14, 0x755eeea4, 0xfff97bd5, };
+const uint32_t SECP256K1_calc_y6G[] = { \
+    0xb075f297, 0x3c870c36, 0x518fe4a0, 0xde80f0f6, 0x7f45c560, 0xf3be9601, 0xacfbb620, 0xae12777a, };
+const uint32_t SECP256K1_calc_x7G[] = { \
+    0xcac4f9bc, 0xe92bdded, 0x0330e39c, 0x3d419b7e, 0xf2ea7a0e, 0xa398f365, 0x6e5db4ea, 0x5cbdf064, };
+const uint32_t SECP256K1_calc_y7G[] = { \
+    0x087264da, 0xa5082628, 0x13fde7b5, 0xa813d0b8, 0x861a54db, 0xa3178d6d, 0xba255960, 0x6aebca40, };
+const uint32_t SECP256K1_calc_x8G[] = { \
+    0xe10a2a01, 0x67784ef3, 0xe5af888a, 0x0a1bdd05, 0xb70f3c2f, 0xaff3843f, 0x5cca351d, 0x2f01e5e1, };
+const uint32_t SECP256K1_calc_y8G[] = { \
+    0x6cbde904, 0xb5da2cb7, 0xba5b7617, 0xc2e213d6, 0x132d13b4, 0x293d082a, 0x41539949, 0x5c4da8a7, };
+const uint32_t SECP256K1_calc_x9G[] = { \
+    0xfc27ccbe, 0xc35f110d, 0x4c57e714, 0xe0979697, 0x9f559abd, 0x09ad178a, 0xf0c7f653, 0xacd484e2, };
+const uint32_t SECP256K1_calc_y9G[] = { \
+    0xc64f9c37, 0x05cc262a, 0x375f8e0f, 0xadd888a4, 0x763b61e9, 0x64380971, 0xb0a7d9fd, 0xcc338921, };
+const uint32_t SECP256K1_calc_x10G[] = { \
+    0x47e247c7, 0x52a68e2a, 0x1943c2b7, 0x3442d49b, 0x1ae6ae5d, 0x35477c7b, 0x47f3c862, 0xa0434d9e, };
+const uint32_t SECP256K1_calc_y10G[] = { \
+    0x037368d7, 0x3cbee53b, 0xd877a159, 0x6f794c2e, 0x93a24c69, 0xa3b6c7e6, 0x5419bc27, 0x893aba42, };
+
+const uint32_t SECP256K1_calc_x16G[] = { \
+    0x2a6dec0a, 0xc44ee89e, 0xb87a5ae9, 0xb2a31369, 0x21c23e97, 0x3011aabc, 0xb59e9ec5, 0xe60fce93, };
+const uint32_t SECP256K1_calc_y16G[] = { \
+    0x69616821, 0xe1f32cce, 0x44d23f0b, 0x1296891e, 0xf5793710, 0x9db99f34, 0x99e59592, 0xf7e35073, };
+const uint32_t SECP256K1_calc_x32G[] = { \
+    0x07143e65, 0x75d0dbd4, 0x9904a61d, 0xdacffcb8, 0xe2f378ce, 0x47b6e054, 0x4fb5a22d, 0xd30199d7, };
+const uint32_t SECP256K1_calc_y32G[] = { \
+    0x24106ab9, 0x05b3ff1f, 0x64ed8196, 0x1f760cc3, 0xe9838065, 0xb3d6dec9, 0x0ae3d5c3, 0x95038d9d, };
+const uint32_t SECP256K1_calc_x64G[] = { \
+    0xf874ef8b, 0xe37918e6, 0xcdbafd81, 0xfc4c6f1d, 0xf832823c, 0x0b1051ea, 0x2d16eab7, 0xbf23c154, };
+const uint32_t SECP256K1_calc_y64G[] = { \
+    0x66831d9f, 0x4dc37efe, 0x811e2f78, 0xc522fc54, 0xba5392e4, 0x7ad928a0, 0xc3300373, 0x5cb3866f, };
+const uint32_t SECP256K1_calc_x128G[] = { \
+    0x6769a24e, 0x64707745, 0x00535655, 0xbcf55cd7, 0xf7d1671c, 0x696c3d09, 0x033f7a06, 0x34ff3be4, };
+const uint32_t SECP256K1_calc_y128G[] = { \
+    0x73cc2f1a, 0x8491067a, 0xe8f8b681, 0x55df16c3, 0x9832098c, 0x3f6619d8, 0x3a236c55, 0x5d9d1162, };
+const uint32_t SECP256K1_calc_x256G[] = { \
+    0xd5f51508, 0x0646e23f, 0xd5ac1ca1, 0xd8c39cab, 0x172de238, 0xea2a6e3e, 0x12c609d9, 0x82822632, };
+const uint32_t SECP256K1_calc_y256G[] = { \
+    0xf6e26caf, 0xd31b6eaf, 0x2f7b17be, 0x62d613ac, 0x30b60ace, 0x5e8256e8, 0x8557dfe4, 0x11f8a809, };
+const uint32_t SECP256K1_calc_x512G[] = { \
+    0xef34a24d, 0x926e2c00, 0xd9e159d0, 0x0adbc968, 0x9cf918d5, 0x905a857a, 0x87a79ff3, 0x465370b2, };
+const uint32_t SECP256K1_calc_y512G[] = { \
+    0xb33887f4, 0xa2f8fb20, 0x15d37a10, 0x588e09b2, 0xfdeec2c1, 0xa4af8bda, 0x8368c082, 0x35e531b3, };
+const uint32_t SECP256K1_calc_x1024G[] = { \
+    0xe285131f, 0xd5b901b2, 0xc813b088, 0xaaec6ecd, 0x66ad6240, 0xd664a18f, 0xe23cbd77, 0x241febb8, };
+const uint32_t SECP256K1_calc_y1024G[] = { \
+    0x2750026d, 0xabb3e66f, 0xbd0cb5af, 0xcd50fd0f, 0x13981df8, 0xd6c420bd, 0xff94f8d3, 0x513378d9, };
+
+const uint32_t SECP256K1_calc_x100G[] = { \
+    0xf7500f88, 0x0221b4ce, 0x406a2689, 0x3ee306b3, 0x5fb72bf5, 0x2e174c83, 0x3c5e1765, 0xed3bace2, };
+const uint32_t SECP256K1_calc_y100G[] = { \
+    0xe335286e, 0xfce17ad5, 0x084895d0, 0x97bd17be, 0x7a1f87bf, 0xdcda5e8a, 0x1288ccff, 0xe57a6f57, };
+const uint32_t SECP256K1_calc_x1000G[] = { \
+    0x79cdb3ad, 0x49b6a238, 0xfd89073d, 0x6db2b637, 0x8b634853, 0x538aaa12, 0x73aa632f, 0x4a5169f6, };
+const uint32_t SECP256K1_calc_y1000G[] = { \
+    0xa3c62601, 0xc7ba61f4, 0x4b2c39a1, 0xcb1127b6, 0xa26a8ca7, 0xae14ba09, 0xeb2a8bad, 0xbaf1e702, };
+const uint32_t SECP256K1_calc_x10000G[] = { \
+    0x4c2f6fae, 0xaaf5cfd8, 0x0bc87f4e, 0x3a02bd71, 0x98232930, 0x0f7b89c8, 0xeac57969, 0x7a36d7ef, };
+const uint32_t SECP256K1_calc_y10000G[] = { \
+    0xe52e24f9, 0x24452172, 0xcc3ea598, 0x644b637a, 0x882b4619, 0x28781419, 0x08a7e640, 0xcdeb2ea3, };
+const uint32_t SECP256K1_calc_x100000G[] = { \
+    0xa09d44fd, 0x49fa3f22, 0x46266ba3, 0x20b2ea3b, 0x5faf0daa, 0x1894aa9e, 0xe7336a40, 0x1cb88761, };
+const uint32_t SECP256K1_calc_y100000G[] = { \
+    0x5a851399, 0x8e5a9d28, 0x3eb2a085, 0xe7557c0a, 0xb85ec064, 0x59157abd, 0xf654b421, 0x9e95f3dd, };
+const uint32_t SECP256K1_calc_x1000000G[] = { \
+    0xa99436cc, 0xcc219866, 0x17988568, 0x5b83f6fa, 0x772d66d6, 0xaea7dcc0, 0x3a858342, 0xaf5a13d0, };
+const uint32_t SECP256K1_calc_y1000000G[] = { \
+    0xd4301ee1, 0xb44b6adb, 0x72f5bfc7, 0x87e7ae7d, 0x3f5594b9, 0x8aebcc31, 0x92cddfb6, 0xc694e15f, };
+
+void test_SECP256K1_addition(void)
 {
-    char c;
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+#define TEST_MANUAL_CHECK   0
+    char keyin;
     /* 
      * Link: https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
      * EC Curve formula
@@ -8146,11 +8637,333 @@ void test_SECP256K1_calcaulation(void)
      * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
      * h  = 1
      */
+const uint32_t* TV_SECP256K1_addition_xNG_LIST[] = {
+    SECP256K1_calc_x1G,
+    SECP256K1_calc_x2G,
+    SECP256K1_calc_x3G,
+    SECP256K1_calc_x4G,
+    SECP256K1_calc_x5G,
+    SECP256K1_calc_x6G,
+    SECP256K1_calc_x7G,
+    SECP256K1_calc_x8G,
+    SECP256K1_calc_x9G,
+    SECP256K1_calc_x10G,
+};
+const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
+    SECP256K1_calc_y1G,
+    SECP256K1_calc_y2G,
+    SECP256K1_calc_y3G,
+    SECP256K1_calc_y4G,
+    SECP256K1_calc_y5G,
+    SECP256K1_calc_y6G,
+    SECP256K1_calc_y7G,
+    SECP256K1_calc_y8G,
+    SECP256K1_calc_y9G,
+    SECP256K1_calc_y10G,
+};
+    const char* test_fn_name = "ec_addPoints";
+
+    bool cmp_result;
+    bool intentional_invalid;
+
     bignum_s* coef_a = mkBigNum(_EC_BITS_);
     bignum_s* coef_b = mkBigNum(_EC_BITS_);
     bignum_s* prime = mkBigNum(_EC_BITS_);
 
-    bignum_s* cand_n = mkBigNum(_EC_BITS_);
+    bignum_s* xG = mkBigNum(_EC_BITS_);
+    bignum_s* yG = mkBigNum(_EC_BITS_);
+
+    bignum_s* xP = mkBigNum(_EC_BITS_);
+    bignum_s* yP = mkBigNum(_EC_BITS_);
+
+    const bool ign_sign = true;
+
+    memcpy(coef_a->nums, SECP256K1_calc_a, coef_a->size);
+    memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
+    memcpy(prime->nums, SECP256K1_calc_p, prime->size);
+
+    memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
+    memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
+
+    clr_bignum(xP);
+    clr_bignum(yP);
+    // d == 1
+    for(size_t i = 0UL; i < 10UL; i++)
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+
+        ec_addPoints(xP, yP, xP, yP, xG, yG, _EC_BITS_, coef_a, prime, ign_sign);
+
+        cmp_result &= (memcmp(xP->nums, TV_SECP256K1_addition_xNG_LIST[i], xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, TV_SECP256K1_addition_yNG_LIST[i], yP->size) == 0);
+
+        printf("N=%lu", i+1UL); test_print_bignum(xP, "xNG");
+        printf("N=%lu", i+1UL); test_print_bignum(yP, "yNG");
+        if(!cmp_result) {
+            printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_xNG_LIST[i], xP->nlen);
+            printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_yNG_LIST[i], yP->nlen);
+        }
+
+        printf("%luG, ", i+1UL);
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif
+    }
+
+    // d == 100
+    {
+        for(size_t i = 10UL; i < 1000000UL; i++)
+        {
+            bool doCompare = false;
+            const uint32_t* xNG_ref = NULL;
+            const uint32_t* yNG_ref = NULL;
+
+            cmp_result = true;
+            intentional_invalid = false;
+
+            ec_addPoints(xP, yP, xP, yP, xG, yG, _EC_BITS_, coef_a, prime, ign_sign);
+            if(i+1UL ==     100UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x100G;
+                yNG_ref = SECP256K1_calc_y100G;
+            }
+            if(i+1UL ==    1000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x1000G;
+                yNG_ref = SECP256K1_calc_y1000G;
+            }
+            if(i+1UL ==   10000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x10000G;
+                yNG_ref = SECP256K1_calc_y10000G;
+            }
+            if(i+1UL ==  100000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x100000G;
+                yNG_ref = SECP256K1_calc_y100000G;
+            }
+            if(i+1UL == 1000000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x1000000G;
+                yNG_ref = SECP256K1_calc_y1000000G;
+            }
+
+            if(doCompare) {
+                cmp_result &= (memcmp(xP->nums, xNG_ref, xP->size) == 0);
+                cmp_result &= (memcmp(yP->nums, yNG_ref, yP->size) == 0);
+
+                printf("N=%lu", i+1UL); test_print_bignum(xP, "xNG");
+                printf("N=%lu", i+1UL); test_print_bignum(yP, "yNG");
+                if(!cmp_result) {
+                    printf("[xNG ref]\r\n"); test_print_bignum_array(xNG_ref, xP->nlen);
+                    printf("[yNG ref]\r\n"); test_print_bignum_array(yNG_ref, yP->nlen);
+                }
+
+
+                printf("%luG, ", i+1UL);
+                printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+                TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+                _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+                printf("============================================================\r\n");
+#endif
+            }
+            if(i+1UL ==  10000UL) {
+                _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
+                _COND_DO_TEST_0_(keyin) break;
+            }
+            if(i+1UL ==  100000UL) {
+                _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
+                _COND_DO_TEST_0_(keyin) break;
+            }
+        }
+
+
+    }
+
+    rmBigNum(&coef_a);
+    rmBigNum(&coef_b);
+    rmBigNum(&prime);
+
+    rmBigNum(&xG);
+    rmBigNum(&yG);
+
+    rmBigNum(&xP);
+    rmBigNum(&yP);
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+#undef TEST_MANUAL_CHECK
+}
+void test_SECP256K1_doubling(void)
+{
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+#define TEST_MANUAL_CHECK   0
+    char keyin;
+    /* 
+     * Link: https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
+     * EC Curve formula
+     * y^2 = x^3 + a * x + b
+     * [PRIME NUMVER FOR MODULO]
+     * p  = 0xffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f
+     * [COEFFICIENT X^1]
+     * a  = 0
+     * [COEFFICIENT X^0]
+     * b  = 7
+     * [BASE POINT]
+     * xG = 0x79be667e f9dcbbac 55a06295 ce870b07 029bfcdb 2dce28d9 59f2815b 16f81798
+     * yG = 0x483ada77 26a3c465 5da4fbfc 0e1108a8 fd17b448 a6855419 9c47d08f fb10d4b8
+     * [n(hP)==0]
+     * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
+     * h  = 1
+     */
+const uint32_t* TV_SECP256K1_doubling_xNG_LIST[] = {
+    SECP256K1_calc_x1G,
+    SECP256K1_calc_x2G,
+    SECP256K1_calc_x4G,
+    SECP256K1_calc_x8G,
+    SECP256K1_calc_x16G,
+    SECP256K1_calc_x32G,
+    SECP256K1_calc_x64G,
+    SECP256K1_calc_x128G,
+    SECP256K1_calc_x256G,
+    SECP256K1_calc_x512G,
+    SECP256K1_calc_x1024G,
+};
+const uint32_t* TV_SECP256K1_doubling_yNG_LIST[] = {\
+    SECP256K1_calc_y1G,
+    SECP256K1_calc_y2G,
+    SECP256K1_calc_y4G,
+    SECP256K1_calc_y8G,
+    SECP256K1_calc_y16G,
+    SECP256K1_calc_y32G,
+    SECP256K1_calc_y64G,
+    SECP256K1_calc_y128G,
+    SECP256K1_calc_y256G,
+    SECP256K1_calc_y512G,
+    SECP256K1_calc_y1024G,
+};
+    const char* test_fn_name = "ec_addPoints";
+
+    bool cmp_result;
+    bool intentional_invalid;
+
+    bignum_s* coef_a = mkBigNum(_EC_BITS_);
+    bignum_s* coef_b = mkBigNum(_EC_BITS_);
+    bignum_s* prime = mkBigNum(_EC_BITS_);
+
+    bignum_s* xP = mkBigNum(_EC_BITS_);
+    bignum_s* yP = mkBigNum(_EC_BITS_);
+
+    const bool ign_sign = true;
+
+    memcpy(coef_a->nums, SECP256K1_calc_a, coef_a->size);
+    memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
+    memcpy(prime->nums, SECP256K1_calc_p, prime->size);
+
+    memcpy(xP->nums, SECP256K1_calc_xG, xP->size);
+    memcpy(yP->nums, SECP256K1_calc_yG, yP->size);
+    // d == 1
+    for(size_t i = 1UL; i < 11UL; i++)
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+
+        ec_doublePoints(xP, yP, _EC_BITS_, coef_a, prime, ign_sign);
+
+        cmp_result &= (memcmp(xP->nums, TV_SECP256K1_doubling_xNG_LIST[i], xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, TV_SECP256K1_doubling_yNG_LIST[i], yP->size) == 0);
+
+        printf("N=%lu", 1UL<<i); test_print_bignum(xP, "xNG");
+        printf("N=%lu", 1UL<<i); test_print_bignum(yP, "yNG");
+
+        if(!cmp_result) {
+            printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_xNG_LIST[i], xP->nlen);
+            printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_yNG_LIST[i], yP->nlen);
+        }
+        printf("%luP, ", (1UL<<i));
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+
+    rmBigNum(&coef_a);
+    rmBigNum(&coef_b);
+    rmBigNum(&prime);
+
+    rmBigNum(&xP);
+    rmBigNum(&yP);
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+#undef TEST_MANUAL_CHECK
+}
+/*
+ * Reference, calculator
+ * https://asecuritysite.com/encryption/secp256k1p
+ */
+const char ref_test_SECP256K1_scalarMul_WNAF[] = "[REFERENCES]\nElliptic Curve Cryptography: ECDH and ECDSA\n[Link] https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/";
+void test_SECP256K1_scalarMul_WNAF(void)
+{
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define TEST_MANUAL_CHECK 0
+    char keyin;
+    /* 
+     * Link: https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
+     * EC Curve formula
+     * y^2 = x^3 + a * x + b
+     * [PRIME NUMVER FOR MODULO]
+     * p  = 0xffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f
+     * [COEFFICIENT X^1]
+     * a  = 0
+     * [COEFFICIENT X^0]
+     * b  = 7
+     * [BASE POINT]
+     * xG = 0x79be667e f9dcbbac 55a06295 ce870b07 029bfcdb 2dce28d9 59f2815b 16f81798
+     * yG = 0x483ada77 26a3c465 5da4fbfc 0e1108a8 fd17b448 a6855419 9c47d08f fb10d4b8
+     * [n(hP)==0]
+     * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
+     * h  = 1
+     */
+    const char* test_fn_name = "ec_scalarMul_WNAF";
+
+    bool cmp_result;
+    bool intentional_invalid;
+
+    bignum_s* coef_a = mkBigNum(_EC_BITS_);
+    bignum_s* coef_b = mkBigNum(_EC_BITS_);
+    bignum_s* prime = mkBigNum(_EC_BITS_);
+
+    bignum_s* sclar_d = mkBigNum(_EC_BITS_);
 
     bignum_s* xG = mkBigNum(_EC_BITS_);
     bignum_s* yG = mkBigNum(_EC_BITS_);
@@ -8159,38 +8972,255 @@ void test_SECP256K1_calcaulation(void)
     bignum_s* yP = mkBigNum(_EC_BITS_);
 
     uwnaf w = 5U;
+    const bool ign_sign = true;
 
     memcpy(coef_a->nums, SECP256K1_calc_a, coef_a->size);
     memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
     memcpy(prime->nums, SECP256K1_calc_p, prime->size);
 
-    memcpy(cand_n->nums, SECP256K1_calc_n, cand_n->size);
-
     memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
     memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
 
-    ec_scalarMul_WNAF(xP, xP, cand_n, xG, yG, _EC_BITS_, coef_a, prime, w);
-    test_print_bignum(xP, "xnhP");
-    test_print_bignum(yP, "ynhP");
+    // d == 1
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_1d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x1G");
+        test_print_bignum(yP, "y1G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x1G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y1G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 2
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_2d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x2G");
+        test_print_bignum(yP, "y2G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x2G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y2G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 3
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_3d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x3G");
+        test_print_bignum(yP, "y3G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x3G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y3G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 4
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_4d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x4G");
+        test_print_bignum(yP, "y4G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x4G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y4G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 5
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_5d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x5G");
+        test_print_bignum(yP, "y5G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x5G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y5G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 10
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_10d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x10G");
+        test_print_bignum(yP, "y10G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x10G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y10G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 100
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_100d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x100G");
+        test_print_bignum(yP, "y100G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x100G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y100G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 1000
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_1000d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x1000G");
+        test_print_bignum(yP, "y1000G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x1000G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y1000G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == 1000000
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_1000000d, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "x1000000G");
+        test_print_bignum(yP, "y1000000G");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x1000000G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y1000000G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+    // d == n
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_calc_n, sclar_d->size);
+
+        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xP, "xnhG");
+        test_print_bignum(yP, "ynhG");
+
+        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x0G, xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y0G, yP->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
 
     rmBigNum(&coef_a);
     rmBigNum(&coef_b);
     rmBigNum(&prime);
 
-    rmBigNum(&cand_n);
+    rmBigNum(&sclar_d);
 
     rmBigNum(&xG);
     rmBigNum(&yG);
 
     rmBigNum(&xP);
     rmBigNum(&yP);
+#undef _KEYIN_DO_TEST_0_
+#undef TEST_MANUAL_CHECK
 }
 #undef _EC_BITS_
 
-#define _KEYIN_DO_TEST_(c, TEST_FUNC_NAME) { \
+#define _KEYIN_DO_TEST_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
-        printf("run %s()(y/n)?: ", (TEST_FUNC_NAME)); \
+        printf("run %s()(y/n)?: ", (TEST_NAME)); \
         (c) = getchar(); \
         getchar(); \
     } while(((c) != 'y' ) && ((c) != 'Y' ) && ((c) != 'n' ) && ((c) != 'N' )); \
@@ -8232,11 +9262,11 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_twos_bignum_256b()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_twos_bignum_256b");
+    printf("[test start: test_cpy_bignum_twos_signed_256b()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_cpy_bignum_twos_signed_256b");
     _COND_DO_TEST_(keyin)
-    test_twos_bignum_256b();
-    printf("[test   end: test_twos_bignum_256b()]\r\n");
+    test_cpy_bignum_twos_signed_256b();
+    printf("[test   end: test_cpy_bignum_twos_signed_256b()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -8274,11 +9304,11 @@ void test_sequence_bignum(void) {
 #endif/* cmp_bignum_with_sub_add_twos */
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_cmp_bignum_signed_256b(cmp_bignum_logical)]\r\n");
+    printf("[test start: test_cmp_bignum_signed_256b(cmp_bignum_logical_signed_safe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_cmp_bignum_signed_256b");
     _COND_DO_TEST_(keyin)
-    test_cmp_bignum_signed_256b("cmp_bignum_logical", cmp_bignum_logical);
-    printf("[test   end: test_cmp_bignum_signed_256b(cmp_bignum_logical)]\r\n");
+    test_cmp_bignum_signed_256b("cmp_bignum_logical_signed_safe", cmp_bignum_logical_signed_safe);
+    printf("[test   end: test_cmp_bignum_signed_256b(cmp_bignum_logical_signed_safe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -8298,11 +9328,11 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum)]\r\n");
+    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum_signed_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_unsigned_256b("sub_bignum", sub_bignum);
-    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum)]\r\n");
+    test_sub_bignum_unsigned_256b("sub_bignum_signed_unsafe", sub_bignum_signed_unsafe);
+    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum_signed_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -8352,35 +9382,35 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum)]\r\n");
+    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum", mul_bignum);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum)]\r\n");
+    test_mul_bignum_1024b("mul_bignum_signed", mul_bignum_signed);
+    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum", mul_bignum_unsafe);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_unsafe)]\r\n");
+    test_mul_bignum_1024b("mul_bignum_signed", mul_bignum_signed_unsafe);
+    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum", mul_bignum);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_signed);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum", mul_bignum_unsafe);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsafe)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_signed_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -8449,19 +9479,19 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum)]\r\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum", mul_bignum);
-    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum)]\r\n");
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed", mul_bignum_signed);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_unsafe", mul_bignum_unsafe);
-    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_unsafe)]\r\n");
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed_unsafe", mul_bignum_signed_unsafe);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -8499,6 +9529,18 @@ void test_sequence_ec(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_simple2_ec_point_addition");
+    _COND_DO_TEST_(keyin)
+    test_simple2_ec_point_addition();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_simple2_ec_point_substraction");
+    _COND_DO_TEST_(keyin)
+    test_simple2_ec_point_substraction();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_simple_ec_point_doubling");
     _COND_DO_TEST_(keyin)
     test_simple_ec_point_doubling();
@@ -8511,15 +9553,33 @@ void test_sequence_ec(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_simple_nwaf_2");
+    _COND_DO_TEST_(keyin)
+    test_simple_nwaf_2();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
     _KEYIN_DO_TEST_(keyin, "test_simple_nwaf_pre_compute");
     _COND_DO_TEST_(keyin)
     test_simple_nwaf_pre_compute();
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_calcaulation");
+    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_addition");
     _COND_DO_TEST_(keyin)
-    test_SECP256K1_calcaulation();
+    test_SECP256K1_addition();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_doubling");
+    _COND_DO_TEST_(keyin)
+    test_SECP256K1_doubling();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_scalarMul_WNAF");
+    _COND_DO_TEST_(keyin)
+    test_SECP256K1_scalarMul_WNAF();
     printf("================================================================================\n");
 }
 

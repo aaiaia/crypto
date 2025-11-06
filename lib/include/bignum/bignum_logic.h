@@ -44,15 +44,6 @@ static inline ReturnType asrb_bignum_self(bignum_s* d, const size_t blen)
 {
     return srb_bignum_self_ext(d, blen, true);
 }
-static inline ReturnType aslb_bignum_self_unsafe(bignum_s* d, const size_t blen)
-{
-    return slb_bitnum_self_ext(d, blen, false);
-}
-static inline ReturnType asrb_bignum_self_unsafe(bignum_s* d, const size_t blen)
-{
-    return srb_bignum_self_ext(d, blen, false);
-}
-
 
 ReturnType mlw_bignum_self_ext(bignum_s* d, const size_t lml, const bool arith);
 ReturnType mrw_bignum_self_ext(bignum_s* d, const size_t lmr, const bool arith);
