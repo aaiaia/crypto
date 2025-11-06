@@ -7683,10 +7683,12 @@ void test_print_wNAF_ext(const wnaf_s* p, const char* title, const bool linefeed
 
     if(title != NULL)   printf("[%s]\r\n", title);
     if(detail) {
+        printf("uwnaf: %lu Bytes (%lu bits), swnaf: %lu Bytes (%lu bits)\r\n", \
+                sizeof(uwnaf), (sizeof(uwnaf)*8UL), sizeof(swnaf), (sizeof(swnaf)*8UL));
         printf("window length = %u\r\n",    p->window);
-        printf("signMsk:0x%08x, ",          p->signMsk);
-        printf("signExt:0x%08x, ",          p->signExt);
-        printf("wNafMsk:0x%08x\r\n",        p->wNafMsk);
+        printf("signMsk:0x%02x, ",          p->signMsk);
+        printf("signExt:0x%02x, ",          p->signExt);
+        printf("wNafMsk:0x%02x\r\n",        p->wNafMsk);
     }
 
     printf("{");
@@ -7708,9 +7710,11 @@ void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
 {
 #if 0 /* convBigNum_wNAF */
 #define _DPRINTF_                   printf
+#define _PRINT_wNAF_INFO_(p, title) test_print_wNAF_info(p, title)
 #define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
 #else
 #define _DPRINTF_
+#define _PRINT_wNAF_INFO_
 #define _PRINT_BIGNUM_(p, title)
 #endif/* convBigNum_wNAF */
     ReturnType fr;
@@ -7722,30 +7726,48 @@ void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
     bignum_s* tmp_d = mkBigNum(dst->bits);
     __FUNC_RETURN_WRAPPING__(fr, cpy_bignum_unsigned_safe(tmp_d, src));
 
+    _PRINT_wNAF_INFO_(dst, "convBigNum_wNAF");
+
+    const uwnaf wNafMsk = dst->wNafMsk;
+    const uwnaf signMsk = dst->signMsk;
+    const uwnaf signExt = dst->signExt;
     for(size_t i = 0UL; i < tmp_d->bits; i++)
     {
         bignum_cmp_e cmp_d;
 
-        _DPRINTF_("[%lu] ", i);
-        _PRINT_BIGNUM_(tmp_d, "tmp_d");
+        _DPRINTF_("[%lu] ", i); _PRINT_BIGNUM_(tmp_d, "tmp_d");
         if(tmp_d->nums[0]&0x1U) {
+            const uwnaf vWNAF = (((uwnaf)tmp_d->nums[0])&wNafMsk);
             // d mods 2^w
-            dst->wnaf.ui[i] = (((uwnaf)tmp_d->nums[0])&(dst->wNafMsk));
-            _DPRINTF_("d mods 2^w: 0x%02x, ", dst->wnaf.ui[i]);
-            // (d mod 2^w) >= 2^(w−1) -> meas that negative?
-            if(dst->wnaf.ui[i] & dst->signMsk)
+            const uwnaf pWNAF = vWNAF;
+            //(d mod 2^w) - 2^w
+            const uwnaf nWNAF = vWNAF | signExt;
+            _DPRINTF_("pWNAF: 0x%02x, nWNAF: 0x%02x\r\n", pWNAF, nWNAF);
+
+            // (d mod 2^w) >= 2^(w−1) -> means that negative
+            if((pWNAF & signMsk) == 0x0U)
             {
-                dst->wnaf.ui[i]-=(dst->signMsk<<1U);
-                _DPRINTF_("(d mod 2^w) - 2^w: 0x%02x \r\n", dst->wnaf.ui[i]);
+                // Positive in Masked Value
+                // d mods 2^w: just masking MASK_VAL[w:0] has all 1'1 bits
+                dst->wnaf.ui[i] = pWNAF;
+                _DPRINTF_("Positive in masked value, d mods 2^w: 0x%02x, ", dst->wnaf.ui[i]);
+            }
+            else
+            {
+                // Negative in Masked Value
+                // (d mod 2^w) - 2^w : means that extends sign bits
+                dst->wnaf.ui[i] = nWNAF;
+                _DPRINTF_("Negative in masked value, (d mod 2^w) - 2^w: 0x%02x \r\n", dst->wnaf.ui[i]);
             }
             _DPRINTF_("[%lu] 0x%08x\t\n", i, ((bignum_t)dst->wnaf.si[i]));
             sub_bignum_carry_loc_signed(tmp_d, ((bignum_t)dst->wnaf.si[i]), 0U);
-            _PRINT_BIGNUM_(tmp_d, "substracted tmp_d");
+            _DPRINTF_("[%lu] ", i); _PRINT_BIGNUM_(tmp_d, "substracted tmp_d");
         }
         else {
             dst->wnaf.ui[i] = 0U;
         }
         __FUNC_RETURN_WRAPPING__(fr, lsrb_bignum_self(tmp_d, 1U));
+        _DPRINTF_("[%lu] ", i); _PRINT_BIGNUM_(tmp_d, "tmp_d>>1");
         cmp_d = cmp0_bignum(tmp_d);
         if(cmp_d == BIGNUM_CMP_ZO) {
             dst->vLen = (i + 1UL);
@@ -7768,6 +7790,7 @@ void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
 
     rmBigNum(&tmp_d);
 #undef _DPRINTF_
+#undef _PRINT_wNAF_INFO_
 #undef _PRINT_BIGNUM_
 }
 
