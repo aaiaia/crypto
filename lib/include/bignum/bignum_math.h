@@ -25,115 +25,296 @@ typedef enum {
     BIGNUM_SIGN_ERR,// ERRor
 } bignum_sign_e;
 
-ReturnType cpy_bignum_math_ext(bignum_s* d, const bignum_s* s, const bool force);
-static inline ReturnType cpy_bignum_math(bignum_s* d, const bignum_s* s)
+ReturnType cpy_bignum_mode_ext(bignum_s* d, const bignum_s* s, const bool inverse, const bool ign_sign, const bool ign_len);
+// copy forward
+static inline ReturnType cpy_bignum_ext(bignum_s* d, const bignum_s* s, const bool ign_sign, const bool ign_len)
 {
-    return cpy_bignum_math_ext(d, s, false);
+    const bool inverse = false;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_safe(bignum_s* d, const bignum_s* s, const bool ign_sign)
+{
+    const bool inverse = false, ign_len = false;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_unsafe(bignum_s* d, const bignum_s* s, const bool ign_sign)
+{
+    const bool inverse = false, ign_len = true;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_signed_safe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = false, ign_sign = false, ign_len = false;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_signed_unsafe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = false, ign_sign = false, ign_len = true;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_unsigned_safe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = false, ign_sign = true, ign_len = false;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = false, ign_sign = true, ign_len = true;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+// copy inverse
+static inline ReturnType cpy_bignum_inverse_ext(bignum_s* d, const bignum_s* s, const bool ign_sign, const bool ign_len)
+{
+    const bool inverse = true;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_inverse_signed_safe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = true, ign_sign = false, ign_len = false;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_inverse_signed_unsafe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = true, ign_sign = false, ign_len = true;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_inverse_unsigned_safe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = true, ign_sign = true, ign_len = false;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
+}
+static inline ReturnType cpy_bignum_inverse_unsigned_unsafe(bignum_s* d, const bignum_s* s)
+{
+    const bool inverse = true, ign_sign = true, ign_len = true;
+    return cpy_bignum_mode_ext(d, s, inverse, ign_sign, ign_len);
 }
 
-ReturnType twos_bignum(bignum_s* d, const bignum_s* s);
-ReturnType abs_bignum_ext(bignum_s* d, const bignum_s* s, const bool ignoreType);
-static inline ReturnType abs_bignum(bignum_s* d, const bignum_s* s)
+ReturnType cpy_bignum_twos_ext(bignum_s* d, const bignum_s* s, const bool ign_sign, const bool ign_len);
+static inline ReturnType cpy_bignum_twos_signed(bignum_s* d, const bignum_s* s, const bool ign_len)
 {
-    return abs_bignum_ext(d, s, false);
+    const bool ign_sign = false;
+    return cpy_bignum_twos_ext(d, s, ign_sign, ign_len);
 }
-static inline ReturnType abs_bignum_signed(bignum_s* d, const bignum_s* s)
+static inline ReturnType cpy_bignum_twos_signed_safe(bignum_s* d, const bignum_s* s)
 {
-    return abs_bignum_ext(d, s, true);
+    const bool ign_sign = false, ign_len = false;
+    return cpy_bignum_twos_ext(d, s, ign_sign, ign_len);
 }
-bignum_sign_e sign_bignum_ext(const bignum_s* s, const bool ignoreType);
-static inline bignum_sign_e sign_bignum(const bignum_s* s)
+static inline ReturnType cpy_bignum_twos_signed_unsafe(bignum_s* d, const bignum_s* s)
+{
+    const bool ign_sign = false, ign_len = true;
+    return cpy_bignum_twos_ext(d, s, ign_sign, ign_len);
+}
+
+ReturnType cpy_bignum_abs_safe_ext(bignum_s* d, const bignum_s* s, const bool ign_sign);
+static inline ReturnType cpy_bignum_abs_safe(bignum_s* d, const bignum_s* s)
+{
+    return cpy_bignum_abs_safe_ext(d, s, false);
+}
+static inline ReturnType cpy_bignum_abs_signed_safe(bignum_s* d, const bignum_s* s)
+{
+    return cpy_bignum_abs_safe_ext(d, s, false);
+}
+static inline ReturnType cpy_bignum_abs_unsigned_safe(bignum_s* d, const bignum_s* s)
+{
+    return cpy_bignum_abs_safe_ext(d, s, true);
+}
+bignum_sign_e sign_bignum_ext(const bignum_s* s, const bool ign_sign);
+static inline bignum_sign_e sign_bignum_signed(const bignum_s* s)
 {
     return sign_bignum_ext(s, false);
 }
-static inline bignum_sign_e sign_bignum_signed(const bignum_s* s)
+static inline bignum_sign_e sign_bignum_unsigned(const bignum_s* s)
 {
     return sign_bignum_ext(s, true);
 }
-bignum_sign_e NOT_IMPLEMENT_signbit_bignum(const bignum_s* s, const size_t msbl, const bignum_sign_e sign);
 bignum_cmp_e cmp0_bignum(const bignum_s* s);
 bignum_cmp_e cmp1_bignum(const bignum_s* s);
 bignum_cmp_e cmp2_bignum(const bignum_s* s);
 bignum_cmp_e cmp_bignum_with_sub_add_twos(const bignum_s* s0, const bignum_s* s1);
-bignum_cmp_e cmp_bignum_logical_ext(const bignum_s* s0, const bignum_s* s1, const bool ignore_type);
-static inline bignum_cmp_e cmp_bignum_logical(const bignum_s* s0, const bignum_s* s1)
+bignum_cmp_e cmp_bignum_logical_ext(const bignum_s* s0, const bignum_s* s1, const bool ign_len, const bool ign_sign);
+static inline bignum_cmp_e cmp_bignum_logical_safe_ext(const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
 {
-    return cmp_bignum_logical_ext(s0, s1, false);
+    const bool ign_len = false;
+    return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
 }
-static inline bignum_cmp_e cmp_bignum_logical_unsigned(const bignum_s* s0, const bignum_s* s1)
+static inline bignum_cmp_e cmp_bignum_logical_unsafe_ext(const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
 {
-    return cmp_bignum_logical_ext(s0, s1, true);
+    const bool ign_len = true;
+    return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
 }
-ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
-static inline ReturnType add_bignum(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+static inline bignum_cmp_e cmp_bignum_logical_signed_safe(const bignum_s* s0, const bignum_s* s1)
 {
-    return add_bignum_ext(NULL, d, s0, s1, 0U);
+    const bool ign_len = false, ign_sign = false;
+    return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
 }
-bignum_t add_bignum_carry_loc(bignum_s* d, const bignum_t v, const size_t idx);
-ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
-static inline ReturnType sub_bignum(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+static inline bignum_cmp_e cmp_bignum_logical_signed_unsafe(const bignum_s* s0, const bignum_s* s1)
 {
-    return sub_bignum_ext(NULL, d, s0, s1, 0U);
+    const bool ign_len = true, ign_sign = false;
+    return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
+}
+static inline bignum_cmp_e cmp_bignum_logical_unsigned_safe(const bignum_s* s0, const bignum_s* s1)
+{
+    const bool ign_len = false, ign_sign = true;
+    return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
+}
+static inline bignum_cmp_e cmp_bignum_logical_unsigned_unsafe(const bignum_s* s0, const bignum_s* s1)
+{
+    const bool ign_len = true, ign_sign = true;
+    return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
+}
+ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign);
+static inline ReturnType add_bignum_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
+{
+    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+}
+static inline ReturnType add_bignum_signed_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+{
+    const bool ign_sign = false;
+    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+}
+static inline ReturnType add_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+{
+    const bool ign_sign = true;
+    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+}
+bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
+static inline bignum_t add_bignum_carry_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return add_bignum_carry_loc_ext(d, v, idx, false);
+}
+static inline bignum_t add_bignum_carry_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return add_bignum_carry_loc_ext(d, v, idx, true);
+}
+bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
+static inline bignum_t sub_bignum_carry_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return sub_bignum_carry_loc_ext(d, v, idx, false);
+}
+static inline bignum_t sub_bignum_carry_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return sub_bignum_carry_loc_ext(d, v, idx, true);
+}
+ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign);
+static inline ReturnType sub_bignum_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
+{
+    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+}
+static inline ReturnType sub_bignum_signed_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+{
+    const bool ign_sign = false;
+    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+}
+static inline ReturnType sub_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
+{
+    const bool ign_sign = true;
+    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
 }
 ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 static inline ReturnType sub_bignum_with_add_twos(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     return sub_bignum_with_add_twos_ext(NULL, d, s0, s1, 0U);
 }
-ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
-ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
-ReturnType mul_bignum_nbs_up2dn_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool guard);
-static inline ReturnType mul_bignum_1bs(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len);
+ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
+static inline ReturnType mul_bignum_signed_1bs(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
-    return mul_bignum_1bs_ext(d, s1, s0, true);
+    return mul_bignum_1bs_ext(d, s1, s0, false);
 }
-static inline ReturnType mul_bignum(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_signed(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
-    return mul_bignum_nbs_up2dn_ext(d, s1, s0, true);
+    const bool ign_sign = false, ign_len = false;
+    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_unsigned(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, false);
+    const bool ign_sign = true, ign_len = false;
+    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+}
+static inline ReturnType mul_bignum_signed_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = false, ign_len = true;
+    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+}
+static inline ReturnType mul_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = true, ign_len = true;
+    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
 }
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
-ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d, const bool guard);
+ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d, const bool ign_len);
 static inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d)
 {
-    return div_bignum_with_mod_nbs_ext(q, r, n, d, true);   // bit length guard
+    return div_bignum_with_mod_nbs_ext(q, r, n, d, false);
+}
+static inline ReturnType div_bignum_with_mod_unsafe(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d)
+{
+    return div_bignum_with_mod_nbs_ext(q, r, n, d, true);
 }
 
 static inline ReturnType div_bignum(bignum_s* q, const bignum_s* n, const bignum_s* d)
 {
-    return div_bignum_with_mod_nbs_ext(q, NULL, n, d, true);   // bit length guard
+    return div_bignum_with_mod_nbs_ext(q, NULL, n, d, false);
+}
+static inline ReturnType div_bignum_unsafe(bignum_s* q, const bignum_s* n, const bignum_s* d)
+{
+    return div_bignum_with_mod_nbs_ext(q, NULL, n, d, true);
 }
 
 static inline ReturnType mod_bignum(bignum_s* r, const bignum_s* n, const bignum_s* d)
 {
-    return div_bignum_with_mod_nbs_ext(NULL, r, n, d, true);   // bit length guard
+    return div_bignum_with_mod_nbs_ext(NULL, r, n, d, false);
+}
+static inline ReturnType mod_bignum_unsafe(bignum_s* r, const bignum_s* n, const bignum_s* d)
+{
+    return div_bignum_with_mod_nbs_ext(NULL, r, n, d, true);
 }
 
 /*
- * aim_bignum and aim_bignum_ext is additive inverse modular
+ * aim_bignum_signed_safe and aim_bignum_ext is additive inverse modular
  * Additive inverse in modulo: (x + y) mod p = 0
  * example) (-87) mod 97 is have to meet (87 + (-87)) mod 97 = 0
  * To figuring out, convert (-87) to 'x' then formula: (87 + 'x') mod 97 = 0
  * Easy way to finding value add modulo p(=97) both side then (87 + 'x' + 97) mod 97 = (97) mod 97 = 0
  * So, getting Additive inverse method (p - |n|) mod p
  */
-ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, const bool guard);
-static inline ReturnType aim_bignum(bignum_s* x, const bignum_s* n, const bignum_s* p)
+ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, const bool ign_len, const bool ign_sign);
+static inline ReturnType aim_bignum_safe(bignum_s* x, const bignum_s* n, const bignum_s* p, const bool ign_sign)
 {
-    return aim_bignum_ext(x, n, p, true);
+    const bool ign_len = false;
+    return aim_bignum_ext(x, n, p, ign_len, ign_sign);
 }
-static inline ReturnType aim_bignum_unsafe(bignum_s* x, const bignum_s* n, const bignum_s* p)
+static inline ReturnType aim_bignum_signed_safe(bignum_s* x, const bignum_s* n, const bignum_s* p)
 {
-    return aim_bignum_ext(x, n, p, false);
+    const bool ign_len = false, ign_sign = false;
+    return aim_bignum_ext(x, n, p, ign_len, ign_sign);
+}
+static inline ReturnType aim_bignum_unsigned_safe(bignum_s* x, const bignum_s* n, const bignum_s* p)
+{
+    const bool ign_len = false, ign_sign = true;
+    return aim_bignum_ext(x, n, p, ign_len, ign_sign);
+}
+static inline ReturnType aim_bignum_unsafe(bignum_s* x, const bignum_s* n, const bignum_s* p, const bool ign_sign)
+{
+    const bool ign_len = true;
+    return aim_bignum_ext(x, n, p, ign_len, ign_sign);
+}
+static inline ReturnType aim_bignum_signed_unsafe(bignum_s* x, const bignum_s* n, const bignum_s* p)
+{
+    const bool ign_len = true, ign_sign = false;
+    return aim_bignum_ext(x, n, p, ign_len, ign_sign);
+}
+static inline ReturnType aim_bignum_unsigned_unsafe(bignum_s* x, const bignum_s* n, const bignum_s* p)
+{
+    const bool ign_len = true, ign_sign = true;
+    return aim_bignum_ext(x, n, p, ign_len, ign_sign);
 }
 
-ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b, const bool guard);
+ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b, const bool ign_len);
 static inline ReturnType gcd_bignum(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s* a, const bignum_s* b)
 {
-    return gcd_bignum_ext(r, s, t, a, b, true);
+    return gcd_bignum_ext(r, s, t, a, b, false);
 }
 
 /*
@@ -144,13 +325,13 @@ static inline ReturnType gcd_bignum(bignum_s* r, bignum_s* s, bignum_s* t, const
  * 'x' can become 1 ~ 96, insert all of x into (18*'x') mod 97 and formaula become equal to '1'
  * The only value is 'x' is 89, so 18^(-1) is same with 89 in modulo
  */
-ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool guard);
+ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const bignum_s* n, const bool ign_len);
 static inline ReturnType mim_bignum(bignum_s* t, const bignum_s* a, const bignum_s* n)
 {
-    return mim_bignum_ext(t, NULL, a, n, true);
+    return mim_bignum_ext(t, NULL, a, n, false);
 }
 static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const bignum_s* n)
 {
-    return mim_bignum_ext(t, NULL, a, n, false);
+    return mim_bignum_ext(t, NULL, a, n, true);
 }
 #endif/* BIGNUM_MATH_H */

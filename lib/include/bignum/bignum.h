@@ -28,41 +28,22 @@ typedef uint32_t    bignum_t;
 #else
 #error "NOT_IMPLEMENTS_YET"
 #endif
+#define BIGNUM_SIGN_BIT(v)      ((v)>>(BIGNUM_BITS-1UL))
 #define BIGNUM_MSB_MASK         (1UL<<(BIGNUM_BITS-1UL))
 #define BIGNUM_LSB_MASK         (1UL)
 #else
 #error "SET PRE-DEFINE VALUE -> SET_BIGNUM_TYPE"
 #endif /* SET_BIGNUM_TYPE */
 
-typedef enum {
-    BIGNUM_TYPE_NU,
-    BIGNUM_TYPE_SIGNED,
-    BIGNUM_TYPE_UNSIGNED,
-    BIGNUM_TYPE_ERR,
-} bignum_type_e;
-
 typedef struct {
     size_t          bits;    // bit width length
     size_t          size;    // size
     size_t          nlen;    // type length
-    bignum_type_e   type;
     bignum_t        lmsk;
     bignum_t*       nums;
 }bignum_s;
 
-bignum_s* mkBigNum_ext(const size_t bits, const bignum_type_e type);
-static inline bignum_s* mkBigNum(const size_t bits)
-{
-    return mkBigNum_ext(bits, BIGNUM_TYPE_UNSIGNED);
-}
-static inline bignum_s* mkBigNum_unsigned(const size_t bits)
-{
-    return mkBigNum_ext(bits, BIGNUM_TYPE_UNSIGNED);
-}
-static inline bignum_s* mkBigNum_signed(const size_t bits)
-{
-    return mkBigNum_ext(bits, BIGNUM_TYPE_SIGNED);
-}
+bignum_s* mkBigNum(const size_t bits);
 int rmBigNum(bignum_s** p);
 
 #endif/* BIGNUM_H */
