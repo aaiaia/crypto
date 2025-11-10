@@ -18,6 +18,8 @@
 
 #include "bignum/bignum_alu.h"
 
+#include "test/test_tool.h"
+
 #include "test/vector.h"
 
 #define ANSI_COLOR_RED     "\x1b[31m"
@@ -66,96 +68,6 @@ static bool g_clkOvf;
     }                                                                                       \
     if(!g_clkOvf)   printf("Process Time(%s): %lf\r\n", g_tTimeTitle ,g_pTime);             \
     else            printf("Process Time(%s): clock tick overflow!!!\r\n", g_tTimeTitle);   \
-}
-
-#define test_print_bignum_value_only(p) test_print_bignum_ext(p, NULL, false, 0UL, false, true, false)
-#define test_print_bignum(p, title) test_print_bignum_ext(p, title, true, 0UL, false, false, true)
-#define test_print_bignum_info(p, title) test_print_bignum_ext(p, title, true, 0UL, true, false, true)
-#define test_print_bignum_array(nums, nlen) test_print_bignum_array_ext(nums, nlen, true, 0UL, false, true)
-static inline void test_print_bignum_array_ext(const bignum_t* nums, const size_t nlen, const bool linefeed, const size_t lfn, const bool prefix, const bool space)
-{
-    if(prefix)                      printf("0x");
-    if(prefix&&space)               printf(" ");
-    for(size_t i = nlen- 1u; i != ((size_t)-1); i--) {
-        printf("%08x", nums[i]);
-        if((i != 0u) && space)      printf(" ");
-        if((((i & (lfn-1U)) == lfn) && (lfn != 0U)) && linefeed)
-                                    printf("\r\n");
-    }
-    if(linefeed)                    printf("\r\n");
-}
-void test_print_bignum_ext(const bignum_s* p, const char* title, const bool linefeed, const size_t lfn, const bool details, const bool prefix, const bool space)
-{
-    if(title != NULL)   printf("[%s]\r\n", title);
-    if(details)
-    {
-        printf("addr:0x%p, bignum_t size:%lu\r\n", p, sizeof(bignum_t));
-        printf("p->nums:0x%p, p->lmsk:0x%x\r\np->bits=%ld, p->nlen=%ld, p->size=%ld\r\n", \
-                p->nums, p->lmsk, p->bits, p->nlen, p->size);
-        printf("[HEX]\r\n");
-    }
-    test_print_bignum_array_ext(p->nums, p->nlen, linefeed, lfn, prefix, space);
-}
-
-#define test_print_bignum_sign(sign)  test_print_bignum_sign_ext(sign, true)
-void test_print_bignum_sign_ext(const bignum_sign_e sign, const bool lf)
-{
-    printf("bignum sign: ");
-    switch(sign)
-    {
-        case BIGNUM_SIGN_NU:    // Not Used(Reserved)
-            printf("BIGNUM_SIGN_NU");
-            break;
-        case BIGNUM_SIGN_POS:   // POSitive
-            printf("BIGNUM_SIGN_POS");
-            break;
-        case BIGNUM_SIGN_NEG:   // NEGative
-            printf("BIGNUM_SIGN_NEG");
-            break;
-        case BIGNUM_SIGN_ERR:   // ERRor
-            printf("BIGNUM_SIGN_ERR");
-            break;
-
-        default:
-            printf("enum case is wrong!!!");
-            break;
-    }
-    if(lf)  printf("\n");
-}
-
-#define test_print_bignum_cmp(cmp)  test_print_bignum_cmp_ext(cmp, true)
-void test_print_bignum_cmp_ext(const bignum_cmp_e cmp, const bool lf)
-{
-    printf("bignum cmp: ");
-    switch(cmp)
-    {
-        case BIGNUM_CMP_NU: // Not Used(Reserved)
-            printf("BIGNUM_CMP_NU");
-            break;
-        case BIGNUM_CMP_NZ: // Not Zero
-            printf("BIGNUM_CMP_NZ");
-            break;
-        case BIGNUM_CMP_ZO: // ZerO
-            printf("BIGNUM_CMP_ZO");
-            break;
-        case BIGNUM_CMP_EQ: // EQual
-            printf("BIGNUM_CMP_EQ");
-            break;
-        case BIGNUM_CMP_GT: // Greater Than
-            printf("BIGNUM_CMP_GT");
-            break;
-        case BIGNUM_CMP_LT: // Less Than
-            printf("BIGNUM_CMP_LT");
-            break;
-        case BIGNUM_CMP_ER: // ERror
-            printf("BIGNUM_CMP_ER");
-            break;
-
-        default:
-            printf("enum case is wrong!!!");
-            break;
-    }
-    if(lf)  printf("\n");
 }
 
 bool chkVector(uint8_t* va, uint8_t* vb, size_t size)

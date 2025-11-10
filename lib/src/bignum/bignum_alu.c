@@ -10,30 +10,6 @@
 #define BIGNUM_SAME_LEN(D, S)       ((D)->nlen == (S)->nlen)
 #define BIGNUM_SAME_BIT(D, S)       ((D)->bits == (S)->bits)
 
-#include <stdio.h>
-void _print_bignum_ext_(const bignum_s* p, const char* title, const char* funcName, const int lineNum, const size_t lfn, const bool details)
-{
-    printf("[%s]\r\n", title);
-    if(funcName != NULL)
-    {
-        printf("@%s():%d\r\n", funcName, lineNum);
-    }
-    if(details)
-    {
-        printf("addr:0x%p, bignum_t size:%lu\r\n", p, sizeof(bignum_t));
-        printf("p->nums:0x%p, p->lmsk:0x%x\r\np->bits=%ld, p->nlen=%ld, p->size=%ld\r\n", \
-                p->nums, p->lmsk, p->bits, p->nlen, p->size);
-        printf("[HEX]\r\n");
-    }
-    for(size_t i = p->nlen- 1u; i != ((size_t)-1); i--) {
-        printf("%08x", p->nums[i]);
-        if(i != 0u)                 printf(" ");
-        else if((i & (lfn-1U) == lfn) & (lfn != 0U))
-                                    printf("\r\n");
-        else                        printf("\r\n");
-    }
-}
-
 #if 0 /* ENABLE_BIGNUM_LOG */
 #ifndef ENABLE_BIGNUM_LOG
 #define ENABLE_BIGNUM_LOG
@@ -42,8 +18,9 @@ void _print_bignum_ext_(const bignum_s* p, const char* title, const char* funcNa
 
 #ifdef ENABLE_BIGNUM_LOG
 #include <stdio.h>
+#include "test/test_tool.h"
 #define _DPRINTF_                   printf
-#define _PRINT_BIGNUM_(p, title)    _print_bignum_ext_(p, title, __func__, __LINE__, 0UL, false)
+#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
 #else
 #define _DPRINTF_
 #define _PRINT_BIGNUM_(p, title)
