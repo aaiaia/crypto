@@ -7840,8 +7840,10 @@ const uint32_t SECP256K1_calc_x1000000G[] = { \
 const uint32_t SECP256K1_calc_y1000000G[] = { \
     0xd4301ee1, 0xb44b6adb, 0x72f5bfc7, 0x87e7ae7d, 0x3f5594b9, 0x8aebcc31, 0x92cddfb6, 0xc694e15f, };
 
+const char ref_test_SECP256K1_addition[] = "[REFERENCES]\nBarebones secp256k1: Adding and Scalar Multiply on the curve (Python)\n[Link] https://asecuritysite.com/encryption/secp256k1p";
 void test_SECP256K1_addition(void)
 {
+    printf("%s\n", ref_test_SECP256K1_addition);
 #define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
@@ -8036,8 +8038,10 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
 #undef _COND_DO_TEST_0_
 #undef TEST_MANUAL_CHECK
 }
+const char ref_test_SECP256K1_doubling[] = "[REFERENCES]\nBarebones secp256k1: Adding and Scalar Multiply on the curve (Python)\n[Link] https://asecuritysite.com/encryption/secp256k1p";
 void test_SECP256K1_doubling(void)
 {
+    printf("%s\n", ref_test_SECP256K1_doubling);
 #define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
@@ -8157,9 +8161,10 @@ const uint32_t* TV_SECP256K1_doubling_yNG_LIST[] = {\
  * Reference, calculator
  * https://asecuritysite.com/encryption/secp256k1p
  */
-const char ref_test_SECP256K1_scalarMul_WNAF[] = "[REFERENCES]\nElliptic Curve Cryptography: ECDH and ECDSA\n[Link] https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/";
+const char ref_test_SECP256K1_scalarMul_WNAF[] = "[REFERENCES]\nBarebones secp256k1: Adding and Scalar Multiply on the curve (Python)\n[Link] https://asecuritysite.com/encryption/secp256k1p";
 void test_SECP256K1_scalarMul_WNAF(void)
 {
+    printf("%s\n", ref_test_SECP256K1_scalarMul_WNAF);
 #define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
     (c) = '\0'; \
     do { \
@@ -8319,6 +8324,209 @@ void test_SECP256K1_scalarMul_WNAF(void)
 
     rmBigNum(&xP);
     rmBigNum(&yP);
+#undef _KEYIN_DO_TEST_0_
+#undef TEST_MANUAL_CHECK
+}
+
+/*
+ * Reference, Elliptic Curve Cryptography: ECDH and ECDSA, Encryption with ECDH
+ * https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
+ */
+const char ref_test_SECP256K1_ECDH[] = "[REFERENCES]\nElliptic Curve Cryptography: ECDH and ECDSA, Encryption with ECDH\n[Link] https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/";
+void test_SECP256K1_ECDH(void)
+{
+    printf("%s\n", ref_test_SECP256K1_ECDH);
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define TEST_MANUAL_CHECK 0
+    char keyin;
+    /* 
+     * Link: https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
+     * EC Curve formula
+     * y^2 = x^3 + a * x + b
+     * [PRIME NUMVER FOR MODULO]
+     * p  = 0xffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f
+     * [COEFFICIENT X^1]
+     * a  = 0
+     * [COEFFICIENT X^0]
+     * b  = 7
+     * [BASE POINT]
+     * xG = 0x79be667e f9dcbbac 55a06295 ce870b07 029bfcdb 2dce28d9 59f2815b 16f81798
+     * yG = 0x483ada77 26a3c465 5da4fbfc 0e1108a8 fd17b448 a6855419 9c47d08f fb10d4b8
+     * [n(hP)==0]
+     * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
+     * h  = 1
+     * Curve: secp256k1
+     * Alice's private key: 0xe32868331fa8ef0138de0de85478346aec5e3912b6029ae71691c384237a3eeb
+     * Alice's public key: (0x86b1aa5120f079594348c67647679e7ac4c365b2c01330db782b0ba611c1d677, 0x5f4376a23eed633657a90f385ba21068ed7e29859a7fab09e953cc5b3e89beba)
+     * Bob's private key: 0xcef147652aa90162e1fff9cf07f2605ea05529ca215a04350a98ecc24aa34342
+     * Bob's public key: (0x4034127647bb7fdab7f1526c7d10be8b28174e2bba35b06ffd8a26fc2c20134a, 0x9e773199edc1ea792b150270ea3317689286c9fe239dd5b9c5cfd9e81b4b632)
+     * Shared secret: (0x3e2ffbc3aa8a2836c1689e55cd169ba638b58a3a18803fcf7de153525b28c3cd, 0x43ca148c92af58ebdb525542488a4fe6397809200fe8c61b41a105449507083)
+     */
+    const uint32_t SECP256K1_ECDH_d_alice[] = { \
+        0x237a3eeb, 0x1691c384, 0xb6029ae7, 0xec5e3912, 0x5478346a, 0x38de0de8, 0x1fa8ef01, 0xe3286833, };
+    const uint32_t SECP256K1_ECDH_xP_alice[] = { \
+        0x11c1d677, 0x782b0ba6, 0xc01330db, 0xc4c365b2, 0x47679e7a, 0x4348c676, 0x20f07959, 0x86b1aa51, };
+    const uint32_t SECP256K1_ECDH_yP_alice[] = { \
+        0x3e89beba, 0xe953cc5b, 0x9a7fab09, 0xed7e2985, 0x5ba21068, 0x57a90f38, 0x3eed6336, 0x5f4376a2, };
+    const uint32_t SECP256K1_ECDH_d_bob[] = { \
+        0x4aa34342, 0x0a98ecc2, 0x215a0435, 0xa05529ca, 0x07f2605e, 0xe1fff9cf, 0x2aa90162, 0xcef14765, };
+    const uint32_t SECP256K1_ECDH_xP_bob[] = { \
+        0x2c20134a, 0xfd8a26fc, 0xba35b06f, 0x28174e2b, 0x7d10be8b, 0xb7f1526c, 0x47bb7fda, 0x40341276, };
+    const uint32_t SECP256K1_ECDH_yP_bob[] = { \
+        0x81b4b632, 0x9c5cfd9e, 0xe239dd5b, 0x89286c9f, 0x0ea33176, 0x92b15027, 0x9edc1ea7, 0x09e77319, };
+    const uint32_t SECP256K1_ECDH_xP_shared[] = { \
+        0x5b28c3cd, 0x7de15352, 0x18803fcf, 0x38b58a3a, 0xcd169ba6, 0xc1689e55, 0xaa8a2836, 0x3e2ffbc3, };
+    const uint32_t SECP256K1_ECDH_yP_shared[] = { \
+        0x49507083, 0xb41a1054, 0x00fe8c61, 0x63978092, 0x2488a4fe, 0xbdb52554, 0xc92af58e, 0x043ca148, };
+
+    const char* test_fn_name = "ec_scalarMul_WNAF";
+
+    bool cmp_result;
+    bool intentional_invalid;
+
+    bignum_s* coef_a = mkBigNum(_EC_BITS_);
+    bignum_s* coef_b = mkBigNum(_EC_BITS_);
+    bignum_s* prime = mkBigNum(_EC_BITS_);
+
+    bignum_s* sclar_d = mkBigNum(_EC_BITS_);
+
+    bignum_s* xG = mkBigNum(_EC_BITS_);
+    bignum_s* yG = mkBigNum(_EC_BITS_);
+
+    bignum_s* xPublic = mkBigNum(_EC_BITS_);
+    bignum_s* yPublic = mkBigNum(_EC_BITS_);
+
+    bignum_s* xShare = mkBigNum(_EC_BITS_);
+    bignum_s* yShare = mkBigNum(_EC_BITS_);
+
+    uwnaf w = 5U;
+    const bool ign_sign = true;
+
+    memcpy(coef_a->nums, SECP256K1_calc_a, coef_a->size);
+    memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
+    memcpy(prime->nums, SECP256K1_calc_p, prime->size);
+
+    memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
+    memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
+
+    // Alice's Public key = Alice's Private Key * Base Point
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_ECDH_d_alice, sclar_d->size);
+
+        ec_scalarMul_WNAF(xPublic, yPublic, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xPublic, "Alice's xPublic");
+        test_print_bignum(yPublic, "Alice's yPublic");
+
+        cmp_result &= (memcmp(xPublic->nums, SECP256K1_ECDH_xP_alice, xPublic->size) == 0);
+        cmp_result &= (memcmp(yPublic->nums, SECP256K1_ECDH_yP_alice, yPublic->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+
+    // Bob's Public key = Bob's Private Key  * Base Point
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_ECDH_d_bob, sclar_d->size);
+
+        ec_scalarMul_WNAF(xPublic, yPublic, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xPublic, "Bob's xPublic");
+        test_print_bignum(yPublic, "Bob's yPublic");
+
+        cmp_result &= (memcmp(xPublic->nums, SECP256K1_ECDH_xP_bob, xPublic->size) == 0);
+        cmp_result &= (memcmp(yPublic->nums, SECP256K1_ECDH_yP_bob, yPublic->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+
+    // Shared Key = Alice's Private Key * Bob's Public Key
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_ECDH_d_alice, sclar_d->size);
+
+        memcpy(xPublic->nums, SECP256K1_ECDH_xP_bob, xPublic->size);
+        memcpy(yPublic->nums, SECP256K1_ECDH_yP_bob, yPublic->size);
+
+        ec_scalarMul_WNAF(xShare, yShare, sclar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xShare, "xShare");
+        test_print_bignum(yShare, "yShare");
+
+        cmp_result &= (memcmp(xShare->nums, SECP256K1_ECDH_xP_shared, xShare->size) == 0);
+        cmp_result &= (memcmp(yShare->nums, SECP256K1_ECDH_yP_shared, yShare->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+
+    // Shared Key = Bob's Private Key * Alice's Public Key
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+        memcpy(sclar_d->nums, SECP256K1_ECDH_d_bob, sclar_d->size);
+
+        memcpy(xPublic->nums, SECP256K1_ECDH_xP_alice, xPublic->size);
+        memcpy(yPublic->nums, SECP256K1_ECDH_yP_alice, yPublic->size);
+
+        ec_scalarMul_WNAF(xShare, yShare, sclar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
+        test_print_bignum(xShare, "xShare");
+        test_print_bignum(yShare, "yShare");
+
+        cmp_result &= (memcmp(xShare->nums, SECP256K1_ECDH_xP_shared, xShare->size) == 0);
+        cmp_result &= (memcmp(yShare->nums, SECP256K1_ECDH_yP_shared, yShare->size) == 0);
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+
+    rmBigNum(&coef_a);
+    rmBigNum(&coef_b);
+    rmBigNum(&prime);
+
+    rmBigNum(&sclar_d);
+
+    rmBigNum(&xG);
+    rmBigNum(&yG);
+
+    rmBigNum(&xPublic);
+    rmBigNum(&yPublic);
+
+    rmBigNum(&xShare);
+    rmBigNum(&yShare);
 #undef _KEYIN_DO_TEST_0_
 #undef TEST_MANUAL_CHECK
 }
@@ -8687,6 +8895,12 @@ void test_sequence_ec(void) {
     _KEYIN_DO_TEST_(keyin, "test_SECP256K1_scalarMul_WNAF");
     _COND_DO_TEST_(keyin)
     test_SECP256K1_scalarMul_WNAF();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_ECDH");
+    _COND_DO_TEST_(keyin)
+    test_SECP256K1_ECDH();
     printf("================================================================================\n");
 }
 
