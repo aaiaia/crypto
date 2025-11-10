@@ -1,5 +1,5 @@
-#ifndef BIGNUM_MATH_H
-#define BIGNUM_MATH_H
+#ifndef BIGNUM_ALU_H
+#define BIGNUM_ALU_H
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -429,4 +429,4 @@ static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const
 {
     return mim_bignum_ext(t, NULL, a, n, true);
 }
-#endif/* BIGNUM_MATH_H */
+#endif/* BIGNUM_ALU_H */

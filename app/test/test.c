@@ -7587,7 +7587,7 @@ void test_simple_ec_point_doubling(void)
             test_print_bignum(x2NP, "x2NP");
             test_print_bignum(y2NP, "y2NP");
         }
-        printf("%6uP, ", (1u<<d));
+        printf("%uP, ", (1u<<d));
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
         TEST_ASSERT((cmp_result) || (intentional_invalid));
 
@@ -7738,6 +7738,10 @@ const uint32_t SECP256K1_calc_100d[]  = { \
     0x00000064, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
 const uint32_t SECP256K1_calc_1000d[]  = { \
     0x000003e8, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_10000d[]  = { \
+    0x00002710, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
+const uint32_t SECP256K1_calc_100000d[]  = { \
+    0x000186A0, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
 const uint32_t SECP256K1_calc_1000000d[]  = { \
     0x000f4240, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, };
 
@@ -8186,6 +8190,74 @@ void test_SECP256K1_scalarMul_WNAF(void)
      * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
      * h  = 1
      */
+    const char* TV_SECP256K1_scalarMul_d_string_LIST[] = {
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+
+        "10",
+        "100",
+        "1000",
+        "10000",
+        "100000",
+        "1000000",
+
+        "n",
+        NULL,
+    };
+    const uint32_t* TV_SECP256K1_scalarMul_d_LIST[] = {
+        SECP256K1_calc_1d,
+        SECP256K1_calc_2d,
+        SECP256K1_calc_3d,
+        SECP256K1_calc_4d,
+        SECP256K1_calc_5d,
+
+        SECP256K1_calc_10d,
+        SECP256K1_calc_100d,
+        SECP256K1_calc_1000d,
+        SECP256K1_calc_10000d,
+        SECP256K1_calc_100000d,
+        SECP256K1_calc_1000000d,
+
+        SECP256K1_calc_n,
+        NULL,
+    };
+    const uint32_t* TV_SECP256K1_scalarMul_xNG_LIST[] = {
+        SECP256K1_calc_x1G,
+        SECP256K1_calc_x2G,
+        SECP256K1_calc_x3G,
+        SECP256K1_calc_x4G,
+        SECP256K1_calc_x5G,
+
+        SECP256K1_calc_x10G,
+        SECP256K1_calc_x100G,
+        SECP256K1_calc_x1000G,
+        SECP256K1_calc_x10000G,
+        SECP256K1_calc_x100000G,
+        SECP256K1_calc_x1000000G,
+
+        SECP256K1_calc_x0G,
+        NULL,
+    };
+    const uint32_t* TV_SECP256K1_scalarMul_yNG_LIST[] = {
+        SECP256K1_calc_y1G,
+        SECP256K1_calc_y2G,
+        SECP256K1_calc_y3G,
+        SECP256K1_calc_y4G,
+        SECP256K1_calc_y5G,
+
+        SECP256K1_calc_y10G,
+        SECP256K1_calc_y100G,
+        SECP256K1_calc_y1000G,
+        SECP256K1_calc_y10000G,
+        SECP256K1_calc_y100000G,
+        SECP256K1_calc_y1000000G,
+
+        SECP256K1_calc_y0G,
+        NULL,
+    };
     const char* test_fn_name = "ec_scalarMul_WNAF";
 
     bool cmp_result;
@@ -8213,215 +8285,18 @@ void test_SECP256K1_scalarMul_WNAF(void)
     memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
     memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
 
-    // d == 1
+    for(size_t i = 0; TV_SECP256K1_scalarMul_d_string_LIST[i] != NULL; i++)
     {
         cmp_result = true;
         intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_1d, sclar_d->size);
+        memcpy(sclar_d->nums, TV_SECP256K1_scalarMul_d_LIST[i], sclar_d->size);
 
         ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x1G");
-        test_print_bignum(yP, "y1G");
+        printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(xP, "xNG");
+        printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(yP, "yNG");
 
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x1G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y1G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 2
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_2d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x2G");
-        test_print_bignum(yP, "y2G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x2G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y2G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 3
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_3d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x3G");
-        test_print_bignum(yP, "y3G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x3G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y3G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 4
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_4d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x4G");
-        test_print_bignum(yP, "y4G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x4G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y4G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 5
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_5d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x5G");
-        test_print_bignum(yP, "y5G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x5G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y5G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 10
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_10d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x10G");
-        test_print_bignum(yP, "y10G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x10G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y10G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 100
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_100d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x100G");
-        test_print_bignum(yP, "y100G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x100G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y100G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 1000
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_1000d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x1000G");
-        test_print_bignum(yP, "y1000G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x1000G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y1000G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == 1000000
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_1000000d, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "x1000000G");
-        test_print_bignum(yP, "y1000000G");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x1000000G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y1000000G, yP->size) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-
-        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-    // d == n
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_calc_n, sclar_d->size);
-
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xP, "xnhG");
-        test_print_bignum(yP, "ynhG");
-
-        cmp_result &= (memcmp(xP->nums, SECP256K1_calc_x0G, xP->size) == 0);
-        cmp_result &= (memcmp(yP->nums, SECP256K1_calc_y0G, yP->size) == 0);
+        cmp_result &= (memcmp(xP->nums, TV_SECP256K1_scalarMul_xNG_LIST[i], xP->size) == 0);
+        cmp_result &= (memcmp(yP->nums, TV_SECP256K1_scalarMul_yNG_LIST[i], yP->size) == 0);
 
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
 #if(TEST_MANUAL_CHECK == 0)
