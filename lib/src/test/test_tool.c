@@ -81,3 +81,24 @@ void test_print_bignum_cmp_ext(const bignum_cmp_e cmp, const bool lf)
     if(lf)  printf("\n");
 }
 
+void test_print_wNAF_ext(const wnaf_s* p, const char* title, const bool linefeed, const bool detail) {
+    if(!(p != NULL))    return; // NULL
+
+    if(title != NULL)   printf("[%s]\r\n", title);
+    if(detail) {
+        printf("uwnaf: %lu Bytes (%lu bits), swnaf: %lu Bytes (%lu bits)\r\n", \
+                sizeof(uwnaf), (sizeof(uwnaf)*8UL), sizeof(swnaf), (sizeof(swnaf)*8UL));
+        printf("window length = %u\r\n",    p->window);
+        printf("signMsk:0x%02x, ",          p->signMsk);
+        printf("signExt:0x%02x, ",          p->signExt);
+        printf("wNafMsk:0x%02x\r\n",        p->wNafMsk);
+    }
+
+    printf("{");
+    for(size_t i = (p->bits-1U); i < SIZE_MAX; i--)
+    {
+        printf("%d,", p->wnaf.si[i]);
+    }
+    printf("}[%lu bits][valid bit length: %lu]", p->bits, p->vLen);
+    if(linefeed)    printf("\r\n");
+}

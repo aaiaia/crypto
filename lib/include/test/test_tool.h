@@ -44,4 +44,13 @@ void test_print_bignum_sign_ext(const bignum_sign_e sign, const bool lf);
 
 void test_print_bignum_cmp_ext(const bignum_cmp_e cmp, const bool lf);
 #define test_print_bignum_cmp(cmp)  test_print_bignum_cmp_ext(cmp, true)
+
+#include "bignum/bignum_wnaf.h"
+void test_print_wNAF_ext(const wnaf_s* p, const char* title, const bool linefeed, const bool detail);
+static inline void test_print_wNAF(const wnaf_s* p, const char* title) {
+    return test_print_wNAF_ext(p, title, true, false);
+}
+static inline void test_print_wNAF_info(const wnaf_s* p, const char* title) {
+    return test_print_wNAF_ext(p, title, true, true);
+}
 #endif /* TEST_TOOL_H */
