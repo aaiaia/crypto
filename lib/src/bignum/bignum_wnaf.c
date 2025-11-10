@@ -3,6 +3,28 @@
 #include "bignum/bignum_wnaf.h"
 #include "bignum/bignum_alu.h"
 
+#if 0 /* ENABLE_BIGNUM_WNAF_LOG */
+#ifndef ENABLE_BIGNUM_WNAF_LOG
+#define ENABLE_BIGNUM_WNAF_LOG
+#endif/* ENABLE_BIGNUM_WNAF_LOG */
+#endif/* ENABLE_BIGNUM_WNAF_LOG */
+
+#ifdef ENABLE_BIGNUM_WNAF_LOG
+#include <stdio.h>
+#include "test/test_tool.h"
+#define _WNAF_FN_(RV, FN)           __RETURN_TYPE_WRAPPING__(RV, FN)
+
+#define _DPRINTF_                   printf
+#define _PRINT_wNAF_INFO_(p, title) test_print_wNAF_info(p, title)
+#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
+#else
+#define _WNAF_FN_(RV, FN)           ((RV) = (FN))
+
+#define _DPRINTF_
+#define _PRINT_wNAF_INFO_
+#define _PRINT_BIGNUM_(p, title)
+#endif/* ENABLE_BIGNUM_WNAF_LOG */
+
 wnaf_s* mkWNAF(const uwnaf w, const size_t bits)
 {
     if(!chkWNAF_window_lenth(w))    return NULL;
@@ -30,19 +52,6 @@ int rmWNAF(wnaf_s** p)
 
 void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
 {
-#if 0 /* convBigNum_wNAF */
-#include <stdio.h>
-#includ "test/test_tool.h"
-#define _WNAF_FN_(RV, FN)           __RETURN_TYPE_WRAPPING__(FR_VAR, FUNC)
-#define _DPRINTF_                   printf
-#define _PRINT_wNAF_INFO_(p, title) test_print_wNAF_info(p, title)
-#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
-#else
-#define _WNAF_FN_(RV, FN)           ((RV) = (FN))
-#define _DPRINTF_
-#define _PRINT_wNAF_INFO_
-#define _PRINT_BIGNUM_(p, title)
-#endif/* convBigNum_wNAF */
     ReturnType fr;
     size_t clrIdx = SIZE_MAX;
 
@@ -115,8 +124,5 @@ void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
     }
 
     rmBigNum(&tmp_d);
-#undef _DPRINTF_
-#undef _PRINT_wNAF_INFO_
-#undef _PRINT_BIGNUM_
 }
 

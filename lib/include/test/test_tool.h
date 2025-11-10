@@ -3,17 +3,17 @@
 #include <stdio.h>
 
 #include "common/returnType.h"
-#define __RETURN_TYPE_WRAPPING__(FR_VAR, FUNC) { \
-    (FR_VAR) = (FUNC); \
-    if((FR_VAR) == E_HAS_NO_VALUE) \
+#define __RETURN_TYPE_WRAPPING__(RV, FN) { \
+    (RV) = (FN); \
+    if((RV) == E_HAS_NO_VALUE) \
     { \
         /* has error */ \
-        printf("[\x1b[33mWARNING\x1b[0m] has no value, %s, line:%d, _fr_: %d\n", __func__, __LINE__, (FR_VAR)); \
+        printf("[\x1b[33mWARNING\x1b[0m] has no value, %s, line:%d, _fr_: %d\n", __func__, __LINE__, (RV)); \
     } \
-    else if((FR_VAR) != E_OK) \
+    else if((RV) != E_OK) \
     { \
         /* has error */ \
-        printf("[\x1b[31mERROR\x1b[0m] %s, line:%d, _fr_: %d\n", __func__, __LINE__, (FR_VAR)); \
+        printf("[\x1b[31mERROR\x1b[0m] %s, line:%d, _fr_: %d\n", __func__, __LINE__, (RV)); \
     } \
 }
 

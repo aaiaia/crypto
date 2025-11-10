@@ -4,7 +4,13 @@
 
 #include "test/test_tool.h"
 
-#if 0
+#if 0 /* ENABLE_EC_LOG */
+#ifndef ENABLE_EC_LOG
+#define ENABLE_EC_LOG
+#endif/* ENABLE_EC_LOG */
+#endif/* ENABLE_EC_LOG */
+
+#ifdef ENABLE_EC_LOG
 #include <stdio.h>
 #include "test/test_tool.h"
 #define _EC_FN_(RV, FN) __RETURN_TYPE_WRAPPING__(RV, FN)
@@ -22,7 +28,7 @@
 
 #define _PRINT_wNAF_INFO_(p, title)
 #define _PRINT_wNAF_(p, title)
-#endif
+#endif /* ENABLE_EC_LOG */
 /*
  * ec_addPoints_ext
  * xR, yR: Result of ec point addition(sum)
