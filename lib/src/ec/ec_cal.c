@@ -4,6 +4,25 @@
 
 #include "test/test_tool.h"
 
+#if 0
+#include <stdio.h>
+#include "test/test_tool.h"
+#define _EC_FN_(RV, FN) __RETURN_TYPE_WRAPPING__(RV, FN)
+
+#define _DPRINTF_                   printf
+#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
+
+#define _PRINT_wNAF_INFO_(p, title) test_print_wNAF_info(p, title)
+#define _PRINT_wNAF_(p, title)      test_print_wNAF_PreCompute_info(p, title)
+#else
+#define _EC_FN_(RV, FN) ((RV) = (FN))
+
+#define _DPRINTF_
+#define _PRINT_BIGNUM_(p, title)
+
+#define _PRINT_wNAF_INFO_(p, title)
+#define _PRINT_wNAF_(p, title)
+#endif
 /*
  * ec_addPoints_ext
  * xR, yR: Result of ec point addition(sum)
@@ -12,17 +31,6 @@
  * a: coeffient of ec curve, y^2 = x^3 + a*x + b
  * p: prime number for modulo p(mod p)
  */
-#if 0 /* ec_addPoints_ext */
-#include <stdio.h>
-#include "test/test_tool.h"
-#define _DPRINTF_                   printf
-#define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
-#define _EC_FN_(RV, FN) __RETURN_TYPE_WRAPPING__(RV, FN)
-#else
-#define _DPRINTF_
-#define _PRINT_BIGNUM_(p, title)
-#define _EC_FN_(RV, FN) ((RV) = (FN))
-#endif/* ec_addPoints_ext */
 void ec_addPoints_ext(bignum_s* xR, bignum_s* yR, \
         const bignum_s* xP, const bignum_s* yP, \
         const bool nQ, \
@@ -270,9 +278,140 @@ void ec_addPoints_ext(bignum_s* xR, bignum_s* yR, \
 #undef BIT_P1
 }
 
-#ifdef _DPRINTF_
-#undef _DPRINTF_
-#endif /* _DPRINTF_ */
-#ifdef _PRINT_BIGNUM_
-#undef _PRINT_BIGNUM_
-#endif /* _PRINT_BIGNUM_ */
+wnaf_pre_compute_ec_s* mkWNAF_preCompute_ec(const uwnaf w, const size_t ec_bits)
+{
+    if(!chkWNAF_window_lenth(w))    return NULL;
+
+    wnaf_pre_compute_ec_s* p = (wnaf_pre_compute_ec_s*)malloc(sizeof(wnaf_pre_compute_ec_s));
+
+    p->w = w;
+    p->l = getWNAF_preCompupte_lengh(w);
+    p->x = (bignum_s**)calloc(p->l, sizeof(bignum_s*));
+    p->y = (bignum_s**)calloc(p->l, sizeof(bignum_s*));
+
+    for(uwnaf i = 0U; i < p->l; i++)
+    {
+        p->x[i] = mkBigNum(ec_bits);
+        p->y[i] = mkBigNum(ec_bits);
+    }
+
+    return p;
+}
+
+int rmWNAF_preCompute_ec(wnaf_pre_compute_ec_s** p)
+{
+    if(p == NULL)   return -1;
+    if(*p == NULL)  return -1;
+
+    for(uwnaf i = 0U; i < (*p)->l; i++)
+    {
+         rmBigNum(&((*p)->x[i]));
+         rmBigNum(&((*p)->y[i]));
+    }
+
+    free((*p)->x);
+    free((*p)->y);
+
+    free(*p);
+
+    *p = NULL;
+
+    return 0;
+}
+
+/*
+ * ec_adsbPoints_ext
+ * pc: pre-computation
+ * xP, yP: Result of ec point doubling
+ * ec_bits: bit length of ec point
+ * p: prime number for modulo p(mod p)
+ * a: coeffient of ec curve, y^2 = x^3 + a*x + b
+ * w: window length of wNAF
+ */
+void ec_preCompute_WNAF(wnaf_pre_compute_ec_s* pc, \
+        const bignum_s* xP, const bignum_s* yP, \
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
+        const uwnaf w, const bool ign_sign)
+{
+    if(!((pc != NULL) && (xP != NULL) && (yP != NULL) && (p != NULL) && (a != NULL)))   return; // NULL pointer
+    if(!((xP->bits == ec_bits) && (yP->bits == ec_bits))) return; // x and y of point have to be same.
+    bignum_s* x2P, * y2P;
+
+    x2P = mkBigNum(ec_bits);
+    y2P = mkBigNum(ec_bits);
+
+    ec_addPoints(x2P, y2P, xP, yP, xP, yP, ec_bits, a, p, ign_sign);
+
+    _PRINT_BIGNUM_(x2P, "x2P");
+    _PRINT_BIGNUM_(y2P, "y2P");
+    cpy_bignum_unsigned_safe(pc->x[0], xP);
+    cpy_bignum_unsigned_safe(pc->y[0], yP);
+
+    for(uwnaf i = 1U; i < pc->l; i++)
+    {
+        ec_addPoints(pc->x[i], pc->y[i], pc->x[i-1], pc->y[i-1], x2P, y2P, ec_bits, a, p, ign_sign);
+    }
+
+    rmBigNum(&x2P);
+    rmBigNum(&y2P);
+}
+
+void ec_scalarMul_WNAF(
+        bignum_s* xdP, bignum_s* ydP, \
+        const bignum_s* d, \
+        const bignum_s* xP, const bignum_s* yP, \
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
+        const uwnaf w, const bool ign_sign)
+{
+    uwnaf wnaf_idx;
+    wnaf_s* wnaf_d = mkWNAF(w, ec_bits);
+    wnaf_pre_compute_ec_s* wnaf_pc = mkWNAF_preCompute_ec(w, ec_bits);
+
+    clr_bignum(xdP);
+    clr_bignum(ydP);
+
+    convBigNum_wNAF(wnaf_d, d);
+    _PRINT_BIGNUM_(d, "d in ec_scalarMul_WNAF()");
+    _PRINT_wNAF_INFO_(wnaf_d, "bignum to wnaf");
+    ec_preCompute_WNAF(wnaf_pc, xP, yP, ec_bits, a, p, w, ign_sign);
+    _PRINT_wNAF_(wnaf_pc, "Pre-Computation in ec_scalarMul_WNAF()");
+
+    for(size_t i = (wnaf_d->bits - 1UL); i != SIZE_MAX; i--)
+    {
+        ec_doublePoints(xdP, ydP, ec_bits, a, p, ign_sign);
+        _DPRINTF_("bit=%lu, ", i); _PRINT_BIGNUM_(xdP, "doubled xdP");
+        _DPRINTF_("bit=%lu, ", i); _PRINT_BIGNUM_(ydP, "doubled ydP");
+
+        if(wnaf_d->wnaf.ui[i] != 0U)
+        {
+            wnaf_idx = getWNAF_index(wnaf_d->wnaf.ui[i]);
+
+            _DPRINTF_("[INFO] @%s, Line:%d, [OPERAND A]\r\n", __func__, __LINE__);
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(xdP, "xdP");
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(ydP, "ydP");
+
+            if(!isNegWNAF(wnaf_d->wnaf.ui[i]))
+            {
+                // sum ec point
+                _DPRINTF_("[ec_addPoints]\r\n");
+                ec_addPoints(xdP, ydP, xdP, ydP, wnaf_pc->x[wnaf_idx], wnaf_pc->y[wnaf_idx], ec_bits, a, p, ign_sign);
+            }
+            else
+            {
+                // sub ec point
+                _DPRINTF_("[ec_subPoints]\r\n");
+                ec_subPoints(xdP, ydP, xdP, ydP, wnaf_pc->x[wnaf_idx], wnaf_pc->y[wnaf_idx], ec_bits, a, p, ign_sign);
+            }
+            _DPRINTF_("[INFO] @%s, Line:%d, [OPERAND B]\r\n", __func__, __LINE__);
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(wnaf_pc->x[wnaf_idx], "x(2^(w-1)-1)P");
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(wnaf_pc->y[wnaf_idx], "y(2^(w-1)-1)P");
+
+            _DPRINTF_("[INFO] @%s, Line:%d, [RESULT]\r\n", __func__, __LINE__);
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(xdP, "xdP");
+            _DPRINTF_("bit=%lu, WNAF=%d, N=%u", i, wnaf_d->wnaf.ui[i], wnaf_idx); _PRINT_BIGNUM_(ydP, "ydP");
+        }
+    }
+
+    rmWNAF(&wnaf_d);
+    rmWNAF_preCompute_ec(&wnaf_pc);
+}

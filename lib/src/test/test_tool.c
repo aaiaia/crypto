@@ -102,3 +102,17 @@ void test_print_wNAF_ext(const wnaf_s* p, const char* title, const bool linefeed
     printf("}[%lu bits][valid bit length: %lu]", p->bits, p->vLen);
     if(linefeed)    printf("\r\n");
 }
+
+void test_print_wNAF_PreCompute_ext(const wnaf_pre_compute_ec_s* p, const char* title, const bool linefeed, const bool detail) {
+    if(title != NULL)   printf("[%s]\r\n", title);
+    if(detail) {
+        printf("window = %u\r\n", p->w);
+        printf("length = %u\r\n", p->l);
+    }
+    for(uwnaf i = 0U; i < p->l; i++)
+    {
+        printf("[%uP]\r\n", ((i<<1U)+1U));
+        test_print_bignum(p->x[i], NULL);
+        test_print_bignum(p->y[i], NULL);
+    }
+}

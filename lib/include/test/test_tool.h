@@ -53,4 +53,15 @@ static inline void test_print_wNAF(const wnaf_s* p, const char* title) {
 static inline void test_print_wNAF_info(const wnaf_s* p, const char* title) {
     return test_print_wNAF_ext(p, title, true, true);
 }
+
+#include "ec/ec_cal.h"
+void test_print_wNAF_PreCompute_ext(const wnaf_pre_compute_ec_s* p, const char* title, const bool linefeed, const bool detail);
+static inline void test_print_wNAF_PreCompute(const wnaf_pre_compute_ec_s* p, const char* title) {
+    return test_print_wNAF_PreCompute_ext(p, title, false, false);
+
+}
+static inline void test_print_wNAF_PreCompute_info(const wnaf_pre_compute_ec_s* p, const char* title) {
+    return test_print_wNAF_PreCompute_ext(p, title, false, true);
+}
+
 #endif /* TEST_TOOL_H */
