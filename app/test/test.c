@@ -18,6 +18,8 @@
 #include "bignum/bignum_alu.h"
 
 #include "ec/ec_cal.h"
+#include "ec/ec_key.h"
+#include "ec/ec_ecdh.h"
 #include "bignum/bignum_wnaf.h"
 
 #include "test/test_tool.h"
@@ -8273,7 +8275,7 @@ void test_SECP256K1_scalarMul_WNAF(void)
     bignum_s* coef_b = mkBigNum(_EC_BITS_);
     bignum_s* prime = mkBigNum(_EC_BITS_);
 
-    bignum_s* sclar_d = mkBigNum(_EC_BITS_);
+    bignum_s* scalar_d = mkBigNum(_EC_BITS_);
 
     bignum_s* xG = mkBigNum(_EC_BITS_);
     bignum_s* yG = mkBigNum(_EC_BITS_);
@@ -8295,9 +8297,9 @@ void test_SECP256K1_scalarMul_WNAF(void)
     {
         cmp_result = true;
         intentional_invalid = false;
-        memcpy(sclar_d->nums, TV_SECP256K1_scalarMul_d_LIST[i], sclar_d->size);
+        memcpy(scalar_d->nums, TV_SECP256K1_scalarMul_d_LIST[i], scalar_d->size);
 
-        ec_scalarMul_WNAF(xP, yP, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        ec_scalarMul_WNAF(xP, yP, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
         printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(xP, "xNG");
         printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(yP, "yNG");
 
@@ -8318,7 +8320,7 @@ void test_SECP256K1_scalarMul_WNAF(void)
     rmBigNum(&coef_b);
     rmBigNum(&prime);
 
-    rmBigNum(&sclar_d);
+    rmBigNum(&scalar_d);
 
     rmBigNum(&xG);
     rmBigNum(&yG);
@@ -8399,7 +8401,7 @@ void test_SECP256K1_ECDH(void)
     bignum_s* coef_b = mkBigNum(_EC_BITS_);
     bignum_s* prime = mkBigNum(_EC_BITS_);
 
-    bignum_s* sclar_d = mkBigNum(_EC_BITS_);
+    bignum_s* scalar_d = mkBigNum(_EC_BITS_);
 
     bignum_s* xG = mkBigNum(_EC_BITS_);
     bignum_s* yG = mkBigNum(_EC_BITS_);
@@ -8407,11 +8409,8 @@ void test_SECP256K1_ECDH(void)
     bignum_s* xPublic = mkBigNum(_EC_BITS_);
     bignum_s* yPublic = mkBigNum(_EC_BITS_);
 
-    bignum_s* xShare = mkBigNum(_EC_BITS_);
-    bignum_s* yShare = mkBigNum(_EC_BITS_);
-
-    uwnaf w = 5U;
-    const bool ign_sign = true;
+    bignum_s* xShared = mkBigNum(_EC_BITS_);
+    bignum_s* yShared = mkBigNum(_EC_BITS_);
 
     memcpy(coef_a->nums, SECP256K1_calc_a, coef_a->size);
     memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
@@ -8424,9 +8423,9 @@ void test_SECP256K1_ECDH(void)
     {
         cmp_result = true;
         intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_ECDH_d_alice, sclar_d->size);
+        memcpy(scalar_d->nums, SECP256K1_ECDH_d_alice, scalar_d->size);
 
-        ec_scalarMul_WNAF(xPublic, yPublic, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        eckey_getPublicKey(xPublic, yPublic, scalar_d, xG, yG, _EC_BITS_, coef_a, prime);
         test_print_bignum(xPublic, "Alice's xPublic");
         test_print_bignum(yPublic, "Alice's yPublic");
 
@@ -8446,9 +8445,9 @@ void test_SECP256K1_ECDH(void)
     {
         cmp_result = true;
         intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_ECDH_d_bob, sclar_d->size);
+        memcpy(scalar_d->nums, SECP256K1_ECDH_d_bob, scalar_d->size);
 
-        ec_scalarMul_WNAF(xPublic, yPublic, sclar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        eckey_getPublicKey(xPublic, yPublic, scalar_d, xG, yG, _EC_BITS_, coef_a, prime);
         test_print_bignum(xPublic, "Bob's xPublic");
         test_print_bignum(yPublic, "Bob's yPublic");
 
@@ -8468,17 +8467,17 @@ void test_SECP256K1_ECDH(void)
     {
         cmp_result = true;
         intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_ECDH_d_alice, sclar_d->size);
+        memcpy(scalar_d->nums, SECP256K1_ECDH_d_alice, scalar_d->size);
 
         memcpy(xPublic->nums, SECP256K1_ECDH_xP_bob, xPublic->size);
         memcpy(yPublic->nums, SECP256K1_ECDH_yP_bob, yPublic->size);
 
-        ec_scalarMul_WNAF(xShare, yShare, sclar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xShare, "xShare");
-        test_print_bignum(yShare, "yShare");
+        ecdh_getSharedKey(xShared, yShared, scalar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime);
+        test_print_bignum(xShared, "xShared");
+        test_print_bignum(yShared, "yShared");
 
-        cmp_result &= (memcmp(xShare->nums, SECP256K1_ECDH_xP_shared, xShare->size) == 0);
-        cmp_result &= (memcmp(yShare->nums, SECP256K1_ECDH_yP_shared, yShare->size) == 0);
+        cmp_result &= (memcmp(xShared->nums, SECP256K1_ECDH_xP_shared, xShared->size) == 0);
+        cmp_result &= (memcmp(yShared->nums, SECP256K1_ECDH_yP_shared, yShared->size) == 0);
 
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
 #if(TEST_MANUAL_CHECK == 0)
@@ -8493,17 +8492,17 @@ void test_SECP256K1_ECDH(void)
     {
         cmp_result = true;
         intentional_invalid = false;
-        memcpy(sclar_d->nums, SECP256K1_ECDH_d_bob, sclar_d->size);
+        memcpy(scalar_d->nums, SECP256K1_ECDH_d_bob, scalar_d->size);
 
         memcpy(xPublic->nums, SECP256K1_ECDH_xP_alice, xPublic->size);
         memcpy(yPublic->nums, SECP256K1_ECDH_yP_alice, yPublic->size);
 
-        ec_scalarMul_WNAF(xShare, yShare, sclar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
-        test_print_bignum(xShare, "xShare");
-        test_print_bignum(yShare, "yShare");
+        ecdh_getSharedKey(xShared, yShared, scalar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime);
+        test_print_bignum(xShared, "xShared");
+        test_print_bignum(yShared, "yShared");
 
-        cmp_result &= (memcmp(xShare->nums, SECP256K1_ECDH_xP_shared, xShare->size) == 0);
-        cmp_result &= (memcmp(yShare->nums, SECP256K1_ECDH_yP_shared, yShare->size) == 0);
+        cmp_result &= (memcmp(xShared->nums, SECP256K1_ECDH_xP_shared, xShared->size) == 0);
+        cmp_result &= (memcmp(yShared->nums, SECP256K1_ECDH_yP_shared, yShared->size) == 0);
 
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
 #if(TEST_MANUAL_CHECK == 0)
@@ -8518,7 +8517,7 @@ void test_SECP256K1_ECDH(void)
     rmBigNum(&coef_b);
     rmBigNum(&prime);
 
-    rmBigNum(&sclar_d);
+    rmBigNum(&scalar_d);
 
     rmBigNum(&xG);
     rmBigNum(&yG);
@@ -8526,8 +8525,8 @@ void test_SECP256K1_ECDH(void)
     rmBigNum(&xPublic);
     rmBigNum(&yPublic);
 
-    rmBigNum(&xShare);
-    rmBigNum(&yShare);
+    rmBigNum(&xShared);
+    rmBigNum(&yShared);
 #undef _KEYIN_DO_TEST_0_
 #undef TEST_MANUAL_CHECK
 }
