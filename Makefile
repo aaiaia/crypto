@@ -4,8 +4,8 @@
 # ============================================================
 # default C language make environment
 CC = gcc
-CFLAGS = -fPIC -DTEST_AES -DTEST_ENDIAN -DTEST_SHA -DTEST_HMAC -DTEST_CMAC			# gcc compile flags, when use compile and linking
-#CFLAGS = -fPIC -DTEST_AES -DTEST_ENDIAN -DTEST_SHA -DTEST_HMAC -DTEST_CMAC -DDEBUG	# gcc compile flags, when use compile and linking
+CFLAGS = -fPIC -DTEST_AES -DTEST_ENDIAN -DTEST_SHA -DTEST_HMAC -DTEST_CMAC -DSET_BIGNUM_TYPE=32				# gcc compile flags, when use compile and linking
+#CFLAGS = -fPIC -DTEST_AES -DTEST_ENDIAN -DTEST_SHA -DTEST_HMAC -DTEST_CMAC -DSET_BIGNUM_TYPE=32 -DDEBUG	# gcc compile flags, when use compile and linking
 # default C++ language make environment
 CXX = g++
 CXXFLAGS =		# g++ compile flags
@@ -24,42 +24,42 @@ LN = ln
 
 #ifeq ($(IS_SHARED),1)
 # Some gcc based compiler to needs this option to fast executint program when use shared library.
-$(info ###########################)
-$(info ###### Compile Flags ######)
-$(info ###########################)
+$(info ===========================)
+$(info ====== Compile Flags ======)
+$(info ===========================)
 #CFLAGS += -fPIC
 $(info CFLAGS = ${CFLAGS})
 #else
 #endif
 
 #ifeq ($(IS_SHARED),1)
-$(info ###########################)
-$(info ###### Linker Flags #*#####)
-$(info ###########################)
+$(info ===========================)
+$(info ====== Linker Flags =*=====)
+$(info ===========================)
 #LDFLAGS += -lm
 $(info LDFLAGS = ${LDFLAGS})
 #else
 #endif
 
-$(info ###########################)
-$(info ###### Configuration ######)
-$(info ###########################)
-$(info ###### Library Conf. ######)
+$(info ===========================)
+$(info ====== Configuration ======)
+$(info ===========================)
+$(info ====== Library Conf. ======)
 MAJOR_VERSION = 1# 1
 MINOR_VERSION = 0# 0
 
-$(info #### Depend file prefix ###)
+$(info ==== Depend file prefix ===)
 DEPEND_FILE_PREFIX = depend_file
 $(info DEPEND_FILE_PREFIX = ${DEPEND_FILE_PREFIX})
 
-$(info ###########################)
-$(info ##### Release Version #####)
-$(info ###########################)
+$(info ===========================)
+$(info ===== Release Version =====)
+$(info ===========================)
 OBJS_DIR_NAME = debug
 $(info OBJS_DIR_NAME = ${OBJS_DIR_NAME})
-$(info ###########################)
-$(info ### Library Srcs & Objs ###)
-$(info ###########################)
+$(info ===========================)
+$(info === Library Srcs & Objs ===)
+$(info ===========================)
 LIB_SRC_DIR_NAME = lib
 $(info LIB_SRC_DIR_NAME = ${LIB_SRC_DIR_NAME})
 
@@ -80,16 +80,16 @@ $(info DEPEND_FILE_POSTFIX_LIB = ${DEPEND_FILE_POSTFIX_LIB})
 DEPEND_FILE_LIB_SUFFIX = .$(DEPEND_FILE_POSTFIX_LIB)
 DEPEND_FILE_LIB = $(OBJS_DIR_NAME)/$(DEPEND_FILE_PREFIX)$(DEPEND_FILE_LIB_SUFFIX)
 $(info DEPEND_FILE_LIB = ${DEPEND_FILE_LIB})
-$(info ###########################)
-$(info ##### Library Config ######)
-$(info ###########################)
+$(info ===========================)
+$(info ===== Library Config ======)
+$(info ===========================)
 LIB_NAME = alu
 $(info LIB_NAME = ${LIB_NAME})
 LIB_DIR_NAME = lib
 $(info LIB_DIR_NAME = ${LIB_DIR_NAME})
 
 COMMON_LIB_NAME = lib$(LIB_NAME)
-$(info # Set variable to static library)
+$(info \# Set variable to static library)
 STATIC_LIB_KEYWD = static
 $(info STATIC_LIB_KEYWD = ${STATIC_LIB_KEYWD})
 STATIC_LIB_SUFFIX = .a
@@ -97,7 +97,7 @@ $(info STATIC_LIB_SUFFIX = ${STATIC_LIB_SUFFIX})
 STATIC_LIB_NAME = $(COMMON_LIB_NAME)$(STATIC_LIB_SUFFIX)
 $(info STATIC_LIB_NAME = ${STATIC_LIB_NAME})
 
-$(info # Set variable to shared library)
+$(info \# Set variable to shared library)
 SHARED_LIB_KEYWD = shared
 $(info SHARED_LIB_KEYWD = ${SHARED_LIB_KEYWD})
 SHARED_FLAGS = -fPIC
@@ -111,9 +111,9 @@ $(info SHARED_LIB_NAME_VER_SUFFIX = ${SHARED_LIB_NAME_VER_SUFFIX})
 SHARED_LIB_NAME_VER = $(SHARED_LIB_NAME)$(SHARED_LIB_NAME_VER_SUFFIX)
 $(info SHARED_LIB_NAME_VER = ${SHARED_LIB_NAME_VER})
 
-$(info ###########################)
-$(info ##### App Srcs & Objs #####)
-$(info ###########################)
+$(info ===========================)
+$(info ===== App Srcs & Objs =====)
+$(info ===========================)
 APP_SRC_DIR_NAME = app
 $(info APP_SRC_DIR_NAME = ${APP_SRC_DIR_NAME})
 
@@ -134,20 +134,20 @@ $(info DEPEND_FILE_POSTFIX_APP = ${DEPEND_FILE_POSTFIX_APP})
 DEPEND_FILE_APP_SUFFIX = .$(DEPEND_FILE_POSTFIX_APP)
 DEPEND_FILE_APP = $(OBJS_DIR_NAME)/$(DEPEND_FILE_PREFIX)$(DEPEND_FILE_APP_SUFFIX)
 $(info DEPEND_FILE_APP = ${DEPEND_FILE_APP})
-$(info ###########################)
-$(info ### Application Config ####)
-$(info ###########################)
+$(info ===========================)
+$(info === Application Config ====)
+$(info ===========================)
 # blank = compile using object
 # static = compile use static library
 # shared = compile use shared library
 APP_USE_LIB_MODE =
 $(info APP_USE_LIB_MODE = ${APP_USE_LIB_MODE})
-$(info ###########################)
-$(info #### Outputs & Target #####)
-$(info ###########################)
+$(info ===========================)
+$(info ==== Outputs & Target =====)
+$(info ===========================)
 OUT_DIR_NAME = out
 $(info OUT_DIR_NAME = ${OUT_DIR_NAME})
-$(info ##### Config for Lib #####)
+$(info ===== Config for Lib =====)
 OUT_LIB_DIR = $(OUT_DIR_NAME)/$(OBJS_DIR_NAME)/$(LIB_DIR_NAME)
 $(info OUT_LIB_DIR = $(OUT_LIB_DIR))
 OUT_LIB_PATH_STATIC = $(OUT_LIB_DIR)/$(STATIC_LIB_NAME)
@@ -157,22 +157,22 @@ $(info OUT_LIB_PATH_SHARED = $(OUT_LIB_PATH_SHARED))
 OUT_LIB_PATH_SHARED_VER = $(OUT_LIB_DIR)/$(SHARED_LIB_NAME_VER)
 $(info OUT_LIB_PATH_SHARED_VER = $(OUT_LIB_PATH_SHARED_VER))
 OUT_LIB_PATH_COMMON = $(OUT_LIB_DIR)/$(COMMON_LIB_NAME)
-$(info ##### Config for App #####)
+$(info ===== Config for App =====)
 OUT_ITEMS_APP = $(APP_OBJS:%.o=%)
 $(info OUT_ITEMS_APP = $(OUT_ITEMS_APP))
 OUT_APP = $(OUT_ITEMS_APP:%=$(OUT_DIR_NAME)/%)
 $(info OUT_APP = ${OUT_APP})
-$(info ###########################)
-$(info #### Include to Library####)
-$(info ###########################)
+$(info ===========================)
+$(info ==== Include to Library====)
+$(info ===========================)
 INC_LIB_PATH = -L$(OUT_LIB_DIR)
 $(info INC_LIB_PATH = $(INC_LIB_PATH))
 
 INC_LIB_NAMES = -l$(patsubst lib%.a,%,$(LIB_NAME))
 $(info INC_LIB_NAMES = $(INC_LIB_NAMES))
-$(info ###########################)
-$(info ###########################)
-$(info ###########################)
+$(info ===========================)
+$(info ===========================)
+$(info ===========================)
 
 #.SUFFIXES : .c .o
 

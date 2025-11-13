@@ -1,5 +1,5 @@
 #include "common/util.h"
-#include "common/ntype.h"
+#include "bignum/bignum.h"
 
 typedef int(*testFunc)(void);
 
