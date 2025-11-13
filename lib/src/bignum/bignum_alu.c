@@ -1076,6 +1076,8 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
 /* Divide with Modulo: ('n'umerator - 'r'emainder) / 'd'enominator = 'q'uotient  */
 //__FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(pow_x, t_mul, p));
 #if 0 /* div_bignum_with_mod_nbs_ext */
+#include <stdio.h>
+#include "test/test_tool.h"
 #   ifndef ENABLE_BIGNUM_LOG
 #      ifdef _DPRINTF_
 #          undef _DPRINTF_
@@ -1227,7 +1229,7 @@ ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s*
                 _PRINT_BIGNUM_(_quot_, "_quot_");
                 if(_fr_ != E_OK) { /* has error */ _DPRINTF_("@%s:%d, _fr_: %d\n", __func__, __LINE__, _fr_); break; };
                 /* n = n - (d<<N) */
-                _fr_ = sub_bignum_signed_unsafe(_temp_, _temp_, _d_m2_);
+                _fr_ = sub_bignum_unsigned_unsafe(_temp_, _temp_, _d_m2_);
                 _PRINT_BIGNUM_(_temp_, "_temp_ -= _d_m2_");
                 if(_fr_ != E_OK) { /* has error */ _DPRINTF_("@%s:%d, _fr_: %d\n", __func__, __LINE__, _fr_); break; };
 
@@ -1381,7 +1383,19 @@ ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, con
     bool errFlags;
     bignum_sign_e signOf_n = BIGNUM_SIGN_NU;
     bignum_sign_e signOf_p = BIGNUM_SIGN_NU;
-    bignum_sign_e signOf_x = BIGNUM_SIGN_NU;
+    bignum_sign_e signOf_signed_t = BIGNUM_SIGN_NU;
+
+    bignum_s* signed_t = NULL;
+
+    // find largest bits
+    {
+        size_t longestBits = 0UL;
+        if(longestBits < x->bits)   longestBits = x->bits;
+        if(longestBits < n->bits)   longestBits = n->bits;
+        if(longestBits < p->bits)   longestBits = p->bits;
+
+        signed_t = mkBigNum(longestBits + 1UL);
+    }
 
     signOf_n = sign_bignum_ext(n, ign_sign);
     signOf_p = sign_bignum_ext(p, ign_sign);
@@ -1389,38 +1403,48 @@ ReturnType aim_bignum_ext(bignum_s* x, const bignum_s* n, const bignum_s* p, con
     if(!((signOf_n == BIGNUM_SIGN_POS) || (signOf_n == BIGNUM_SIGN_NEG)))
     {
         _DPRINTF_("[ERROR]%s:%d, E_ERROR_BIGNUM_SIGNBIT\r\n", __func__, __LINE__);
+        rmBigNum(&signed_t);
         return E_ERROR_BIGNUM_SIGNBIT;
     }
     if(!((signOf_p == BIGNUM_SIGN_POS) || (signOf_p == BIGNUM_SIGN_NEG)))
     {
         _DPRINTF_("[ERROR]%s:%d, E_ERROR_BIGNUM_SIGNBIT\r\n", __func__, __LINE__);
+        rmBigNum(&signed_t);
         return E_ERROR_BIGNUM_SIGNBIT;
     }
 
+    // extends bits by belows...
     if(signOf_n == signOf_p) // both are positive or negative
     {
-        sub_bignum_unsafe(x, n, p, ign_sign);
+        _DPRINTF_("@%s:%d, signed_t = n - p\r\n", __func__, __LINE__);
+        sub_bignum_unsafe(signed_t, n, p, ign_sign);
     }
     else // one is positive and other is negative
     {
-        add_bignum_unsafe(x, n, p, ign_sign);
+        _DPRINTF_("@%s:%d, signed_t = n + p\r\n", __func__, __LINE__);
+        add_bignum_unsafe(signed_t, n, p, ign_sign);
     }
 
-    signOf_x = sign_bignum_ext(x, ign_sign);
-    _DPRINTF_("@%s:%d, signOf_x:%d\n", __func__, __LINE__, signOf_x);
-    if(!((signOf_x == BIGNUM_SIGN_POS) || (signOf_x == BIGNUM_SIGN_NEG)))
+    signOf_signed_t = sign_bignum_signed(signed_t);
+    _DPRINTF_("@%s:%d, signOf_signed_t:%d\n", __func__, __LINE__, signOf_signed_t);
+    if(!((signOf_signed_t == BIGNUM_SIGN_POS) || (signOf_signed_t == BIGNUM_SIGN_NEG)))
     {
         _DPRINTF_("[ERROR]%s:%d, E_ERROR_BIGNUM_SIGNBIT\r\n", __func__, __LINE__);
+        rmBigNum(&signed_t);
         return E_ERROR_BIGNUM_SIGNBIT;
     }
-    if(signOf_x != signOf_p)
+    if(signOf_signed_t != BIGNUM_SIGN_POS)
     {
-        add_bignum_unsafe(x, x, p, ign_sign);
+        _DPRINTF_("@%s:%d, signed_t += p\r\n", __func__, __LINE__);
+        add_bignum_unsigned_unsafe(signed_t, signed_t, p);
     }
     else
     {
         /* DO_NOTHING */
     }
+    cpy_bignum_unsigned_unsafe(x, signed_t);
+
+    rmBigNum(&signed_t);
 
     return E_OK;
 }

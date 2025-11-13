@@ -384,7 +384,7 @@ void ec_scalarMul_WNAF(
 
     for(size_t i = (wnaf_d->bits - 1UL); i != SIZE_MAX; i--)
     {
-        ec_doublePoints(xdP, ydP, ec_bits, a, p, ign_sign);
+        ec_doublePoints_self(xdP, ydP, ec_bits, a, p, ign_sign);
         _DPRINTF_("bit=%lu, ", i); _PRINT_BIGNUM_(xdP, "doubled xdP");
         _DPRINTF_("bit=%lu, ", i); _PRINT_BIGNUM_(ydP, "doubled ydP");
 
