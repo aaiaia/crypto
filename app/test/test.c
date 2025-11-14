@@ -20,6 +20,7 @@
 #include "ec/ec_cal.h"
 #include "ec/ec_key.h"
 #include "ec/ec_ecdh.h"
+#include "ec/ec_ecdsa.h"
 #include "bignum/bignum_wnaf.h"
 
 #include "test/test_tool.h"
@@ -8718,122 +8719,6 @@ void test_SECP256K1_ECDSA(void)
     _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(order_n, "order_n");
     _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(prime, "prime");
 
-#if 0
-    {
-        const uint32_t mul_val[] = {
-            0x41f63062, 0x578638c7, 0x0a49ed32, 0x0c0c3b34, 0xdfef4a65, 0x1e94210d, 0xd7fe3c29, 0xf5ee9f1d, \
-            0x377704fc, 0xea8b2433, 0x840f2622, 0xd08d8499, 0x8c6b9291, 0x4d2b9a61, 0xf0bd1d44, 0x3b4e0c61, };
-        bignum_s* scalar_mul = mkBigNum(_EC_BITS_<<1U);
-        bignum_s* scalar_mod = mkBigNum(_EC_BITS_);
-
-        memcpy(scalar_mul->nums, mul_val, scalar_mul->size);
-
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_mul, "scalar_mul");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(prime, "prime");
-        __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_mod, scalar_mul, prime));
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_mod, "scalar_mod");
-
-        rmBigNum(&scalar_mul);
-        rmBigNum(&scalar_mod);
-    }
-#endif
-#if 0
-    {
-        const uint32_t const_s[] = { \
-            0x4410da73, 0xe7507361, 0xf2a59ca6, 0x7c326f37, 0x97072d7b, 0x2e67e1e8, 0xe6e68835, 0x3b88fe29, };
-
-        bignum_s* scalar_z =  mkBigNum(_EC_BITS_);
-        bignum_s* scalar_s =  mkBigNum(_EC_BITS_);
-
-        bignum_s* scalar_add =  mkBigNum(_EC_BITS_+1U);
-
-        memset(scalar_z->nums, 0, scalar_z->size);
-        memcpy(scalar_s->nums, const_s, scalar_s->size);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_z, "scalar_z");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_s, "scalar_s");
-
-        __RETURN_TYPE_WRAPPING__(fr, add_bignum_unsigned_unsafe(scalar_add, scalar_z, scalar_s));
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_add, "scalar_add, z + s");
-        __RETURN_TYPE_WRAPPING__(fr, add_bignum_unsigned_unsafe(scalar_add, scalar_s, scalar_z));
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_add, "scalar_add, s + z");
-
-        rmBigNum(&scalar_add);
-
-        rmBigNum(&scalar_z);
-        rmBigNum(&scalar_s);
-    }
-#endif
-
-#if 1 /* Derive_Public_Key_from_private_key */
-    {
-        printf("===== Derive_Public_Key_from_private_key =====\r\n");
-        bignum_s* xG = mkBigNum(_EC_BITS_);
-        bignum_s* yG = mkBigNum(_EC_BITS_);
-
-        bignum_s* xdG = mkBigNum(_EC_BITS_);
-        bignum_s* ydG = mkBigNum(_EC_BITS_);
-
-        bignum_s* xP = mkBigNum(_EC_BITS_);
-        bignum_s* yP = mkBigNum(_EC_BITS_);
-
-        bignum_s* xPublic = mkBigNum(_EC_BITS_);
-        bignum_s* yPublic = mkBigNum(_EC_BITS_);
-
-        bignum_s* xNPublic = mkBigNum(_EC_BITS_);
-        bignum_s* yNPublic = mkBigNum(_EC_BITS_);
-
-        bignum_s* scalar_d = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_a = mkBigNum(_EC_BITS_);
-
-        memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
-        memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
-
-        memcpy(scalar_d->nums, SECP256K1_ECDSA_d_alice, scalar_d->size);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_d, "scalar_d");
-
-        ec_scalarMul_WNAF(xdG, ydG, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xdG, "xdG(public)");
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(ydG, "ydG(public)");
-
-        ec_doublePoints(xP, yP, xdG, ydG, _EC_BITS_, coef_a, prime, ign_sign);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xP, "xP(x2dG)");
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yP, "yP(y2dG)");
-        ec_addPoints(xP, yP, xP, yP, xdG, ydG, _EC_BITS_, coef_a, prime, ign_sign);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(xP, "xP(x3dG)");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(yP, "yP(y3dG)");
-
-        clr_bignum(scalar_a);
-        add_bignum_carry_loc_unsigned(scalar_a, 0x3U, 0);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_a, "scalar_a");
-
-        memcpy(xPublic->nums, SECP256K1_ECDSA_xP_alice, xPublic->size);
-        memcpy(yPublic->nums, SECP256K1_ECDSA_yP_alice, yPublic->size);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xPublic, "xPublic");
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yPublic, "yPublic");
-
-        ec_scalarMul_WNAF(xNPublic, yNPublic, scalar_a, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(xNPublic, "xNPublic(x3Public)");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(yNPublic, "yNPublic(y3Public)");
-
-        rmBigNum(&xG);
-        rmBigNum(&yG);
-
-        rmBigNum(&xdG);
-        rmBigNum(&ydG);
-
-        rmBigNum(&xP);
-        rmBigNum(&yP);
-
-        rmBigNum(&xPublic);
-        rmBigNum(&yPublic);
-
-        rmBigNum(&xNPublic);
-        rmBigNum(&yNPublic);
-
-        rmBigNum(&scalar_d);
-        rmBigNum(&scalar_a);
-    }
-#endif/* Derive_Public_Key_from_private_key */
 #if 1 /* HASH_IS_ZERO */
     // makes hash to 0
     {
@@ -8846,109 +8731,24 @@ void test_SECP256K1_ECDSA(void)
             size_t iteration = 0;
 
             bignum_s* scalar_d = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_k = mkBigNum(_EC_BITS_);
             bignum_s* scalar_z = mkBigNum(_EC_BITS_);
-
-            bignum_s* scalar_add =  mkBigNum(_EC_BITS_+1U);
-            bignum_s* scalar_mul =  mkBigNum(_EC_BITS_<<1U);
-
-            bignum_s* scalar_r = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_s = mkBigNum(_EC_BITS_);
 
             bignum_s* xG = mkBigNum(_EC_BITS_);
             bignum_s* yG = mkBigNum(_EC_BITS_);
 
-            bignum_s* xkG = mkBigNum(_EC_BITS_);
-            bignum_s* ykG = mkBigNum(_EC_BITS_);
-
             memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
             memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xG, "xG");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yG, "yG");
 
             memcpy(scalar_d->nums, SECP256K1_ECDSA_d_alice, scalar_d->size);
             memset(scalar_z->nums, 0, scalar_z->size);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_d, "scalar_d");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
-            srand(time(NULL));
-            while(1)
-            {
-                iteration++;
-                bignum_cmp_e cmp_non_zero = BIGNUM_CMP_NU;
-                // random k
-                for(size_t i = 0UL; i < scalar_k->nlen; i++)
-                {
-                    bignum_t rand_num = 0UL;
-                    for(size_t j = 0UL; j < sizeof(bignum_t); j++)  rand_num |= (bignum_t)((rand()&0xFF)<<(j*8));
-                    scalar_k->nums[i] = rand_num;
-                }
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k");
+            ecdsa_sign(sign_r, sign_s, scalar_z, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, order_n);
 
-                ec_scalarMul_WNAF(xkG, ykG, scalar_k, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xkG, "xkG");
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(ykG, "ykG");
-
-                /* xP of k*G is scalar r */
-                /* r mod n(curve order) */
-                __RETURN_TYPE_WRAPPING__(fr, aim_bignum_unsigned_unsafe(scalar_r, xkG, order_n));
-
-                /* r = 0: retry */
-                cmp_non_zero = cmp0_bignum(scalar_r);
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_CMP_(cmp_non_zero);
-                if(cmp_non_zero == BIGNUM_CMP_ZO)       continue;
-                else if(cmp_non_zero == BIGNUM_CMP_NZ)  /* Acceptable Cases */;
-                else                                    _ECDSA_DPRINTF_("@%s:%u, HAS_ERROR\r\n", __func__, __LINE__); /* HAS_ERROR */;
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_r, "scalar_r");
-
-                __RETURN_TYPE_WRAPPING__(fr, mim_bignum(scalar_k, scalar_k, order_n));
-                if(fr == E_OK)                          /* Acceptable Cases */;
-                else if(fr == E_HAS_NO_VALUE)           continue;
-                else                                    _ECDSA_DPRINTF_("@%s:%u, HAS_ERROR\r\n", __func__, __LINE__); /* HAS_ERROR */;
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k, k^(-1)");
-
-                __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_r, scalar_d));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, r * d");
-                __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_s, scalar_mul, order_n));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (r * d) mod n");
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
-                __RETURN_TYPE_WRAPPING__(fr, add_bignum_unsigned_unsafe(scalar_add, scalar_z, scalar_s));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_add, "scalar_add, z + (r * d)");
-                __RETURN_TYPE_WRAPPING__(fr, aim_bignum_unsigned_unsafe(scalar_s, scalar_add, order_n));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (z + (r * d)) mod n");
-
-                __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_k, scalar_s));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, (k^(-1)) * (z + (r * d))");
-                __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_s, scalar_mul, order_n));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, s = ((k^(-1)) * (z + (r * d))) mod n");
-
-                /* s = 0: retry */
-                cmp_non_zero = cmp0_bignum(scalar_s);
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_CMP_(cmp_non_zero);
-                if(cmp_non_zero == BIGNUM_CMP_ZO)       continue;
-                else if(cmp_non_zero == BIGNUM_CMP_NZ)  /* Acceptable Cases */;
-                else                                    _ECDSA_DPRINTF_("@%s:%u, HAS_ERROR\r\n", __func__, __LINE__); /* HAS_ERROR */;
-
-                break;
-            }
-            __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(sign_r, scalar_r));
-            __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(sign_s, scalar_s));
             rmBigNum(&scalar_d);
-            rmBigNum(&scalar_k);
             rmBigNum(&scalar_z);
-
-            rmBigNum(&scalar_add);
-            rmBigNum(&scalar_mul);
-
-            rmBigNum(&scalar_r);
-            rmBigNum(&scalar_s);
 
             rmBigNum(&xG);
             rmBigNum(&yG);
-
-            rmBigNum(&xkG);
-            rmBigNum(&ykG);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_DPRINTF_("iteration: %lu\r\n", iteration);
         }
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(sign_r, "signature r");
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(sign_s, "signature s");
@@ -8956,30 +8756,13 @@ void test_SECP256K1_ECDSA(void)
         // verify with Alice's public key
         {
             printf("===== [HASH SET TO 0] Veri using Alice's public key =====\r\n");
-            const bignum_t* SECP256K1_ECDSA_r = sign_r->nums;
-            const bignum_t* SECP256K1_ECDSA_s = sign_s->nums;
-
-            bignum_s* scalar_r = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_s = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_u1 = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_u2 = mkBigNum(_EC_BITS_);
 
             bignum_s* scalar_z = mkBigNum(_EC_BITS_);
-
-            bignum_s* scalar_mul =  mkBigNum(_EC_BITS_<<1U);
 
             bignum_s* xG = mkBigNum(_EC_BITS_);
             bignum_s* yG = mkBigNum(_EC_BITS_);
             bignum_s* xPublic = mkBigNum(_EC_BITS_);
             bignum_s* yPublic = mkBigNum(_EC_BITS_);
-
-            bignum_s* xNPublic = mkBigNum(_EC_BITS_);
-            bignum_s* yNPublic = mkBigNum(_EC_BITS_);
-            bignum_s* xNG = mkBigNum(_EC_BITS_);
-            bignum_s* yNG = mkBigNum(_EC_BITS_);
-
-            bignum_s* xP = mkBigNum(_EC_BITS_);
-            bignum_s* yP = mkBigNum(_EC_BITS_);
 
             memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
             memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
@@ -8990,69 +8773,29 @@ void test_SECP256K1_ECDSA(void)
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xPublic, "xPublic");
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yPublic, "yPublic");
 
-            memcpy(scalar_r->nums, SECP256K1_ECDSA_r, scalar_r->size);
-            memcpy(scalar_s->nums, SECP256K1_ECDSA_s, scalar_s->size);
             memset(scalar_z->nums, 0, scalar_z->size);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_r, "scalar_r");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s");
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
-            // s^(-1)
-            __RETURN_TYPE_WRAPPING__(fr, mim_bignum(scalar_s, scalar_s, order_n));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, s^(-1)");
-
-            // (s^(-1) * z) mod n
-            __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_z));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, s^(-1) * z");
-            __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u1, scalar_mul, order_n));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_u1, "scalar_u1, (s^(-1) * z) mod n");
-
-            // (s^(-1) * r) mod n
-            __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_r));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, s^(-1) * r");
-            __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u2, scalar_mul, order_n));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_u2, "scalar_u2, (s^(-1) * r) mod n");
-
-            // u1 * G
-            ec_scalarMul_WNAF(xNG, yNG, scalar_u1, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNG, "xNG");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yNG, "yNG");
-            // u_2 * H_a
-            ec_scalarMul_WNAF(xNPublic, yNPublic, scalar_u2, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNPublic, "xNPublic");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yNPublic, "yNPublic");
-            // P = u1 * G + u_2 * H_a
-            ec_addPoints(xP, yP, xNG, yNG, xNPublic, yNPublic, _EC_BITS_, coef_a, prime, ign_sign);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xP, "xP");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yP, "yP");
-
-            __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(veri_r, xP));
-
-            rmBigNum(&scalar_r);
-            rmBigNum(&scalar_s);
-            rmBigNum(&scalar_u1);
-            rmBigNum(&scalar_u2);
+            cmp_result &= ecdsa_veri_calc_r(veri_r, sign_r, sign_s, scalar_z, xPublic, yPublic, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+            printf("ecdsa_veri_calc_r = %u\r\n", cmp_result);
 
             rmBigNum(&scalar_z);
-
-            rmBigNum(&scalar_mul);
 
             rmBigNum(&xG);
             rmBigNum(&yG);
             rmBigNum(&xPublic);
             rmBigNum(&yPublic);
-
-            rmBigNum(&xNG);
-            rmBigNum(&yNG);
-            rmBigNum(&xNPublic);
-            rmBigNum(&yNPublic);
-
-            rmBigNum(&xP);
-            rmBigNum(&yP);
         }
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(sign_r, "signature r");
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(sign_s, "signature s");
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(veri_r, "verify r");
+
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
     }
 #endif/* HASH_IS_ZERO */
 
@@ -9064,22 +8807,12 @@ void test_SECP256K1_ECDSA(void)
 
         printf("===== Sign using example at https://learnmeabitcoin.com/technical/cryptography/elliptic-curve/ecdsa/ =====\r\n");
 
-        size_t iteration = 0;
         bignum_s* scalar_d = mkBigNum(_EC_BITS_);
         bignum_s* scalar_k = mkBigNum(_EC_BITS_);
         bignum_s* scalar_z = mkBigNum(_EC_BITS_);
 
-        bignum_s* scalar_add =  mkBigNum(_EC_BITS_+1U);
-        bignum_s* scalar_mul =  mkBigNum(_EC_BITS_<<1U);
-
-        bignum_s* scalar_r = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_s = mkBigNum(_EC_BITS_);
-
         bignum_s* xG = mkBigNum(_EC_BITS_);
         bignum_s* yG = mkBigNum(_EC_BITS_);
-
-        bignum_s* xkG = mkBigNum(_EC_BITS_);
-        bignum_s* ykG = mkBigNum(_EC_BITS_);
 
         memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
         memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
@@ -9093,69 +8826,15 @@ void test_SECP256K1_ECDSA(void)
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k");
 
-        {
-            bignum_cmp_e cmp_non_zero = BIGNUM_CMP_NU;
+        ecdsa_sign_nonce(sign_r, sign_s, scalar_k, scalar_z, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, order_n);
 
-            ec_scalarMul_WNAF(xkG, ykG, scalar_k, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xkG, "xkG");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(ykG, "ykG");
-
-            __RETURN_TYPE_WRAPPING__(fr,cpy_bignum_unsigned_safe(scalar_r, xkG));
-
-            /* r = 0: retry */
-            cmp_non_zero = cmp0_bignum(scalar_r);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_CMP_(cmp_non_zero);
-            if(cmp_non_zero == BIGNUM_CMP_ZO)       _ECDSA_DPRINTF_("[INVALID CASES] scalar_r is zero\r\n");
-            else if(cmp_non_zero == BIGNUM_CMP_NZ)  /* Acceptable Cases */;
-            else                                    _ECDSA_DPRINTF_("[ERROR] %s:%d\r\n", __func__, __LINE__);/* HAS_ERROR */;
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_r, "scalar_r");
-
-            __RETURN_TYPE_WRAPPING__(fr, mim_bignum(scalar_k, scalar_k, order_n));
-            if(fr == E_OK)                          /* Acceptable Cases */;
-            else if(fr == E_HAS_NO_VALUE)           _ECDSA_DPRINTF_("[INVALID CASES] scalar_r not has multiplicative inverse modulo\r\n");
-            else                                    _ECDSA_DPRINTF_("[ERROR] %s:%d\r\n", __func__, __LINE__);/* HAS_ERROR */;
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k, k^(-1)");
-
-            __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_r, scalar_d));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, r * d");
-            __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_s, scalar_mul, order_n));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (r * d) mod n");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
-            __RETURN_TYPE_WRAPPING__(fr, add_bignum_unsigned_unsafe(scalar_add, scalar_z, scalar_s));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_add, "scalar_add, z + (r * d)");
-            __RETURN_TYPE_WRAPPING__(fr, aim_bignum_unsigned_unsafe(scalar_s, scalar_add, order_n));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (z + (r * d)) mod n");
-
-            __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_k, scalar_s));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, (k^(-1)) * (z + (r * d))");
-            __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_s, scalar_mul, order_n));
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, s = ((k^(-1)) * (z + (r * d))) mod n");
-
-            /* s = 0: retry */
-            cmp_non_zero = cmp0_bignum(scalar_s);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_CMP_(cmp_non_zero);
-            if(cmp_non_zero == BIGNUM_CMP_ZO)       _ECDSA_DPRINTF_("[INVALID CASES] scalar_s is zero\r\n");
-            else if(cmp_non_zero == BIGNUM_CMP_NZ)  /* Acceptable Cases */;
-            else                                    _ECDSA_DPRINTF_("[ERROR] %s:%d\r\n", __func__, __LINE__);/* HAS_ERROR */;
-        }
-        __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(sign_r, scalar_r));
-        __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(sign_s, scalar_s));
         rmBigNum(&scalar_d);
         rmBigNum(&scalar_k);
         rmBigNum(&scalar_z);
 
-        rmBigNum(&scalar_add);
-        rmBigNum(&scalar_mul);
-
-        rmBigNum(&scalar_r);
-        rmBigNum(&scalar_s);
-
         rmBigNum(&xG);
         rmBigNum(&yG);
 
-        rmBigNum(&xkG);
-        rmBigNum(&ykG);
-        printf("@%s:%u, ", __func__, __LINE__); printf("iteration: %lu\r\n", iteration);
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(sign_r, "signature r");
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(sign_s, "signature s");
 
@@ -9179,27 +8858,12 @@ void test_SECP256K1_ECDSA(void)
         memcpy(sign_r->nums, SECP256K1_ECDSA_sign_r_example2, sign_r->size);
         memcpy(sign_s->nums, SECP256K1_ECDSA_sign_s_example2, sign_s->size);
 
-        bignum_s* scalar_r = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_s = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_u1 = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_u2 = mkBigNum(_EC_BITS_);
-
         bignum_s* scalar_z = mkBigNum(_EC_BITS_);
-
-        bignum_s* scalar_mul =  mkBigNum(_EC_BITS_<<1U);
 
         bignum_s* xG = mkBigNum(_EC_BITS_);
         bignum_s* yG = mkBigNum(_EC_BITS_);
         bignum_s* xPublic = mkBigNum(_EC_BITS_);
         bignum_s* yPublic = mkBigNum(_EC_BITS_);
-
-        bignum_s* xNPublic = mkBigNum(_EC_BITS_);
-        bignum_s* yNPublic = mkBigNum(_EC_BITS_);
-        bignum_s* xNG = mkBigNum(_EC_BITS_);
-        bignum_s* yNG = mkBigNum(_EC_BITS_);
-
-        bignum_s* xP = mkBigNum(_EC_BITS_);
-        bignum_s* yP = mkBigNum(_EC_BITS_);
 
         memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
         memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
@@ -9210,65 +8874,21 @@ void test_SECP256K1_ECDSA(void)
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xPublic, "xPublic");
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yPublic, "yPublic");
 
-        memcpy(scalar_r->nums, SECP256K1_ECDSA_sign_r_example2, scalar_r->size);
-        memcpy(scalar_s->nums, SECP256K1_ECDSA_sign_s_example2, scalar_s->size);
         memcpy(scalar_z->nums, SECP256K1_ECDSA_m_sha256_example2, scalar_z->size);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_r, "scalar_r");
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s");
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
-        // s^(-1)
-        __RETURN_TYPE_WRAPPING__(fr, mim_bignum(scalar_s, scalar_s, order_n));
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "s^(-1) mod n");
+        cmp_result &= ecdsa_veri_calc_r(veri_r, sign_r, sign_s, scalar_z, xPublic, yPublic, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+        printf("ecdsa_veri_calc_r = %u\r\n", cmp_result);
 
-        // (s^(-1) * z) mod n
-        __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_z));
-        __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u1, scalar_mul, order_n));
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_u1, "u1 = (s^(-1) * z) mod n");
-
-        // (s^(-1) * r) mod n
-        __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_r));
-        __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u2, scalar_mul, order_n));
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_u2, "u2 = (s^(-1) * r) mod n");
-
-        // u1 * G
-        ec_scalarMul_WNAF(xNG, yNG, scalar_u1, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNG, "xNG");
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yNG, "yNG");
-        // u_2 * H_a
-        ec_scalarMul_WNAF(xNPublic, yNPublic, scalar_u2, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNPublic, "xNPublic");
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yNPublic, "yNPublic");
-        // P = u1 * G + u_2 * H_a
-        ec_addPoints(xP, yP, xNG, yNG, xNPublic, yNPublic, _EC_BITS_, coef_a, prime, ign_sign);
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xP, "xP");
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yP, "yP");
-
-        __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(veri_r, xP));
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(veri_r, "veri r");
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(sign_r, "sign r");
 
-        rmBigNum(&scalar_r);
-        rmBigNum(&scalar_s);
-        rmBigNum(&scalar_u1);
-        rmBigNum(&scalar_u2);
-
         rmBigNum(&scalar_z);
-
-        rmBigNum(&scalar_mul);
 
         rmBigNum(&xG);
         rmBigNum(&yG);
         rmBigNum(&xPublic);
         rmBigNum(&yPublic);
-
-        rmBigNum(&xNG);
-        rmBigNum(&yNG);
-        rmBigNum(&xNPublic);
-        rmBigNum(&yNPublic);
-
-        rmBigNum(&xP);
-        rmBigNum(&yP);
 
         cmp_result &= (memcmp(sign_r->nums, veri_r->nums, _EC_SIZE_) == 0);
 
@@ -9279,118 +8899,6 @@ void test_SECP256K1_ECDSA(void)
         printf("============================================================\r\n");
 #endif/* TEST_MANUAL_CHECK */
     }
-
-#if 0 /* INVALID_EXMAPLE */
-    {
-        cmp_result = true;
-        intentional_invalid = false;
-
-        printf("===== Veri using example public key source: Andrea Corbellini blogs =====\r\n");
-
-        memcpy(sign_r->nums, INVALID_SECP256K1_ECDSA_sign_r_example, sign_r->size);
-        memcpy(sign_s->nums, INVALID_SECP256K1_ECDSA_sign_s_example, sign_s->size);
-
-        bignum_s* scalar_r = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_s = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_u1 = mkBigNum(_EC_BITS_);
-        bignum_s* scalar_u2 = mkBigNum(_EC_BITS_);
-
-        bignum_s* scalar_z = mkBigNum(_EC_BITS_);
-
-        bignum_s* scalar_mul =  mkBigNum(_EC_BITS_<<1U);
-
-        bignum_s* xG = mkBigNum(_EC_BITS_);
-        bignum_s* yG = mkBigNum(_EC_BITS_);
-        bignum_s* xPublic = mkBigNum(_EC_BITS_);
-        bignum_s* yPublic = mkBigNum(_EC_BITS_);
-
-        bignum_s* xNPublic = mkBigNum(_EC_BITS_);
-        bignum_s* yNPublic = mkBigNum(_EC_BITS_);
-        bignum_s* xNG = mkBigNum(_EC_BITS_);
-        bignum_s* yNG = mkBigNum(_EC_BITS_);
-
-        bignum_s* xP = mkBigNum(_EC_BITS_);
-        bignum_s* yP = mkBigNum(_EC_BITS_);
-
-        memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
-        memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
-        memcpy(xPublic->nums, INVALID_SECP256K1_ECDSA_xPublic_example, xPublic->size);
-        memcpy(yPublic->nums, INVALID_SECP256K1_ECDSA_yPublic_example, yPublic->size);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(xG, "xG");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(yG, "yG");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(xPublic, "xPublic");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(yPublic, "yPublic");
-
-        memcpy(scalar_r->nums, INVALID_SECP256K1_ECDSA_sign_r_example, scalar_r->size);
-        memcpy(scalar_s->nums, INVALID_SECP256K1_ECDSA_sign_s_example, scalar_s->size);
-        memcpy(scalar_z->nums, SECP256K1_ECDSA_m_sha1_digest, scalar_z->size);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_r, "scalar_r");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_s, "scalar_s");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_z, "scalar_z");
-
-        // s^(-1)
-        __RETURN_TYPE_WRAPPING__(fr, mim_bignum(scalar_s, scalar_s, order_n));
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_s, "s^(-1) mod n");
-
-        // (s^(-1) * z) mod n
-        __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_z));
-        __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u1, scalar_mul, order_n));
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_u1, "u1 = (s^(-1) * z) mod n");
-
-        // (s^(-1) * r) mod n
-        __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_r));
-        __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u2, scalar_mul, order_n));
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_u2, "u2 = (s^(-1) * r) mod n");
-
-        // u1 * G
-        ec_scalarMul_WNAF(xNG, yNG, scalar_u1, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(xNG, "xNG");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(yNG, "yNG");
-        // u_2 * H_a
-        ec_scalarMul_WNAF(xNPublic, yNPublic, scalar_u2, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(xNPublic, "xNPublic");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(yNPublic, "yNPublic");
-        // P = u1 * G + u_2 * H_a
-        ec_addPoints(xP, yP, xNG, yNG, xNPublic, yNPublic, _EC_BITS_, coef_a, prime, ign_sign);
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(xP, "xP");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(yP, "yP");
-
-        __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(veri_r, xP));
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(veri_r, "veri r");
-        printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(scalar_r, "r reference");
-
-        rmBigNum(&scalar_r);
-        rmBigNum(&scalar_s);
-        rmBigNum(&scalar_u1);
-        rmBigNum(&scalar_u2);
-
-        rmBigNum(&scalar_z);
-
-        rmBigNum(&scalar_mul);
-
-        rmBigNum(&xG);
-        rmBigNum(&yG);
-        rmBigNum(&xPublic);
-        rmBigNum(&yPublic);
-
-        rmBigNum(&xNG);
-        rmBigNum(&yNG);
-        rmBigNum(&xNPublic);
-        rmBigNum(&yNPublic);
-
-        rmBigNum(&xP);
-        rmBigNum(&yP);
-
-        cmp_result &= (memcmp(sign_r->nums, veri_r->nums, _EC_SIZE_) == 0);
-
-        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-#if(TEST_MANUAL_CHECK == 0)
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
-#else
-        printf("============================================================\r\n");
-#endif/* TEST_MANUAL_CHECK */
-    }
-#endif/* INVALID_EXMAPLE */
 
     for(size_t i = 0; i < 1000UL; i++)
     // Alice's Public key = Alice's Private Key * Base Point
@@ -9403,20 +8911,10 @@ void test_SECP256K1_ECDSA(void)
             _ECDSA_DPRINTF_("===== Sign using Alice's private key =====\r\n");
             size_t iteration = 0;
             bignum_s* scalar_d = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_k = mkBigNum(_EC_BITS_);
             bignum_s* scalar_z = mkBigNum(_EC_BITS_);
-
-            bignum_s* scalar_add =  mkBigNum(_EC_BITS_+1U);
-            bignum_s* scalar_mul =  mkBigNum(_EC_BITS_<<1U);
-
-            bignum_s* scalar_r = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_s = mkBigNum(_EC_BITS_);
 
             bignum_s* xG = mkBigNum(_EC_BITS_);
             bignum_s* yG = mkBigNum(_EC_BITS_);
-
-            bignum_s* xkG = mkBigNum(_EC_BITS_);
-            bignum_s* ykG = mkBigNum(_EC_BITS_);
 
             memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
             memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
@@ -9428,84 +8926,13 @@ void test_SECP256K1_ECDSA(void)
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_d, "scalar_d");
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
-            srand(time(NULL));
-            while(1)
-            {
-                iteration++;
-                bignum_cmp_e cmp_non_zero = BIGNUM_CMP_NU;
-                // random k
-                for(size_t i = 0UL; i < scalar_k->nlen; i++)
-                {
-                    bignum_t rand_num = 0UL;
-                    for(size_t j = 0UL; j < sizeof(bignum_t); j++)  rand_num |= (bignum_t)((rand()&0xFF)<<(j*8));
-                    scalar_k->nums[i] = rand_num;
-                }
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k");
+            ecdsa_sign(sign_r, sign_s, scalar_z, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, order_n);
 
-                ec_scalarMul_WNAF(xkG, ykG, scalar_k, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xkG, "xkG");
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(ykG, "ykG");
-
-                /* xP of k*G is scalar r */
-                /* r mod n(curve order) */
-                __RETURN_TYPE_WRAPPING__(fr, aim_bignum_unsigned_unsafe(scalar_r, xkG, order_n));
-
-                /* r = 0: retry */
-                cmp_non_zero = cmp0_bignum(scalar_r);
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_CMP_(cmp_non_zero);
-                if(cmp_non_zero == BIGNUM_CMP_ZO)       continue;
-                else if(cmp_non_zero == BIGNUM_CMP_NZ)  /* Acceptable Cases */;
-                else                                    /* HAS_ERROR */;
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_r, "scalar_r");
-
-                __RETURN_TYPE_WRAPPING__(fr, mim_bignum(scalar_k, scalar_k, order_n));
-                if(fr == E_OK)                          /* Acceptable Cases */;
-                else if(fr == E_HAS_NO_VALUE)           continue;
-                else                                    /* HAS_ERROR */;
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k, k^(-1)");
-
-                __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_r, scalar_d));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, r * d");
-                __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_s, scalar_mul, order_n));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (r * d) mod n");
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
-                __RETURN_TYPE_WRAPPING__(fr, add_bignum_unsigned_unsafe(scalar_add, scalar_z, scalar_s));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_add, "scalar_add, z + (r * d)");
-                __RETURN_TYPE_WRAPPING__(fr, aim_bignum_unsigned_unsafe(scalar_s, scalar_add, order_n));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (z + (r * d)) mod n");
-
-                __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_k, scalar_s));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, (k^(-1)) * (z + (r * d))");
-                __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_s, scalar_mul, order_n));
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, s = ((k^(-1)) * (z + (r * d))) mod n");
-
-                /* s = 0: retry */
-                cmp_non_zero = cmp0_bignum(scalar_s);
-                _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_CMP_(cmp_non_zero);
-                if(cmp_non_zero == BIGNUM_CMP_ZO)       continue;
-                else if(cmp_non_zero == BIGNUM_CMP_NZ)  /* Acceptable Cases */;
-                else                                    /* HAS_ERROR */;
-
-                break;
-            }
-            __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(sign_r, scalar_r));
-            __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(sign_s, scalar_s));
             rmBigNum(&scalar_d);
-            rmBigNum(&scalar_k);
             rmBigNum(&scalar_z);
-
-            rmBigNum(&scalar_add);
-            rmBigNum(&scalar_mul);
-
-            rmBigNum(&scalar_r);
-            rmBigNum(&scalar_s);
 
             rmBigNum(&xG);
             rmBigNum(&yG);
-
-            rmBigNum(&xkG);
-            rmBigNum(&ykG);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_DPRINTF_("iteration: %lu\r\n", iteration);
         }
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(sign_r, "signature r");
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(sign_s, "signature s");
@@ -9513,30 +8940,12 @@ void test_SECP256K1_ECDSA(void)
         // verify with Alice's public key
         {
             _ECDSA_DPRINTF_("===== Veri using Alice's public key =====\r\n");
-            const bignum_t* SECP256K1_ECDSA_r = sign_r->nums;
-            const bignum_t* SECP256K1_ECDSA_s = sign_s->nums;
-
-            bignum_s* scalar_r = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_s = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_u1 = mkBigNum(_EC_BITS_);
-            bignum_s* scalar_u2 = mkBigNum(_EC_BITS_);
-
             bignum_s* scalar_z = mkBigNum(_EC_BITS_);
-
-            bignum_s* scalar_mul =  mkBigNum(_EC_BITS_<<1U);
 
             bignum_s* xG = mkBigNum(_EC_BITS_);
             bignum_s* yG = mkBigNum(_EC_BITS_);
             bignum_s* xPublic = mkBigNum(_EC_BITS_);
             bignum_s* yPublic = mkBigNum(_EC_BITS_);
-
-            bignum_s* xNPublic = mkBigNum(_EC_BITS_);
-            bignum_s* yNPublic = mkBigNum(_EC_BITS_);
-            bignum_s* xNG = mkBigNum(_EC_BITS_);
-            bignum_s* yNG = mkBigNum(_EC_BITS_);
-
-            bignum_s* xP = mkBigNum(_EC_BITS_);
-            bignum_s* yP = mkBigNum(_EC_BITS_);
 
             memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
             memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
@@ -9547,60 +8956,18 @@ void test_SECP256K1_ECDSA(void)
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xPublic, "xPublic");
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yPublic, "yPublic");
 
-            memcpy(scalar_r->nums, SECP256K1_ECDSA_r, scalar_r->size);
-            memcpy(scalar_s->nums, SECP256K1_ECDSA_s, scalar_s->size);
             memcpy(scalar_z->nums, SECP256K1_ECDSA_m_sha1_digest, scalar_z->size);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_r, "scalar_r");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s");
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
-            // s^(-1)
-            __RETURN_TYPE_WRAPPING__(fr, mim_bignum(scalar_s, scalar_s, order_n));
-
-            // (s^(-1) * z) mod n
-            __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_z));
-            __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u1, scalar_mul, order_n));
-
-            // (s^(-1) * r) mod n
-            __RETURN_TYPE_WRAPPING__(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_r));
-            __RETURN_TYPE_WRAPPING__(fr, mod_bignum_unsafe(scalar_u2, scalar_mul, order_n));
-
-            // u1 * G
-            ec_scalarMul_WNAF(xNG, yNG, scalar_u1, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNG, "xNG");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yNG, "yNG");
-            // u_2 * H_a
-            ec_scalarMul_WNAF(xNPublic, yNPublic, scalar_u2, xPublic, yPublic, _EC_BITS_, coef_a, prime, w, ign_sign);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNPublic, "xNPublic");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yNPublic, "yNPublic");
-            // P = u1 * G + u_2 * H_a
-            ec_addPoints(xP, yP, xNG, yNG, xNPublic, yNPublic, _EC_BITS_, coef_a, prime, ign_sign);
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xP, "xP");
-            _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(yP, "yP");
-
-            __RETURN_TYPE_WRAPPING__(fr, cpy_bignum_unsigned_safe(veri_r, xP));
-
-            rmBigNum(&scalar_r);
-            rmBigNum(&scalar_s);
-            rmBigNum(&scalar_u1);
-            rmBigNum(&scalar_u2);
+            cmp_result &= ecdsa_veri_calc_r(veri_r, sign_r, sign_s, scalar_z, xPublic, yPublic, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+            printf("ecdsa_veri_calc_r = %u\r\n", cmp_result);
 
             rmBigNum(&scalar_z);
-
-            rmBigNum(&scalar_mul);
 
             rmBigNum(&xG);
             rmBigNum(&yG);
             rmBigNum(&xPublic);
             rmBigNum(&yPublic);
-
-            rmBigNum(&xNG);
-            rmBigNum(&yNG);
-            rmBigNum(&xNPublic);
-            rmBigNum(&yNPublic);
-
-            rmBigNum(&xP);
-            rmBigNum(&yP);
         }
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(veri_r, "veri r");
 
