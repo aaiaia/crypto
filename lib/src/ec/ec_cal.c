@@ -30,14 +30,14 @@
 #define _PRINT_wNAF_(p, title)
 #endif /* ENABLE_EC_LOG */
 /*
- * ec_addPoints_ext
+ * ec_calPoints_ext
  * xR, yR: Result of ec point addition(sum)
  * xP, yP: Operand ec point P
  * xQ, yQ: Operand ec point Q
  * a: coeffient of ec curve, y^2 = x^3 + a*x + b
  * p: prime number for modulo p(mod p)
  */
-void ec_addPoints_ext(bignum_s* xR, bignum_s* yR, \
+void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
         const bignum_s* xP, const bignum_s* yP, \
         const bool nQ, \
         const bignum_s* xQ, const bignum_s* yQ, \
