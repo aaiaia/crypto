@@ -93,4 +93,39 @@ void ec_scalarMul_WNAF(
         const bignum_s* xP, const bignum_s* yP, \
         const size_t ec_bits, const bignum_s* a, const bignum_s* p, \
         const uwnaf w, const bool ign_sign);
+
+bool ec_isInfJacobi(const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP);
+
+void ec_convAffineToJacobi(bignum_s* jXP, bignum_s* jYP, bignum_s* jZP, \
+        const bignum_s* xP, const bignum_s* yP);
+
+void ec_convJacobiToAffine(bignum_s* xP, bignum_s* yP, \
+        const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP, \
+        const size_t ec_bits, const bignum_s* p);
+
+void ec_doublingPoint_inJacobi(bignum_s* jXP, bignum_s* jYP, bignum_s* jZP, \
+        const bool nQ, \
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p);
+
+void ec_calPoint_AffineIntoJacobi_ext(bignum_s* jXR, bignum_s* jYR, bignum_s* jZR, \
+        const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP, \
+        const bool nQ, \
+        const bignum_s* xQ, const bignum_s* yQ, \
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p);
+static inline void ec_addPoint_AffineIntoJacobi(bignum_s* jXR, bignum_s* jYR, bignum_s* jZR, \
+        const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP, \
+        const bignum_s* xQ, const bignum_s* yQ, \
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p)
+{
+    const bool nQ = false;
+    ec_calPoint_AffineIntoJacobi_ext(jXR, jYR, jZR, jXP, jYP, jZP, nQ, xQ, yQ, ec_bits, a, p);
+}
+static inline void ec_subPoint_AffineIntoJacobi(bignum_s* jXR, bignum_s* jYR, bignum_s* jZR, \
+        const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP, \
+        const bignum_s* xQ, const bignum_s* yQ, \
+        const size_t ec_bits, const bignum_s* a, const bignum_s* p)
+{
+    const bool nQ = true;
+    ec_calPoint_AffineIntoJacobi_ext(jXR, jYR, jZR, jXP, jYP, jZP, nQ, xQ, yQ, ec_bits, a, p);
+}
 #endif /* EC_CAL_H */

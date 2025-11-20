@@ -8042,6 +8042,227 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
 #undef _COND_DO_TEST_0_
 #undef TEST_MANUAL_CHECK
 }
+const char ref_test_SECP256K1_add_affine_into_jacobi[] = "[REFERENCES]\nGuide to Elliptic Curve Cryptography, Darrel Hankerson, Alfred Menezes Scott Vanstone, Springer";
+void test_SECP256K1_add_affine_into_jacobi(void)
+{
+    printf("%s\n", ref_test_SECP256K1_add_affine_into_jacobi);
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+#define TEST_MANUAL_CHECK   0
+    char keyin;
+    /* 
+     * Link: https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
+     * EC Curve formula
+     * y^2 = x^3 + a * x + b
+     * [PRIME NUMVER FOR MODULO]
+     * p  = 0xffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f
+     * [COEFFICIENT X^1]
+     * a  = 0
+     * [COEFFICIENT X^0]
+     * b  = 7
+     * [BASE POINT]
+     * xG = 0x79be667e f9dcbbac 55a06295 ce870b07 029bfcdb 2dce28d9 59f2815b 16f81798
+     * yG = 0x483ada77 26a3c465 5da4fbfc 0e1108a8 fd17b448 a6855419 9c47d08f fb10d4b8
+     * [n(hP)==0]
+     * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
+     * h  = 1
+     */
+const uint32_t* TV_SECP256K1_addition_xNG_LIST[] = {
+    SECP256K1_calc_x1G,
+    SECP256K1_calc_x2G,
+    SECP256K1_calc_x3G,
+    SECP256K1_calc_x4G,
+    SECP256K1_calc_x5G,
+    SECP256K1_calc_x6G,
+    SECP256K1_calc_x7G,
+    SECP256K1_calc_x8G,
+    SECP256K1_calc_x9G,
+    SECP256K1_calc_x10G,
+};
+const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
+    SECP256K1_calc_y1G,
+    SECP256K1_calc_y2G,
+    SECP256K1_calc_y3G,
+    SECP256K1_calc_y4G,
+    SECP256K1_calc_y5G,
+    SECP256K1_calc_y6G,
+    SECP256K1_calc_y7G,
+    SECP256K1_calc_y8G,
+    SECP256K1_calc_y9G,
+    SECP256K1_calc_y10G,
+};
+    const char* test_fn_name = "ec_addPoints";
+
+    bool cmp_result;
+    bool intentional_invalid;
+
+    bignum_s* coef_a = mkBigNum(_EC_BITS_);
+    bignum_s* coef_b = mkBigNum(_EC_BITS_);
+    bignum_s* prime = mkBigNum(_EC_BITS_);
+
+    bignum_s* xG = mkBigNum(_EC_BITS_);
+    bignum_s* yG = mkBigNum(_EC_BITS_);
+
+    bignum_s* jXP = mkBigNum(_EC_BITS_);
+    bignum_s* jYP = mkBigNum(_EC_BITS_);
+    bignum_s* jZP = mkBigNum(_EC_BITS_);
+
+    bignum_s* axP = mkBigNum(_EC_BITS_);
+    bignum_s* ayP = mkBigNum(_EC_BITS_);
+
+    const bool ign_sign = true;
+
+    memcpy(coef_a->nums, SECP256K1_calc_a, coef_a->size);
+    memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
+    memcpy(prime->nums, SECP256K1_calc_p, prime->size);
+
+    memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
+    memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
+
+    // set Jacobi to Base point
+    ec_convAffineToJacobi(jXP, jYP, jZP, xG, yG);
+    test_print_bignum(jXP, "[1G] jXP");
+    test_print_bignum(jYP, "[1G] jYP");
+    test_print_bignum(jZP, "[1G] jZP");
+
+    ec_doublingPoint_inJacobi(jXP, jYP, jZP, false, _EC_BITS_, coef_a, prime);
+    test_print_bignum(jXP, "[2G] jXP");
+    test_print_bignum(jYP, "[2G] jYP");
+    test_print_bignum(jZP, "[2G] jZP");
+    ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+    test_print_bignum(axP, "[2G] axP");
+    test_print_bignum(ayP, "[2G] ayP");
+    printf("[x2G ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_xNG_LIST[1], axP->nlen);
+    printf("[y2G ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_yNG_LIST[1], ayP->nlen);
+    // d == 1
+    for(size_t i = 2UL; i < 10UL; i++)
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+
+        ec_addPoint_AffineIntoJacobi(jXP, jYP, jZP, jXP, jYP, jZP, xG, yG, _EC_BITS_, coef_a, prime);
+        ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+
+        cmp_result &= (memcmp(axP->nums, TV_SECP256K1_addition_xNG_LIST[i], axP->size) == 0);
+        cmp_result &= (memcmp(ayP->nums, TV_SECP256K1_addition_yNG_LIST[i], ayP->size) == 0);
+
+        printf("N=%lu", i+1UL); test_print_bignum(axP, "xNG");
+        printf("N=%lu", i+1UL); test_print_bignum(ayP, "yNG");
+        if(!cmp_result) {
+            printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_xNG_LIST[i], axP->nlen);
+            printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_yNG_LIST[i], ayP->nlen);
+        }
+
+        printf("%luG, ", i+1UL);
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif
+    }
+
+    // d == 100
+    {
+        for(size_t i = 10UL; i < 1000000UL; i++)
+        {
+            bool doCompare = false;
+            const uint32_t* xNG_ref = NULL;
+            const uint32_t* yNG_ref = NULL;
+
+            cmp_result = true;
+            intentional_invalid = false;
+
+            ec_addPoint_AffineIntoJacobi(jXP, jYP, jZP, jXP, jYP, jZP, xG, yG, _EC_BITS_, coef_a, prime);
+            if(i+1UL ==     100UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x100G;
+                yNG_ref = SECP256K1_calc_y100G;
+            }
+            if(i+1UL ==    1000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x1000G;
+                yNG_ref = SECP256K1_calc_y1000G;
+            }
+            if(i+1UL ==   10000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x10000G;
+                yNG_ref = SECP256K1_calc_y10000G;
+            }
+            if(i+1UL ==  100000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x100000G;
+                yNG_ref = SECP256K1_calc_y100000G;
+            }
+            if(i+1UL == 1000000UL) {
+                doCompare |= true;
+                xNG_ref = SECP256K1_calc_x1000000G;
+                yNG_ref = SECP256K1_calc_y1000000G;
+            }
+
+            if(doCompare) {
+                ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+
+                cmp_result &= (memcmp(axP->nums, xNG_ref, axP->size) == 0);
+                cmp_result &= (memcmp(ayP->nums, yNG_ref, ayP->size) == 0);
+
+                printf("N=%lu", i+1UL); test_print_bignum(axP, "xNG");
+                printf("N=%lu", i+1UL); test_print_bignum(ayP, "yNG");
+                if(!cmp_result) {
+                    printf("[xNG ref]\r\n"); test_print_bignum_array(xNG_ref, axP->nlen);
+                    printf("[yNG ref]\r\n"); test_print_bignum_array(yNG_ref, ayP->nlen);
+                }
+
+                printf("%luG, ", i+1UL);
+                printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+                TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+                _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+                printf("============================================================\r\n");
+#endif
+            }
+            if(i+1UL ==  10000UL) {
+                _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
+                _COND_DO_TEST_0_(keyin) break;
+            }
+            if(i+1UL ==  100000UL) {
+                _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
+                _COND_DO_TEST_0_(keyin) break;
+            }
+        }
+
+
+    }
+
+    rmBigNum(&coef_a);
+    rmBigNum(&coef_b);
+    rmBigNum(&prime);
+
+    rmBigNum(&xG);
+    rmBigNum(&yG);
+
+    rmBigNum(&jXP);
+    rmBigNum(&jYP);
+    rmBigNum(&jZP);
+
+    rmBigNum(&axP);
+    rmBigNum(&ayP);
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+#undef TEST_MANUAL_CHECK
+}
 const char ref_test_SECP256K1_doubling[] = "[REFERENCES]\nBarebones secp256k1: Adding and Scalar Multiply on the curve (Python)\n[Link] https://asecuritysite.com/encryption/secp256k1p";
 void test_SECP256K1_doubling(void)
 {
@@ -8293,6 +8514,18 @@ void test_SECP256K1_scalarMul_WNAF(void)
 
     memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
     memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
+
+    {
+        wnaf_pre_compute_ec_s* wnaf_pc = mkWNAF_preCompute_ec(w, _EC_BITS_);
+
+        ec_preCompute_WNAF(wnaf_pc, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+
+        test_print_bignum(xG, "xG: Base point");
+        test_print_bignum(yG, "yG: Base point");
+        test_print_wNAF_PreCompute_info(wnaf_pc, "dG: d * Base point");
+
+        rmWNAF_preCompute_ec(&wnaf_pc);
+    }
 
     for(size_t i = 0; TV_SECP256K1_scalarMul_d_string_LIST[i] != NULL; i++)
     {
@@ -9361,6 +9594,12 @@ void test_sequence_ec(void) {
     _KEYIN_DO_TEST_(keyin, "test_SECP256K1_addition");
     _COND_DO_TEST_(keyin)
     test_SECP256K1_addition();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_add_affine_into_jacobi");
+    _COND_DO_TEST_(keyin)
+    test_SECP256K1_add_affine_into_jacobi();
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
