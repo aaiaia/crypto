@@ -33,6 +33,11 @@
 #define EC_BIT_P1(ec_bits)  (ec_bits+1UL)
 #define EC_BIT_X2(ec_bits)  (ec_bits<<1U)
 
+bool ec_isIndentityPoint(const bignum_s* x, const bignum_s* y)
+{
+    return ((cmp0_bignum(x) == BIGNUM_CMP_ZO) && (cmp0_bignum(y) == BIGNUM_CMP_ZO));
+}
+
 /*
  * ec_calPoints_ext
  * xR, yR: Result of ec point addition(sum)
@@ -49,17 +54,11 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
         const bool ign_sign)
 {
     bool slope_is_INFINITE = false;
-    bool point_is_IDENTITY = false;
+    bool affine_is_IDENTITY = false;
     ReturnType fr;
 
-    if((cmp0_bignum(xP) == BIGNUM_CMP_ZO) && (cmp0_bignum(yP) == BIGNUM_CMP_ZO)) {
-        _DPRINTF_("[INFO] Point P is IDENTITY ELEMENTS\r\n");
-        point_is_IDENTITY |= true;
-    }
-    if((cmp0_bignum(xQ) == BIGNUM_CMP_ZO) && (cmp0_bignum(yQ) == BIGNUM_CMP_ZO)) {
-        _DPRINTF_("[INFO] Point Q is IDENTITY ELEMENTS\r\n");
-        point_is_IDENTITY |= true;
-    }
+    affine_is_IDENTITY |= ec_isIndentityPoint(xP, yP);
+    affine_is_IDENTITY |= ec_isIndentityPoint(xQ, yQ);
 
     _PRINT_BIGNUM_(xP, "| | | | | xP | | | | |");
     _PRINT_BIGNUM_(yP, "| | | | | yP | | | | |");
@@ -69,7 +68,7 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
     _PRINT_BIGNUM_(p, "| | | | | p | | | | |");
     _PRINT_BIGNUM_(a, "| | | | | a | | | | |");
 
-    if(!point_is_IDENTITY) {
+    if(!affine_is_IDENTITY) {
         bignum_cmp_e cmp_x = cmp_bignum_logical_safe_ext(xP, xQ, ign_sign);
         bignum_cmp_e cmp_y = cmp_bignum_logical_safe_ext(yP, yQ, ign_sign);
         _DPRINTF_("[INFO] Point P and Q are %s\r\n", ((cmp_x == BIGNUM_CMP_EQ) && (cmp_y == BIGNUM_CMP_EQ))?"Same":"Diff");
@@ -110,7 +109,7 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
             _PRINT_BIGNUM_(bitEx_p1_dxi, "| | | | | bitEx_p1_dx^(-1) = (xP - xQ)^(-1) mod bitEx_p1_p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
                 _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
-                slope_is_INFINITE = true;
+                slope_is_INFINITE |= true;
             }
 
             if(!slope_is_INFINITE) {
@@ -180,7 +179,7 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
             _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | (2 * yP)^(-1) mod bitEx_p1_p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
                 _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
-                slope_is_INFINITE = true;
+                slope_is_INFINITE |= true;
             }
 
             if(!slope_is_INFINITE) {
@@ -227,8 +226,9 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
             rmBigNum(&bitEx_x2_mul);
 
             rmBigNum(&bitEx_p1_pow_m);
+
+            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | xR(bitEx_p1_x) | | | | |");
         }
-        _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | xR(bitEx_p1_x) | | | | |");
 
         /* Get yR */
         {
@@ -252,16 +252,17 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
             _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | ( yP + m(xR - xP) ) mod bitEx_p1_p | | | | |");
 
             rmBigNum(&bitEx_x2_mul);
+
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | yR | | | | |");
+
+            // -yR
+            _EC_FN_(fr, cpy_bignum_twos_signed_safe(bitEx_p1_y, bitEx_p1_y));
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) | | | | |");
+
+            // (-yR) mod bitEx_p1_p
+            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
+            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) mod bitEx_p1_p | | | | |");
         }
-        _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | yR | | | | |");
-
-        // -yR
-        _EC_FN_(fr, cpy_bignum_twos_signed_safe(bitEx_p1_y, bitEx_p1_y));
-        _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) | | | | |");
-
-        // (-yR) mod bitEx_p1_p
-        _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
-        _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) mod bitEx_p1_p | | | | |");
 
         if(!slope_is_INFINITE) {
             _EC_FN_(fr, cpy_bignum_unsigned_unsafe(xR, bitEx_p1_x));
@@ -425,17 +426,27 @@ void ec_scalarMul_WNAF(
 }
 
 // The point at infinity corresponds to (1 : 1 : 0), while the negative of (X : Y : Z) is (X :−Y : Z).
-bool ec_isInfJacobi(const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP)
+bool ec_isIdentity_inJacobi(const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP)
 {
-    bignum_cmp_e cmpX;
-    bignum_cmp_e cmpY;
-    bignum_cmp_e cmpZ;
+    return ((cmp1_bignum(jXP) == BIGNUM_CMP_ON) &&(cmp1_bignum(jYP) == BIGNUM_CMP_ON) && (cmp0_bignum(jZP) == BIGNUM_CMP_ZO));
+}
+void ec_setIdentity_inJacobi(bignum_s* jXP, bignum_s* jYP, bignum_s* jZP)
+{
+    ReturnType fr;
 
-    cmpX = cmp1_bignum(jXP);
-    cmpY = cmp1_bignum(jYP);
-    cmpZ = cmp0_bignum(jZP);
-
-    return ((cmpX == BIGNUM_CMP_ON) &&(cmpY == BIGNUM_CMP_ON) && (cmpZ == BIGNUM_CMP_ZO));
+    _EC_FN_(fr, clr_bignum(jXP));
+    _EC_FN_(fr, set1b_bignum(jXP, 0UL));
+    _EC_FN_(fr, clr_bignum(jYP));
+    _EC_FN_(fr, set1b_bignum(jYP, 0UL));
+    _EC_FN_(fr, clr_bignum(jZP));
+}
+bool ec_isInfinite_inJacobi(const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP)
+{
+    return (cmp0_bignum(jZP) == BIGNUM_CMP_ZO);
+}
+bool ec_isAffine_inJacobi(const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP)
+{
+    return ((cmp0_bignum(jXP) == BIGNUM_CMP_ZO) && (cmp0_bignum(jYP) == BIGNUM_CMP_ZO) && (cmp1_bignum(jZP) == BIGNUM_CMP_ON));
 }
 
 void ec_convAffineToJacobi(bignum_s* jXP, bignum_s* jYP, bignum_s* jZP, \
@@ -485,399 +496,484 @@ void ec_convJacobiToAffine(bignum_s* xP, bignum_s* yP, \
     rmBigNum(&tmp_mul);
 }
 
-void ec_doublingPoint_inJacobi(bignum_s* jXP, bignum_s* jYP, bignum_s* jZP, \
+/* reference: Guide to Elliptic Curve Cryptography, Springer, 2004
+ * 3.2.1 Projective coordinates
+ * Example 3.20 (addition formulas using Jacobian coordinates), pp.88
+ * Point doubling.
+ *  Algorithm 3.21 Point doubling (y^2 = x^3 −3x +b, Jacobian coordinates)
+ */
+void ec_doublingPoint_inJacobi_ext(bignum_s* jXP, bignum_s* jYP, bignum_s* jZP, \
         const bool nP, \
         const size_t ec_bits, const bignum_s* a, const bignum_s* p)
 {
-    // added condition that: P != −P, jYP != -jYP
+    bool jacobi_is_IDENTITY = ec_isIdentity_inJacobi(jXP, jYP, jZP);
 
-    ReturnType fr;
-
-    bignum_s* bitEx_p1_p = mkBigNum(EC_BIT_P1(ec_bits));
-
-    bignum_s* jX1P = mkBigNum(ec_bits);
-    bignum_s* jY1P = mkBigNum(ec_bits);
-    bignum_s* jZ1P = mkBigNum(ec_bits);
-
-    bignum_s* t_x2_mul = mkBigNum(EC_BIT_X2(ec_bits));
-    bignum_s* t_p1_buf = mkBigNum(EC_BIT_P1(ec_bits));
-    bignum_s* t_p0_buf = mkBigNum(ec_bits);
-
-    bignum_s* tmp_A = mkBigNum(ec_bits);
-    bignum_s* tmp_B = mkBigNum(ec_bits);
-    bignum_s* tmp_C = mkBigNum(ec_bits);
-    bignum_s* tmp_D = mkBigNum(ec_bits);
-
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(bitEx_p1_p, p));
-
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(jX1P, jXP));
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(jY1P, jYP));
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(jZ1P, jZP));
-
-    #define X_1 jX1P
-    #define Y_1 jY1P
-    #define Z_1 jZ1P
-
-    #define X_3 jXP
-    #define Y_3 jYP
-    #define Z_3 jZP
-
-    _PRINT_BIGNUM_(bitEx_p1_p, "| | | | | GF(bitEx_p1_p) | | | | |");
-
-    // A = Y_1^2
-    _PRINT_BIGNUM_(Y_1, "| | | | | Y_1 | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Y_1, Y_1));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_A, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A = Y_1^2 mod bitEx_p1_p | | | | |");
-
-    // B = 4 * X_1 * A
-    _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
-    _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_1, tmp_A));
-    _EC_FN_(fr, mod_bignum_unsafe(t_x2_mul, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_x2_mul, "| | | | |  t_x2_mul = X_1 * tmp_A mod bitEx_p1_p | | | | |");
-    _EC_FN_(fr, lslb_bignum_self(t_x2_mul, 2UL));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_B, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_B, "| | | | |  tmp_B = 4 * t_x2_mul mod bitEx_p1_p | | | | |");
-
-    // C = 8 * A^2
-    _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_A, tmp_A));
-    _EC_FN_(fr, mod_bignum_unsafe(t_x2_mul, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_x2_mul, "| | | | |  t_x2_mul = tmp_A^2 mod bitEx_p1_p | | | | |");
-    _EC_FN_(fr, lslb_bignum_self(t_x2_mul, 3UL));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_C, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_C, "| | | | |  tmp_C = 8 * tmp_A mod bitEx_p1_p | | | | |");
-
-    // D = 3 * X_1^2 + a * Z_1^4
-    // tmp_D = a * Z_1^4
-    // t_p0_buf = Z_1^2
-    _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, Z_1));
-    _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = Z_1^2 mod bitEx_p1_p | | | | |");
-    // t_p0_buf = Z_1^4 = t_p0_buf * t_p0_buf
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, t_p0_buf, t_p0_buf));
-    _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = t_p0_buf^2 mod bitEx_p1_p | | | | |");
-    // tmp_D = a * Z_1^4 = a * t_p0_buf
-    _PRINT_BIGNUM_(a, "| | | | | a | | | | |");
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, a, t_p0_buf));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_D, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_D, "| | | | | tmp_D = a * t_p0_buf mod bitEx_p1_p | | | | |");
-    // t_p0_buf = X_1^2
-    _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_1, X_1));
-    _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = X_1^2 mod bitEx_p1_p | | | | |");
-    // t_p1_buf = 2 * X_1^2
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
-    _EC_FN_(fr, cpy_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf));
-    _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
-    _PRINT_BIGNUM_(t_p1_buf, "| | | | |  t_p1_buf = 2 * t_p0_buf | | | | |");
-    _EC_FN_(fr, aim_bignum_signed_unsafe(t_p1_buf, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p1_buf, "| | | | |  t_p1_buf = 2 * t_p0_buf mod bitEx_p1_p | | | | |");
-    // t_p0_buf = 3 * X_1^2 = 2 * X_1^2 + X_1^2 = t_p1_buf + t_p0_buf
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
-    _PRINT_BIGNUM_(t_p1_buf, "| | | | |  t_p1_buf | | | | |");
-    _EC_FN_(fr, add_bignum_unsigned_unsafe(t_p1_buf, t_p1_buf, t_p0_buf));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = t_p1_buf + t_p0_buf mod bitEx_p1_p | | | | |");
-    // tmp_D = (3 * X_1^2) + (a * Z_1^4) = t_p0_buf + tmp_D
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
-    _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D | | | | |");
-    _EC_FN_(fr, add_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf, tmp_D));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(tmp_D, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D = t_p0_buf + tmp_D mod bitEx_p1_p | | | | |");
-
-    // X_3 = D^2 - 2 * B
-    // X_3 = D^2
-    _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_D, tmp_D));
-    _EC_FN_(fr, mod_bignum_unsafe(X_3, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(X_3, "| | | | |  X_3 = tmp_D^2 mod bitEx_p1_p | | | | |");
-    // t_p0_buf = 2 * B
-    _PRINT_BIGNUM_(tmp_B, "| | | | |  tmp_B | | | | |");
-    _EC_FN_(fr, cpy_bignum_unsigned_unsafe(t_p1_buf, tmp_B));
-    _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = 2 * tmp_B mod bitEx_p1_p | | | | |");
-    // X_3 =  (D^2) - (2 * B) = X_3 - t_p0_buf
-    _PRINT_BIGNUM_(X_3, "| | | | |  X_3 | | | | |");
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, X_3, t_p0_buf));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(X_3, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(X_3, "| | | | |  X_3 = X_3 - t_p0_buf mod bitEx_p1_p | | | | |");
-
-    // Y_3 = D * (B - X_3) - C
-    // t_p0_buf = (B - X_3)
-    _PRINT_BIGNUM_(tmp_B, "| | | | |  tmp_B | | | | |");
-    _PRINT_BIGNUM_(X_3, "| | | | |  X_3 | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_B, X_3));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = tmp_B - X_3 mod bitEx_p1_p | | | | |");
-    // t_p0_buf = D * (B - X_3) = D * t_p0_buf
-    _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D | | | | |");
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_D, t_p0_buf));
-    _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = tmp_D * t_p0_buf mod bitEx_p1_p | | | | |");
-    // Y_3 =  (D * (B - X_3)) - C = t_p0_buf - C
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
-    _PRINT_BIGNUM_(tmp_C, "| | | | |  tmp_C | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf, tmp_C));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(Y_3, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(Y_3, "| | | | |  Y_3 = t_p0_buf - tmp_C mod bitEx_p1_p | | | | |");
-
-    // Z_3 = 2 * Y_1 * Z_1
-    // t_p0_buf = 2 * Y_1
-    _PRINT_BIGNUM_(Y_1, "| | | | |  Y_1 | | | | |");
-    if(!nP) {
-        // positive P(+P)
-        _EC_FN_(fr, cpy_bignum_unsigned_safe(t_p1_buf, Y_1));
-        _EC_FN_(fr, aim_bignum_signed_unsafe(t_p1_buf, t_p1_buf, bitEx_p1_p));
-        _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf = Y_1 mod bitEx_p1_p | | | | |");
+    if(jacobi_is_IDENTITY)
+    {
+        /* P = O(INF), result is P(=O, INF) */
     }
-    else {
-        // negative P(-P)
-        _EC_FN_(fr, cpy_bignum_twos_signed_safe(t_p1_buf, Y_1));
+    else
+    {
+        ReturnType fr;
+
+        bignum_s* bitEx_p1_p = mkBigNum(EC_BIT_P1(ec_bits));
+
+        bignum_s* jX1P = mkBigNum(ec_bits);
+        bignum_s* jY1P = mkBigNum(ec_bits);
+        bignum_s* jZ1P = mkBigNum(ec_bits);
+
+        bignum_s* t_x2_mul = mkBigNum(EC_BIT_X2(ec_bits));
+        bignum_s* t_p1_buf = mkBigNum(EC_BIT_P1(ec_bits));
+        bignum_s* t_p0_buf = mkBigNum(ec_bits);
+
+        bignum_s* tmp_A = mkBigNum(ec_bits);
+        bignum_s* tmp_B = mkBigNum(ec_bits);
+        bignum_s* tmp_C = mkBigNum(ec_bits);
+        bignum_s* tmp_D = mkBigNum(ec_bits);
+
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(bitEx_p1_p, p));
+
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jX1P, jXP));
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jY1P, jYP));
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jZ1P, jZP));
+
+        #define X_1 jX1P
+        #define Y_1 jY1P
+        #define Z_1 jZ1P
+
+        #define X_3 jXP
+        #define Y_3 jYP
+        #define Z_3 jZP
+
+        _PRINT_BIGNUM_(bitEx_p1_p, "| | | | | GF(bitEx_p1_p) | | | | |");
+
+        // A = Y_1^2
+        _PRINT_BIGNUM_(Y_1, "| | | | | Y_1 | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Y_1, Y_1));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_A, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A = Y_1^2 mod bitEx_p1_p | | | | |");
+
+        // B = 4 * X_1 * A
+        _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
+        _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_1, tmp_A));
+        _EC_FN_(fr, mod_bignum_unsafe(t_x2_mul, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_x2_mul, "| | | | |  t_x2_mul = X_1 * tmp_A mod bitEx_p1_p | | | | |");
+        _EC_FN_(fr, lslb_bignum_self(t_x2_mul, 2UL));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_B, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_B, "| | | | |  tmp_B = 4 * t_x2_mul mod bitEx_p1_p | | | | |");
+
+        // C = 8 * A^2
+        _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_A, tmp_A));
+        _EC_FN_(fr, mod_bignum_unsafe(t_x2_mul, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_x2_mul, "| | | | |  t_x2_mul = tmp_A^2 mod bitEx_p1_p | | | | |");
+        _EC_FN_(fr, lslb_bignum_self(t_x2_mul, 3UL));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_C, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_C, "| | | | |  tmp_C = 8 * tmp_A mod bitEx_p1_p | | | | |");
+
+        // D = 3 * X_1^2 + a * Z_1^4
+        // tmp_D = a * Z_1^4
+        // t_p0_buf = Z_1^2
+        _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, Z_1));
+        _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = Z_1^2 mod bitEx_p1_p | | | | |");
+        // t_p0_buf = Z_1^4 = t_p0_buf * t_p0_buf
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, t_p0_buf, t_p0_buf));
+        _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = t_p0_buf^2 mod bitEx_p1_p | | | | |");
+        // tmp_D = a * Z_1^4 = a * t_p0_buf
+        _PRINT_BIGNUM_(a, "| | | | | a | | | | |");
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, a, t_p0_buf));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_D, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_D, "| | | | | tmp_D = a * t_p0_buf mod bitEx_p1_p | | | | |");
+        // t_p0_buf = X_1^2
+        _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_1, X_1));
+        _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = X_1^2 mod bitEx_p1_p | | | | |");
+        // t_p1_buf = 2 * X_1^2
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
+        _EC_FN_(fr, cpy_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf));
+        _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
+        _PRINT_BIGNUM_(t_p1_buf, "| | | | |  t_p1_buf = 2 * t_p0_buf | | | | |");
         _EC_FN_(fr, aim_bignum_signed_unsafe(t_p1_buf, t_p1_buf, bitEx_p1_p));
-        _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf = -Y_1 mod bitEx_p1_p | | | | |");
+        _PRINT_BIGNUM_(t_p1_buf, "| | | | |  t_p1_buf = 2 * t_p0_buf mod bitEx_p1_p | | | | |");
+        // t_p0_buf = 3 * X_1^2 = 2 * X_1^2 + X_1^2 = t_p1_buf + t_p0_buf
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
+        _PRINT_BIGNUM_(t_p1_buf, "| | | | |  t_p1_buf | | | | |");
+        _EC_FN_(fr, add_bignum_unsigned_unsafe(t_p1_buf, t_p1_buf, t_p0_buf));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = t_p1_buf + t_p0_buf mod bitEx_p1_p | | | | |");
+        // tmp_D = (3 * X_1^2) + (a * Z_1^4) = t_p0_buf + tmp_D
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
+        _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D | | | | |");
+        _EC_FN_(fr, add_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf, tmp_D));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(tmp_D, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D = t_p0_buf + tmp_D mod bitEx_p1_p | | | | |");
+
+        // X_3 = D^2 - 2 * B
+        // X_3 = D^2
+        _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_D, tmp_D));
+        _EC_FN_(fr, mod_bignum_unsafe(X_3, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(X_3, "| | | | |  X_3 = tmp_D^2 mod bitEx_p1_p | | | | |");
+        // t_p0_buf = 2 * B
+        _PRINT_BIGNUM_(tmp_B, "| | | | |  tmp_B | | | | |");
+        _EC_FN_(fr, cpy_bignum_unsigned_unsafe(t_p1_buf, tmp_B));
+        _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = 2 * tmp_B mod bitEx_p1_p | | | | |");
+        // X_3 =  (D^2) - (2 * B) = X_3 - t_p0_buf
+        _PRINT_BIGNUM_(X_3, "| | | | |  X_3 | | | | |");
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
+        _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, X_3, t_p0_buf));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(X_3, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(X_3, "| | | | |  X_3 = X_3 - t_p0_buf mod bitEx_p1_p | | | | |");
+
+        // Y_3 = D * (B - X_3) - C
+        // t_p0_buf = (B - X_3)
+        _PRINT_BIGNUM_(tmp_B, "| | | | |  tmp_B | | | | |");
+        _PRINT_BIGNUM_(X_3, "| | | | |  X_3 | | | | |");
+        _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_B, X_3));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = tmp_B - X_3 mod bitEx_p1_p | | | | |");
+        // t_p0_buf = D * (B - X_3) = D * t_p0_buf
+        _PRINT_BIGNUM_(tmp_D, "| | | | |  tmp_D | | | | |");
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_D, t_p0_buf));
+        _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = tmp_D * t_p0_buf mod bitEx_p1_p | | | | |");
+        // Y_3 =  (D * (B - X_3)) - C = t_p0_buf - C
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf | | | | |");
+        _PRINT_BIGNUM_(tmp_C, "| | | | |  tmp_C | | | | |");
+        _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf, tmp_C));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(Y_3, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(Y_3, "| | | | |  Y_3 = t_p0_buf - tmp_C mod bitEx_p1_p | | | | |");
+
+        // Z_3 = 2 * Y_1 * Z_1
+        // t_p0_buf = 2 * Y_1
+        _PRINT_BIGNUM_(Y_1, "| | | | |  Y_1 | | | | |");
+        if(!nP) {
+            // positive P(+P)
+            _EC_FN_(fr, cpy_bignum_unsigned_safe(t_p1_buf, Y_1));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(t_p1_buf, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf = Y_1 mod bitEx_p1_p | | | | |");
+        }
+        else {
+            // negative P(-P)
+            _EC_FN_(fr, cpy_bignum_twos_signed_safe(t_p1_buf, Y_1));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(t_p1_buf, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf = -Y_1 mod bitEx_p1_p | | | | |");
+        }
+        _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = 2 * Y_1 | | | | |");
+        // Z_3 = (2 * Y_1) * Z_1 = t_p0_buf * Z_1, alias Z_3 = Z_1
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, t_p0_buf, Z_1));
+        _EC_FN_(fr, mod_bignum_unsafe(Z_3, t_x2_mul, bitEx_p1_p));
+
+        jacobi_is_IDENTITY |= ec_isInfinite_inJacobi(X_3, Y_3, Z_3);
+        if(jacobi_is_IDENTITY)
+        {
+            ec_setIdentity_inJacobi(X_3, Y_3, Z_3);
+        }
+
+        #undef X_1
+        #undef Y_1
+        #undef Z_1
+
+        #undef X_3
+        #undef Y_3
+        #undef Z_3
+
+        rmBigNum(&bitEx_p1_p);
+
+        rmBigNum(&jX1P);
+        rmBigNum(&jY1P);
+        rmBigNum(&jZ1P);
+
+        rmBigNum(&t_x2_mul);
+        rmBigNum(&t_p1_buf);
+        rmBigNum(&t_p0_buf);
+
+        rmBigNum(&tmp_A);
+        rmBigNum(&tmp_B);
+        rmBigNum(&tmp_C);
+        rmBigNum(&tmp_D);
     }
-    _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | |  t_p0_buf = 2 * Y_1 | | | | |");
-    // Z_3 = (2 * Y_1) * Z_1 = t_p0_buf * Z_1, alias Z_3 = Z_1
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, t_p0_buf, Z_1));
-    _EC_FN_(fr, mod_bignum_unsafe(Z_3, t_x2_mul, bitEx_p1_p));
-
-    #undef X_1
-    #undef Y_1
-    #undef Z_1
-
-    #undef X_3
-    #undef Y_3
-    #undef Z_3
-
-    rmBigNum(&bitEx_p1_p);
-
-    rmBigNum(&jX1P);
-    rmBigNum(&jY1P);
-    rmBigNum(&jZ1P);
-
-    rmBigNum(&t_x2_mul);
-    rmBigNum(&t_p1_buf);
-    rmBigNum(&t_p0_buf);
-
-    rmBigNum(&tmp_A);
-    rmBigNum(&tmp_B);
-    rmBigNum(&tmp_C);
-    rmBigNum(&tmp_D);
 }
 
+/* reference: Guide to Elliptic Curve Cryptography, Springer, 2004
+ * 3.2.1 Projective coordinates
+ * Example 3.20 (addition formulas using Jacobian coordinates), pp.88
+ * Point addition using mixed Jacobian-affine coordinates.
+ * Algorithm 3.22 Point addition (y^2 = x^3−3x +b, affine-Jacobian coordinates), pp.91
+ */
 void ec_calPoint_AffineIntoJacobi_ext(bignum_s* jXR, bignum_s* jYR, bignum_s* jZR, \
         const bignum_s* jXP, const bignum_s* jYP, const bignum_s* jZP, \
         const bool nQ, \
-        const bignum_s* xQ, const bignum_s* yQ, \
+        const bignum_s* axQ, const bignum_s* ayQ, \
         const size_t ec_bits, const bignum_s* a, const bignum_s* p)
 {
-    // added condition Z_1(jZP) != 0
-    // added condition that: P != +-Q
-
     ReturnType fr;
 
-    bignum_s* bitEx_p1_p = mkBigNum(EC_BIT_P1(ec_bits));
+    bool slope_is_INFINITE = false;
+    bool points_are_SAME = false;
+    bool affine_is_IDENTITY = ec_isIndentityPoint(axQ, ayQ);
+    bool jacobi_is_IDENTITY = ec_isIdentity_inJacobi(jXP, jYP, jZP);
 
-    bignum_s* jX1P = mkBigNum(ec_bits);
-    bignum_s* jY1P = mkBigNum(ec_bits);
-    bignum_s* jZ1P = mkBigNum(ec_bits);
-
-    bignum_s* t_x2_mul = mkBigNum(EC_BIT_X2(ec_bits));
-    bignum_s* t_p1_buf = mkBigNum(EC_BIT_P1(ec_bits));
-    bignum_s* t_p0_buf = mkBigNum(ec_bits);
-
-    bignum_s* tmp_A = mkBigNum(ec_bits);
-    bignum_s* tmp_B = mkBigNum(ec_bits);
-    bignum_s* tmp_C = mkBigNum(ec_bits);
-    bignum_s* tmp_D = mkBigNum(ec_bits);
-    bignum_s* tmp_E = mkBigNum(ec_bits);
-    bignum_s* tmp_F = mkBigNum(ec_bits);
-    bignum_s* tmp_G = mkBigNum(ec_bits);
-    bignum_s* tmp_H = mkBigNum(ec_bits);
-    bignum_s* tmp_I = mkBigNum(ec_bits);
-
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(bitEx_p1_p, p));
-
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(jX1P, jXP));
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(jY1P, jYP));
-    _EC_FN_(fr, cpy_bignum_unsigned_safe(jZ1P, jZP));
-
-    #define X_1 jX1P
-    #define Y_1 jY1P
-    #define Z_1 jZ1P
-
-    #define X_2 xQ
-    #define Y_2 yQ
-
-    #define X_3 jXR
-    #define Y_3 jYR
-    #define Z_3 jZR
-
-    _PRINT_BIGNUM_(bitEx_p1_p, "| | | | | GF(bitEx_p1_p) | | | | |");
-
-    // A = Z_1^2
-    _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, Z_1));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_A, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A = Z_1^2 mod bitEx_p1_p | | | | |");
-    // B = Z_1 * A
-    _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
-    _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, tmp_A));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_B, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_B, "| | | | | tmp_B = Z_1 * tmp_A mod bitEx_p1_p | | | | |");
-    // C = X_2 * A
-    _PRINT_BIGNUM_(X_2, "| | | | | X_2 | | | | |");
-    _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_2, tmp_A));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_C, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_C, "| | | | | tmp_C = X_2 * tmp_A mod bitEx_p1_p | | | | |");
-    // D = Y_2 * B
-    // t_p0_buf = Y_2 or -Y_2
-    _PRINT_BIGNUM_(Y_2, "| | | | | Y_2 | | | | |");
-    if(!nQ) { // add
-        _EC_FN_(fr, cpy_bignum_unsigned_safe(t_p1_buf, Y_2));
-        _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
-        _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = Y_2 | | | | |");
+    if(affine_is_IDENTITY)
+    {
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jXR, jXP));
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jYR, jYP));
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jZR, jZP));
+        printf("@%s:%d -> affine_is_IDENTITY\r\n", __func__, __LINE__);
     }
-    else { // sub
-        _EC_FN_(fr, cpy_bignum_twos_signed_safe(t_p1_buf, Y_2));
-        _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
-        _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = -Y_2 | | | | |");
+    else if(jacobi_is_IDENTITY)
+    {
+        ec_convAffineToJacobi(jXR, jYR, jZR, axQ, ayQ);
+        printf("@%s:%d -> jacobi_is_IDENTITY\r\n", __func__, __LINE__);
     }
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, t_p0_buf, tmp_B));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_D, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_D, "| | | | | tmp_D = t_p0_buf * tmp_B mod bitEx_p1_p | | | | |");
-    // E = C - X_1
-    _PRINT_BIGNUM_(tmp_C, "| | | | | tmp_C | | | | |");
-    _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_C, X_1));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(tmp_E, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E = tmp_C - X_1 mod bitEx_p1_p | | | | |");
-    // F = D − Y_1
-    _PRINT_BIGNUM_(tmp_D, "| | | | | tmp_D | | | | |");
-    _PRINT_BIGNUM_(Y_1, "| | | | | Y_1 | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_D, Y_1));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(tmp_F, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_F, "| | | | | tmp_F = tmp_D - Y_1 mod bitEx_p1_p | | | | |");
-    // G = E^2
-    _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_E, tmp_E));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_G, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_G, "| | | | | tmp_G = tmp_E^2 mod bitEx_p1_p | | | | |");
-    // H = G * E
-    _PRINT_BIGNUM_(tmp_G, "| | | | | tmp_G | | | | |");
-    _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_G, tmp_E));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_H, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_H, "| | | | | tmp_H = tmp_G * tmp_E mod bitEx_p1_p | | | | |");
-    // I = X_1 * G
-    _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
-    _PRINT_BIGNUM_(tmp_G, "| | | | | tmp_G | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_1, tmp_G));
-    _EC_FN_(fr, mod_bignum_unsafe(tmp_I, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(tmp_I, "| | | | | tmp_I = X_1 * tmp_G mod bitEx_p1_p | | | | |");
+    else
+    {
+        ReturnType fr;
 
-    // X_3 = F^2 − (H + 2 * I)
-    // t_p1_buf = I<<1 = 2 * I
-    _PRINT_BIGNUM_(tmp_I, "| | | | | tmp_I | | | | |");
-    _EC_FN_(fr, cpy_bignum_unsigned_unsafe(t_p1_buf, tmp_I));
-    _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
-    _EC_FN_(fr, aim_bignum_unsigned_unsafe(t_p1_buf, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf = 2 * tmp_I mod bitEx_p1_p | | | | |");
-    // X_3 = H + (2 * I) = H + t_p1_buf
-    _PRINT_BIGNUM_(tmp_H, "| | | | | tmp_H | | | | |");
-    _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf | | | | |");
-    _EC_FN_(fr, add_bignum_unsigned_unsafe(t_p1_buf, tmp_H, t_p1_buf));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(X_3, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(X_3, "| | | | | X_3 = tmp_H + t_p1_buf mod bitEx_p1_p | | | | |");
-    // t_p0_buf = F^2
-    _PRINT_BIGNUM_(tmp_F, "| | | | | tmp_F | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_F, tmp_F));
-    _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = tmp_F^2 mod bitEx_p1_p | | | | |");
-    // X_3 = (F^2) - (H + 2 * I = H) = t_p0_buf − X_3
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf | | | | |");
-    _PRINT_BIGNUM_(X_3, "| | | | | X_3 | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf, X_3));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(X_3, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(X_3, "| | | | | X_3 = t_p0_buf - t_p0_buf mod bitEx_p1_p | | | | |");
+        bignum_s* bitEx_p1_p = mkBigNum(EC_BIT_P1(ec_bits));
 
-    // Y_3 = F * (I − X_3) − Y_1 * H
-    // t_p0_buf = Y_1 * H
-    _PRINT_BIGNUM_(Y_1, "| | | | | Y_1 | | | | |");
-    _PRINT_BIGNUM_(tmp_H, "| | | | | tmp_H | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Y_1, tmp_H));
-    _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = Y_1 * tmp_H mod bitEx_p1_p | | | | |");
-    // Y_3 = (I − X_3)
-    _PRINT_BIGNUM_(tmp_I, "| | | | | tmp_I | | | | |");
-    _PRINT_BIGNUM_(X_3, "| | | | | X_3 | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_I, X_3));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(Y_3, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 = tmp_I - X_3 mod bitEx_p1_p | | | | |");
-    // Y_3 = F * (I − X_3) = F * Y_3
-    _PRINT_BIGNUM_(tmp_F, "| | | | | tmp_F | | | | |");
-    _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_F, Y_3));
-    _EC_FN_(fr, mod_bignum_unsafe(Y_3, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 = tmp_F * Y_3 mod bitEx_p1_p | | | | |");
-    // Y_3 = (F * (I − X_3)) - (Y_1 * H) = Y_3 − t_p0_buf
-    _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 | | | | |");
-    _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf | | | | |");
-    _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, Y_3, t_p0_buf));
-    _EC_FN_(fr, aim_bignum_signed_unsafe(Y_3, t_p1_buf, bitEx_p1_p));
-    _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 = Y_3 - t_p0_buf mod bitEx_p1_p | | | | |");
+        bignum_s* jX1P = mkBigNum(ec_bits);
+        bignum_s* jY1P = mkBigNum(ec_bits);
+        bignum_s* jZ1P = mkBigNum(ec_bits);
 
-    // Z_3 = Z_1 * E
-    _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
-    _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E | | | | |");
-    _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, tmp_E));
-    _EC_FN_(fr, mod_bignum_unsafe(Z_3, t_x2_mul, bitEx_p1_p));
-    _PRINT_BIGNUM_(Z_3, "| | | | | Z_3 = Z_1 * tmp_E mod bitEx_p1_p | | | | |");
+        bignum_s* t_x2_mul = mkBigNum(EC_BIT_X2(ec_bits));
+        bignum_s* t_p1_buf = mkBigNum(EC_BIT_P1(ec_bits));
+        bignum_s* t_p0_buf = mkBigNum(ec_bits);
 
-    #undef X_1
-    #undef Y_1
-    #undef Z_1
+        bignum_s* tmp_A = mkBigNum(ec_bits);
+        bignum_s* tmp_B = mkBigNum(ec_bits);
+        bignum_s* tmp_C = mkBigNum(ec_bits);
+        bignum_s* tmp_D = mkBigNum(ec_bits);
+        bignum_s* tmp_E = mkBigNum(ec_bits);
+        bignum_s* tmp_F = mkBigNum(ec_bits);
+        bignum_s* tmp_G = mkBigNum(ec_bits);
+        bignum_s* tmp_H = mkBigNum(ec_bits);
+        bignum_s* tmp_I = mkBigNum(ec_bits);
 
-    #undef X_2
-    #undef Y_2
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(bitEx_p1_p, p));
 
-    #undef X_3
-    #undef Y_3
-    #undef Z_3
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jX1P, jXP));
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jY1P, jYP));
+        _EC_FN_(fr, cpy_bignum_unsigned_safe(jZ1P, jZP));
 
-    rmBigNum(&bitEx_p1_p);
+        #define X_1 jX1P
+        #define Y_1 jY1P
+        #define Z_1 jZ1P
 
-    rmBigNum(&jX1P);
-    rmBigNum(&jY1P);
-    rmBigNum(&jZ1P);
+        #define X_2 axQ
+        #define Y_2 ayQ
 
-    rmBigNum(&t_x2_mul);
-    rmBigNum(&t_p1_buf);
-    rmBigNum(&t_p0_buf);
+        #define X_3 jXR
+        #define Y_3 jYR
+        #define Z_3 jZR
 
-    rmBigNum(&tmp_A);
-    rmBigNum(&tmp_B);
-    rmBigNum(&tmp_C);
-    rmBigNum(&tmp_D);
-    rmBigNum(&tmp_E);
-    rmBigNum(&tmp_F);
-    rmBigNum(&tmp_G);
-    rmBigNum(&tmp_H);
-    rmBigNum(&tmp_I);
+        _PRINT_BIGNUM_(bitEx_p1_p, "| | | | | GF(bitEx_p1_p) | | | | |");
+
+        // A = Z_1^2
+        _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, Z_1));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_A, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A = Z_1^2 mod bitEx_p1_p | | | | |");
+        // B = Z_1 * A
+        _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
+        _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, tmp_A));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_B, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_B, "| | | | | tmp_B = Z_1 * tmp_A mod bitEx_p1_p | | | | |");
+        // C = X_2 * A
+        _PRINT_BIGNUM_(X_2, "| | | | | X_2 | | | | |");
+        _PRINT_BIGNUM_(tmp_A, "| | | | | tmp_A | | | | |");
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_2, tmp_A));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_C, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_C, "| | | | | tmp_C = X_2 * tmp_A mod bitEx_p1_p | | | | |");
+        // D = Y_2 * B
+        // t_p0_buf = Y_2 or -Y_2
+        _PRINT_BIGNUM_(Y_2, "| | | | | Y_2 | | | | |");
+        if(!nQ) { // add
+            _EC_FN_(fr, cpy_bignum_unsigned_safe(t_p1_buf, Y_2));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = Y_2 | | | | |");
+        }
+        else { // sub
+            _EC_FN_(fr, cpy_bignum_twos_signed_safe(t_p1_buf, Y_2));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(t_p0_buf, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = -Y_2 | | | | |");
+        }
+        _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, t_p0_buf, tmp_B));
+        _EC_FN_(fr, mod_bignum_unsafe(tmp_D, t_x2_mul, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_D, "| | | | | tmp_D = t_p0_buf * tmp_B mod bitEx_p1_p | | | | |");
+        // E = C - X_1
+        _PRINT_BIGNUM_(tmp_C, "| | | | | tmp_C | | | | |");
+        _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
+        _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_C, X_1));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(tmp_E, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E = tmp_C - X_1 mod bitEx_p1_p | | | | |");
+        // F = D − Y_1
+        _PRINT_BIGNUM_(tmp_D, "| | | | | tmp_D | | | | |");
+        _PRINT_BIGNUM_(Y_1, "| | | | | Y_1 | | | | |");
+        _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_D, Y_1));
+        _EC_FN_(fr, aim_bignum_signed_unsafe(tmp_F, t_p1_buf, bitEx_p1_p));
+        _PRINT_BIGNUM_(tmp_F, "| | | | | tmp_F = tmp_D - Y_1 mod bitEx_p1_p | | | | |");
+        /*
+         * CONDITION FOR J is equal with A or INFINITE
+         * E = C − X_1 = (X_2 * A,=C) - X_1 = X_2 * (Z_1^2, =A) - X_1
+         *   = X_2 * Z_1^2 - X_1 == 0
+         * F = D − Y_1 = (Y_2 * B, =D) - Y_1 = Y_2 * (Z_1 * A, =B) - Y_1
+         *   = Y_2 * Z_1 * (Z_1^2, =A) - Y_1
+         *   = Y_2 * Z_1^3 - Y_1 == 0
+         */
+        if(cmp0_bignum(tmp_E) == BIGNUM_CMP_ZO)
+        {
+            // Jacobi and Affine coordinates same P(X1:Y1:Z1) = R(x2,y2,1)
+            if(cmp0_bignum(tmp_F) == BIGNUM_CMP_ZO)
+            {
+                points_are_SAME |= true;
+            }
+            else
+            {
+#if 0
+                slope_is_INFINITE |= true;
+#endif
+            }
+
+        }
+
+        if(!points_are_SAME)
+        {
+            // G = E^2
+            _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_E, tmp_E));
+            _EC_FN_(fr, mod_bignum_unsafe(tmp_G, t_x2_mul, bitEx_p1_p));
+            _PRINT_BIGNUM_(tmp_G, "| | | | | tmp_G = tmp_E^2 mod bitEx_p1_p | | | | |");
+            // H = G * E
+            _PRINT_BIGNUM_(tmp_G, "| | | | | tmp_G | | | | |");
+            _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_G, tmp_E));
+            _EC_FN_(fr, mod_bignum_unsafe(tmp_H, t_x2_mul, bitEx_p1_p));
+            _PRINT_BIGNUM_(tmp_H, "| | | | | tmp_H = tmp_G * tmp_E mod bitEx_p1_p | | | | |");
+            // I = X_1 * G
+            _PRINT_BIGNUM_(X_1, "| | | | | X_1 | | | | |");
+            _PRINT_BIGNUM_(tmp_G, "| | | | | tmp_G | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, X_1, tmp_G));
+            _EC_FN_(fr, mod_bignum_unsafe(tmp_I, t_x2_mul, bitEx_p1_p));
+            _PRINT_BIGNUM_(tmp_I, "| | | | | tmp_I = X_1 * tmp_G mod bitEx_p1_p | | | | |");
+
+            // X_3 = F^2 − (H + 2 * I)
+            // t_p1_buf = I<<1 = 2 * I
+            _PRINT_BIGNUM_(tmp_I, "| | | | | tmp_I | | | | |");
+            _EC_FN_(fr, cpy_bignum_unsigned_unsafe(t_p1_buf, tmp_I));
+            _EC_FN_(fr, lslb_bignum_self(t_p1_buf, 1UL));
+            _EC_FN_(fr, aim_bignum_unsigned_unsafe(t_p1_buf, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf = 2 * tmp_I mod bitEx_p1_p | | | | |");
+            // X_3 = H + (2 * I) = H + t_p1_buf
+            _PRINT_BIGNUM_(tmp_H, "| | | | | tmp_H | | | | |");
+            _PRINT_BIGNUM_(t_p1_buf, "| | | | | t_p1_buf | | | | |");
+            _EC_FN_(fr, add_bignum_unsigned_unsafe(t_p1_buf, tmp_H, t_p1_buf));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(X_3, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(X_3, "| | | | | X_3 = tmp_H + t_p1_buf mod bitEx_p1_p | | | | |");
+            // t_p0_buf = F^2
+            _PRINT_BIGNUM_(tmp_F, "| | | | | tmp_F | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_F, tmp_F));
+            _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
+            _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = tmp_F^2 mod bitEx_p1_p | | | | |");
+            // X_3 = (F^2) - (H + 2 * I = H) = t_p0_buf − X_3
+            _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf | | | | |");
+            _PRINT_BIGNUM_(X_3, "| | | | | X_3 | | | | |");
+            _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, t_p0_buf, X_3));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(X_3, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(X_3, "| | | | | X_3 = t_p0_buf - t_p0_buf mod bitEx_p1_p | | | | |");
+
+            // Y_3 = F * (I − X_3) − Y_1 * H
+            // t_p0_buf = Y_1 * H
+            _PRINT_BIGNUM_(Y_1, "| | | | | Y_1 | | | | |");
+            _PRINT_BIGNUM_(tmp_H, "| | | | | tmp_H | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Y_1, tmp_H));
+            _EC_FN_(fr, mod_bignum_unsafe(t_p0_buf, t_x2_mul, bitEx_p1_p));
+            _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf = Y_1 * tmp_H mod bitEx_p1_p | | | | |");
+            // Y_3 = (I − X_3)
+            _PRINT_BIGNUM_(tmp_I, "| | | | | tmp_I | | | | |");
+            _PRINT_BIGNUM_(X_3, "| | | | | X_3 | | | | |");
+            _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, tmp_I, X_3));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(Y_3, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 = tmp_I - X_3 mod bitEx_p1_p | | | | |");
+            // Y_3 = F * (I − X_3) = F * Y_3
+            _PRINT_BIGNUM_(tmp_F, "| | | | | tmp_F | | | | |");
+            _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, tmp_F, Y_3));
+            _EC_FN_(fr, mod_bignum_unsafe(Y_3, t_x2_mul, bitEx_p1_p));
+            _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 = tmp_F * Y_3 mod bitEx_p1_p | | | | |");
+            // Y_3 = (F * (I − X_3)) - (Y_1 * H) = Y_3 − t_p0_buf
+            _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 | | | | |");
+            _PRINT_BIGNUM_(t_p0_buf, "| | | | | t_p0_buf | | | | |");
+            _EC_FN_(fr, sub_bignum_unsigned_unsafe(t_p1_buf, Y_3, t_p0_buf));
+            _EC_FN_(fr, aim_bignum_signed_unsafe(Y_3, t_p1_buf, bitEx_p1_p));
+            _PRINT_BIGNUM_(Y_3, "| | | | | Y_3 = Y_3 - t_p0_buf mod bitEx_p1_p | | | | |");
+
+            // Z_3 = Z_1 * E
+            _PRINT_BIGNUM_(Z_1, "| | | | | Z_1 | | | | |");
+            _PRINT_BIGNUM_(tmp_E, "| | | | | tmp_E | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned(t_x2_mul, Z_1, tmp_E));
+            _EC_FN_(fr, mod_bignum_unsafe(Z_3, t_x2_mul, bitEx_p1_p));
+            _PRINT_BIGNUM_(Z_3, "| | | | | Z_3 = Z_1 * tmp_E mod bitEx_p1_p | | | | |");
+
+            slope_is_INFINITE |= ec_isInfinite_inJacobi(jXR, jYR, jZR);
+            if(slope_is_INFINITE)
+            {
+                ec_setIdentity_inJacobi(jXR, jYR, jZR);
+            }
+
+        }
+        #undef X_1
+        #undef Y_1
+        #undef Z_1
+
+        #undef X_2
+        #undef Y_2
+
+        #undef X_3
+        #undef Y_3
+        #undef Z_3
+
+        rmBigNum(&bitEx_p1_p);
+
+        rmBigNum(&jX1P);
+        rmBigNum(&jY1P);
+        rmBigNum(&jZ1P);
+
+        rmBigNum(&t_x2_mul);
+        rmBigNum(&t_p1_buf);
+        rmBigNum(&t_p0_buf);
+
+        rmBigNum(&tmp_A);
+        rmBigNum(&tmp_B);
+        rmBigNum(&tmp_C);
+        rmBigNum(&tmp_D);
+        rmBigNum(&tmp_E);
+        rmBigNum(&tmp_F);
+        rmBigNum(&tmp_G);
+        rmBigNum(&tmp_H);
+        rmBigNum(&tmp_I);
+
+        if(points_are_SAME)
+        {
+            ec_convAffineToJacobi(jXR, jYR, jZR, axQ, ayQ);
+            ec_doublingPoint_inJacobi_ext(jXR, jYR, jZR, nQ, ec_bits, a, p);
+            ec_convAffineToJacobi(jXR, jYR, jZR, axQ, ayQ);
+            ec_doublingPoint_inJacobi_ext(jXR, jYR, jZR, nQ, ec_bits, a, p);
+        }
+    }
 }
 
 #undef EC_BIT_P1

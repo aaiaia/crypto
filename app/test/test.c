@@ -8129,29 +8129,19 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
     memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
     memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
 
-    // set Jacobi to Base point
-    ec_convAffineToJacobi(jXP, jYP, jZP, xG, yG);
-    test_print_bignum(jXP, "[1G] jXP");
-    test_print_bignum(jYP, "[1G] jYP");
-    test_print_bignum(jZP, "[1G] jZP");
-
-    ec_doublingPoint_inJacobi(jXP, jYP, jZP, false, _EC_BITS_, coef_a, prime);
-    test_print_bignum(jXP, "[2G] jXP");
-    test_print_bignum(jYP, "[2G] jYP");
-    test_print_bignum(jZP, "[2G] jZP");
-    ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
-    test_print_bignum(axP, "[2G] axP");
-    test_print_bignum(ayP, "[2G] ayP");
-    printf("[x2G ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_xNG_LIST[1], axP->nlen);
-    printf("[y2G ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_yNG_LIST[1], ayP->nlen);
+    ec_setIdentity_inJacobi(jXP, jYP, jZP);
     // d == 1
-    for(size_t i = 2UL; i < 10UL; i++)
+    for(size_t i = 0UL; i < 10UL; i++)
     {
         cmp_result = true;
         intentional_invalid = false;
 
         ec_addPoint_AffineIntoJacobi(jXP, jYP, jZP, jXP, jYP, jZP, xG, yG, _EC_BITS_, coef_a, prime);
         ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+
+        printf("N=%lu", i+1UL); test_print_bignum(jXP, "jXNG");
+        printf("N=%lu", i+1UL); test_print_bignum(jYP, "jYNG");
+        printf("N=%lu", i+1UL); test_print_bignum(jZP, "jZNG");
 
         cmp_result &= (memcmp(axP->nums, TV_SECP256K1_addition_xNG_LIST[i], axP->size) == 0);
         cmp_result &= (memcmp(ayP->nums, TV_SECP256K1_addition_yNG_LIST[i], ayP->size) == 0);
