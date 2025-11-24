@@ -8101,7 +8101,7 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
     SECP256K1_calc_y9G,
     SECP256K1_calc_y10G,
 };
-    const char* test_fn_name = "ec_addPoints";
+    const char* test_fn_name = "ec_addPoint_AffineIntoJacobi";
 
     bool cmp_result;
     bool intentional_invalid;
@@ -8146,8 +8146,8 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
         cmp_result &= (memcmp(axP->nums, TV_SECP256K1_addition_xNG_LIST[i], axP->size) == 0);
         cmp_result &= (memcmp(ayP->nums, TV_SECP256K1_addition_yNG_LIST[i], ayP->size) == 0);
 
-        printf("N=%lu", i+1UL); test_print_bignum(axP, "xNG");
-        printf("N=%lu", i+1UL); test_print_bignum(ayP, "yNG");
+        printf("N=%lu", i+1UL); test_print_bignum(axP, "axNG");
+        printf("N=%lu", i+1UL); test_print_bignum(ayP, "ayNG");
         if(!cmp_result) {
             printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_xNG_LIST[i], axP->nlen);
             printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_yNG_LIST[i], ayP->nlen);
@@ -8368,6 +8368,141 @@ const uint32_t* TV_SECP256K1_doubling_yNG_LIST[] = {\
 
     rmBigNum(&xP);
     rmBigNum(&yP);
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+#undef TEST_MANUAL_CHECK
+}
+const char ref_test_SECP256K1_doubling_jacobi[] = "[REFERENCES]\nGuide to Elliptic Curve Cryptography, Darrel Hankerson, Alfred Menezes Scott Vanstone, Springer";
+void test_SECP256K1_doubling_jacobi(void)
+{
+    printf("%s\n", ref_test_SECP256K1_doubling_jacobi);
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+#define TEST_MANUAL_CHECK   0
+    char keyin;
+    /* 
+     * Link: https://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
+     * EC Curve formula
+     * y^2 = x^3 + a * x + b
+     * [PRIME NUMVER FOR MODULO]
+     * p  = 0xffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f
+     * [COEFFICIENT X^1]
+     * a  = 0
+     * [COEFFICIENT X^0]
+     * b  = 7
+     * [BASE POINT]
+     * xG = 0x79be667e f9dcbbac 55a06295 ce870b07 029bfcdb 2dce28d9 59f2815b 16f81798
+     * yG = 0x483ada77 26a3c465 5da4fbfc 0e1108a8 fd17b448 a6855419 9c47d08f fb10d4b8
+     * [n(hP)==0]
+     * n  = 0xffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141
+     * h  = 1
+     */
+const uint32_t* TV_SECP256K1_doubling_xNG_LIST[] = {
+    SECP256K1_calc_x1G,
+    SECP256K1_calc_x2G,
+    SECP256K1_calc_x4G,
+    SECP256K1_calc_x8G,
+    SECP256K1_calc_x16G,
+    SECP256K1_calc_x32G,
+    SECP256K1_calc_x64G,
+    SECP256K1_calc_x128G,
+    SECP256K1_calc_x256G,
+    SECP256K1_calc_x512G,
+    SECP256K1_calc_x1024G,
+};
+const uint32_t* TV_SECP256K1_doubling_yNG_LIST[] = {\
+    SECP256K1_calc_y1G,
+    SECP256K1_calc_y2G,
+    SECP256K1_calc_y4G,
+    SECP256K1_calc_y8G,
+    SECP256K1_calc_y16G,
+    SECP256K1_calc_y32G,
+    SECP256K1_calc_y64G,
+    SECP256K1_calc_y128G,
+    SECP256K1_calc_y256G,
+    SECP256K1_calc_y512G,
+    SECP256K1_calc_y1024G,
+};
+    const char* test_fn_name = "ec_doublingPoint_inJacobi";
+
+    bool cmp_result;
+    bool intentional_invalid;
+
+    bignum_s* coef_a = mkBigNum(_EC_BITS_);
+    bignum_s* coef_b = mkBigNum(_EC_BITS_);
+    bignum_s* prime = mkBigNum(_EC_BITS_);
+
+    bignum_s* jXP = mkBigNum(_EC_BITS_);
+    bignum_s* jYP = mkBigNum(_EC_BITS_);
+    bignum_s* jZP = mkBigNum(_EC_BITS_);
+
+    bignum_s* axP = mkBigNum(_EC_BITS_);
+    bignum_s* ayP = mkBigNum(_EC_BITS_);
+
+    const bool ign_sign = true;
+
+    memcpy(coef_a->nums, SECP256K1_calc_a, coef_a->size);
+    memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
+    memcpy(prime->nums, SECP256K1_calc_p, prime->size);
+
+    memcpy(axP->nums, SECP256K1_calc_xG, axP->size);
+    memcpy(ayP->nums, SECP256K1_calc_yG, ayP->size);
+
+    ec_convAffineToJacobi(jXP, jYP, jZP, axP, ayP);
+
+    // d == 1
+    for(size_t i = 1UL; i < 11UL; i++)
+    {
+        cmp_result = true;
+        intentional_invalid = false;
+
+        ec_doublingPoint_inJacobi(jXP, jYP, jZP, _EC_BITS_, coef_a, prime);
+        ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+
+        printf("N=%lu", 1UL<<i); test_print_bignum(jXP, "jXNG");
+        printf("N=%lu", 1UL<<i); test_print_bignum(jYP, "jYNG");
+        printf("N=%lu", 1UL<<i); test_print_bignum(jZP, "jZNG");
+
+        cmp_result &= (memcmp(axP->nums, TV_SECP256K1_doubling_xNG_LIST[i], axP->size) == 0);
+        cmp_result &= (memcmp(ayP->nums, TV_SECP256K1_doubling_yNG_LIST[i], ayP->size) == 0);
+
+        printf("N=%lu", 1UL<<i); test_print_bignum(axP, "axNG");
+        printf("N=%lu", 1UL<<i); test_print_bignum(ayP, "ayNG");
+
+        if(!cmp_result) {
+            printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_xNG_LIST[i], jXP->nlen);
+            printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_yNG_LIST[i], jYP->nlen);
+        }
+        printf("%luP, ", (1UL<<i));
+        printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if(TEST_MANUAL_CHECK == 0)
+        TEST_ASSERT((cmp_result) || (intentional_invalid));
+#else
+        _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        printf("============================================================\r\n");
+#endif/* TEST_MANUAL_CHECK */
+    }
+
+    rmBigNum(&coef_a);
+    rmBigNum(&coef_b);
+    rmBigNum(&prime);
+
+    rmBigNum(&jXP);
+    rmBigNum(&jYP);
+    rmBigNum(&jZP);
+
+    rmBigNum(&axP);
+    rmBigNum(&ayP);
 #undef _KEYIN_DO_TEST_0_
 #undef _COND_DO_TEST_0_
 #undef TEST_MANUAL_CHECK
@@ -9596,6 +9731,12 @@ void test_sequence_ec(void) {
     _KEYIN_DO_TEST_(keyin, "test_SECP256K1_doubling");
     _COND_DO_TEST_(keyin)
     test_SECP256K1_doubling();
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_SECP256K1_doubling_jacobi");
+    _COND_DO_TEST_(keyin)
+    test_SECP256K1_doubling_jacobi();
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
