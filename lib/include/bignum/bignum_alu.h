@@ -6,6 +6,7 @@
 
 #include "common/returnType.h"
 #include "bignum/bignum.h"
+#include "bignum/bignum_mont.h"
 #include "common/util.h"
 typedef enum {
     BIGNUM_CMP_NU,  // Not Used(Reserved)
@@ -29,6 +30,10 @@ typedef enum {
 ReturnType inv_bignum(bignum_s* n);
 ReturnType set_bignum(bignum_s* n);
 ReturnType clr_bignum(bignum_s* n);
+
+ReturnType inv1w_bignum(bignum_s* n, const size_t wloc);
+ReturnType set1w_bignum(bignum_s* n, const size_t wloc);
+ReturnType clr1w_bignum(bignum_s* n, const size_t wloc);
 
 ReturnType set1b_bignum(bignum_s* n, const size_t bloc);
 ReturnType clr1b_bignum(bignum_s* n, const size_t bloc);
@@ -429,4 +434,14 @@ static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const
 {
     return mim_bignum_ext(t, NULL, a, n, true);
 }
+
+/*
+ * Mongomery Reduction and Multiplication
+ * Ref: Handbook of Applied Cryptography, 1996, CRC press
+ * 14.3.2 Montgomery reduction in Chapter14
+ * Study at https://blog.naver.com/aaiaia/224087676346
+ */
+ReturnType convBignumToMont_unsigned_safe(bignum_s* mont, const bignum_s* n, const mont_conf_s* conf);
+ReturnType mod_mont_unsigned_safe(bignum_s* mont, const mont_conf_s* conf);
+ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* a, const bignum_s* b, const mont_conf_s* conf);
 #endif/* BIGNUM_ALU_H */

@@ -30,36 +30,65 @@
 #define BIGNUM_SAME_LEN(D, S)       ((D)->nlen == (S)->nlen)
 #define BIGNUM_SAME_BIT(D, S)       ((D)->bits == (S)->bits)
 
+#define BIGNUM_INV_WORD(N, I) ((N)->nums[I] = ~((N)->nums[I]))
+#define BIGNUM_SET_WORD(N, I) ((N)->nums[I] = BIGNUM_MAX)
+#define BIGNUM_CLR_WORD(N, I) ((N)->nums[I] = BIGNUM_ZERO)
 ReturnType inv_bignum(bignum_s* n)
 {
     if(!(n != NULL))    return E_ERROR_NULL;
 
     for(size_t i = 0UL; i < n->nlen; i++)
     {
-        n->nums[i] = ~n->nums[i];
+        BIGNUM_INV_WORD(n, i);
     }
     return E_OK;
 }
-
 ReturnType set_bignum(bignum_s* n)
 {
     if(!(n != NULL))    return E_ERROR_NULL;
 
     for(size_t i = 0UL; i < n->nlen; i++)
     {
-        n->nums[i] = BIGNUM_MAX;
+        BIGNUM_SET_WORD(n, i);
     }
     return E_OK;
 }
-
 ReturnType clr_bignum(bignum_s* n)
 {
     if(!(n != NULL))    return E_ERROR_NULL;
 
     for(size_t i = 0UL; i < n->nlen; i++)
     {
-        n->nums[i] = 0U;
+        BIGNUM_CLR_WORD(n, i);
     }
+    return E_OK;
+}
+
+ReturnType inv1w_bignum(bignum_s* n, const size_t wloc)
+{
+    if(!(n != NULL))    return E_ERROR_NULL;
+    if(n->nlen <= wloc) return E_ERROR_BIGNUM_LENGTH;
+
+    BIGNUM_INV_WORD(n, wloc);
+
+    return E_OK;
+}
+ReturnType set1w_bignum(bignum_s* n, const size_t wloc)
+{
+    if(!(n != NULL))    return E_ERROR_NULL;
+    if(n->nlen <= wloc) return E_ERROR_BIGNUM_LENGTH;
+
+    BIGNUM_SET_WORD(n, wloc);
+
+    return E_OK;
+}
+ReturnType clr1w_bignum(bignum_s* n, const size_t wloc)
+{
+    if(!(n != NULL))    return E_ERROR_NULL;
+    if(n->nlen <= wloc) return E_ERROR_BIGNUM_LENGTH;
+
+    BIGNUM_CLR_WORD(n, wloc);
+
     return E_OK;
 }
 
@@ -1644,5 +1673,27 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
     if(!has_value)  return E_HAS_NO_VALUE;
     else            return E_OK;
 }
-#undef _DPRINTF_
 
+ReturnType convBignumToMont_unsigned_safe(bignum_s* mont, const bignum_s* n, const mont_conf_s* conf)
+{
+    ReturnType fr;
+    // x' = xR mod m
+    bignum_s* t_x2 = mkBigNum(n->bits<<1UL);
+
+    _FUNC_WRAP_(fr, cpy_bignum_unsigned_unsafe(t_x2, n));
+    _FUNC_WRAP_(fr, lslb_bignum_self(t_x2, n->bits));
+    _FUNC_WRAP_(fr, mod_bignum_unsafe(mont, t_x2, conf->m));
+
+    rmBigNum(&t_x2);
+
+    return fr;
+}
+ReturnType mod_mont_unsigned_safe(bignum_s* mont, const mont_conf_s* conf)
+{
+    return E_NOT_IMPL;
+}
+ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* a, const bignum_s* b, const mont_conf_s* conf)
+{
+    return E_NOT_IMPL;
+}
+#undef _DPRINTF_
