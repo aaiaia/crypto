@@ -23,6 +23,7 @@ mont_conf_s* mkMontConf(const size_t bits)
         (void)set1w_bignum(conf->mu, i);
     }
     (void)clr1w_bignum(conf->mu, conf->mu->nlen - 1UL);
+    (void)clr1w_bignum(conf->mu, 0UL);
 
     return conf;
 }

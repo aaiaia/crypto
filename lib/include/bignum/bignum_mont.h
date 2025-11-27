@@ -13,12 +13,14 @@
 typedef uint128_t   mont_t;// not implements yet
 #define MONT_BASE_BIT           64UL    // is same size with bignum_t
 #define MONT_BASE_VAL           (1UL<<MONT_BASE_BIT)
+#define MONT_BASE_MOD           0xFFFFFFFFFFFFFFFFUL
 
 #define MONT_LEN_BITS(idx)      U64L2BIT(idx)
 #elif(SET_BIGNUM_TYPE == 32)
 typedef uint64_t    mont_t;
 #define MONT_BASE_BIT           32UL    // is same size with bignum_t
 #define MONT_BASE_VAL           (1UL<<MONT_BASE_BIT)
+#define MONT_BASE_MOD           0xFFFFFFFFU
 
 #define MONT_LEN_BITS(idx)      U32L2BIT(idx)
 #else

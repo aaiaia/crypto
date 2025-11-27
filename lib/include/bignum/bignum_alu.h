@@ -34,6 +34,7 @@ ReturnType clr_bignum(bignum_s* n);
 ReturnType inv1w_bignum(bignum_s* n, const size_t wloc);
 ReturnType set1w_bignum(bignum_s* n, const size_t wloc);
 ReturnType clr1w_bignum(bignum_s* n, const size_t wloc);
+ReturnType put1w_bignum(bignum_s* n, const bignum_t v, const size_t wloc);
 
 ReturnType set1b_bignum(bignum_s* n, const size_t bloc);
 ReturnType clr1b_bignum(bignum_s* n, const size_t bloc);
@@ -342,6 +343,7 @@ static inline ReturnType mul_bignum_unsigned_unsafe(bignum_s* d, const bignum_s*
     const bool ign_sign = true, ign_len = true;
     return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
 }
+ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_t w0);
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
 ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d, const bool ign_len);
 static inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d)
@@ -441,7 +443,15 @@ static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const
  * 14.3.2 Montgomery reduction in Chapter14
  * Study at https://blog.naver.com/aaiaia/224087676346
  */
-ReturnType convBignumToMont_unsigned_safe(bignum_s* mont, const bignum_s* n, const mont_conf_s* conf);
-ReturnType mod_mont_unsigned_safe(bignum_s* mont, const mont_conf_s* conf);
-ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* a, const bignum_s* b, const mont_conf_s* conf);
+ReturnType swapMontToBignum_unsigned_safe(bignum_s* dst, const bignum_s* src, const mont_conf_s* conf);
+static inline ReturnType convBignumToMont_unsigned_safe(bignum_s* mont, const bignum_s* n, const mont_conf_s* conf)
+{
+    return swapMontToBignum_unsigned_safe(mont, n, conf);
+}
+static inline ReturnType convMontToBignum_unsigned_safe(bignum_s* n, const bignum_s* mont, const mont_conf_s* conf)
+{
+    return swapMontToBignum_unsigned_safe(n, mont, conf);
+}
+ReturnType mod_mont_unsigned_safe(bignum_s* mont, const bignum_s* n_x2bit, const mont_conf_s* conf);
+ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignum_s* y, const mont_conf_s* conf);
 #endif/* BIGNUM_ALU_H */

@@ -30,9 +30,10 @@
 #define BIGNUM_SAME_LEN(D, S)       ((D)->nlen == (S)->nlen)
 #define BIGNUM_SAME_BIT(D, S)       ((D)->bits == (S)->bits)
 
-#define BIGNUM_INV_WORD(N, I) ((N)->nums[I] = ~((N)->nums[I]))
-#define BIGNUM_SET_WORD(N, I) ((N)->nums[I] = BIGNUM_MAX)
-#define BIGNUM_CLR_WORD(N, I) ((N)->nums[I] = BIGNUM_ZERO)
+#define BIGNUM_INV_WORD(N, I)       ((N)->nums[I] = ~((N)->nums[I]))
+#define BIGNUM_SET_WORD(N, I)       ((N)->nums[I] = BIGNUM_MAX)
+#define BIGNUM_CLR_WORD(N, I)       ((N)->nums[I] = BIGNUM_ZERO)
+#define BIGNUM_PUT_WORD(N, I, V)    ((N)->nums[I] = (V))
 ReturnType inv_bignum(bignum_s* n)
 {
     if(!(n != NULL))    return E_ERROR_NULL;
@@ -88,6 +89,15 @@ ReturnType clr1w_bignum(bignum_s* n, const size_t wloc)
     if(n->nlen <= wloc) return E_ERROR_BIGNUM_LENGTH;
 
     BIGNUM_CLR_WORD(n, wloc);
+
+    return E_OK;
+}
+ReturnType put1w_bignum(bignum_s* n, const bignum_t v, const size_t wloc)
+{
+    if(!(n != NULL))    return E_ERROR_NULL;
+    if(n->nlen <= wloc) return E_ERROR_BIGNUM_LENGTH;
+
+    BIGNUM_PUT_WORD(n, wloc, v);
 
     return E_OK;
 }
@@ -1101,6 +1111,23 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
 
     return E_OK;
 }
+
+ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_t w0)
+{
+    const bool ign_sign = true, ign_len = true;
+
+    ReturnType fr;
+
+    bignum_s* s0 = mkBigNum(BIGNUM_BITS);
+
+    s0->nums[0] = w0;
+
+    fr = mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+
+    rmBigNum(&s0);
+
+    return fr;
+}
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
 /* Divide with Modulo: ('n'umerator - 'r'emainder) / 'd'enominator = 'q'uotient  */
 //__FUNC_RETURN_WRAPPING__(fr, mod_bignum_unsafe(pow_x, t_mul, p));
@@ -1674,26 +1701,124 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
     else            return E_OK;
 }
 
-ReturnType convBignumToMont_unsigned_safe(bignum_s* mont, const bignum_s* n, const mont_conf_s* conf)
-{
-    ReturnType fr;
-    // x' = xR mod m
-    bignum_s* t_x2 = mkBigNum(n->bits<<1UL);
+static ReturnType setMontWindow(const bignum_t ui, const mont_conf_s* conf);
+static ReturnType unsetMontWindow(const mont_conf_s* conf);
 
-    _FUNC_WRAP_(fr, cpy_bignum_unsigned_unsafe(t_x2, n));
-    _FUNC_WRAP_(fr, lslb_bignum_self(t_x2, n->bits));
-    _FUNC_WRAP_(fr, mod_bignum_unsafe(mont, t_x2, conf->m));
+static ReturnType setMontWindow(const bignum_t ui, const mont_conf_s* conf)
+{
+    if(conf == NULL)    return E_ERROR_NULL;
+
+    ReturnType fr = E_NOT_OK;
+
+    const bignum_t m_head = (( ui) - 1UL);
+    const bignum_t m_tail = ((~ui) + 1UL);
+    _FUNC_WRAP_(fr, put1w_bignum(conf->mu, m_head, conf->mu->nlen-1UL));
+    _FUNC_WRAP_(fr, put1w_bignum(conf->mu, m_tail, 0UL));
+
+    return fr;
+}
+static ReturnType unsetMontWindow(const mont_conf_s* conf)
+{
+    if(conf == NULL)    return E_ERROR_NULL;
+
+    ReturnType fr = E_NOT_OK;
+
+    _FUNC_WRAP_(fr, clr1w_bignum(conf->mu, conf->mu->nlen-1UL));
+    _FUNC_WRAP_(fr, clr1w_bignum(conf->mu, 0UL));
+
+    return fr;
+}
+
+ReturnType swapMontToBignum_unsigned_safe(bignum_s* dst, const bignum_s* src, const mont_conf_s* conf)
+{
+    ReturnType fr = E_NOT_OK;
+    // x' = xR mod m
+    bignum_s* t_x2 = mkBigNum(src->bits<<1UL);
+
+    _FUNC_WRAP_(fr, cpy_bignum_unsigned_unsafe(t_x2, src));
+    // x' = xR mod m, R = 2^256
+    _FUNC_WRAP_(fr, lslb_bignum_self(t_x2, src->bits));
+    // x' = xR mod m, R = 2^256
+    _FUNC_WRAP_(fr, mod_bignum_unsafe(dst, src, conf->m));
 
     rmBigNum(&t_x2);
 
     return fr;
 }
-ReturnType mod_mont_unsigned_safe(bignum_s* mont, const mont_conf_s* conf)
+ReturnType mod_mont_unsigned_safe(bignum_s* mont, const bignum_s* n_x2bit, const mont_conf_s* conf)
 {
-    return E_NOT_IMPL;
+    if(conf == NULL)    return E_ERROR_NULL;
+    if(n_x2bit == NULL) return E_ERROR_NULL;
+
+    ReturnType fr = E_NOT_OK;
+
+    bignum_s* a_x2bit = mkBigNum(n_x2bit->bits);
+
+    _FUNC_WRAP_(fr, cpy_bignum_unsigned_unsafe(a_x2bit, n_x2bit));
+    for(size_t i = 0UL; i < conf->nlen; i)
+    {
+        const bignum_t a0 = a_x2bit->nums[0];
+        // ui = a_0 * m' mod b
+        // ui = a_0, when m' = -m^(-1) mod R = 1
+        // ui * m
+        if(a0 != 0)
+        {
+            const bignum_t m_head = (( a0) - 1UL);
+            const bignum_t m_tail = ((~a0) + 1UL);
+
+            _FUNC_WRAP_(fr, setMontWindow(a0, conf));
+            _FUNC_WRAP_(fr, add_bignum_unsigned_unsafe(a_x2bit, a_x2bit, conf->mu));
+            _FUNC_WRAP_(fr, unsetMontWindow(conf));
+            // ui * m / b
+            _FUNC_WRAP_(fr, lslb_bignum_self(a_x2bit, MONT_BASE_BIT));
+        }
+        else { /* DO_NOTHING */ }
+    }
+    _FUNC_WRAP_(fr, cpy_bignum_unsigned_unsafe(mont, a_x2bit));
+
+    rmBigNum(&a_x2bit);
+
+    return fr;
 }
-ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* a, const bignum_s* b, const mont_conf_s* conf)
+ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignum_s* y, const mont_conf_s* conf)
 {
-    return E_NOT_IMPL;
+    if(conf == NULL)    return E_ERROR_NULL;
+
+    ReturnType fr = E_NOT_OK;
+
+    bignum_s* a_x2bit = mkBigNum(mont->bits<<1UL);
+    bignum_s* mul_x2b = mkBigNum(mont->bits<<1UL);
+
+    _FUNC_WRAP_(fr, clr_bignum(a_x2bit));
+
+    for(size_t i = 0UL; i < conf->nlen; i)
+    {
+        const bignum_t a0 = a_x2bit->nums[0];
+        const bignum_t xi = x->nums[i];
+        const bignum_t y0 = y->nums[0];
+        const bignum_t b  = MONT_BASE_MOD;
+        bignum_t ui;
+
+        // ui = ((a_0 + x_i * y_0) * m') mod b
+        // ui = (a_0 + x_i * y_0) mod b, when m' = -m^(-1) mod R = 1
+        ui = (bignum_t)((((bignumX2_t)xi) * ((bignumX2_t)y0)) % ((bignumX2_t)b));
+        ui = (bignum_t)((((bignumX2_t)ui) + ((bignumX2_t)a0)) % ((bignumX2_t)b));
+        // A = (A + x_i * y + u_i * m)
+        // A = (A + x_i * y)
+        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, y, xi));
+        _FUNC_WRAP_(fr, add_bignum_unsigned_unsafe(a_x2bit, a_x2bit, mul_x2b));
+        // A = (A + x_i * y) + (u_i * m)
+        _FUNC_WRAP_(fr, setMontWindow(ui, conf));
+        _FUNC_WRAP_(fr, add_bignum_unsigned_unsafe(a_x2bit, a_x2bit, conf->mu));
+        _FUNC_WRAP_(fr, unsetMontWindow(conf));
+        // A = A/b
+        _FUNC_WRAP_(fr, lslb_bignum_self(a_x2bit, MONT_BASE_BIT));
+    }
+    _FUNC_WRAP_(fr, cpy_bignum_unsigned_unsafe(mont, a_x2bit));
+
+    rmBigNum(&a_x2bit);
+    rmBigNum(&mul_x2b);
+
+    return fr;
 }
 #undef _DPRINTF_
