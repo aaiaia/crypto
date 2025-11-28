@@ -4694,6 +4694,7 @@ void test_montgomery(const char* test_fn_name)
     {
         for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i+=2)
         {
+            cmp_result = true;
             memcpy(multiplier->nums,    TEST_MONTGOMERY_NORMAL_TV_LIST[i],      multiplier->size);
             memcpy(multiplicand->nums,  TEST_MONTGOMERY_NORMAL_TV_LIST[i+1],    multiplicand->size);
 
@@ -4716,8 +4717,8 @@ void test_montgomery(const char* test_fn_name)
             printReturnType(fr);
 #endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
 
-            cmp_result  = (memcmp(mont_modulo->nums, mont_product->nums, TEST_MONT_MUL_SIZE) == 0);
-            cmp_result |= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
+            cmp_result &= (memcmp(mont_modulo->nums, mont_product->nums, TEST_MONT_MUL_SIZE) == 0);
+            cmp_result &= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
             if(!cmp_result)
             {
                 test_print_mont_conf(mont_conf, "montgomery info");
