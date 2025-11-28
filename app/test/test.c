@@ -4525,6 +4525,345 @@ void test_mim_bignum(void)
 #undef TEST_MMI_BIGNUM_BIT_LEN
 }
 
+const uint32_t TEST_MONTGOMERY_NORMAL_MODULUS[] = { \
+    0xfffffc2f, 0xfffffffe, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, };
+
+const uint32_t TEST_MONTGOMERY_NORMAL_x1G[] = { \
+    0x16f81798, 0x59f2815b, 0x2dce28d9, 0x029bfcdb, 0xce870b07, 0x55a06295, 0xf9dcbbac, 0x79be667e, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y1G[] = { \
+    0xfb10d4b8, 0x9c47d08f, 0xa6855419, 0xfd17b448, 0x0e1108a8, 0x5da4fbfc, 0x26a3c465, 0x483ada77, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x2G[] = { \
+    0x5c709ee5, 0xabac09b9, 0x8cef3ca7, 0x5c778e4b, 0x95c07cd8, 0x3045406e, 0x41ed7d6d, 0xc6047f94, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y2G[] = { \
+    0x50cfe52a, 0x236431a9, 0x3266d0e1, 0xf7f63265, 0x466ceaee, 0xa3c58419, 0xa63dc339, 0x1ae168fe, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x3G[] = { \
+    0xbce036f9, 0x8601f113, 0x836f99b0, 0xb531c845, 0xf89d5229, 0x49344f85, 0x9258c310, 0xf9308a01, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y3G[] = { \
+    0x84b8e672, 0x6cb9fd75, 0x34c2231b, 0x6500a999, 0x2a37f356, 0x0fe337e6, 0x632de814, 0x388f7b0f, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x4G[] = { \
+    0xe8c4cd13, 0x74fa94ab, 0x0ee07584, 0xcc6c1390, 0x930b1404, 0x581e4904, 0xc10d80f3, 0xe493dbf1, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y4G[] = { \
+    0x47739922, 0xcfe97bdc, 0xbfbdfe40, 0xd967ae33, 0x8ea51448, 0x5642e209, 0xa0d455b7, 0x51ed993e, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x5G[] = { \
+    0xb240efe4, 0xcba8d569, 0xdc619ab7, 0xe88b84bd, 0x0a5c5128, 0x55b4a725, 0x1a072093, 0x2f8bde4d, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y5G[] = { \
+    0xa6ac62d6, 0xdca87d3a, 0xab0d6840, 0xf788271b, 0xa6c9c426, 0xd4dba9dd, 0x36e5e3d6, 0xd8ac2226, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x6G[] = { \
+    0x60297556, 0x2f057a14, 0x8568a18b, 0x82f6472f, 0x355235d3, 0x20453a14, 0x755eeea4, 0xfff97bd5, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y6G[] = { \
+    0xb075f297, 0x3c870c36, 0x518fe4a0, 0xde80f0f6, 0x7f45c560, 0xf3be9601, 0xacfbb620, 0xae12777a, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x7G[] = { \
+    0xcac4f9bc, 0xe92bdded, 0x0330e39c, 0x3d419b7e, 0xf2ea7a0e, 0xa398f365, 0x6e5db4ea, 0x5cbdf064, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y7G[] = { \
+    0x087264da, 0xa5082628, 0x13fde7b5, 0xa813d0b8, 0x861a54db, 0xa3178d6d, 0xba255960, 0x6aebca40, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x8G[] = { \
+    0xe10a2a01, 0x67784ef3, 0xe5af888a, 0x0a1bdd05, 0xb70f3c2f, 0xaff3843f, 0x5cca351d, 0x2f01e5e1, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y8G[] = { \
+    0x6cbde904, 0xb5da2cb7, 0xba5b7617, 0xc2e213d6, 0x132d13b4, 0x293d082a, 0x41539949, 0x5c4da8a7, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x9G[] = { \
+    0xfc27ccbe, 0xc35f110d, 0x4c57e714, 0xe0979697, 0x9f559abd, 0x09ad178a, 0xf0c7f653, 0xacd484e2, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y9G[] = { \
+    0xc64f9c37, 0x05cc262a, 0x375f8e0f, 0xadd888a4, 0x763b61e9, 0x64380971, 0xb0a7d9fd, 0xcc338921, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x10G[] = { \
+    0x47e247c7, 0x52a68e2a, 0x1943c2b7, 0x3442d49b, 0x1ae6ae5d, 0x35477c7b, 0x47f3c862, 0xa0434d9e, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y10G[] = { \
+    0x037368d7, 0x3cbee53b, 0xd877a159, 0x6f794c2e, 0x93a24c69, 0xa3b6c7e6, 0x5419bc27, 0x893aba42, };
+
+const uint32_t TEST_MONTGOMERY_NORMAL_x16G[] = { \
+    0x2a6dec0a, 0xc44ee89e, 0xb87a5ae9, 0xb2a31369, 0x21c23e97, 0x3011aabc, 0xb59e9ec5, 0xe60fce93, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y16G[] = { \
+    0x69616821, 0xe1f32cce, 0x44d23f0b, 0x1296891e, 0xf5793710, 0x9db99f34, 0x99e59592, 0xf7e35073, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x32G[] = { \
+    0x07143e65, 0x75d0dbd4, 0x9904a61d, 0xdacffcb8, 0xe2f378ce, 0x47b6e054, 0x4fb5a22d, 0xd30199d7, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y32G[] = { \
+    0x24106ab9, 0x05b3ff1f, 0x64ed8196, 0x1f760cc3, 0xe9838065, 0xb3d6dec9, 0x0ae3d5c3, 0x95038d9d, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x64G[] = { \
+    0xf874ef8b, 0xe37918e6, 0xcdbafd81, 0xfc4c6f1d, 0xf832823c, 0x0b1051ea, 0x2d16eab7, 0xbf23c154, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y64G[] = { \
+    0x66831d9f, 0x4dc37efe, 0x811e2f78, 0xc522fc54, 0xba5392e4, 0x7ad928a0, 0xc3300373, 0x5cb3866f, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x128G[] = { \
+    0x6769a24e, 0x64707745, 0x00535655, 0xbcf55cd7, 0xf7d1671c, 0x696c3d09, 0x033f7a06, 0x34ff3be4, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y128G[] = { \
+    0x73cc2f1a, 0x8491067a, 0xe8f8b681, 0x55df16c3, 0x9832098c, 0x3f6619d8, 0x3a236c55, 0x5d9d1162, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x256G[] = { \
+    0xd5f51508, 0x0646e23f, 0xd5ac1ca1, 0xd8c39cab, 0x172de238, 0xea2a6e3e, 0x12c609d9, 0x82822632, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y256G[] = { \
+    0xf6e26caf, 0xd31b6eaf, 0x2f7b17be, 0x62d613ac, 0x30b60ace, 0x5e8256e8, 0x8557dfe4, 0x11f8a809, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x512G[] = { \
+    0xef34a24d, 0x926e2c00, 0xd9e159d0, 0x0adbc968, 0x9cf918d5, 0x905a857a, 0x87a79ff3, 0x465370b2, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y512G[] = { \
+    0xb33887f4, 0xa2f8fb20, 0x15d37a10, 0x588e09b2, 0xfdeec2c1, 0xa4af8bda, 0x8368c082, 0x35e531b3, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x1024G[] = { \
+    0xe285131f, 0xd5b901b2, 0xc813b088, 0xaaec6ecd, 0x66ad6240, 0xd664a18f, 0xe23cbd77, 0x241febb8, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y1024G[] = { \
+    0x2750026d, 0xabb3e66f, 0xbd0cb5af, 0xcd50fd0f, 0x13981df8, 0xd6c420bd, 0xff94f8d3, 0x513378d9, };
+
+const uint32_t TEST_MONTGOMERY_NORMAL_x100G[] = { \
+    0xf7500f88, 0x0221b4ce, 0x406a2689, 0x3ee306b3, 0x5fb72bf5, 0x2e174c83, 0x3c5e1765, 0xed3bace2, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y100G[] = { \
+    0xe335286e, 0xfce17ad5, 0x084895d0, 0x97bd17be, 0x7a1f87bf, 0xdcda5e8a, 0x1288ccff, 0xe57a6f57, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x1000G[] = { \
+    0x79cdb3ad, 0x49b6a238, 0xfd89073d, 0x6db2b637, 0x8b634853, 0x538aaa12, 0x73aa632f, 0x4a5169f6, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y1000G[] = { \
+    0xa3c62601, 0xc7ba61f4, 0x4b2c39a1, 0xcb1127b6, 0xa26a8ca7, 0xae14ba09, 0xeb2a8bad, 0xbaf1e702, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x10000G[] = { \
+    0x4c2f6fae, 0xaaf5cfd8, 0x0bc87f4e, 0x3a02bd71, 0x98232930, 0x0f7b89c8, 0xeac57969, 0x7a36d7ef, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y10000G[] = { \
+    0xe52e24f9, 0x24452172, 0xcc3ea598, 0x644b637a, 0x882b4619, 0x28781419, 0x08a7e640, 0xcdeb2ea3, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x100000G[] = { \
+    0xa09d44fd, 0x49fa3f22, 0x46266ba3, 0x20b2ea3b, 0x5faf0daa, 0x1894aa9e, 0xe7336a40, 0x1cb88761, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y100000G[] = { \
+    0x5a851399, 0x8e5a9d28, 0x3eb2a085, 0xe7557c0a, 0xb85ec064, 0x59157abd, 0xf654b421, 0x9e95f3dd, };
+const uint32_t TEST_MONTGOMERY_NORMAL_x1000000G[] = { \
+    0xa99436cc, 0xcc219866, 0x17988568, 0x5b83f6fa, 0x772d66d6, 0xaea7dcc0, 0x3a858342, 0xaf5a13d0, };
+const uint32_t TEST_MONTGOMERY_NORMAL_y1000000G[] = { \
+    0xd4301ee1, 0xb44b6adb, 0x72f5bfc7, 0x87e7ae7d, 0x3f5594b9, 0x8aebcc31, 0x92cddfb6, 0xc694e15f, };
+
+const uint32_t* TEST_MONTGOMERY_NORMAL_TV_LIST[] = { \
+    TEST_MONTGOMERY_NORMAL_x1G,         TEST_MONTGOMERY_NORMAL_y1G, \
+    TEST_MONTGOMERY_NORMAL_x2G,         TEST_MONTGOMERY_NORMAL_y2G, \
+    TEST_MONTGOMERY_NORMAL_x3G,         TEST_MONTGOMERY_NORMAL_y3G, \
+    TEST_MONTGOMERY_NORMAL_x4G,         TEST_MONTGOMERY_NORMAL_y4G, \
+    TEST_MONTGOMERY_NORMAL_x5G,         TEST_MONTGOMERY_NORMAL_y5G, \
+    TEST_MONTGOMERY_NORMAL_x6G,         TEST_MONTGOMERY_NORMAL_y6G, \
+    TEST_MONTGOMERY_NORMAL_x7G,         TEST_MONTGOMERY_NORMAL_y7G, \
+    TEST_MONTGOMERY_NORMAL_x8G,         TEST_MONTGOMERY_NORMAL_y8G, \
+    TEST_MONTGOMERY_NORMAL_x9G,         TEST_MONTGOMERY_NORMAL_y9G, \
+    TEST_MONTGOMERY_NORMAL_x10G,        TEST_MONTGOMERY_NORMAL_y10G, \
+
+    TEST_MONTGOMERY_NORMAL_x16G,        TEST_MONTGOMERY_NORMAL_y16G, \
+    TEST_MONTGOMERY_NORMAL_x32G,        TEST_MONTGOMERY_NORMAL_y32G, \
+    TEST_MONTGOMERY_NORMAL_x64G,        TEST_MONTGOMERY_NORMAL_y64G, \
+    TEST_MONTGOMERY_NORMAL_x128G,       TEST_MONTGOMERY_NORMAL_y128G, \
+    TEST_MONTGOMERY_NORMAL_x256G,       TEST_MONTGOMERY_NORMAL_y256G, \
+    TEST_MONTGOMERY_NORMAL_x512G,       TEST_MONTGOMERY_NORMAL_y512G, \
+    TEST_MONTGOMERY_NORMAL_x1024G,      TEST_MONTGOMERY_NORMAL_y1024G, \
+
+    TEST_MONTGOMERY_NORMAL_x100G,       TEST_MONTGOMERY_NORMAL_y100G, \
+    TEST_MONTGOMERY_NORMAL_x1000G,      TEST_MONTGOMERY_NORMAL_y1000G, \
+    TEST_MONTGOMERY_NORMAL_x10000G,     TEST_MONTGOMERY_NORMAL_y10000G, \
+    TEST_MONTGOMERY_NORMAL_x100000G,    TEST_MONTGOMERY_NORMAL_y100000G, \
+    TEST_MONTGOMERY_NORMAL_x1000000G,   TEST_MONTGOMERY_NORMAL_y1000000G, \
+    NULL,                               NULL, \
+};
+void test_montgomery(const char* test_fn_name)
+{
+#define _KEYIN_DO_TEST_0_(c, TEST_NAME) { \
+    (c) = '\0'; \
+    do { \
+        printf("%s: ", (TEST_NAME)); \
+        (c) = getchar(); \
+        getchar(); \
+        if('A' <= (c) && (c) <= 'Z')    break; \
+        if('a' <= (c) && (c) <= 'z')    break; \
+    } while(((c) != 'y' ) && ((c) != 'Y' )); \
+    if('A' <= (c) && (c) <= 'Z')    (c) += 0x20; \
+}
+#define _COND_DO_TEST_0_(c)   if((c) == 'y')
+
+#define TEST_MONT_MUL_BITS  256U
+#define TEST_MONT_MUL_SIZE  (TEST_MONT_MUL_BITS>>3U)
+    char keyin;
+    bool cmp_result;
+    bool intentional_invalid;
+    ReturnType fr;
+
+    bool manually = true;
+
+    bignum_s* modulus = mkBigNum(TEST_MONT_MUL_BITS);
+
+    bignum_s* multiplier = mkBigNum(TEST_MONT_MUL_BITS);
+    bignum_s* multiplicand = mkBigNum(TEST_MONT_MUL_BITS);
+
+    bignum_s* norm_prod_x2b = mkBigNum(TEST_MONT_MUL_BITS<<1UL);
+    bignum_s* norm_prod_mod = mkBigNum(TEST_MONT_MUL_BITS);
+    bignum_s* mont_modulo = mkBigNum(TEST_MONT_MUL_BITS);
+
+    bignum_s* mont_product = mkBigNum(TEST_MONT_MUL_BITS);
+    bignum_s* mont_to_norm = mkBigNum(TEST_MONT_MUL_BITS);
+
+    mont_conf_s* mont_conf = NULL;
+
+    memcpy(modulus->nums, TEST_MONTGOMERY_NORMAL_MODULUS, modulus->size);
+    mont_conf = mkMontConf(modulus);
+
+    _KEYIN_DO_TEST_0_(keyin, "Test Automatically?(y/n)");
+    _COND_DO_TEST_0_(keyin) manually = false;
+
+    if(!manually)
+    {
+        for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i+=2)
+        {
+            memcpy(multiplier->nums,    TEST_MONTGOMERY_NORMAL_TV_LIST[i],      multiplier->size);
+            memcpy(multiplicand->nums,  TEST_MONTGOMERY_NORMAL_TV_LIST[i+1],    multiplicand->size);
+
+            intentional_invalid = false;
+
+            TICK_TIME_START("Normal Form multiply and modulus");
+            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+            TICK_TIME_END;
+
+            fr = mod_mont_unsigned_safe(mont_modulo, norm_prod_x2b, mont_conf);
+
+            TICK_TIME_START("Montgomery Form multiply with modulus");
+            fr = mul_mont_unsigned_safe(mont_product, multiplier, multiplicand, mont_conf);
+            fr = convMontToBignum_unsigned_safe(mont_to_norm, mont_product, mont_conf);
+            TICK_TIME_END;
+
+#if 1 /*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+            printf("%s() = ", test_fn_name);
+            printReturnType(fr);
+#endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+
+            cmp_result  = (memcmp(mont_modulo->nums, mont_product->nums, TEST_MONT_MUL_SIZE) == 0);
+            cmp_result |= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
+            if(!cmp_result)
+            {
+                test_print_mont_conf(mont_conf, "montgomery info");
+
+                test_print_bignum(modulus, "modulus");
+
+                test_print_bignum(multiplier, "multiplier");
+                test_print_bignum(multiplicand, "multiplicand");
+                test_print_bignum(norm_prod_mod, "norm_prod_mod");
+                test_print_bignum(mont_modulo, "mont_modulo");
+
+                test_print_bignum(mont_product, "mont_product");
+                test_print_bignum(mont_to_norm, "mont_to_norm");
+            }
+            printf("[%lu] %s() is %s\r\n", i, test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+#if 1 /*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+            TEST_ASSERT(cmp_result);
+#endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
+        }
+    }
+    else
+    {
+        for(size_t i = 0UL; i < 0x10UL; i++)
+        {
+            (void)memset(multiplier->nums, 0U, multiplier->size);
+            (void)memset(multiplicand->nums, 0U, multiplicand->size);
+
+            /* set test vector*/
+            srand(time(NULL)+i);
+            for(size_t byte = 0UL; byte < (multiplier->size)>>1UL; byte++)
+            {
+                ((uint8_t*)multiplier->nums)[byte] = (rand()&0xFFU);
+            }
+            for(size_t byte = 0UL; byte < (multiplicand->size)>>1UL; byte++)
+            {
+                ((uint8_t*)multiplicand->nums)[byte] = (rand()&0xFFU);
+            }
+
+            /* Classical multiply and modulus */
+            TICK_TIME_START("Normal Form multiply and modulus");
+            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+            TICK_TIME_END;
+
+            fr = mod_mont_unsigned_safe(mont_modulo, norm_prod_x2b, mont_conf);
+
+            /* Montgomery Multiplication */
+            TICK_TIME_START("Montgomery Form multiply with modulus");
+            fr = mul_mont_unsigned_safe(mont_product, multiplier, multiplicand, mont_conf);
+            fr = convMontToBignum_unsigned_safe(mont_to_norm, mont_product, mont_conf);
+            TICK_TIME_END;
+            printf("%s() = ", test_fn_name);
+            printReturnType(fr);
+            printf("********************************************************************************\n");
+            printf("TEST RANDOM_NUMBERS, MANUALLY 'COMPARE WITH https://defuse.ca/big-number-calculator.htm'\n");
+            printf("%s()", test_fn_name);
+            test_print_bignum(multiplier, "multiplier");
+            test_print_bignum(multiplicand, "multiplicand");
+
+            printf("[PRODUCT and MOD]\n");
+            test_print_bignum_value_only(multiplier);
+            printf(" * ");
+            test_print_bignum_value_only(multiplicand);
+            printf("\n=>");
+            test_print_bignum_value_only(norm_prod_x2b);
+            printf("%%");
+            test_print_bignum_value_only(modulus);
+            printf("\n = ");
+            test_print_bignum_value_only(norm_prod_mod);
+            printf("\n");
+
+            printf("[MONTGOMERY REDUCTION]\n");
+            test_print_bignum_value_only(norm_prod_x2b);
+            printf(" * R^-1 mod ");
+            test_print_bignum_value_only(modulus);
+            printf("\n = ");
+            test_print_bignum_value_only(mont_modulo);
+            printf("\n");
+
+            printf("[MONTGOMERY MULTIPLICATION]\n");
+            test_print_bignum_value_only(multiplier);
+            printf(" * ");
+            test_print_bignum_value_only(multiplicand);
+            printf(" * 1000000000000000000000000000000000000000000000000000000000^-1 mod ");
+            test_print_bignum_value_only(modulus);
+            printf("\n = ");
+            test_print_bignum_value_only(mont_product);
+            printf("\n");
+            test_print_bignum_value_only(mont_product);
+            printf(" * 1000000000000000000000000000000000000000000000000000000000 mod ");
+            test_print_bignum_value_only(modulus);
+            printf("\n = ");
+            test_print_bignum_value_only(mont_to_norm);
+            printf("\n");
+            printf("********************************************************************************\n");
+            _KEYIN_DO_TEST_0_(keyin, "check result(y)");
+        }
+    }
+
+    {
+        intentional_invalid = false;
+
+        clr_bignum(norm_prod_mod); set1b_bignum(norm_prod_mod, 0UL);
+        TICK_TIME_START("Normal Form multiply and modulus");
+        for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+        {
+            memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+
+            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+            fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+        }
+        TICK_TIME_END;
+
+        clr_bignum(mont_product); set1b_bignum(mont_product, 0UL);
+        TICK_TIME_START("Montgomery Form multiply with modulus");
+        for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+        {
+            memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+
+            fr = mul_mont_unsigned_safe(mont_product, mont_product, multiplicand, mont_conf);
+        }
+        fr = convMontToBignum_unsigned_safe(mont_to_norm, mont_product, mont_conf);
+        TICK_TIME_END;
+
+        cmp_result |= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
+        printf("%s() is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    }
+
+    rmBigNum(&modulus);
+
+    rmBigNum(&multiplier);
+    rmBigNum(&multiplicand);
+
+    rmBigNum(&norm_prod_x2b);
+    rmBigNum(&norm_prod_mod);
+    rmBigNum(&mont_modulo);
+
+    rmBigNum(&mont_product);
+    rmBigNum(&mont_to_norm);
+
+    rmMontConf(&mont_conf);
+#undef _KEYIN_DO_TEST_0_
+#undef _COND_DO_TEST_0_
+#undef TEST_MONT_MUL_BITS
+#undef TEST_MONT_MUL_SIZE
+}
 #include "common/bitwise.h"
 #include "ghash/gf128.h"
 int test_ghash(void)
@@ -9381,6 +9720,7 @@ void test_SECP256K1_ECDSA(void)
 
 void test_sequence_bignum(void) {
     char keyin = '\0';
+
     printf("--------------------------------------------------------------------------------\n");
     printf("[test start: test_macro()]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_macro");
@@ -9667,6 +10007,14 @@ void test_sequence_bignum(void) {
     _COND_DO_TEST_(keyin)
     test_mim_bignum();
     printf("[test   end: test_mim_bignum()]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_montgomery()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_montgomery");
+    _COND_DO_TEST_(keyin)
+    test_montgomery("test_montgomery");
+    printf("[test   end: test_montgomery()]\r\n");
     printf("================================================================================\n");
 }
 

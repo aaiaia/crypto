@@ -22,7 +22,7 @@
 void test_print_bignum_ext(const bignum_s* p, const char* title, \
         const char* funcName, const int lineNum, \
         const bool linefeed, const size_t lfn, const bool details, const bool prefix, const bool space);
-#define test_print_bignum_value_only(p) test_print_bignum_ext(p, NULL, __func__, __LINE__, false, 0UL, false, true, false)
+#define test_print_bignum_value_only(p) test_print_bignum_ext(p, NULL, NULL, 0, false, 0UL, false, true, false)
 #define test_print_bignum(p, title) test_print_bignum_ext(p, title, __func__, __LINE__, true, 0UL, false, false, true)
 #define test_print_bignum_info(p, title) test_print_bignum_ext(p, title, __func__, __LINE__, true, 0UL, true, false, true)
 static inline void test_print_bignum_array_ext(const bignum_t* nums, const size_t nlen, const bool linefeed, const size_t lfn, const bool prefix, const bool space)
@@ -62,6 +62,11 @@ static inline void test_print_wNAF_PreCompute(const wnaf_pre_compute_ec_s* p, co
 }
 static inline void test_print_wNAF_PreCompute_info(const wnaf_pre_compute_ec_s* p, const char* title) {
     return test_print_wNAF_PreCompute_ext(p, title, false, true);
+}
+
+void test_print_mont_conf_ext(const mont_conf_s* p, const char* title, const bool linefeed, const bool detail);
+static inline void test_print_mont_conf(const mont_conf_s* p, const char* title) {
+    return test_print_mont_conf_ext(p, title, false, true);
 }
 
 #endif /* TEST_TOOL_H */
