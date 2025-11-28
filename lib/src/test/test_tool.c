@@ -116,3 +116,13 @@ void test_print_wNAF_PreCompute_ext(const wnaf_pre_compute_ec_s* p, const char* 
         test_print_bignum(p->y[i], NULL);
     }
 }
+
+void test_print_mont_conf_ext(const mont_conf_s* p, const char* title, const bool linefeed, const bool detail) {
+    if(title != NULL)   printf("[%s]\r\n", title);
+    if(detail) {
+        printf("baseLen: %lu\r\n", p->baseLen);
+        printf("radixBits: %lu\r\n", p->radixBits);
+    }
+    test_print_bignum(p->modulus, "modulus");
+    test_print_bignum(p->nModInv, "nModInv");
+}

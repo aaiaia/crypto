@@ -13,16 +13,12 @@
 typedef uint128_t   mont_t;// not implements yet
 #define MONT_BASE_BIT           64UL    // is same size with bignum_t
 #define MONT_BASE_VAL           (1UL<<MONT_BASE_BIT)
-#define MONT_BASE_MOD           0xFFFFFFFFFFFFFFFFUL
-
-#define MONT_LEN_BITS(idx)      U64L2BIT(idx)
+#define MONT_BASE_b2L(bits)     QUOBITU64(bits)
 #elif(SET_BIGNUM_TYPE == 32)
 typedef uint64_t    mont_t;
 #define MONT_BASE_BIT           32UL    // is same size with bignum_t
 #define MONT_BASE_VAL           (1UL<<MONT_BASE_BIT)
-#define MONT_BASE_MOD           0xFFFFFFFFU
-
-#define MONT_LEN_BITS(idx)      U32L2BIT(idx)
+#define MONT_BASE_b2L(bits)     QUOBITU32(bits)
 #else
 #error "NOT_IMPLEMENTS_YET"
 #endif
@@ -38,22 +34,22 @@ typedef uint64_t    mont_t;
  * Study at https://blog.naver.com/aaiaia/224087676346
  */
 /*
- * base is fixed, b = 2^32
- * R is fixed, R = b^n = 2^32n, ex: secp256k1 need 256bit, n is 8
- * R^(-1) is fixed, R^(-1) = 1
- * m is fixed, m = b^n - 1 = 2^32n - 1,
- *      ex: secp256k1 needs 256 bit, n = 8
- *          x^256 -1 == 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
- * m' is fixed, m' = -m^(-1) mod R = 1
+ * b : base is fixed to 2^32
+ * R : shift left value to converting to Montgomery Form.
+ *     base is fixed, so represent R = b^n using n to (2^32)^n
+ *     n has means that number of digit in looooong number.
+ *     ex: secp256k1 need 256bit, n is 8
+ * m : modulus, (like, prime of secp256k1)
+ * m': -m^(-1) mod R
  */
 typedef struct {
-    size_t bitsOfn;
-    size_t nlen;
-    size_t bitsOfm;
-    bignum_s* m;
-    bignum_s* mu;   // to reduce u_i * m, mu = (m_n-2 m_n-3 ... m_1 m_0)_2^32
+    //size_t baseBits;  // b : unit of processs(radix of basis), like symbol in montgomery form(space).
+    size_t baseLen;     // n : b^n, number of base, converting normal to montgomery form, it will be number of iteration.
+    size_t radixBits;   // R : R = 2^radixBit
+    bignum_s* modulus;  // m : montgomery space is one of finite field. To make a number in finite fied, needs prime.
+    bignum_s* nModInv;  // m': m' = -m^(-1) mod R
 }mont_conf_s;
 
-mont_conf_s* mkMontConf(const size_t bits);
+mont_conf_s* mkMontConf(const bignum_s* modulus);
 int rmMontConf(mont_conf_s** conf);
 #endif/* BIGNUM_MONT_H */
