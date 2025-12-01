@@ -4823,24 +4823,56 @@ void test_montgomery(const char* test_fn_name)
 
         clr_bignum(norm_prod_mod); set1b_bignum(norm_prod_mod, 0UL);
         TICK_TIME_START("Normal Form multiply and modulus");
-        for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+        for(size_t iter = 0x0; iter < 0x100; iter++)
         {
-            memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
-            fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+                fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+                fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+            }
         }
         TICK_TIME_END;
 
         clr_bignum(mont_product); set1b_bignum(mont_product, 0UL);
         TICK_TIME_START("Montgomery Form multiply with modulus");
-        for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+        for(size_t iter = 0x0; iter < 0x100; iter++)
         {
-            memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-            fr = mul_mont_unsigned_safe(mont_product, mont_product, multiplicand, mont_conf);
+                fr = mul_mont_unsigned_safe(mont_product, mont_product, multiplicand, mont_conf);
+            }
         }
         fr = convMontToBignum_unsigned_safe(mont_to_norm, mont_product, mont_conf);
+        TICK_TIME_END;
+
+        TICK_TIME_START("Process time of mul_bignum_unsigned_unsafe()");
+        for(size_t iter = 0x0; iter < 0x100; iter++)
+        {
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+
+                fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+            }
+        }
+        TICK_TIME_END;
+
+        srand(time(NULL));
+        bignum_t rw = (((rand()&0xFFFFU)<<16U)|((rand()&0xFFFFU)<<0U));
+        TICK_TIME_START("Process time of mul1w_bignum_unsigned_unsafe()");
+        for(size_t iter = 0x0; iter < 0x100; iter++)
+        {
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+
+                fr = mul1w_bignum_unsigned_unsafe(norm_prod_x2b, rw, multiplicand);
+            }
+        }
         TICK_TIME_END;
 
         cmp_result |= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
@@ -9721,6 +9753,14 @@ void test_SECP256K1_ECDSA(void)
 
 void test_sequence_bignum(void) {
     char keyin = '\0';
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_montgomery()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_montgomery");
+    _COND_DO_TEST_(keyin)
+    test_montgomery("test_montgomery");
+    printf("[test   end: test_montgomery()]\r\n");
+    printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
     printf("[test start: test_macro()]\r\n");

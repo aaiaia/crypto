@@ -1011,7 +1011,7 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
     _DPRINTF_("s1->bits = %lu\n", s1->bits);
     _DPRINTF_("s0->bits = %lu\n", s0->bits);
 
-    if(cmp0_bignum(s0) != BIGNUM_CMP_ZO)
+    if(cmp0_bignum(s0) != BIGNUM_CMP_ZO || cmp0_bignum(s1) != BIGNUM_CMP_ZO)
     {
         ReturnType _fr_ = E_OK;
 
@@ -1112,19 +1112,19 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
     return E_OK;
 }
 
-ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_t w0)
+ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = true;
 
     ReturnType fr;
 
-    bignum_s* s0 = mkBigNum(BIGNUM_BITS);
+    bignum_s* s1 = mkBigNum(BIGNUM_BITS);
 
-    s0->nums[0] = w0;
+    s1->nums[0] = ws1;
 
     fr = mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
 
-    rmBigNum(&s0);
+    rmBigNum(&s1);
 
     return fr;
 }
@@ -1753,7 +1753,7 @@ ReturnType mod_mont_unsigned_safe(bignum_s* mont, const bignum_s* n_x2bit, const
         // ui * m
         if(ui != 0)
         {
-            _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, conf->modulus, ui));
+            _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, ui, conf->modulus));
             _FUNC_WRAP_(fr, add_bignum_unsigned_unsafe(a_x2bit, a_x2bit, mul_x2b));
         }
         else
@@ -1810,7 +1810,7 @@ ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignu
         // A = (A + x_i * y)
         _DPRINTF_("xi= 0x%08x\r\n", xi);
         _PRINT_BIGNUM_(y, "y");
-        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, y, xi));              _DPRINTF_("||%s:%d\n", __func__, __LINE__);
+        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, xi, y));              _DPRINTF_("||%s:%d\n", __func__, __LINE__);
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b = xi * y");
         _PRINT_BIGNUM_(a_x2bit, "a_x2bit");
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b");
@@ -1819,7 +1819,7 @@ ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignu
         // A = (A + x_i * y) + (u_i * m)
         _DPRINTF_("ui= 0x%08x\r\n", ui);
         _PRINT_BIGNUM_(conf->modulus, "conf->modulus");
-        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, conf->modulus, ui));  _DPRINTF_("||%s:%d\n", __func__, __LINE__);
+        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, ui, conf->modulus));  _DPRINTF_("||%s:%d\n", __func__, __LINE__);
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b = ui * m");
         _PRINT_BIGNUM_(a_x2bit, "a_x2bit");
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b");

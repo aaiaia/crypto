@@ -22,12 +22,13 @@
 #endif /* ENABLE_BIGNUM_LOG */
 mont_conf_s* mkMontConf(const bignum_s* modulus)
 {
-    if(modulus == NULL)             return NULL;
-    if(modulus->bits%MONT_BASE_BIT) return NULL;    // modulus length have to be multiple of bit length of base
+    if(modulus == NULL)                 return NULL;
+    if(MONT_BASE_bREM(modulus->bits))   return NULL;    // modulus length have to be multiple of bit length of base
+    if(modulus->bits<MONT_BASE_BIT)     return NULL;
 
     const size_t mont_n = MONT_BASE_b2L(modulus->bits);
-    bignum_s* baseRadix = mkBigNum(modulus->bits + 1UL);
-    bignum_s* nModInv_p1b = mkBigNum(modulus->bits + 1UL);
+    bignum_s* baseRadix = mkBigNum(modulus->bits);
+    bignum_s* nModInv = mkBigNum(modulus->bits);
     (void)clr_bignum(baseRadix);
     (void)set1b_bignum(baseRadix, MONT_BASE_BIT);
      _PRINT_BIGNUM_(baseRadix, "baseRadix");
@@ -41,17 +42,15 @@ mont_conf_s* mkMontConf(const bignum_s* modulus)
      _PRINT_BIGNUM_(conf->modulus, "conf->modulus");
 
     conf->nModInv = mkBigNum(modulus->bits);
-    (void)cpy_bignum_unsigned_unsafe(nModInv_p1b, modulus);
-    (void)inv_bignum(nModInv_p1b);
-    (void)add_bignum_carry_loc_unsigned(nModInv_p1b, 1U, 0U);
-     _PRINT_BIGNUM_(nModInv_p1b, "nModInv_p1b");
-    (void)mim_bignum(nModInv_p1b, nModInv_p1b, baseRadix);  // nModInv = m' = -m^-1 mod b
-     _PRINT_BIGNUM_(nModInv_p1b, "nModInv_p1b");
-    (void)cpy_bignum_unsigned_unsafe(conf->nModInv, nModInv_p1b);
+    (void)cpy_bignum_twos_signed_safe(nModInv, modulus);
+     _PRINT_BIGNUM_(nModInv, "nModInv(=2's of modulus)");
+    (void)mim_bignum(nModInv, nModInv, baseRadix);  // nModInv = m' = -m^-1 mod b
+     _PRINT_BIGNUM_(nModInv, "nModInv(Multiplicative inverse modulo");
+    (void)cpy_bignum_unsigned_safe(conf->nModInv, nModInv);
      _PRINT_BIGNUM_(conf->nModInv, "conf->nModInv");
 
     rmBigNum(&baseRadix);
-    rmBigNum(&nModInv_p1b);
+    rmBigNum(&nModInv);
 
     return conf;
 }

@@ -343,7 +343,7 @@ static inline ReturnType mul_bignum_unsigned_unsafe(bignum_s* d, const bignum_s*
     const bool ign_sign = true, ign_len = true;
     return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
 }
-ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_t w0);
+ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0);
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
 ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d, const bool ign_len);
 static inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d)
