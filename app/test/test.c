@@ -1437,7 +1437,7 @@ void test_sub_bignum_unsigned_127b(void)
         test_co = BIGNUM_MAX;
 
         TICK_TIME_START("add_bignum_wloc_ext");
-        add_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i], 0UL, ign_sign);
+        add_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i], 0UL, true, ign_sign);
         TICK_TIME_END;
         cmp_result = (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
         if(!cmp_result)
@@ -1519,7 +1519,7 @@ void test_add_bignum_unsigned_256b(void) {
             test_co = 0;
 
             TICK_TIME_START("add_bignum_wloc_ext");
-            add_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, test_ci, 0UL, ign_sign);
+            add_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, test_ci, 0UL, true, ign_sign);
             TICK_TIME_END;
             cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
             if((!cmp_result))
@@ -1739,7 +1739,7 @@ void test_sub_bignum_unsigned_256b(void) {
             test_co = 0;
 
             TICK_TIME_START("sub_bignum_wloc_ext");
-            sub_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, test_ci, 0UL, ign_sign);
+            sub_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, test_ci, 0UL, true, ign_sign);
             TICK_TIME_END;
             cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
             if((!cmp_result))
@@ -10312,6 +10312,22 @@ void test_sequence_bignum(void) {
     _COND_DO_TEST_(keyin)
     test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_signed_unsafe);
     printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_x2w_bignum_safe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_x2w_bignum_safe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_x2w_bignum_safe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_x2w_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_x2w_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_x2w_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
