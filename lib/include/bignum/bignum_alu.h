@@ -327,43 +327,53 @@ static inline ReturnType sub_bignum_with_add_twos(bignum_s* d, const bignum_s* s
 {
     return sub_bignum_with_add_twos_ext(NULL, d, s0, s1, 0U);
 }
-ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len);
-ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
-static inline ReturnType mul_bignum_signed_1bs(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+ReturnType mul_bignum_1bsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len);
+ReturnType mul_bignum_nbsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
+static inline ReturnType mul_bignum_signed_1bsR2L(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
-    return mul_bignum_1bs_ext(d, s1, s0, false);
+    return mul_bignum_1bsR2L_ext(d, s1, s0, false);
 }
-static inline ReturnType mul_bignum_signed(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_nbsR2L_signed(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = false, ign_len = false;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_unsigned(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_nbsR2L_unsigned(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = false;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_signed_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_signed_nbsR2L_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = false, ign_len = true;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_unsigned_nbsR2L_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = true;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
 
-ReturnType mul_bignum_x2w_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
-static inline ReturnType mul_x2w_bignum_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+ReturnType mul_bignum_x2wMul_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
+static inline ReturnType mul_bignum_signed_x2w_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = false, ign_len = false;
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
+}
+static inline ReturnType mul_bignum_unsigned_x2wMul_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = false;
-    return mul_bignum_x2w_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_x2w_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_signed_x2wMul_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = false, ign_len = true;
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
+}
+static inline ReturnType mul_bignum_unsigned_x2wMul_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = true;
-    return mul_bignum_x2w_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
 }
 
 ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0);

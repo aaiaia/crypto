@@ -978,7 +978,7 @@ ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_
 // idea notes.
 // s0 accumulates then shift left
 // s1 checks inclease nums index and shift likes bit witth
-ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len) {
+ReturnType mul_bignum_1bsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len) {
     if(!((d != NULL) && (s1 != NULL) && (s0 != NULL)))  return E_ERROR_NULL;
     if((!(s1->bits == s0->bits)) && (!ign_len))         return E_ERROR_BIGNUM_LENGTH;
     if((!(d->bits >= s0->bits)) && (!ign_len))          return E_ERROR_BIGNUM_LENGTH;
@@ -1020,7 +1020,7 @@ ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
     return E_OK;
 }
 
-ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len) {
+ReturnType mul_bignum_nbsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len) {
     if(!((d != NULL) && (s1 != NULL) && (s0 != NULL)))  return E_ERROR_NULL;
     if((!(s1->bits == s0->bits)) && (!ign_len))         return E_ERROR_BIGNUM_LENGTH;
     if((!(d->bits >= s0->bits)) && (!ign_len))          return E_ERROR_BIGNUM_LENGTH;
@@ -1130,7 +1130,7 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
     return E_OK;
 }
 
-ReturnType mul_bignum_x2w_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len) {
+ReturnType mul_bignum_x2wMul_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len) {
     if(!((d != NULL) && (s1 != NULL) && (s0 != NULL)))  return E_ERROR_NULL;
     if((!(s1->bits == s0->bits)) && (!ign_len))         return E_ERROR_BIGNUM_LENGTH;
     if((!(d->bits >= s0->bits)) && (!ign_len))          return E_ERROR_BIGNUM_LENGTH;
@@ -1159,11 +1159,16 @@ ReturnType mul_bignum_x2w_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
             bignum_t _ss0_;
             if(i < s0->nlen)    _ss0_ = s0->nums[i];
             else                _ss0_ = _bf0_;
+
+            if(_ss0_ == 0x0U)   continue;
+
             for(size_t j=0ul; j<d->nlen; j++)
             {
                 bignum_t _ss1_;
                 if(j < s1->nlen)    _ss1_ = s1->nums[j];
-                else                _ss1_ = _bf0_;
+                else                _ss1_ = _bf1_;
+
+                if(_ss1_ == 0x0U)   continue;
 
                 (*((bignumX2b_t*)(bnw_x2w->nums))) = ((bignumX2b_t)(_ss0_) *  (bignumX2b_t)(_ss1_));
                 _fr_ = add_bignum_wloc_unsigned_unsafe(mul_buf, mul_buf, bnw_x2w, i+j);
@@ -1196,7 +1201,7 @@ ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_t ws1, const b
 
     s1->nums[0] = ws1;
 
-    fr = mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    fr = mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 
     rmBigNum(&s1);
 
@@ -1627,7 +1632,7 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
 
         // (old_s, s) := (s, old_s − quotient × s)
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_tmp_, ___s_));
-        _FUNC_WRAP_(_fr_, mul_bignum_signed_unsafe(_tmp_, _quo_, _tmp_));
+        _FUNC_WRAP_(_fr_, mul_bignum_signed_nbsR2L_unsafe(_tmp_, _quo_, _tmp_));
         _FUNC_WRAP_(_fr_, sub_bignum_signed_unsafe(_tmp_, _o_s_, _tmp_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_o_s_, ___s_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(___s_, _tmp_));
@@ -1636,7 +1641,7 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
 
         // (old_t, t) := (t, old_t − quotient × t)
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_tmp_, ___t_));
-        _FUNC_WRAP_(_fr_, mul_bignum_signed_unsafe(_tmp_, _quo_, _tmp_));
+        _FUNC_WRAP_(_fr_, mul_bignum_signed_nbsR2L_unsafe(_tmp_, _quo_, _tmp_));
         _FUNC_WRAP_(_fr_, sub_bignum_signed_unsafe(_tmp_, _o_t_, _tmp_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_o_t_, ___t_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(___t_, _tmp_));
@@ -1716,7 +1721,7 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
 
         // (t, newt) := (newt, t − quotient × newt)
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_tmp_, _n_t_));
-        _FUNC_WRAP_(_fr_, mul_bignum_signed_unsafe(_tmp_, _quo_, _tmp_));
+        _FUNC_WRAP_(_fr_, mul_bignum_signed_nbsR2L_unsafe(_tmp_, _quo_, _tmp_));
         _FUNC_WRAP_(_fr_, sub_bignum_signed_unsafe(_tmp_, _o_t_, _tmp_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_o_t_, _n_t_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_n_t_, _tmp_));

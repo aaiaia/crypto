@@ -1973,19 +1973,19 @@ void test_sub_bignum_unsigned_256b_ext(const char* test_fn_name, const TEST_FP_B
 }
 
 #define TEST_MUL_BIGNUM_BS  1024U
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_0[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_0[] = {
     0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_0[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_0[] = {
     0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_0[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_0[] = {
     0x00000001U, 0x00000000U, 0xfffffffeU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -1996,19 +1996,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_0[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_1[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_1[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_1[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_1[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_1[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_1[] = {
     0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0xfffffffeU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -2019,19 +2019,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_1[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_2[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_2[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_2[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_2[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_2[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_2[] = {
     0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xffffffffU, 0xfffffffeU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -2042,19 +2042,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_2[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_3[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_3[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_3[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_3[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_3[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_3[] = {
     0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xffffffffU, 0xfffffffeU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -2065,19 +2065,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_3[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_4[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_4[] = {
     0x00000007U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 }; // 7
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_4[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_4[] = {
     0xfffffff2U, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -14
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_4[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_4[] = {
     0xffffff9eU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
@@ -2088,19 +2088,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_4[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -98
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_5[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_5[] = {
     0xfffffff2U, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -14
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_5[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_5[] = {
     0x00000007U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 }; // 7
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_5[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_5[] = {
     0xffffff9eU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
@@ -2120,32 +2120,32 @@ typedef struct {
 } test_bignum_mul_bignum_set_t;
 
 typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignum_s*);
-void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
+void test_mul_bignum_signed_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
 {
     const test_bignum_mul_bignum_set_t TEST_BIGNUM_mul_bignum_set_LIST[] = {
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_0, TEST_BIGNUM_1024b_Num_MUL___B_0, TEST_BIGNUM_1024b_Num_MUL_Ref_0,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_0,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_1, TEST_BIGNUM_1024b_Num_MUL___B_1, TEST_BIGNUM_1024b_Num_MUL_Ref_1,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_1,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_2, TEST_BIGNUM_1024b_Num_MUL___B_2, TEST_BIGNUM_1024b_Num_MUL_Ref_2,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_2,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_3, TEST_BIGNUM_1024b_Num_MUL___B_3, TEST_BIGNUM_1024b_Num_MUL_Ref_3,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_3,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_4, TEST_BIGNUM_1024b_Num_MUL___B_4, TEST_BIGNUM_1024b_Num_MUL_Ref_4,
-            NULL, false,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_4,
+            NULL, true,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_5, TEST_BIGNUM_1024b_Num_MUL___B_5, TEST_BIGNUM_1024b_Num_MUL_Ref_5,
-            NULL, false,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_5,
+            NULL, true,
         },
     };
 
@@ -2195,27 +2195,27 @@ void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST
 {
     const test_bignum_mul_bignum_set_t TEST_BIGNUM_mul_bignum_set_LIST[] = {
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_0, TEST_BIGNUM_1024b_Num_MUL___B_0, TEST_BIGNUM_1024b_Num_MUL_Ref_0,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_0,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_1, TEST_BIGNUM_1024b_Num_MUL___B_1, TEST_BIGNUM_1024b_Num_MUL_Ref_1,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_1,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_2, TEST_BIGNUM_1024b_Num_MUL___B_2, TEST_BIGNUM_1024b_Num_MUL_Ref_2,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_2,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_3, TEST_BIGNUM_1024b_Num_MUL___B_3, TEST_BIGNUM_1024b_Num_MUL_Ref_3,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_3,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_4, TEST_BIGNUM_1024b_Num_MUL___B_4, TEST_BIGNUM_1024b_Num_MUL_Ref_4,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_4,
             NULL, true,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_5, TEST_BIGNUM_1024b_Num_MUL___B_5, TEST_BIGNUM_1024b_Num_MUL_Ref_5,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_5,
             NULL, true,
         },
     };
@@ -2253,6 +2253,61 @@ void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST
         }
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
         TEST_ASSERT((cmp_result) || (intentional_invalid));
+    }
+
+    rmBigNum(&test_opA);
+    rmBigNum(&test_opB);
+    rmBigNum(&test_dst);
+    rmBigNum(&test_ref);
+}
+typedef struct {
+    const char*                 fn;
+    const TEST_FP_BIGNUM_MUL    fp;
+}TV_MUL_BIGNUM_LIST_t;
+void test_mul_bignum_1024b_sameBitLength_time_measuring(const size_t iter)
+{
+    const TV_MUL_BIGNUM_LIST_t tv_mul_bignum_fn_list[] = {
+                {"mul_bignum_signed_1bsR2L",           mul_bignum_signed_1bsR2L           },
+                {"mul_bignum_nbsR2L_signed",               mul_bignum_nbsR2L_signed               },
+                {"mul_bignum_nbsR2L_unsigned",             mul_bignum_nbsR2L_unsigned             },
+                {"mul_bignum_signed_nbsR2L_unsafe",        mul_bignum_signed_nbsR2L_unsafe        },
+                {"mul_bignum_unsigned_nbsR2L_unsafe",      mul_bignum_unsigned_nbsR2L_unsafe      },
+                {"mul_bignum_signed_x2w_safe",      mul_bignum_signed_x2w_safe      },
+                {"mul_bignum_unsigned_x2wMul_safe",    mul_bignum_unsigned_x2wMul_safe    },
+                {"mul_bignum_signed_x2wMul_unsafe",    mul_bignum_signed_x2wMul_unsafe    },
+                {"mul_bignum_unsigned_x2wMul_unsafe",  mul_bignum_unsigned_x2wMul_unsafe  },
+                {NULL,                              NULL                            },
+    };
+
+    bool cmp_result;
+    bool intentional_invalid;
+    ReturnType fr;
+
+    bignum_s* test_opA = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_opB = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_dst = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_ref = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+
+    srand(time(NULL));
+    for(size_t i=0UL; i<test_opA->nlen; i++)
+    {
+            test_opA->nums[i] = ((((bignum_t)(rand()&0xFFFFU))<<(0U)) | (((bignum_t)(rand()&0xFFFFU))<<(BIGNUM_BITS>>1U)));
+    }
+    for(size_t i=0UL; i<test_opB->nlen; i++)
+    {
+            test_opB->nums[i] = ((((bignum_t)(rand()&0xFFFFU))<<(0U)) | (((bignum_t)(rand()&0xFFFFU))<<(BIGNUM_BITS>>1U)));
+    }
+
+    for(size_t i=0UL; tv_mul_bignum_fn_list[i].fp!=NULL; i++)
+    {
+        TICK_TIME_START(tv_mul_bignum_fn_list[i].fn);
+        for(size_t j=0UL; j<iter; j++)
+        {
+            if((fr = tv_mul_bignum_fn_list[i].fp(test_dst, test_opA, test_opB)) != E_OK) {
+                printReturnType(fr);
+            }
+        }
+        TICK_TIME_END;
     }
 
     rmBigNum(&test_opA);
@@ -2697,7 +2752,7 @@ void test_mul_bignum_bs_nn(void)
     test_ref->nums[0]  = 0x00000001U;
     intentional_invalid = false;
 
-    if(fr = mul_bignum_1bs_ext(test_dst, test_opA, test_opB, false)) {
+    if(fr = mul_bignum_1bsR2L_ext(test_dst, test_opA, test_opB, false)) {
         printReturnType(fr);
     } else { /* Do nothing */ }
 
@@ -2709,7 +2764,7 @@ void test_mul_bignum_bs_nn(void)
         test_print_bignum(test_dst, "dst");
         test_print_bignum(test_ref, "ref");
     }
-    printf("mul_bignum_signed_1bs() is %s\r\n", ((test_cmp)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    printf("mul_bignum_signed_1bsR2L() is %s\r\n", ((test_cmp)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
     TEST_ASSERT((test_cmp) || (intentional_invalid));
 
     rmBigNum(&test_opA);
@@ -4339,8 +4394,8 @@ void test_gcd_bignum(void)
         test_print_bignum(num_s, "coef s");
         test_print_bignum(num_t, "coef t");
 
-        if((fr = mul_bignum_signed_unsafe(prod_as, num_a, num_s)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
-        if((fr = mul_bignum_signed_unsafe(prod_bt, num_b, num_t)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = mul_bignum_signed_nbsR2L_unsafe(prod_as, num_a, num_s)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = mul_bignum_signed_nbsR2L_unsafe(prod_bt, num_b, num_t)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
         if((fr = add_bignum_signed_unsafe(sum, prod_as, prod_bt)) != E_OK)        { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
         test_print_bignum(prod_as, "prod_as");
         test_print_bignum(prod_bt, "prod_bt");
@@ -5070,7 +5125,7 @@ void test_montgomery(const char* test_fn_name)
             intentional_invalid = false;
 
             TICK_TIME_START("Normal Form multiply and modulus");
-            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, multiplier, multiplicand);
             fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
@@ -5128,7 +5183,7 @@ void test_montgomery(const char* test_fn_name)
 
             /* Classical multiply and modulus */
             TICK_TIME_START("Normal Form multiply and modulus");
-            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, multiplier, multiplicand);
             fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
@@ -5198,7 +5253,7 @@ void test_montgomery(const char* test_fn_name)
             {
                 memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-                fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+                fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
                 fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             }
         }
@@ -5218,14 +5273,14 @@ void test_montgomery(const char* test_fn_name)
         fr = convMontToBignum_unsigned_safe(mont_to_norm, mont_product, mont_conf);
         TICK_TIME_END;
 
-        TICK_TIME_START("Process time of mul_bignum_unsigned_unsafe()");
+        TICK_TIME_START("Process time of mul_bignum_unsigned_nbsR2L_unsafe()");
         for(size_t iter = 0x0; iter < 0x100; iter++)
         {
             for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
             {
                 memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-                fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+                fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
             }
         }
         TICK_TIME_END;
@@ -10273,61 +10328,132 @@ void test_sequence_bignum(void) {
     printf("[test   end: test_sub1w_bignum_loc_signed()]\r\n");
     printf("================================================================================\n");
 
-
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed_1bs)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_1bsR2L)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum_signed_1bs", mul_bignum_signed_1bs);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed_1bs)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_signed_1bsR2L", mul_bignum_signed_1bsR2L);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_1bsR2L)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_signed)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum_signed", mul_bignum_signed);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed_unsafe)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_unsigned)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum_signed", mul_bignum_signed_unsafe);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed_unsafe)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_nbsR2L_unsigned", mul_bignum_nbsR2L_unsigned);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_unsigned)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed)]\r\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_signed_nbsR2L_unsafe", mul_bignum_signed_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_unsigned_nbsR2L_unsafe", mul_bignum_unsigned_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_x2w_safe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_signed_x2w_safe", mul_bignum_signed_x2w_safe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_x2w_safe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_unsigned_x2wMul_safe", mul_bignum_unsigned_x2wMul_safe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_x2wMul_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_signed_x2wMul_unsafe", mul_bignum_signed_x2wMul_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_x2wMul_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_unsigned_x2wMul_unsafe", mul_bignum_unsigned_x2wMul_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_unsigned)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_signed);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_nbsR2L_unsigned", mul_bignum_nbsR2L_unsigned);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_unsigned)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_signed)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_signed_unsafe);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_unsafe)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_x2w_bignum_safe)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_x2w_bignum_safe);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_x2w_bignum_safe)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_unsigned_nbsR2L_unsafe", mul_bignum_unsigned_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_x2w_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_x2w_unsafe);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_x2w_unsafe)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed_nbsR2L_unsafe", mul_bignum_signed_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_unsigned_x2wMul_safe", mul_bignum_unsigned_x2wMul_safe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_unsigned_x2wMul_unsafe", mul_bignum_unsigned_x2wMul_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBitLength_time_measuring()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBitLength_time_measuring");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBitLength_time_measuring(0x1000UL);
+    printf("[test   end: test_mul_bignum_1024b_sameBitLength_time_measuring()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -10396,19 +10522,19 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed)]\r\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_nbsR2L_signed)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed", mul_bignum_signed);
-    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed)]\r\n");
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_nbsR2L_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed_unsafe", mul_bignum_signed_unsafe);
-    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_unsafe)]\r\n");
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed_nbsR2L_unsafe", mul_bignum_signed_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
