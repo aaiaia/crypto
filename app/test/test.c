@@ -1425,7 +1425,7 @@ void test_sub_bignum_unsigned_127b(void)
 
     const bool ign_sign = true;
 
-    /* add_bignum_ext test */
+    /* add_bignum_wloc_ext test */
     for(unsigned int i = 0u; i < TV_U32_ADD_NUM; i++) {
         memset(test_opA->nums, 0x0u, (test_opA->size));
         memset(test_opB->nums, 0x0u, (test_opB->size));
@@ -1436,8 +1436,8 @@ void test_sub_bignum_unsigned_127b(void)
         memcpy(test_ref->nums, TV_u32_add_refList[i], TV_u32_add_lenList[i]);
         test_co = BIGNUM_MAX;
 
-        TICK_TIME_START("add_bignum_ext");
-        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i], ign_sign);
+        TICK_TIME_START("add_bignum_wloc_ext");
+        add_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, TV_u32_add_carryInList[i], 0UL, true, ign_sign);
         TICK_TIME_END;
         cmp_result = (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
         if(!cmp_result)
@@ -1449,7 +1449,7 @@ void test_sub_bignum_unsigned_127b(void)
             printf("[ref carry]\r\nc=0x%08x\r\n", TV_u32_add_carryInList[i]);
             printf("[out carry]\r\nc=0x%08x\r\n", test_co);
         }
-        printf("add_bignum_ext() is %s\r\n", ((cmp_result)?MES_PASS:MES_FAIL));
+        printf("add_bignum_wloc_ext() is %s\r\n", ((cmp_result)?MES_PASS:MES_FAIL));
         TEST_ASSERT(cmp_result);
     }
 
@@ -1491,11 +1491,15 @@ void test_add_bignum_unsigned_256b(void) {
 
     bignum_s* test_opA;
     bignum_s* test_opB;
+    bignum_s* test_opB_bd2;
+    bignum_s* test_opB_bd4;
     bignum_s* test_dst;
     bignum_s* test_ref;
 
     test_opA = mkBigNum(TEST_BIGNUM_256BIT);
     test_opB = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opB_bd2 = mkBigNum(TEST_BIGNUM_256BIT>>1UL);
+    test_opB_bd4 = mkBigNum(TEST_BIGNUM_256BIT>>2UL);
     test_dst = mkBigNum(TEST_BIGNUM_256BIT);
     test_ref = mkBigNum(TEST_BIGNUM_256BIT);
 
@@ -1504,39 +1508,404 @@ void test_add_bignum_unsigned_256b(void) {
     /* Add test */
     for(size_t i = 0UL; i <sizeof(TEST_BIGNUM_add_bignum_set_LIST)/sizeof(test_bignum_add_bignum_set_t); i++)
     {
-        memcpy(test_opA->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___a, test_opA->size);
-        memcpy(test_opB->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___b, test_opB->size);
-        memcpy(test_ref->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums_ref, test_ref->size);
-        intentional_invalid = TEST_BIGNUM_add_bignum_set_LIST[i].invalid_case;
-        test_ci = 0;
-        test_co = 0;
-
-        TICK_TIME_START("add_bignum_ext");
-        add_bignum_ext(&test_co, test_dst, test_opA, test_opB, test_ci, ign_sign);
-        TICK_TIME_END;
-        cmp_result = (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
-        if((!cmp_result))
         {
-            test_print_bignum(test_opA, "opA");
-            test_print_bignum(test_opB, "opB");
-            test_print_bignum(test_dst, "dst");
-            test_print_bignum(test_ref, "ref");
-            printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
-            printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+            cmp_result = true;
 
+            memcpy(test_opA->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_opB->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___b, test_opB->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_add_bignum_set_LIST[i].invalid_case;
+            test_ci = 0;
+            test_co = 0;
+
+            TICK_TIME_START("add_bignum_wloc_ext");
+            add_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, test_ci, 0UL, true, ign_sign);
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("add_bignum_wloc_ext() is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
         }
-        printf("add_bignum_ext() is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
-        TEST_ASSERT((cmp_result) || (intentional_invalid));
+        {
+            // note: add_bignum_wloc_unsigned_unsafe, low side first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_add_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_add_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("add_bignum_wloc_unsigned_unsafe(): /2 bits width, low side first");
+            memcpy(test_opB_bd2->nums, (opB_addr+(0UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd2, (0UL*(test_opB_bd2->nlen)));
+            memcpy(test_opB_bd2->nums, (opB_addr+(1UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd2, (1UL*(test_opB_bd2->nlen)));
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+
+            }
+            printf("add_bignum_wloc_unsigned_unsafe(), /2 bits width, low side first, is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+        {
+            // note: add_bignum_wloc_unsigned_unsafe, high side first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_add_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_add_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("add_bignum_wloc_unsigned_unsafe: /2 bits width high side first");
+            memcpy(test_opB_bd2->nums, (opB_addr+(1UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd2, (1UL*(test_opB_bd2->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd2->nums, (opB_addr+(0UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd2, (0UL*(test_opB_bd2->nlen)));
+            test_co += test_cr;
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("add_bignum_wloc_unsigned_unsafe(), /2 bits width, high side first is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+        {
+            // note: add_bignum_wloc_unsigned_unsafe, low side first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_add_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_add_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("add_bignum_wloc_unsigned_unsafe(): /4 bits width, low side first");
+            memcpy(test_opB_bd4->nums, (opB_addr+(0UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd4, (0UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(1UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (1UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(2UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (2UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(3UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (3UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("add_bignum_wloc_unsigned_unsafe(), /4 bits width, low side first, is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+        {
+            // note: add_bignum_wloc_unsigned_unsafe, high side first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_add_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_add_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_add_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("add_bignum_wloc_unsigned_unsafe: /4 bits width high side first");
+            memcpy(test_opB_bd4->nums, (opB_addr+(3UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd4, (3UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(2UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (2UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(1UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (1UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(0UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            add_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (0UL*(test_opB_bd4->nlen)));
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("add_bignum_wloc_unsigned_unsafe(), /4 bits width, high side first is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
     }
 
     rmBigNum(&test_ref);
     rmBigNum(&test_dst);
     rmBigNum(&test_opA);
     rmBigNum(&test_opB);
+    rmBigNum(&test_opB_bd2);
+    rmBigNum(&test_opB_bd4);
 }
 
+void test_sub_bignum_unsigned_256b(void) {
+    typedef struct {
+        const bignum_t* nums___a;
+        const bignum_t* nums___b;
+        const bignum_t* nums_ref;
+        const char*     title;
+        const bool      invalid_case;
+    } test_bignum_sub_bignum_set_t;
+    const test_bignum_sub_bignum_set_t TEST_BIGNUM_sub_bignum_set_LIST[] = {
+        {
+            TEST_BIGNUM_256b_RandomNum_Add_A_B_0, TEST_BIGNUM_256b_RandomNum_______B_0, TEST_BIGNUM_256b_RandomNum_______A_0,
+            "add 256b bitnum A - B, link: https://defuse.ca/big-number-calculator.htm", false,
+        },
+        {
+            TEST_BIGNUM_256b_signed__zero, TEST_BIGNUM_256b_signed____p1, TEST_BIGNUM_256b_signed____m1,
+            "add 256b bitnum 0 - (+1), link: https://defuse.ca/big-number-calculator.htm", false,
+        },
+        {
+            TEST_BIGNUM_256b_signed____m3, TEST_BIGNUM_256b_signed____m2, TEST_BIGNUM_256b_signed____m1,
+            "add 256b bitnum (-3) - (-2), link: https://defuse.ca/big-number-calculator.htm", false,
+        },
+    };
+
+    bool cmp_result;
+    bool intentional_invalid;
+
+    bignum_t test_ci;
+    bignum_t test_co;
+
+    bignum_s* test_opA;
+    bignum_s* test_opB;
+    bignum_s* test_opB_bd2;
+    bignum_s* test_opB_bd4;
+    bignum_s* test_dst;
+    bignum_s* test_ref;
+
+    test_opA = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opB = mkBigNum(TEST_BIGNUM_256BIT);
+    test_opB_bd2 = mkBigNum(TEST_BIGNUM_256BIT>>1UL);
+    test_opB_bd4 = mkBigNum(TEST_BIGNUM_256BIT>>2UL);
+    test_dst = mkBigNum(TEST_BIGNUM_256BIT);
+    test_ref = mkBigNum(TEST_BIGNUM_256BIT);
+
+    const bool ign_sign = true;
+
+    /* Add test */
+    for(size_t i = 0UL; i <sizeof(TEST_BIGNUM_sub_bignum_set_LIST)/sizeof(test_bignum_sub_bignum_set_t); i++)
+    {
+        {
+            cmp_result = true;
+
+            memcpy(test_opA->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_opB->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums___b, test_opB->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_sub_bignum_set_LIST[i].invalid_case;
+            test_ci = 0;
+            test_co = 0;
+
+            TICK_TIME_START("sub_bignum_wloc_ext");
+            sub_bignum_wloc_ext(&test_co, test_dst, test_opA, test_opB, test_ci, 0UL, true, ign_sign);
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("sub_bignum_wloc_ext() is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+        {
+            // note: sub_bignum_wloc_unsigned_unsafe, log side first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_sub_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_sub_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("sub_bignum_wloc_unsigned_unsafe: /2 bits width low side first");
+            memcpy(test_opB_bd2->nums, (opB_addr+(0UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd2, (0UL*(test_opB_bd2->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd2->nums, (opB_addr+(1UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd2, (1UL*(test_opB_bd2->nlen)));
+            test_co += test_cr;
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("sub_bignum_wloc_unsigned_unsafe(), /2 bits width, low side first is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+        {
+            // note: sub_bignum_wloc_unsigned_unsafe, high side first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_sub_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_sub_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("sub_bignum_wloc_unsigned_unsafe: /2 bits width high side first");
+            memcpy(test_opB_bd2->nums, (opB_addr+(1UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd2, (1UL*(test_opB_bd2->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd2->nums, (opB_addr+(0UL*(test_opB->size>>1UL))), test_opB->size>>1UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd2, (0UL*(test_opB_bd2->nlen)));
+            test_co += test_cr;
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("sub_bignum_wloc_unsigned_unsafe(), /2 bits width, high side first is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+        {
+            // note: sub_bignum_wloc_unsigned_unsafe, low size first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_sub_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_sub_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("sub_bignum_wloc_unsigned_unsafe: /4 bits width low side first");
+            memcpy(test_opB_bd4->nums, (opB_addr+(0UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd4, (0UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(1UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (1UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(2UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (2UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(3UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (3UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("sub_bignum_wloc_unsigned_unsafe(), /4 bits width, low side first is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+        {
+            // note: sub_bignum_wloc_unsigned_unsafe, high side first
+            cmp_result = true;
+
+            bignum_t test_cr;
+            const uint8_t* opB_addr = ((uint8_t*)TEST_BIGNUM_sub_bignum_set_LIST[i].nums___b);
+            memcpy(test_opA->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums___a, test_opA->size);
+            memcpy(test_ref->nums, TEST_BIGNUM_sub_bignum_set_LIST[i].nums_ref, test_ref->size);
+            intentional_invalid = TEST_BIGNUM_sub_bignum_set_LIST[i].invalid_case;
+
+            TICK_TIME_START("sub_bignum_wloc_unsigned_unsafe: /4 bits width high side first");
+            memcpy(test_opB_bd4->nums, (opB_addr+(3UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_opA, test_opB_bd4, (3UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(2UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (2UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(1UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (1UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            memcpy(test_opB_bd4->nums, (opB_addr+(0UL*(test_opB->size>>2UL))), test_opB->size>>2UL);
+            sub_bignum_wloc_unsigned_unsafe(test_dst, test_dst, test_opB_bd4, (0UL*(test_opB_bd4->nlen)));
+            test_co += test_cr;
+            TICK_TIME_END;
+            cmp_result &= (memcmp(test_ref->nums, test_dst->nums, (test_ref->size)) == 0);
+            if((!cmp_result))
+            {
+                test_print_bignum(test_opA, "opA");
+                test_print_bignum(test_opB, "opB");
+                test_print_bignum(test_dst, "dst");
+                test_print_bignum(test_ref, "ref");
+                printf("[carry  in]\r\nc=0x%08x\r\n", test_ci);
+                printf("[carry out]\r\nc=0x%08x\r\n", test_co);
+
+            }
+            printf("sub_bignum_wloc_unsigned_unsafe(), /4 bits width, high side first is %s\r\n", ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            TEST_ASSERT((cmp_result) || (intentional_invalid));
+        }
+    }
+
+    rmBigNum(&test_ref);
+    rmBigNum(&test_dst);
+    rmBigNum(&test_opA);
+    rmBigNum(&test_opB);
+    rmBigNum(&test_opB_bd2);
+    rmBigNum(&test_opB_bd4);
+}
 typedef ReturnType (*TEST_FP_BIGNUM_SUB)(bignum_s*, const bignum_s*, const bignum_s*);
-void test_sub_bignum_unsigned_256b(const char* test_fn_name, const TEST_FP_BIGNUM_SUB test_fp)
+void test_sub_bignum_unsigned_256b_ext(const char* test_fn_name, const TEST_FP_BIGNUM_SUB test_fp)
 {
     typedef struct {
         const bignum_t* nums___a;
@@ -1604,19 +1973,19 @@ void test_sub_bignum_unsigned_256b(const char* test_fn_name, const TEST_FP_BIGNU
 }
 
 #define TEST_MUL_BIGNUM_BS  1024U
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_0[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_0[] = {
     0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_0[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_0[] = {
     0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_0[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_0[] = {
     0x00000001U, 0x00000000U, 0xfffffffeU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -1627,19 +1996,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_0[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_1[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_1[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_1[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_1[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_1[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_1[] = {
     0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0xfffffffeU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -1650,19 +2019,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_1[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_2[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_2[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_2[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_2[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_2[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_2[] = {
     0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xffffffffU, 0xfffffffeU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -1673,19 +2042,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_2[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_3[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_3[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_3[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_3[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_3[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_3[] = {
     0x00000001U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0xffffffffU, 0xfffffffeU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
@@ -1696,19 +2065,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_3[] = {
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 };
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_4[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_4[] = {
     0x00000007U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 }; // 7
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_4[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_4[] = {
     0xfffffff2U, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -14
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_4[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_4[] = {
     0xffffff9eU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
@@ -1719,19 +2088,19 @@ const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_4[] = {
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -98
 
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___A_5[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_5[] = {
     0xfffffff2U, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
 }; // -14
-const bignum_t TEST_BIGNUM_1024b_Num_MUL___B_5[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_5[] = {
     0x00000007U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
     0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 0x00000000U, 
 }; // 7
-const bignum_t TEST_BIGNUM_1024b_Num_MUL_Ref_5[] = {
+const bignum_t TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_5[] = {
     0xffffff9eU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
     0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 0xffffffffU, 
@@ -1751,32 +2120,32 @@ typedef struct {
 } test_bignum_mul_bignum_set_t;
 
 typedef ReturnType (*TEST_FP_BIGNUM_MUL)(bignum_s*, const bignum_s*, const bignum_s*);
-void test_mul_bignum_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
+void test_mul_bignum_signed_1024b(const char* test_fn_name, const TEST_FP_BIGNUM_MUL test_fp)
 {
     const test_bignum_mul_bignum_set_t TEST_BIGNUM_mul_bignum_set_LIST[] = {
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_0, TEST_BIGNUM_1024b_Num_MUL___B_0, TEST_BIGNUM_1024b_Num_MUL_Ref_0,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_0,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_1, TEST_BIGNUM_1024b_Num_MUL___B_1, TEST_BIGNUM_1024b_Num_MUL_Ref_1,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_1,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_2, TEST_BIGNUM_1024b_Num_MUL___B_2, TEST_BIGNUM_1024b_Num_MUL_Ref_2,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_2,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_3, TEST_BIGNUM_1024b_Num_MUL___B_3, TEST_BIGNUM_1024b_Num_MUL_Ref_3,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_3,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_4, TEST_BIGNUM_1024b_Num_MUL___B_4, TEST_BIGNUM_1024b_Num_MUL_Ref_4,
-            NULL, false,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_4,
+            NULL, true,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_5, TEST_BIGNUM_1024b_Num_MUL___B_5, TEST_BIGNUM_1024b_Num_MUL_Ref_5,
-            NULL, false,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_5,
+            NULL, true,
         },
     };
 
@@ -1826,27 +2195,27 @@ void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST
 {
     const test_bignum_mul_bignum_set_t TEST_BIGNUM_mul_bignum_set_LIST[] = {
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_0, TEST_BIGNUM_1024b_Num_MUL___B_0, TEST_BIGNUM_1024b_Num_MUL_Ref_0,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_0, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_0,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_1, TEST_BIGNUM_1024b_Num_MUL___B_1, TEST_BIGNUM_1024b_Num_MUL_Ref_1,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_1, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_1,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_2, TEST_BIGNUM_1024b_Num_MUL___B_2, TEST_BIGNUM_1024b_Num_MUL_Ref_2,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_2, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_2,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_3, TEST_BIGNUM_1024b_Num_MUL___B_3, TEST_BIGNUM_1024b_Num_MUL_Ref_3,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_3, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_3,
             NULL, false,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_4, TEST_BIGNUM_1024b_Num_MUL___B_4, TEST_BIGNUM_1024b_Num_MUL_Ref_4,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_4, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_4,
             NULL, true,
         },
         {
-            TEST_BIGNUM_1024b_Num_MUL___A_5, TEST_BIGNUM_1024b_Num_MUL___B_5, TEST_BIGNUM_1024b_Num_MUL_Ref_5,
+            TV_BIGNUM_SIGNED_NUM_1kb_MUL___A_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL___B_5, TV_BIGNUM_SIGNED_NUM_1kb_MUL_Ref_5,
             NULL, true,
         },
     };
@@ -1884,6 +2253,61 @@ void test_mul_bignum_1024b_sameBignumLength(const char* test_fn_name, const TEST
         }
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
         TEST_ASSERT((cmp_result) || (intentional_invalid));
+    }
+
+    rmBigNum(&test_opA);
+    rmBigNum(&test_opB);
+    rmBigNum(&test_dst);
+    rmBigNum(&test_ref);
+}
+typedef struct {
+    const char*                 fn;
+    const TEST_FP_BIGNUM_MUL    fp;
+}TV_MUL_BIGNUM_LIST_t;
+void test_mul_bignum_1024b_sameBitLength_time_measuring(const size_t iter)
+{
+    const TV_MUL_BIGNUM_LIST_t tv_mul_bignum_fn_list[] = {
+                {"mul_bignum_signed_1bsR2L",           mul_bignum_signed_1bsR2L           },
+                {"mul_bignum_nbsR2L_signed",               mul_bignum_nbsR2L_signed               },
+                {"mul_bignum_nbsR2L_unsigned",             mul_bignum_nbsR2L_unsigned             },
+                {"mul_bignum_signed_nbsR2L_unsafe",        mul_bignum_signed_nbsR2L_unsafe        },
+                {"mul_bignum_unsigned_nbsR2L_unsafe",      mul_bignum_unsigned_nbsR2L_unsafe      },
+                {"mul_bignum_signed_x2w_safe",      mul_bignum_signed_x2w_safe      },
+                {"mul_bignum_unsigned_x2wMul_safe",    mul_bignum_unsigned_x2wMul_safe    },
+                {"mul_bignum_signed_x2wMul_unsafe",    mul_bignum_signed_x2wMul_unsafe    },
+                {"mul_bignum_unsigned_x2wMul_unsafe",  mul_bignum_unsigned_x2wMul_unsafe  },
+                {NULL,                              NULL                            },
+    };
+
+    bool cmp_result;
+    bool intentional_invalid;
+    ReturnType fr;
+
+    bignum_s* test_opA = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_opB = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_dst = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+    bignum_s* test_ref = mkBigNum(TEST_MUL_BIGNUM_BS<<0U);
+
+    srand(time(NULL));
+    for(size_t i=0UL; i<test_opA->nlen; i++)
+    {
+            test_opA->nums[i] = ((((bignum_t)(rand()&0xFFFFU))<<(0U)) | (((bignum_t)(rand()&0xFFFFU))<<(BIGNUM_BITS>>1U)));
+    }
+    for(size_t i=0UL; i<test_opB->nlen; i++)
+    {
+            test_opB->nums[i] = ((((bignum_t)(rand()&0xFFFFU))<<(0U)) | (((bignum_t)(rand()&0xFFFFU))<<(BIGNUM_BITS>>1U)));
+    }
+
+    for(size_t i=0UL; tv_mul_bignum_fn_list[i].fp!=NULL; i++)
+    {
+        TICK_TIME_START(tv_mul_bignum_fn_list[i].fn);
+        for(size_t j=0UL; j<iter; j++)
+        {
+            if((fr = tv_mul_bignum_fn_list[i].fp(test_dst, test_opA, test_opB)) != E_OK) {
+                printReturnType(fr);
+            }
+        }
+        TICK_TIME_END;
     }
 
     rmBigNum(&test_opA);
@@ -1930,9 +2354,9 @@ const uint32_t TV_BIGNUM_CARRY_LOC_FFFFFFFF_at012_007FFFFF_at3_unsigned[] = {
 };
 
 #define TEST_BIGNUM_CARRY_LOC_BIT_LEN 1024U
-void test_add_bignum_carry_loc_unsigned(void)
+void test_add1w_bignum_loc_unsigned(void)
 {
-    const char test_fn_name[] = "add_bignum_carry_loc_unsigned";
+    const char test_fn_name[] = "add1w_bignum_loc_unsigned";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -1947,7 +2371,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     test_opB = 0x12345678U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -1964,7 +2388,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     test_opB = 0x87654321U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -1982,7 +2406,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     test_opB = 0x66666666U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -1999,7 +2423,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     /* Set first stage 4 */
     test_opB = 0x00800000U;
     intentional_invalid = false;
-    bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, 3);
+    bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
@@ -2013,9 +2437,9 @@ void test_add_bignum_carry_loc_unsigned(void)
 
     rmBigNum(&test_opA);
 }
-void test_sub_bignum_carry_loc_unsigned(void)
+void test_sub1w_bignum_loc_unsigned(void)
 {
-    const char test_fn_name[] = "sub_bignum_carry_loc_unsigned";
+    const char test_fn_name[] = "sub1w_bignum_loc_unsigned";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -2029,7 +2453,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     /* Set first stage 4 */
     test_opB = 0x00800000U;
     intentional_invalid = false;
-    bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, 3);
+    bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
@@ -2045,7 +2469,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     test_opB = 0x66666666U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2062,7 +2486,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     test_opB = 0x87654321U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2079,7 +2503,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     test_opB = 0x12345678U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2124,9 +2548,9 @@ const uint32_t TV_BIGNUM_CARRY_LOC_m4294967297[] = {
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
 };
-void test_add_bignum_carry_loc_signed(void)
+void test_add1w_bignum_loc_signed(void)
 {
-    const char test_fn_name[] = "add_bignum_carry_loc_signed";
+    const char test_fn_name[] = "add1w_bignum_loc_signed";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -2140,7 +2564,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 1 */
     test_opB = 0xFFFFFFFF;  //  m1 at idx 1 == m4294967296
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m4294967297, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2152,7 +2576,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 2 */
     test_opB = 0x00000001;  // p1 at idx 1 == p4294967296
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2164,7 +2588,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 3 */
     test_opB = 0xFFFFFFFE;  // m2
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m3_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2176,7 +2600,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 4 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m2_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2188,7 +2612,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 5 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2200,7 +2624,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 6 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_0_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2211,9 +2635,9 @@ void test_add_bignum_carry_loc_signed(void)
 
     rmBigNum(&test_opA);
 }
-void test_sub_bignum_carry_loc_signed(void)
+void test_sub1w_bignum_loc_signed(void)
 {
-    const char test_fn_name[] = "sub_bignum_carry_loc_signed";
+    const char test_fn_name[] = "sub1w_bignum_loc_signed";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -2227,7 +2651,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 6 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2239,7 +2663,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 5 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m2_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2251,7 +2675,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 4 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m3_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2263,7 +2687,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 3 */
     test_opB = 0xFFFFFFFE;  // m2
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2275,7 +2699,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 2 */
     test_opB = 0x00000001;  // p1 at idx 1 == p4294967296
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m4294967297, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2287,7 +2711,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 1 */
     test_opB = 0xFFFFFFFF;  //  m1 at idx 1 == m4294967296
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2328,7 +2752,7 @@ void test_mul_bignum_bs_nn(void)
     test_ref->nums[0]  = 0x00000001U;
     intentional_invalid = false;
 
-    if(fr = mul_bignum_1bs_ext(test_dst, test_opA, test_opB, false)) {
+    if(fr = mul_bignum_1bsR2L_ext(test_dst, test_opA, test_opB, false)) {
         printReturnType(fr);
     } else { /* Do nothing */ }
 
@@ -2340,7 +2764,7 @@ void test_mul_bignum_bs_nn(void)
         test_print_bignum(test_dst, "dst");
         test_print_bignum(test_ref, "ref");
     }
-    printf("mul_bignum_signed_1bs() is %s\r\n", ((test_cmp)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+    printf("mul_bignum_signed_1bsR2L() is %s\r\n", ((test_cmp)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
     TEST_ASSERT((test_cmp) || (intentional_invalid));
 
     rmBigNum(&test_opA);
@@ -3970,8 +4394,8 @@ void test_gcd_bignum(void)
         test_print_bignum(num_s, "coef s");
         test_print_bignum(num_t, "coef t");
 
-        if((fr = mul_bignum_signed_unsafe(prod_as, num_a, num_s)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
-        if((fr = mul_bignum_signed_unsafe(prod_bt, num_b, num_t)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = mul_bignum_signed_nbsR2L_unsafe(prod_as, num_a, num_s)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
+        if((fr = mul_bignum_signed_nbsR2L_unsafe(prod_bt, num_b, num_t)) != E_OK) { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
         if((fr = add_bignum_signed_unsafe(sum, prod_as, prod_bt)) != E_OK)        { /* has error */ printf("%s, line:%d, fr: %d\n", __func__, __LINE__, fr); };
         test_print_bignum(prod_as, "prod_as");
         test_print_bignum(prod_bt, "prod_bt");
@@ -4694,13 +5118,14 @@ void test_montgomery(const char* test_fn_name)
     {
         for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i+=2)
         {
+            cmp_result = true;
             memcpy(multiplier->nums,    TEST_MONTGOMERY_NORMAL_TV_LIST[i],      multiplier->size);
             memcpy(multiplicand->nums,  TEST_MONTGOMERY_NORMAL_TV_LIST[i+1],    multiplicand->size);
 
             intentional_invalid = false;
 
             TICK_TIME_START("Normal Form multiply and modulus");
-            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, multiplier, multiplicand);
             fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
@@ -4716,8 +5141,8 @@ void test_montgomery(const char* test_fn_name)
             printReturnType(fr);
 #endif/*_mod_values_are_only_valid_in_unsafety_multiplication_functions_*/
 
-            cmp_result  = (memcmp(mont_modulo->nums, mont_product->nums, TEST_MONT_MUL_SIZE) == 0);
-            cmp_result |= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
+            cmp_result &= (memcmp(mont_modulo->nums, mont_product->nums, TEST_MONT_MUL_SIZE) == 0);
+            cmp_result &= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
             if(!cmp_result)
             {
                 test_print_mont_conf(mont_conf, "montgomery info");
@@ -4758,7 +5183,7 @@ void test_montgomery(const char* test_fn_name)
 
             /* Classical multiply and modulus */
             TICK_TIME_START("Normal Form multiply and modulus");
-            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, multiplier, multiplicand);
             fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
@@ -4822,24 +5247,56 @@ void test_montgomery(const char* test_fn_name)
 
         clr_bignum(norm_prod_mod); set1b_bignum(norm_prod_mod, 0UL);
         TICK_TIME_START("Normal Form multiply and modulus");
-        for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+        for(size_t iter = 0x0; iter < 0x100; iter++)
         {
-            memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-            fr = mul_bignum_unsigned_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
-            fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+                fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+                fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+            }
         }
         TICK_TIME_END;
 
         clr_bignum(mont_product); set1b_bignum(mont_product, 0UL);
         TICK_TIME_START("Montgomery Form multiply with modulus");
-        for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+        for(size_t iter = 0x0; iter < 0x100; iter++)
         {
-            memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-            fr = mul_mont_unsigned_safe(mont_product, mont_product, multiplicand, mont_conf);
+                fr = mul_mont_unsigned_safe(mont_product, mont_product, multiplicand, mont_conf);
+            }
         }
         fr = convMontToBignum_unsigned_safe(mont_to_norm, mont_product, mont_conf);
+        TICK_TIME_END;
+
+        TICK_TIME_START("Process time of mul_bignum_unsigned_nbsR2L_unsafe()");
+        for(size_t iter = 0x0; iter < 0x100; iter++)
+        {
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+
+                fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+            }
+        }
+        TICK_TIME_END;
+
+        srand(time(NULL));
+        bignum_t rw = (((rand()&0xFFFFU)<<16U)|((rand()&0xFFFFU)<<0U));
+        TICK_TIME_START("Process time of mul1w_bignum_unsigned_unsafe()");
+        for(size_t iter = 0x0; iter < 0x100; iter++)
+        {
+            for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
+            {
+                memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
+
+                fr = mul1w_bignum_unsigned_unsafe(norm_prod_x2b, rw, multiplicand);
+            }
+        }
         TICK_TIME_END;
 
         cmp_result |= (memcmp(mont_to_norm->nums, norm_prod_mod->nums, TEST_MONT_MUL_SIZE) == 0);
@@ -9819,89 +10276,184 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum_signed_unsafe)]\r\n");
+    printf("[test start: test_sub_bignum_unsigned_256b()]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_unsigned_256b("sub_bignum_signed_unsafe", sub_bignum_signed_unsafe);
-    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum_signed_unsafe)]\r\n");
+    test_sub_bignum_unsigned_256b();
+    printf("[test   end: test_sub_bignum_unsigned_256b()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b");
+    printf("[test start: test_sub_bignum_unsigned_256b_ext(sub_bignum_signed_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b_ext");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_unsigned_256b("sub_bignum_with_add_twos", sub_bignum_with_add_twos);
-    printf("[test   end: test_sub_bignum_unsigned_256b(sub_bignum_with_add_twos)]\r\n");
+    test_sub_bignum_unsigned_256b_ext("sub_bignum_signed_unsafe", sub_bignum_signed_unsafe);
+    printf("[test   end: test_sub_bignum_unsigned_256b_ext(sub_bignum_signed_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_add_bignum_carry_loc_unsigned()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc_unsigned");
+    printf("[test start: test_sub_bignum_unsigned_256b_ext(sub_bignum_with_add_twos)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_unsigned_256b_ext");
     _COND_DO_TEST_(keyin)
-    test_add_bignum_carry_loc_unsigned();
-    printf("[test   end: test_add_bignum_carry_loc_unsigned()]\r\n");
+    test_sub_bignum_unsigned_256b_ext("sub_bignum_with_add_twos", sub_bignum_with_add_twos);
+    printf("[test   end: test_sub_bignum_unsigned_256b_ext(sub_bignum_with_add_twos)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_add1w_bignum_loc_unsigned()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add1w_bignum_loc_unsigned");
+    _COND_DO_TEST_(keyin)
+    test_add1w_bignum_loc_unsigned();
+    printf("[test   end: test_add1w_bignum_loc_unsigned()]\r\n");
     printf("================================================================================\n");
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_carry_loc_unsigned()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_carry_loc_unsigned");
+    printf("[test start: test_sub1w_bignum_loc_unsigned()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub1w_bignum_loc_unsigned");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_carry_loc_unsigned();
-    printf("[test   end: test_sub_bignum_carry_loc_unsigned()]\r\n");
+    test_sub1w_bignum_loc_unsigned();
+    printf("[test   end: test_sub1w_bignum_loc_unsigned()]\r\n");
     printf("================================================================================\n");
     //printf("--------------------------------------------------------------------------------\n");
-    //printf("[test start: test_add_bignum_carry_loc_signed()]\r\n");
-    //_KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc_signed");
+    //printf("[test start: test_add1w_bignum_loc_signed()]\r\n");
+    //_KEYIN_DO_TEST_(keyin, "test_add1w_bignum_loc_signed");
     //_COND_DO_TEST_(keyin)
-    //test_add_bignum_carry_loc_signed();
-    //printf("[test   end: test_add_bignum_carry_loc_signed()]\r\n");
+    //test_add1w_bignum_loc_signed();
+    //printf("[test   end: test_add1w_bignum_loc_signed()]\r\n");
     //printf("================================================================================\n");
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_carry_loc_signed()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_carry_loc_signed");
+    printf("[test start: test_sub1w_bignum_loc_signed()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub1w_bignum_loc_signed");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_carry_loc_signed();
-    printf("[test   end: test_sub_bignum_carry_loc_signed()]\r\n");
-    printf("================================================================================\n");
-
-
-    printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed_1bs)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
-    _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum_signed_1bs", mul_bignum_signed_1bs);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed_1bs)]\r\n");
+    test_sub1w_bignum_loc_signed();
+    printf("[test   end: test_sub1w_bignum_loc_signed()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_1bsR2L)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum_signed", mul_bignum_signed);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_signed_1bsR2L", mul_bignum_signed_1bsR2L);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_1bsR2L)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b(mul_bignum_signed_unsafe)]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_signed)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b("mul_bignum_signed", mul_bignum_signed_unsafe);
-    printf("[test   end: test_mul_bignum_1024b(mul_bignum_signed_unsafe)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed)]\r\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_unsigned)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_nbsR2L_unsigned", mul_bignum_nbsR2L_unsigned);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_unsigned)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_signed_nbsR2L_unsafe", mul_bignum_signed_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_unsigned_nbsR2L_unsafe", mul_bignum_unsigned_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_x2w_safe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_signed_x2w_safe", mul_bignum_signed_x2w_safe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_x2w_safe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_unsigned_x2wMul_safe", mul_bignum_unsigned_x2wMul_safe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_x2wMul_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_signed_x2wMul_unsafe", mul_bignum_signed_x2wMul_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_x2wMul_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_signed_1024b("mul_bignum_unsigned_x2wMul_unsafe", mul_bignum_unsigned_x2wMul_unsafe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_unsigned)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_signed);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_nbsR2L_unsigned", mul_bignum_nbsR2L_unsigned);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_unsigned)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_signed)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed", mul_bignum_signed_unsafe);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_unsafe)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_signed)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_unsigned_nbsR2L_unsafe", mul_bignum_unsigned_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_nbsR2L_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed_nbsR2L_unsafe", mul_bignum_signed_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_unsigned_x2wMul_safe", mul_bignum_unsigned_x2wMul_safe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_safe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_unsigned_x2wMul_unsafe", mul_bignum_unsigned_x2wMul_unsafe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_x2wMul_unsafe)]\r\n");
+    printf("================================================================================\n");
+
+    printf("--------------------------------------------------------------------------------\n");
+    printf("[test start: test_mul_bignum_1024b_sameBitLength_time_measuring()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBitLength_time_measuring");
+    _COND_DO_TEST_(keyin)
+    test_mul_bignum_1024b_sameBitLength_time_measuring(0x1000UL);
+    printf("[test   end: test_mul_bignum_1024b_sameBitLength_time_measuring()]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -9970,19 +10522,19 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed)]\r\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_nbsR2L_signed)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed", mul_bignum_signed);
-    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed)]\r\n");
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_nbsR2L_signed)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_unsafe)]\r\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed_unsafe", mul_bignum_signed_unsafe);
-    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_unsafe)]\r\n");
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed_nbsR2L_unsafe", mul_bignum_signed_nbsR2L_unsafe);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_nbsR2L_unsafe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");

@@ -264,86 +264,119 @@ static inline bignum_cmp_e cmp_bignum_logical_unsigned_unsafe(const bignum_s* s0
     const bool ign_len = true, ign_sign = true;
     return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
 }
-ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign);
+ReturnType add_bignum_wloc_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const size_t wloc, const bool ign_len, const bool ign_sign);
 static inline ReturnType add_bignum_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
 {
-    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, true, ign_sign);
 }
 static inline ReturnType add_bignum_signed_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = false;
-    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, true, ign_sign);
 }
 static inline ReturnType add_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = true;
-    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, true, ign_sign);
 }
-bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
-static inline bignum_t add_bignum_carry_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
+static inline ReturnType add_bignum_wloc_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const size_t wloc)
 {
-    return add_bignum_carry_loc_ext(d, v, idx, false);
+    const bool ign_sign = true;
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, wloc, true, ign_sign);
 }
-static inline bignum_t add_bignum_carry_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
+bignum_t add1w_bignum_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
+static inline bignum_t add1w_bignum_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
 {
-    return add_bignum_carry_loc_ext(d, v, idx, true);
+    return add1w_bignum_loc_ext(d, v, idx, false);
 }
-bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
-static inline bignum_t sub_bignum_carry_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
+static inline bignum_t add1w_bignum_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
 {
-    return sub_bignum_carry_loc_ext(d, v, idx, false);
+    return add1w_bignum_loc_ext(d, v, idx, true);
 }
-static inline bignum_t sub_bignum_carry_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
+bignum_t sub1w_bignum_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
+static inline bignum_t sub1w_bignum_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
 {
-    return sub_bignum_carry_loc_ext(d, v, idx, true);
+    return sub1w_bignum_loc_ext(d, v, idx, false);
 }
-ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign);
+static inline bignum_t sub1w_bignum_loc_unsigned(bignum_s* d, const bignum_t v, const size_t idx)
+{
+    return sub1w_bignum_loc_ext(d, v, idx, true);
+}
+ReturnType sub_bignum_wloc_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const size_t wloc, const bool ign_len, const bool ign_sign);
 static inline ReturnType sub_bignum_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
 {
-    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, true, ign_sign);
 }
 static inline ReturnType sub_bignum_signed_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = false;
-    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, true, ign_sign);
 }
 static inline ReturnType sub_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = true;
-    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, true, ign_sign);
+}
+static inline ReturnType sub_bignum_wloc_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const size_t wloc)
+{
+    const bool ign_sign = true;
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, wloc, true, ign_sign);
 }
 ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 static inline ReturnType sub_bignum_with_add_twos(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     return sub_bignum_with_add_twos_ext(NULL, d, s0, s1, 0U);
 }
-ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len);
-ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
-static inline ReturnType mul_bignum_signed_1bs(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+ReturnType mul_bignum_1bsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len);
+ReturnType mul_bignum_nbsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
+static inline ReturnType mul_bignum_signed_1bsR2L(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
-    return mul_bignum_1bs_ext(d, s1, s0, false);
+    return mul_bignum_1bsR2L_ext(d, s1, s0, false);
 }
-static inline ReturnType mul_bignum_signed(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_nbsR2L_signed(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = false, ign_len = false;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_unsigned(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_nbsR2L_unsigned(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = false;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_signed_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_signed_nbsR2L_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = false, ign_len = true;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_unsigned_nbsR2L_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = true;
-    return mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_t w0);
+
+ReturnType mul_bignum_x2wMul_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
+static inline ReturnType mul_bignum_signed_x2w_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = false, ign_len = false;
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
+}
+static inline ReturnType mul_bignum_unsigned_x2wMul_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = true, ign_len = false;
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
+}
+static inline ReturnType mul_bignum_signed_x2wMul_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = false, ign_len = true;
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
+}
+static inline ReturnType mul_bignum_unsigned_x2wMul_unsafe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+{
+    const bool ign_sign = true, ign_len = true;
+    return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
+}
+
+ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0);
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
 ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d, const bool ign_len);
 static inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d)

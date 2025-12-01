@@ -587,7 +587,7 @@ ReturnType cpy_bignum_twos_ext(bignum_s* d, const bignum_s* s, const bool ign_si
     ret = cpy_bignum_inverse_ext(d, s, ign_sign, ign_len);
     if(ret != E_OK) return ret;
 
-    (void)add_bignum_carry_loc_unsigned(d, 1UL, 0UL);
+    (void)add1w_bignum_loc_unsigned(d, 1UL, 0UL);
 
     ret = E_OK;
 
@@ -755,11 +755,11 @@ bignum_cmp_e cmp_bignum_logical_ext(const bignum_s* s0, const bignum_s* s1, cons
 }
 
 /* Return carry out, it can be only FALSE / TRUE, the others are error */
-ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign) {
+ReturnType add_bignum_wloc_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const size_t wloc, const bool ign_len, const bool ign_sign) {
     if(!((d != NULL) && (s0 != NULL) && (s1 != NULL)))
         return E_ERROR_NULL;
 
-    if(!((d->nlen >= s0->nlen) && (d->nlen >= s1->nlen)))
+    if(!(((d->nlen >= s0->nlen) && (d->nlen >= (s1->nlen+wloc))) || ign_len))
         return E_ERROR_BIGNUM_LENGTH;
 
     bignum_t _c = ci;
@@ -768,7 +768,20 @@ ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const b
     const bignum_t _bf0_ = BIGNUM_SIGN_MASK(s0, ign_sign);  // _bfN_: bit fill sN
     const bignum_t _bf1_ = BIGNUM_SIGN_MASK(s1, ign_sign);  // _bfN_: bit fill sN
 
-    for(size_t i=0ul; i<d->nlen; i++) {
+    for(size_t i=0ul; i<wloc; i++)
+    {
+        if(i<d->nlen)
+        {
+            if(i < s0->nlen)    d->nums[i] = s0->nums[i];
+            else                d->nums[i] = _bf0_;
+        }
+        else
+        {
+            /* dest overflow */
+        }
+    }
+
+    for(size_t i=wloc, j=0ul; i<d->nlen; i++, j++) {
         bignum_t _ts0_, _ss0_;   // _tsN_: temp sN, _ssN_: selecte sN
         bignum_t _ts1_, _ss1_;
 
@@ -777,7 +790,7 @@ ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const b
         _ts0_ = _ss0_ + _c;
         _c = (_ts0_ < _ss0_);
 
-        if(i < s1->nlen)    _ss1_ = s1->nums[i];
+        if(j < s1->nlen)    _ss1_ = s1->nums[j];
         else                _ss1_ = _bf1_;
         _ts1_ = _ts0_ + _ss1_;
         _c |= (_ts1_ < _ts0_);
@@ -789,7 +802,7 @@ ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const b
     return E_OK;
 }
 
-bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
+bignum_t add1w_bignum_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
     bignum_t _s;
     bignum_t _c = v;
     bignum_t SIGN_EXT = ((BIGNUM_SIGN_BIT(v) != 0U) && (!ign_sign))?(BIGNUM_MAX):(0U);
@@ -810,7 +823,7 @@ bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
     return _c;
 }
 
-#if 0 /* sub_bignum_carry_loc_ext */
+#if 0 /* sub1w_bignum_loc_ext */
 #   ifndef ENABLE_BIGNUM_LOG
 #      ifdef _DPRINTF_
 #          undef _DPRINTF_
@@ -821,8 +834,8 @@ bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
 #          define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
 #      endif
 #   endif /*ENABLE_BIGNUM_LOG*/
-#endif/* sub_bignum_carry_loc_ext */
-bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
+#endif/* sub1w_bignum_loc_ext */
+bignum_t sub1w_bignum_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
     bignum_t _s;
     bignum_t _c = v;
     const bignum_t SIGN_EXT = ((BIGNUM_SIGN_BIT(v) != 0U) && (!ign_sign))?(BIGNUM_MAX):(0U);;
@@ -847,7 +860,7 @@ bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
 
     return _c;
 }
-#if 0 /* sub_bignum_carry_loc_ext */
+#if 0 /* sub1w_bignum_loc_ext */
 #   ifndef ENABLE_BIGNUM_LOG
 #      ifdef _DPRINTF_
 #          undef _DPRINTF_
@@ -858,10 +871,10 @@ bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
 #          define _PRINT_BIGNUM_
 #      endif
 #   endif/* ENABLE_BIGNUM_LOG */
-#endif/* sub_bignum_carry_loc_ext */
+#endif/* sub1w_bignum_loc_ext */
 
 /* Return carry out, it can be only FALSE / TRUE, the others are error */
-#if 0 /* sub_bignum_ext */
+#if 0 /* sub_bignum_wloc_ext */
 #   ifndef ENABLE_BIGNUM_LOG
 #      ifdef _DPRINTF_
 #          undef _DPRINTF_
@@ -872,43 +885,48 @@ bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
 #          define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
 #      endif
 #   endif /*ENABLE_BIGNUM_LOG*/
-#endif/* sub_bignum_ext */
-ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign) {
+#endif/* sub_bignum_wloc_ext */
+ReturnType sub_bignum_wloc_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const size_t wloc, const bool ign_len, const bool ign_sign) {
     if(!((d != NULL) && (s0 != NULL) && (s1 != NULL)))
         return E_ERROR_NULL;
 
-    if(!((d->nlen >= s0->nlen) && (d->nlen >= s1->nlen)))
+    if(!(((d->nlen >= s0->nlen) && (d->nlen >= (s1->nlen+wloc))) || ign_len))
         return E_ERROR_BIGNUM_LENGTH;
 
+    bignum_t _c = ci;
+
+    const bignum_t _bf0_ = BIGNUM_SIGN_MASK(s0, ign_sign);  // _bfN_: bit fill sN
+    const bignum_t _bf1_ = BIGNUM_SIGN_MASK(s1, ign_sign);  // _bfN_: bit fill sN
+
+    _DPRINTF_("@%s:%d, _bf0_:0x%x, _bf1_:0x%x\r\n",  __func__, __LINE__, _bf0_, _bf1_);
+
+    for(size_t i=0ul; i<wloc; i++)
     {
-        bignum_t _c = ci;
-
-        const bignum_t _bf0_ = BIGNUM_SIGN_MASK(s0, ign_sign);  // _bfN_: bit fill sN
-        const bignum_t _bf1_ = BIGNUM_SIGN_MASK(s1, ign_sign);  // _bfN_: bit fill sN
-
-        _DPRINTF_("@%s:%d, _bf0_:0x%x, _bf1_:0x%x\r\n",  __func__, __LINE__, _bf0_, _bf1_);
-
-        for(size_t i=0UL; i<d->nlen; i++) {
-            bignum_t _ts0_, _ss0_;
-            bignum_t _ts1_, _ss1_;
-
-            if(i < s0->nlen)    _ss0_ = s0->nums[i];
-            else                _ss0_ = _bf0_;
-            _ts0_ = _ss0_ - _c;
-            _c = (_ts0_ > _ss0_);
-
-            if(i < s1->nlen)    _ss1_ = s1->nums[i];
-            else                _ss1_ = _bf1_;
-            _ts1_ = _ts0_ - _ss1_;
-            _c |= (_ts1_ > _ts0_);
-            d->nums[i] = _ts1_;
-        }
-
-        if(co != NULL)  (*co) = _c;
+        if(i < s0->nlen)    d->nums[i] = s0->nums[i];
+        else                d->nums[i] = _bf0_;
     }
+
+    for(size_t i=wloc, j=0ul; i<d->nlen; i++, j++) {
+        bignum_t _ts0_, _ss0_;
+        bignum_t _ts1_, _ss1_;
+
+        if(i < s0->nlen)    _ss0_ = s0->nums[i];
+        else                _ss0_ = _bf0_;
+        _ts0_ = _ss0_ - _c;
+        _c = (_ts0_ > _ss0_);
+
+        if(j < s1->nlen)    _ss1_ = s1->nums[j];
+        else                _ss1_ = _bf1_;
+        _ts1_ = _ts0_ - _ss1_;
+        _c |= (_ts1_ > _ts0_);
+        d->nums[i] = _ts1_;
+    }
+
+    if(co != NULL)  (*co) = _c;
+
     return E_OK;
 }
-#if 0 /* sub_bignum_ext */
+#if 0 /* sub_bignum_wloc_ext */
 #   ifndef ENABLE_BIGNUM_LOG
 #      ifdef _DPRINTF_
 #          undef _DPRINTF_
@@ -919,7 +937,7 @@ ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const b
 #          define _PRINT_BIGNUM_
 #      endif
 #   endif/* ENABLE_BIGNUM_LOG */
-#endif/* sub_bignum_ext */
+#endif/* sub_bignum_wloc_ext */
 
 ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci) {
     if(!((d != NULL) && (s0 != NULL) && (s1 != NULL)))
@@ -960,7 +978,7 @@ ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_
 // idea notes.
 // s0 accumulates then shift left
 // s1 checks inclease nums index and shift likes bit witth
-ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len) {
+ReturnType mul_bignum_1bsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_len) {
     if(!((d != NULL) && (s1 != NULL) && (s0 != NULL)))  return E_ERROR_NULL;
     if((!(s1->bits == s0->bits)) && (!ign_len))         return E_ERROR_BIGNUM_LENGTH;
     if((!(d->bits >= s0->bits)) && (!ign_len))          return E_ERROR_BIGNUM_LENGTH;
@@ -981,7 +999,7 @@ ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
         for(size_t sft = 0U; sft < sftBit; sft++) {
             if(((es1->nums[i] >> sft) & 0x1U) != 0x0u) {
                 bignum_t co = BIGNUM_MAX;
-                if(add_bignum_ext(&co, acc, acc, es0, 0U, ign_sign) != E_OK) // unsigned
+                if(add_bignum_wloc_ext(&co, acc, acc, es0, 0U, 0UL, ign_len, ign_sign) != E_OK) // unsigned
                 {
                     return E_ERROR_RUNTIME;
                 }
@@ -1002,7 +1020,7 @@ ReturnType mul_bignum_1bs_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s
     return E_OK;
 }
 
-ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len) {
+ReturnType mul_bignum_nbsR2L_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len) {
     if(!((d != NULL) && (s1 != NULL) && (s0 != NULL)))  return E_ERROR_NULL;
     if((!(s1->bits == s0->bits)) && (!ign_len))         return E_ERROR_BIGNUM_LENGTH;
     if((!(d->bits >= s0->bits)) && (!ign_len))          return E_ERROR_BIGNUM_LENGTH;
@@ -1011,7 +1029,7 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
     _DPRINTF_("s1->bits = %lu\n", s1->bits);
     _DPRINTF_("s0->bits = %lu\n", s0->bits);
 
-    if(cmp0_bignum(s0) != BIGNUM_CMP_ZO)
+    if(cmp0_bignum(s0) != BIGNUM_CMP_ZO || cmp0_bignum(s1) != BIGNUM_CMP_ZO)
     {
         ReturnType _fr_ = E_OK;
 
@@ -1112,19 +1130,80 @@ ReturnType mul_bignum_nbs_dn2up_ext(bignum_s* d, const bignum_s* s1, const bignu
     return E_OK;
 }
 
-ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s1, const bignum_t w0)
+ReturnType mul_bignum_x2wMul_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len) {
+    if(!((d != NULL) && (s1 != NULL) && (s0 != NULL)))  return E_ERROR_NULL;
+    if((!(s1->bits == s0->bits)) && (!ign_len))         return E_ERROR_BIGNUM_LENGTH;
+    if((!(d->bits >= s0->bits)) && (!ign_len))          return E_ERROR_BIGNUM_LENGTH;
+    if((!(d->bits >= s1->bits)) && (!ign_len))          return E_ERROR_BIGNUM_LENGTH;
+
+    _DPRINTF_("s1->bits = %lu\n", s1->bits);
+    _DPRINTF_("s0->bits = %lu\n", s0->bits);
+
+    if(cmp0_bignum(s0) != BIGNUM_CMP_ZO || cmp0_bignum(s1) != BIGNUM_CMP_ZO)
+    {
+        ReturnType _fr_ = E_OK;
+
+        bignum_s* bnw_x2w;
+        bignum_s* mul_buf;
+
+        const bignum_t _bf0_ = BIGNUM_SIGN_MASK(s0, ign_sign);  // _bfN_: bit fill sN
+        const bignum_t _bf1_ = BIGNUM_SIGN_MASK(s1, ign_sign);  // _bfN_: bit fill sN
+
+        bnw_x2w = mkBigNum(BIGNUM_BITS<<1UL);
+        mul_buf = mkBigNum(d->bits);
+
+        clr_bignum(mul_buf);
+
+        for(size_t i=0ul; i<d->nlen; i++)
+        {
+            bignum_t _ss0_;
+            if(i < s0->nlen)    _ss0_ = s0->nums[i];
+            else                _ss0_ = _bf0_;
+
+            if(_ss0_ == 0x0U)   continue;
+
+            for(size_t j=0ul; j<d->nlen; j++)
+            {
+                bignum_t _ss1_;
+                if(j < s1->nlen)    _ss1_ = s1->nums[j];
+                else                _ss1_ = _bf1_;
+
+                if(_ss1_ == 0x0U)   continue;
+
+                (*((bignumX2b_t*)(bnw_x2w->nums))) = ((bignumX2b_t)(_ss0_) *  (bignumX2b_t)(_ss1_));
+                _fr_ = add_bignum_wloc_unsigned_unsafe(mul_buf, mul_buf, bnw_x2w, i+j);
+
+                if(_fr_ != E_OK)    break;
+            }
+        }
+
+        (void)cpy_bignum_unsigned_safe(d, mul_buf);
+
+        rmBigNum(&bnw_x2w);
+        rmBigNum(&mul_buf);
+    }
+    else
+    {
+        /* s0 is zero */
+        return clr_bignum(d);
+    }
+
+    return E_OK;
+}
+
+ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = true;
 
     ReturnType fr;
 
-    bignum_s* s0 = mkBigNum(BIGNUM_BITS);
+    bignum_s* s1 = mkBigNum(BIGNUM_BITS);
 
-    s0->nums[0] = w0;
+    s1->nums[0] = ws1;
 
-    fr = mul_bignum_nbs_dn2up_ext(d, s1, s0, ign_sign, ign_len);
+    fr = mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 
-    rmBigNum(&s0);
+    rmBigNum(&s1);
 
     return fr;
 }
@@ -1553,7 +1632,7 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
 
         // (old_s, s) := (s, old_s − quotient × s)
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_tmp_, ___s_));
-        _FUNC_WRAP_(_fr_, mul_bignum_signed_unsafe(_tmp_, _quo_, _tmp_));
+        _FUNC_WRAP_(_fr_, mul_bignum_signed_nbsR2L_unsafe(_tmp_, _quo_, _tmp_));
         _FUNC_WRAP_(_fr_, sub_bignum_signed_unsafe(_tmp_, _o_s_, _tmp_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_o_s_, ___s_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(___s_, _tmp_));
@@ -1562,7 +1641,7 @@ ReturnType gcd_bignum_ext(bignum_s* r, bignum_s* s, bignum_s* t, const bignum_s*
 
         // (old_t, t) := (t, old_t − quotient × t)
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_tmp_, ___t_));
-        _FUNC_WRAP_(_fr_, mul_bignum_signed_unsafe(_tmp_, _quo_, _tmp_));
+        _FUNC_WRAP_(_fr_, mul_bignum_signed_nbsR2L_unsafe(_tmp_, _quo_, _tmp_));
         _FUNC_WRAP_(_fr_, sub_bignum_signed_unsafe(_tmp_, _o_t_, _tmp_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_o_t_, ___t_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(___t_, _tmp_));
@@ -1642,7 +1721,7 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
 
         // (t, newt) := (newt, t − quotient × newt)
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_tmp_, _n_t_));
-        _FUNC_WRAP_(_fr_, mul_bignum_signed_unsafe(_tmp_, _quo_, _tmp_));
+        _FUNC_WRAP_(_fr_, mul_bignum_signed_nbsR2L_unsafe(_tmp_, _quo_, _tmp_));
         _FUNC_WRAP_(_fr_, sub_bignum_signed_unsafe(_tmp_, _o_t_, _tmp_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_o_t_, _n_t_));
         _FUNC_WRAP_(_fr_, cpy_bignum_signed_safe(_n_t_, _tmp_));
@@ -1753,7 +1832,7 @@ ReturnType mod_mont_unsigned_safe(bignum_s* mont, const bignum_s* n_x2bit, const
         // ui * m
         if(ui != 0)
         {
-            _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, conf->modulus, ui));
+            _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, ui, conf->modulus));
             _FUNC_WRAP_(fr, add_bignum_unsigned_unsafe(a_x2bit, a_x2bit, mul_x2b));
         }
         else
@@ -1810,7 +1889,7 @@ ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignu
         // A = (A + x_i * y)
         _DPRINTF_("xi= 0x%08x\r\n", xi);
         _PRINT_BIGNUM_(y, "y");
-        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, y, xi));              _DPRINTF_("||%s:%d\n", __func__, __LINE__);
+        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, xi, y));              _DPRINTF_("||%s:%d\n", __func__, __LINE__);
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b = xi * y");
         _PRINT_BIGNUM_(a_x2bit, "a_x2bit");
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b");
@@ -1819,7 +1898,7 @@ ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignu
         // A = (A + x_i * y) + (u_i * m)
         _DPRINTF_("ui= 0x%08x\r\n", ui);
         _PRINT_BIGNUM_(conf->modulus, "conf->modulus");
-        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, conf->modulus, ui));  _DPRINTF_("||%s:%d\n", __func__, __LINE__);
+        _FUNC_WRAP_(fr, mul1w_bignum_unsigned_unsafe(mul_x2b, ui, conf->modulus));  _DPRINTF_("||%s:%d\n", __func__, __LINE__);
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b = ui * m");
         _PRINT_BIGNUM_(a_x2bit, "a_x2bit");
         _PRINT_BIGNUM_(mul_x2b, "mul_x2b");

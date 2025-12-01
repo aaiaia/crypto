@@ -95,7 +95,7 @@ void convBigNum_wNAF(wnaf_s* dst, const bignum_s* src)
                 _DPRINTF_("Negative in masked value, (d mod 2^w) - 2^w: 0x%02x \r\n", dst->wnaf.ui[i]);
             }
             _DPRINTF_("[%lu] 0x%08x\t\n", i, ((bignum_t)dst->wnaf.si[i]));
-            sub_bignum_carry_loc_signed(tmp_d, ((bignum_t)dst->wnaf.si[i]), 0U);
+            sub1w_bignum_loc_signed(tmp_d, ((bignum_t)dst->wnaf.si[i]), 0U);
             _DPRINTF_("[%lu] ", i); _PRINT_BIGNUM_(tmp_d, "substracted tmp_d");
         }
         else {

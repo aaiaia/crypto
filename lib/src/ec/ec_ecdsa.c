@@ -109,7 +109,7 @@ void ecdsa_sign_ext(bignum_s* sign_r, bignum_s* sign_s, \
         else                                    /* HAS_ERROR */;
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k, k^(-1)");
 
-        _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_r, scalar_d));
+        _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_nbsR2L_unsafe(scalar_mul, scalar_r, scalar_d));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, r * d");
         _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_s, scalar_mul, n));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (r * d) mod n");
@@ -119,7 +119,7 @@ void ecdsa_sign_ext(bignum_s* sign_r, bignum_s* sign_s, \
         _ECDSA_FN_CALL_(fr, aim_bignum_unsigned_unsafe(scalar_s, scalar_add, n));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (z + (r * d)) mod n");
 
-        _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_k, scalar_s));
+        _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_nbsR2L_unsafe(scalar_mul, scalar_k, scalar_s));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, (k^(-1)) * (z + (r * d))");
         _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_s, scalar_mul, n));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, s = ((k^(-1)) * (z + (r * d))) mod n");
@@ -194,7 +194,7 @@ bool ecdsa_veri_ext(bignum_s* calc_r, const bignum_s* sign_r, const bignum_s* si
     _ECDSA_FN_CALL_(fr, mim_bignum(scalar_s, sign_s, n));
 
     // (s^(-1) * z) mod n
-    _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_z));
+    _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_nbsR2L_unsafe(scalar_mul, scalar_s, scalar_z));
     _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_u, scalar_mul, n));
     // u1 * G
     ec_scalarMul_WNAF(xT, yT, scalar_u, xG, yG, ec_bits, a, p, w, ign_sign);
@@ -206,7 +206,7 @@ bool ecdsa_veri_ext(bignum_s* calc_r, const bignum_s* sign_r, const bignum_s* si
     _ECDSA_FN_CALL_(fr, cpy_bignum_unsigned_safe(yP, yT));
 
     // (s^(-1) * r) mod n
-    _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, sign_r));
+    _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_nbsR2L_unsafe(scalar_mul, scalar_s, sign_r));
     _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_u, scalar_mul, n));
     // u_2 * H_a
     ec_scalarMul_WNAF(xT, yT, scalar_u, xPublic, yPublic, ec_bits, a, p, w, ign_sign);

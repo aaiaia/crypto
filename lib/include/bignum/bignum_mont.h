@@ -14,11 +14,13 @@ typedef uint128_t   mont_t;// not implements yet
 #define MONT_BASE_BIT           64UL    // is same size with bignum_t
 #define MONT_BASE_VAL           (1UL<<MONT_BASE_BIT)
 #define MONT_BASE_b2L(bits)     QUOBITU64(bits)
+#define MONT_BASE_bREM(bits)    REMBITU64(bits)
 #elif(SET_BIGNUM_TYPE == 32)
 typedef uint64_t    mont_t;
 #define MONT_BASE_BIT           32UL    // is same size with bignum_t
 #define MONT_BASE_VAL           (1UL<<MONT_BASE_BIT)
 #define MONT_BASE_b2L(bits)     QUOBITU32(bits)
+#define MONT_BASE_bREM(bits)    REMBITU32(bits)
 #else
 #error "NOT_IMPLEMENTS_YET"
 #endif
