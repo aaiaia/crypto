@@ -264,20 +264,25 @@ static inline bignum_cmp_e cmp_bignum_logical_unsigned_unsafe(const bignum_s* s0
     const bool ign_len = true, ign_sign = true;
     return cmp_bignum_logical_ext(s0, s1, ign_len, ign_sign);
 }
-ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign);
+ReturnType add_bignum_wloc_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const size_t wloc, const bool ign_sign);
 static inline ReturnType add_bignum_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
 {
-    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, ign_sign);
 }
 static inline ReturnType add_bignum_signed_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = false;
-    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, ign_sign);
 }
 static inline ReturnType add_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = true;
-    return add_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, ign_sign);
+}
+static inline ReturnType add_bignum_wloc_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const size_t wloc)
+{
+    const bool ign_sign = true;
+    return add_bignum_wloc_ext(NULL, d, s0, s1, 0U, wloc, ign_sign);
 }
 bignum_t add1w_bignum_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign);
 static inline bignum_t add1w_bignum_loc_signed(bignum_s* d, const bignum_t v, const size_t idx)
@@ -297,20 +302,25 @@ static inline bignum_t sub1w_bignum_loc_unsigned(bignum_s* d, const bignum_t v, 
 {
     return sub1w_bignum_loc_ext(d, v, idx, true);
 }
-ReturnType sub_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const bool ign_sign);
+ReturnType sub_bignum_wloc_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci, const size_t wloc, const bool ign_sign);
 static inline ReturnType sub_bignum_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bool ign_sign)
 {
-    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, ign_sign);
 }
 static inline ReturnType sub_bignum_signed_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = false;
-    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, ign_sign);
 }
 static inline ReturnType sub_bignum_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
 {
     const bool ign_sign = true;
-    return sub_bignum_ext(NULL, d, s0, s1, 0U, ign_sign);
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, 0UL, ign_sign);
+}
+static inline ReturnType sub_bignum_wloc_unsigned_unsafe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const size_t wloc)
+{
+    const bool ign_sign = true;
+    return sub_bignum_wloc_ext(NULL, d, s0, s1, 0U, wloc, ign_sign);
 }
 ReturnType sub_bignum_with_add_twos_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_t ci);
 static inline ReturnType sub_bignum_with_add_twos(bignum_s* d, const bignum_s* s0, const bignum_s* s1)
