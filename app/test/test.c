@@ -1930,9 +1930,9 @@ const uint32_t TV_BIGNUM_CARRY_LOC_FFFFFFFF_at012_007FFFFF_at3_unsigned[] = {
 };
 
 #define TEST_BIGNUM_CARRY_LOC_BIT_LEN 1024U
-void test_add_bignum_carry_loc_unsigned(void)
+void test_add1w_bignum_loc_unsigned(void)
 {
-    const char test_fn_name[] = "add_bignum_carry_loc_unsigned";
+    const char test_fn_name[] = "add1w_bignum_loc_unsigned";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -1947,7 +1947,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     test_opB = 0x12345678U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -1964,7 +1964,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     test_opB = 0x87654321U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -1982,7 +1982,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     test_opB = 0x66666666U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -1999,7 +1999,7 @@ void test_add_bignum_carry_loc_unsigned(void)
     /* Set first stage 4 */
     test_opB = 0x00800000U;
     intentional_invalid = false;
-    bignum_t tmp = add_bignum_carry_loc_unsigned(test_opA, test_opB, 3);
+    bignum_t tmp = add1w_bignum_loc_unsigned(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
@@ -2013,9 +2013,9 @@ void test_add_bignum_carry_loc_unsigned(void)
 
     rmBigNum(&test_opA);
 }
-void test_sub_bignum_carry_loc_unsigned(void)
+void test_sub1w_bignum_loc_unsigned(void)
 {
-    const char test_fn_name[] = "sub_bignum_carry_loc_unsigned";
+    const char test_fn_name[] = "sub1w_bignum_loc_unsigned";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -2029,7 +2029,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     /* Set first stage 4 */
     test_opB = 0x00800000U;
     intentional_invalid = false;
-    bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, 3);
+    bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, 3);
     if(tmp) {
         printf("carry = %u \r\n", tmp);
     }
@@ -2045,7 +2045,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     test_opB = 0x66666666U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2062,7 +2062,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     test_opB = 0x87654321U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2079,7 +2079,7 @@ void test_sub_bignum_carry_loc_unsigned(void)
     test_opB = 0x12345678U;
     intentional_invalid = false;
     for(size_t i = 0UL; i < test_opA->nlen; i++) {
-        bignum_t tmp = sub_bignum_carry_loc_unsigned(test_opA, test_opB, i);
+        bignum_t tmp = sub1w_bignum_loc_unsigned(test_opA, test_opB, i);
         if(tmp) {
             printf("[%lu] carry = %u \r\n", i, tmp);
         }
@@ -2124,9 +2124,9 @@ const uint32_t TV_BIGNUM_CARRY_LOC_m4294967297[] = {
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 
 };
-void test_add_bignum_carry_loc_signed(void)
+void test_add1w_bignum_loc_signed(void)
 {
-    const char test_fn_name[] = "add_bignum_carry_loc_signed";
+    const char test_fn_name[] = "add1w_bignum_loc_signed";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -2140,7 +2140,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 1 */
     test_opB = 0xFFFFFFFF;  //  m1 at idx 1 == m4294967296
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m4294967297, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2152,7 +2152,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 2 */
     test_opB = 0x00000001;  // p1 at idx 1 == p4294967296
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2164,7 +2164,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 3 */
     test_opB = 0xFFFFFFFE;  // m2
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m3_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2176,7 +2176,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 4 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m2_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2188,7 +2188,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 5 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2200,7 +2200,7 @@ void test_add_bignum_carry_loc_signed(void)
     /* Set first stage 6 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)add_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)add1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_0_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2211,9 +2211,9 @@ void test_add_bignum_carry_loc_signed(void)
 
     rmBigNum(&test_opA);
 }
-void test_sub_bignum_carry_loc_signed(void)
+void test_sub1w_bignum_loc_signed(void)
 {
-    const char test_fn_name[] = "sub_bignum_carry_loc_signed";
+    const char test_fn_name[] = "sub1w_bignum_loc_signed";
 
     bignum_s* test_opA;
     bignum_t test_opB;
@@ -2227,7 +2227,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 6 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2239,7 +2239,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 5 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m2_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2251,7 +2251,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 4 */
     test_opB = 0x00000001;  // p1
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m3_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2263,7 +2263,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 3 */
     test_opB = 0xFFFFFFFE;  // m2
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 0);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 0);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2275,7 +2275,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 2 */
     test_opB = 0x00000001;  // p1 at idx 1 == p4294967296
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m4294967297, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -2287,7 +2287,7 @@ void test_sub_bignum_carry_loc_signed(void)
     /* Set first stage 1 */
     test_opB = 0xFFFFFFFF;  //  m1 at idx 1 == m4294967296
     intentional_invalid = false;
-    (void)sub_bignum_carry_loc_signed(test_opA, test_opB, 1);
+    (void)sub1w_bignum_loc_signed(test_opA, test_opB, 1);
     cmp_result = (memcmp(test_opA->nums, TV_BIGNUM_CARRY_LOC_m1_signed, (test_opA->size)) == 0);
     if((!cmp_result))
     {
@@ -9755,14 +9755,6 @@ void test_sequence_bignum(void) {
     char keyin = '\0';
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_montgomery()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_montgomery");
-    _COND_DO_TEST_(keyin)
-    test_montgomery("test_montgomery");
-    printf("[test   end: test_montgomery()]\r\n");
-    printf("================================================================================\n");
-
-    printf("--------------------------------------------------------------------------------\n");
     printf("[test start: test_macro()]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_macro");
     _COND_DO_TEST_(keyin)
@@ -9876,32 +9868,32 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_add_bignum_carry_loc_unsigned()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc_unsigned");
+    printf("[test start: test_add1w_bignum_loc_unsigned()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_add1w_bignum_loc_unsigned");
     _COND_DO_TEST_(keyin)
-    test_add_bignum_carry_loc_unsigned();
-    printf("[test   end: test_add_bignum_carry_loc_unsigned()]\r\n");
+    test_add1w_bignum_loc_unsigned();
+    printf("[test   end: test_add1w_bignum_loc_unsigned()]\r\n");
     printf("================================================================================\n");
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_carry_loc_unsigned()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_carry_loc_unsigned");
+    printf("[test start: test_sub1w_bignum_loc_unsigned()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub1w_bignum_loc_unsigned");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_carry_loc_unsigned();
-    printf("[test   end: test_sub_bignum_carry_loc_unsigned()]\r\n");
+    test_sub1w_bignum_loc_unsigned();
+    printf("[test   end: test_sub1w_bignum_loc_unsigned()]\r\n");
     printf("================================================================================\n");
     //printf("--------------------------------------------------------------------------------\n");
-    //printf("[test start: test_add_bignum_carry_loc_signed()]\r\n");
-    //_KEYIN_DO_TEST_(keyin, "test_add_bignum_carry_loc_signed");
+    //printf("[test start: test_add1w_bignum_loc_signed()]\r\n");
+    //_KEYIN_DO_TEST_(keyin, "test_add1w_bignum_loc_signed");
     //_COND_DO_TEST_(keyin)
-    //test_add_bignum_carry_loc_signed();
-    //printf("[test   end: test_add_bignum_carry_loc_signed()]\r\n");
+    //test_add1w_bignum_loc_signed();
+    //printf("[test   end: test_add1w_bignum_loc_signed()]\r\n");
     //printf("================================================================================\n");
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_sub_bignum_carry_loc_signed()]\r\n");
-    _KEYIN_DO_TEST_(keyin, "test_sub_bignum_carry_loc_signed");
+    printf("[test start: test_sub1w_bignum_loc_signed()]\r\n");
+    _KEYIN_DO_TEST_(keyin, "test_sub1w_bignum_loc_signed");
     _COND_DO_TEST_(keyin)
-    test_sub_bignum_carry_loc_signed();
-    printf("[test   end: test_sub_bignum_carry_loc_signed()]\r\n");
+    test_sub1w_bignum_loc_signed();
+    printf("[test   end: test_sub1w_bignum_loc_signed()]\r\n");
     printf("================================================================================\n");
 
 

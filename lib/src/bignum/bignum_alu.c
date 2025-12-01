@@ -587,7 +587,7 @@ ReturnType cpy_bignum_twos_ext(bignum_s* d, const bignum_s* s, const bool ign_si
     ret = cpy_bignum_inverse_ext(d, s, ign_sign, ign_len);
     if(ret != E_OK) return ret;
 
-    (void)add_bignum_carry_loc_unsigned(d, 1UL, 0UL);
+    (void)add1w_bignum_loc_unsigned(d, 1UL, 0UL);
 
     ret = E_OK;
 
@@ -789,7 +789,7 @@ ReturnType add_bignum_ext(bignum_t* co, bignum_s* d, const bignum_s* s0, const b
     return E_OK;
 }
 
-bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
+bignum_t add1w_bignum_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
     bignum_t _s;
     bignum_t _c = v;
     bignum_t SIGN_EXT = ((BIGNUM_SIGN_BIT(v) != 0U) && (!ign_sign))?(BIGNUM_MAX):(0U);
@@ -810,7 +810,7 @@ bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
     return _c;
 }
 
-#if 0 /* sub_bignum_carry_loc_ext */
+#if 0 /* sub1w_bignum_loc_ext */
 #   ifndef ENABLE_BIGNUM_LOG
 #      ifdef _DPRINTF_
 #          undef _DPRINTF_
@@ -821,8 +821,8 @@ bignum_t add_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
 #          define _PRINT_BIGNUM_(p, title)    test_print_bignum(p, title)
 #      endif
 #   endif /*ENABLE_BIGNUM_LOG*/
-#endif/* sub_bignum_carry_loc_ext */
-bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
+#endif/* sub1w_bignum_loc_ext */
+bignum_t sub1w_bignum_loc_ext(bignum_s* d, const bignum_t v, const size_t idx, const bool ign_sign) {
     bignum_t _s;
     bignum_t _c = v;
     const bignum_t SIGN_EXT = ((BIGNUM_SIGN_BIT(v) != 0U) && (!ign_sign))?(BIGNUM_MAX):(0U);;
@@ -847,7 +847,7 @@ bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
 
     return _c;
 }
-#if 0 /* sub_bignum_carry_loc_ext */
+#if 0 /* sub1w_bignum_loc_ext */
 #   ifndef ENABLE_BIGNUM_LOG
 #      ifdef _DPRINTF_
 #          undef _DPRINTF_
@@ -858,7 +858,7 @@ bignum_t sub_bignum_carry_loc_ext(bignum_s* d, const bignum_t v, const size_t id
 #          define _PRINT_BIGNUM_
 #      endif
 #   endif/* ENABLE_BIGNUM_LOG */
-#endif/* sub_bignum_carry_loc_ext */
+#endif/* sub1w_bignum_loc_ext */
 
 /* Return carry out, it can be only FALSE / TRUE, the others are error */
 #if 0 /* sub_bignum_ext */
