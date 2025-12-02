@@ -333,12 +333,12 @@ static inline ReturnType mul_bignum_signed_1bsR2L(bignum_s* d, const bignum_s* s
 {
     return mul_bignum_1bsR2L_ext(d, s1, s0, false);
 }
-static inline ReturnType mul_bignum_nbsR2L_signed(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_signed_nbsR2L_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = false, ign_len = false;
     return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
 }
-static inline ReturnType mul_bignum_nbsR2L_unsigned(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_unsigned_nbsR2L_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = true, ign_len = false;
     return mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
@@ -355,7 +355,7 @@ static inline ReturnType mul_bignum_unsigned_nbsR2L_unsafe(bignum_s* d, const bi
 }
 
 ReturnType mul_bignum_x2wMul_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
-static inline ReturnType mul_bignum_signed_x2w_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_signed_x2wMul_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = false, ign_len = false;
     return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
@@ -376,7 +376,23 @@ static inline ReturnType mul_bignum_unsigned_x2wMul_unsafe(bignum_s* d, const bi
     return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
 }
 
-ReturnType mul1w_bignum_unsigned_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0);
+static inline ReturnType mul1w_bignum_unsigned_nbsR2L_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0)
+{
+    const bool ign_sign = true, ign_len = true;
+    ReturnType fr;
+    bignum_s* s1 = mkBigNum(BIGNUM_BITS);
+    s1->nums[0] = ws1;
+    fr = mul_bignum_nbsR2L_ext(d, s1, s0, ign_sign, ign_len);
+    rmBigNum(&s1);
+    return fr;
+}
+ReturnType mul1w_bignum_x2wMul_ext(bignum_s* d, const bignum_t ws1, const bignum_s* s0, const size_t wloc, const bool ign_sign, const bool ign_len);
+static inline ReturnType mul1w_bignum_unsigned_x2wMul_unsafe(bignum_s* d, const bignum_t ws1, const bignum_s* s0)
+{
+    const bool ign_sign = true, ign_len = true;
+    const size_t wloc = 0UL;
+    return mul1w_bignum_x2wMul_ext(d, ws1, s0, wloc, ign_sign, ign_len);
+}
 /* Divide with Modulo: 'n'umerator = 'q'uotient * 'd'enominator + 'r'emainder */
 ReturnType div_bignum_with_mod_nbs_ext(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d, const bool ign_len);
 static inline ReturnType div_bignum_with_mod(bignum_s* q, bignum_s* r, const bignum_s* n, const bignum_s* d)
@@ -469,22 +485,4 @@ static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const
 {
     return mim_bignum_ext(t, NULL, a, n, true);
 }
-
-/*
- * Mongomery Reduction and Multiplication
- * Ref: Handbook of Applied Cryptography, 1996, CRC press
- * 14.3.2 Montgomery reduction in Chapter14
- * Study at https://blog.naver.com/aaiaia/224087676346
- */
-ReturnType swapMontToBignum_unsigned_safe(bignum_s* dst, const bignum_s* src, const mont_conf_s* conf);
-static inline ReturnType convBignumToMont_unsigned_safe(bignum_s* mont, const bignum_s* n, const mont_conf_s* conf)
-{
-    return swapMontToBignum_unsigned_safe(mont, n, conf);
-}
-static inline ReturnType convMontToBignum_unsigned_safe(bignum_s* n, const bignum_s* mont, const mont_conf_s* conf)
-{
-    return swapMontToBignum_unsigned_safe(n, mont, conf);
-}
-ReturnType mod_mont_unsigned_safe(bignum_s* mont, const bignum_s* n_x2bit, const mont_conf_s* conf);
-ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignum_s* y, const mont_conf_s* conf);
 #endif/* BIGNUM_ALU_H */
