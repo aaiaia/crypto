@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stddef.h> // size_t, NULL
 
+#include "common/returnType.h"
 #include "common/util.h"
 #include "bignum/bignum.h"
 
@@ -54,4 +55,25 @@ typedef struct {
 
 mont_conf_s* mkMontConf(const bignum_s* modulus);
 int rmMontConf(mont_conf_s** conf);
+
+/*
+ * Mongomery Reduction and Multiplication
+ * Ref: Handbook of Applied Cryptography, 1996, CRC press
+ * 14.3.2 Montgomery reduction in Chapter14
+ * Study at https://blog.naver.com/aaiaia/224087676346
+ */
+typedef ReturnType (*mont_mul_bignum_t)(bignum_s*, const bignum_t, const bignum_s*);
+extern const mont_mul_bignum_t mont_mul1w_bignum_unsigned_unsafe;
+
+ReturnType swapMontToBignum_unsigned_safe(bignum_s* dst, const bignum_s* src, const mont_conf_s* conf);
+static inline ReturnType convBignumToMont_unsigned_safe(bignum_s* mont, const bignum_s* n, const mont_conf_s* conf)
+{
+    return swapMontToBignum_unsigned_safe(mont, n, conf);
+}
+static inline ReturnType convMontToBignum_unsigned_safe(bignum_s* n, const bignum_s* mont, const mont_conf_s* conf)
+{
+    return swapMontToBignum_unsigned_safe(n, mont, conf);
+}
+ReturnType mod_mont_unsigned_safe(bignum_s* mont, const bignum_s* n_x2bit, const mont_conf_s* conf);
+ReturnType mul_mont_unsigned_safe(bignum_s* mont, const bignum_s* x, const bignum_s* y, const mont_conf_s* conf);
 #endif/* BIGNUM_MONT_H */

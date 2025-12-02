@@ -2268,8 +2268,8 @@ void test_mul_bignum_1024b_sameBitLength_time_measuring(const size_t iter)
 {
     const TV_MUL_BIGNUM_LIST_t tv_mul_bignum_fn_list[] = {
                 {"mul_bignum_signed_1bsR2L",           mul_bignum_signed_1bsR2L           },
-                {"mul_bignum_nbsR2L_signed",               mul_bignum_nbsR2L_signed               },
-                {"mul_bignum_nbsR2L_unsigned",             mul_bignum_nbsR2L_unsigned             },
+                {"mul_bignum_signed_nbsR2L_safe",               mul_bignum_signed_nbsR2L_safe               },
+                {"mul_bignum_unsigned_nbsR2L_safe",             mul_bignum_unsigned_nbsR2L_safe             },
                 {"mul_bignum_signed_nbsR2L_unsafe",        mul_bignum_signed_nbsR2L_unsafe        },
                 {"mul_bignum_unsigned_nbsR2L_unsafe",      mul_bignum_unsigned_nbsR2L_unsafe      },
                 {"mul_bignum_signed_x2wMul_safe",      mul_bignum_signed_x2wMul_safe      },
@@ -5125,7 +5125,7 @@ void test_montgomery(const char* test_fn_name)
             intentional_invalid = false;
 
             TICK_TIME_START("Normal Form multiply and modulus");
-            fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mul_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, multiplier, multiplicand);
             fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
@@ -5183,7 +5183,7 @@ void test_montgomery(const char* test_fn_name)
 
             /* Classical multiply and modulus */
             TICK_TIME_START("Normal Form multiply and modulus");
-            fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, multiplier, multiplicand);
+            fr = mul_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, multiplier, multiplicand);
             fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
@@ -5253,7 +5253,7 @@ void test_montgomery(const char* test_fn_name)
             {
                 memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-                fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+                fr = mul_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
                 fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             }
         }
@@ -5273,28 +5273,28 @@ void test_montgomery(const char* test_fn_name)
         fr = convMontToBignum_unsigned_safe(mont_to_norm, mont_product, mont_conf);
         TICK_TIME_END;
 
-        TICK_TIME_START("Process time of mul_bignum_unsigned_nbsR2L_unsafe()");
+        TICK_TIME_START("Process time of mul_bignum_unsigned_x2wMul_unsafe()");
         for(size_t iter = 0x0; iter < 0x100; iter++)
         {
             for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
             {
                 memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-                fr = mul_bignum_unsigned_nbsR2L_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
+                fr = mul_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
             }
         }
         TICK_TIME_END;
 
         srand(time(NULL));
         bignum_t rw = (((rand()&0xFFFFU)<<16U)|((rand()&0xFFFFU)<<0U));
-        TICK_TIME_START("Process time of mul1w_bignum_unsigned_unsafe()");
+        TICK_TIME_START("Process time of mul1w_bignum_unsigned_x2wMul_unsafe()");
         for(size_t iter = 0x0; iter < 0x100; iter++)
         {
             for(size_t i = 0UL; TEST_MONTGOMERY_NORMAL_TV_LIST[i] != NULL; i++)
             {
                 memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
-                fr = mul1w_bignum_unsigned_unsafe(norm_prod_x2b, rw, multiplicand);
+                fr = mul1w_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, rw, multiplicand);
             }
         }
         TICK_TIME_END;
@@ -8723,22 +8723,28 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
     memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
     memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
 
-    clr_bignum(xP);
-    clr_bignum(yP);
     // d == 1
     for(size_t i = 0UL; i < 10UL; i++)
     {
         cmp_result = true;
         intentional_invalid = false;
 
-        ec_addPoints(xP, yP, xP, yP, xG, yG, _EC_BITS_, coef_a, prime, ign_sign);
+        clr_bignum(xP);
+        clr_bignum(yP);
+
+        TICK_TIME_START(test_fn_name);
+        for(size_t iterCnt = 0UL; iterCnt < i+1UL; iterCnt++) {
+            ec_addPoints(xP, yP, xP, yP, xG, yG, _EC_BITS_, coef_a, prime, ign_sign);
+        }
+        TICK_TIME_END;
 
         cmp_result &= (memcmp(xP->nums, TV_SECP256K1_addition_xNG_LIST[i], xP->size) == 0);
         cmp_result &= (memcmp(yP->nums, TV_SECP256K1_addition_yNG_LIST[i], yP->size) == 0);
 
-        printf("N=%lu", i+1UL); test_print_bignum(xP, "xNG");
-        printf("N=%lu", i+1UL); test_print_bignum(yP, "yNG");
         if(!cmp_result) {
+            printf("N=%lu", i+1UL); test_print_bignum(xP, "xNG");
+            printf("N=%lu", i+1UL); test_print_bignum(yP, "yNG");
+
             printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_xNG_LIST[i], xP->nlen);
             printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_yNG_LIST[i], yP->nlen);
         }
@@ -8755,7 +8761,7 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
 
     // d == 100
     {
-        for(size_t i = 10UL; i < 1000000UL; i++)
+        for(size_t doCnt = 10UL; doCnt < 1000000UL; doCnt*=10UL)
         {
             bool doCompare = false;
             const uint32_t* xNG_ref = NULL;
@@ -8764,28 +8770,35 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
             cmp_result = true;
             intentional_invalid = false;
 
-            ec_addPoints(xP, yP, xP, yP, xG, yG, _EC_BITS_, coef_a, prime, ign_sign);
-            if(i+1UL ==     100UL) {
+            clr_bignum(xP);
+            clr_bignum(yP);
+
+            TICK_TIME_START(test_fn_name);
+            for(size_t iterCnt = 0UL; iterCnt < doCnt; iterCnt++) {
+                ec_addPoints(xP, yP, xP, yP, xG, yG, _EC_BITS_, coef_a, prime, ign_sign);
+            }
+            TICK_TIME_END;
+            if(doCnt ==     100UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x100G;
                 yNG_ref = SECP256K1_calc_y100G;
             }
-            if(i+1UL ==    1000UL) {
+            if(doCnt ==    1000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x1000G;
                 yNG_ref = SECP256K1_calc_y1000G;
             }
-            if(i+1UL ==   10000UL) {
+            if(doCnt ==   10000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x10000G;
                 yNG_ref = SECP256K1_calc_y10000G;
             }
-            if(i+1UL ==  100000UL) {
+            if(doCnt ==  100000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x100000G;
                 yNG_ref = SECP256K1_calc_y100000G;
             }
-            if(i+1UL == 1000000UL) {
+            if(doCnt == 1000000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x1000000G;
                 yNG_ref = SECP256K1_calc_y1000000G;
@@ -8795,15 +8808,16 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
                 cmp_result &= (memcmp(xP->nums, xNG_ref, xP->size) == 0);
                 cmp_result &= (memcmp(yP->nums, yNG_ref, yP->size) == 0);
 
-                printf("N=%lu", i+1UL); test_print_bignum(xP, "xNG");
-                printf("N=%lu", i+1UL); test_print_bignum(yP, "yNG");
                 if(!cmp_result) {
+                    printf("N=%lu", doCnt); test_print_bignum(xP, "xNG");
+                    printf("N=%lu", doCnt); test_print_bignum(yP, "yNG");
+
                     printf("[xNG ref]\r\n"); test_print_bignum_array(xNG_ref, xP->nlen);
                     printf("[yNG ref]\r\n"); test_print_bignum_array(yNG_ref, yP->nlen);
                 }
 
 
-                printf("%luG, ", i+1UL);
+                printf("%luG, ", doCnt);
                 printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
 #if(TEST_MANUAL_CHECK == 0)
                 TEST_ASSERT((cmp_result) || (intentional_invalid));
@@ -8812,11 +8826,11 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
                 printf("============================================================\r\n");
 #endif
             }
-            if(i+1UL ==  10000UL) {
+            if(doCnt ==  10000UL) {
                 _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
                 _COND_DO_TEST_0_(keyin) break;
             }
-            if(i+1UL ==  100000UL) {
+            if(doCnt ==  100000UL) {
                 _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
                 _COND_DO_TEST_0_(keyin) break;
             }
@@ -8925,26 +8939,32 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
     memcpy(xG->nums, SECP256K1_calc_xG, xG->size);
     memcpy(yG->nums, SECP256K1_calc_yG, yG->size);
 
-    ec_setIdentity_inJacobi(jXP, jYP, jZP);
     // d == 1
     for(size_t i = 0UL; i < 10UL; i++)
     {
         cmp_result = true;
         intentional_invalid = false;
 
-        ec_addPoint_AffineIntoJacobi(jXP, jYP, jZP, jXP, jYP, jZP, xG, yG, _EC_BITS_, coef_a, prime);
-        ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+        ec_setIdentity_inJacobi(jXP, jYP, jZP);
 
-        printf("N=%lu", i+1UL); test_print_bignum(jXP, "jXNG");
-        printf("N=%lu", i+1UL); test_print_bignum(jYP, "jYNG");
-        printf("N=%lu", i+1UL); test_print_bignum(jZP, "jZNG");
+        TICK_TIME_START(test_fn_name);
+        for(size_t iterCnt = 0UL; iterCnt < i+1UL; iterCnt++) {
+            ec_addPoint_AffineIntoJacobi(jXP, jYP, jZP, jXP, jYP, jZP, xG, yG, _EC_BITS_, coef_a, prime);
+        }
+        ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+        TICK_TIME_END;
 
         cmp_result &= (memcmp(axP->nums, TV_SECP256K1_addition_xNG_LIST[i], axP->size) == 0);
         cmp_result &= (memcmp(ayP->nums, TV_SECP256K1_addition_yNG_LIST[i], ayP->size) == 0);
 
-        printf("N=%lu", i+1UL); test_print_bignum(axP, "axNG");
-        printf("N=%lu", i+1UL); test_print_bignum(ayP, "ayNG");
         if(!cmp_result) {
+            printf("N=%lu", i+1UL); test_print_bignum(jXP, "jXNG");
+            printf("N=%lu", i+1UL); test_print_bignum(jYP, "jYNG");
+            printf("N=%lu", i+1UL); test_print_bignum(jZP, "jZNG");
+
+            printf("N=%lu", i+1UL); test_print_bignum(axP, "axNG");
+            printf("N=%lu", i+1UL); test_print_bignum(ayP, "ayNG");
+
             printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_xNG_LIST[i], axP->nlen);
             printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_addition_yNG_LIST[i], ayP->nlen);
         }
@@ -8961,7 +8981,7 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
 
     // d == 100
     {
-        for(size_t i = 10UL; i < 1000000UL; i++)
+        for(size_t doCnt = 10UL; doCnt < 1000000UL; doCnt*=10UL)
         {
             bool doCompare = false;
             const uint32_t* xNG_ref = NULL;
@@ -8970,28 +8990,34 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
             cmp_result = true;
             intentional_invalid = false;
 
-            ec_addPoint_AffineIntoJacobi(jXP, jYP, jZP, jXP, jYP, jZP, xG, yG, _EC_BITS_, coef_a, prime);
-            if(i+1UL ==     100UL) {
+            ec_setIdentity_inJacobi(jXP, jYP, jZP);
+
+            TICK_TIME_START(test_fn_name);
+            for(size_t iterCnt = 0UL; iterCnt < doCnt; iterCnt++) {
+                ec_addPoint_AffineIntoJacobi(jXP, jYP, jZP, jXP, jYP, jZP, xG, yG, _EC_BITS_, coef_a, prime);
+            }
+            TICK_TIME_END;
+            if(doCnt ==     100UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x100G;
                 yNG_ref = SECP256K1_calc_y100G;
             }
-            if(i+1UL ==    1000UL) {
+            if(doCnt ==    1000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x1000G;
                 yNG_ref = SECP256K1_calc_y1000G;
             }
-            if(i+1UL ==   10000UL) {
+            if(doCnt ==   10000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x10000G;
                 yNG_ref = SECP256K1_calc_y10000G;
             }
-            if(i+1UL ==  100000UL) {
+            if(doCnt ==  100000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x100000G;
                 yNG_ref = SECP256K1_calc_y100000G;
             }
-            if(i+1UL == 1000000UL) {
+            if(doCnt == 1000000UL) {
                 doCompare |= true;
                 xNG_ref = SECP256K1_calc_x1000000G;
                 yNG_ref = SECP256K1_calc_y1000000G;
@@ -9003,14 +9029,15 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
                 cmp_result &= (memcmp(axP->nums, xNG_ref, axP->size) == 0);
                 cmp_result &= (memcmp(ayP->nums, yNG_ref, ayP->size) == 0);
 
-                printf("N=%lu", i+1UL); test_print_bignum(axP, "xNG");
-                printf("N=%lu", i+1UL); test_print_bignum(ayP, "yNG");
                 if(!cmp_result) {
+                    printf("N=%lu", doCnt); test_print_bignum(axP, "xNG");
+                    printf("N=%lu", doCnt); test_print_bignum(ayP, "yNG");
+
                     printf("[xNG ref]\r\n"); test_print_bignum_array(xNG_ref, axP->nlen);
                     printf("[yNG ref]\r\n"); test_print_bignum_array(yNG_ref, ayP->nlen);
                 }
 
-                printf("%luG, ", i+1UL);
+                printf("%luG, ", doCnt);
                 printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
 #if(TEST_MANUAL_CHECK == 0)
                 TEST_ASSERT((cmp_result) || (intentional_invalid));
@@ -9019,11 +9046,11 @@ const uint32_t* TV_SECP256K1_addition_yNG_LIST[] = {\
                 printf("============================================================\r\n");
 #endif
             }
-            if(i+1UL ==  10000UL) {
+            if(doCnt ==  10000UL) {
                 _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
                 _COND_DO_TEST_0_(keyin) break;
             }
-            if(i+1UL ==  100000UL) {
+            if(doCnt ==  100000UL) {
                 _KEYIN_DO_TEST_0_(keyin, "This test needs loooooong time, Stop Test?(y/n)");
                 _COND_DO_TEST_0_(keyin) break;
             }
@@ -9128,23 +9155,29 @@ const uint32_t* TV_SECP256K1_doubling_yNG_LIST[] = {\
     memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
     memcpy(prime->nums, SECP256K1_calc_p, prime->size);
 
-    memcpy(xP->nums, SECP256K1_calc_xG, xP->size);
-    memcpy(yP->nums, SECP256K1_calc_yG, yP->size);
     // d == 1
-    for(size_t i = 1UL; i < 11UL; i++)
+    for(size_t i = 0UL; i < 11UL; i++)
     {
         cmp_result = true;
         intentional_invalid = false;
 
-        ec_doublePoints_self(xP, yP, _EC_BITS_, coef_a, prime, ign_sign);
+        memcpy(xP->nums, SECP256K1_calc_xG, xP->size);
+        memcpy(yP->nums, SECP256K1_calc_yG, yP->size);
+
+        TICK_TIME_START(test_fn_name);
+        for(size_t iterCnt = 0UL; iterCnt < i; iterCnt++)
+        {
+            ec_doublePoints_self(xP, yP, _EC_BITS_, coef_a, prime, ign_sign);
+        }
+        TICK_TIME_END;
 
         cmp_result &= (memcmp(xP->nums, TV_SECP256K1_doubling_xNG_LIST[i], xP->size) == 0);
         cmp_result &= (memcmp(yP->nums, TV_SECP256K1_doubling_yNG_LIST[i], yP->size) == 0);
 
-        printf("N=%lu", 1UL<<i); test_print_bignum(xP, "xNG");
-        printf("N=%lu", 1UL<<i); test_print_bignum(yP, "yNG");
-
         if(!cmp_result) {
+            printf("N=%lu", 1UL<<i); test_print_bignum(xP, "xNG");
+            printf("N=%lu", 1UL<<i); test_print_bignum(yP, "yNG");
+
             printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_xNG_LIST[i], xP->nlen);
             printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_yNG_LIST[i], yP->nlen);
         }
@@ -9251,31 +9284,36 @@ const uint32_t* TV_SECP256K1_doubling_yNG_LIST[] = {\
     memcpy(coef_b->nums, SECP256K1_calc_b, coef_b->size);
     memcpy(prime->nums, SECP256K1_calc_p, prime->size);
 
-    memcpy(axP->nums, SECP256K1_calc_xG, axP->size);
-    memcpy(ayP->nums, SECP256K1_calc_yG, ayP->size);
-
-    ec_convAffineToJacobi(jXP, jYP, jZP, axP, ayP);
-
     // d == 1
-    for(size_t i = 1UL; i < 11UL; i++)
+    for(size_t i = 0UL; i < 11UL; i++)
     {
         cmp_result = true;
         intentional_invalid = false;
 
-        ec_doublingPoint_inJacobi(jXP, jYP, jZP, _EC_BITS_, coef_a, prime);
-        ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+        memcpy(axP->nums, SECP256K1_calc_xG, axP->size);
+        memcpy(ayP->nums, SECP256K1_calc_yG, ayP->size);
 
-        printf("N=%lu", 1UL<<i); test_print_bignum(jXP, "jXNG");
-        printf("N=%lu", 1UL<<i); test_print_bignum(jYP, "jYNG");
-        printf("N=%lu", 1UL<<i); test_print_bignum(jZP, "jZNG");
+        ec_convAffineToJacobi(jXP, jYP, jZP, axP, ayP);
+
+        TICK_TIME_START(test_fn_name);
+        for(size_t iterCnt = 0UL; iterCnt < i; iterCnt++)
+        {
+            ec_doublingPoint_inJacobi(jXP, jYP, jZP, _EC_BITS_, coef_a, prime);
+        }
+        ec_convJacobiToAffine(axP, ayP, jXP, jYP, jZP, _EC_BITS_, prime);
+        TICK_TIME_END;
 
         cmp_result &= (memcmp(axP->nums, TV_SECP256K1_doubling_xNG_LIST[i], axP->size) == 0);
         cmp_result &= (memcmp(ayP->nums, TV_SECP256K1_doubling_yNG_LIST[i], ayP->size) == 0);
 
-        printf("N=%lu", 1UL<<i); test_print_bignum(axP, "axNG");
-        printf("N=%lu", 1UL<<i); test_print_bignum(ayP, "ayNG");
-
         if(!cmp_result) {
+            printf("N=%lu", 1UL<<i); test_print_bignum(jXP, "jXNG");
+            printf("N=%lu", 1UL<<i); test_print_bignum(jYP, "jYNG");
+            printf("N=%lu", 1UL<<i); test_print_bignum(jZP, "jZNG");
+
+            printf("N=%lu", 1UL<<i); test_print_bignum(axP, "axNG");
+            printf("N=%lu", 1UL<<i); test_print_bignum(ayP, "ayNG");
+
             printf("[xNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_xNG_LIST[i], jXP->nlen);
             printf("[yNG ref]\r\n"); test_print_bignum_array(TV_SECP256K1_doubling_yNG_LIST[i], jYP->nlen);
         }
@@ -9439,7 +9477,9 @@ void test_SECP256K1_scalarMul_WNAF(void)
     {
         wnaf_pre_compute_ec_s* wnaf_pc = mkWNAF_preCompute_ec(w, _EC_BITS_);
 
+        TICK_TIME_START(test_fn_name);
         ec_preCompute_WNAF(wnaf_pc, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
+        TICK_TIME_END;
 
         test_print_bignum(xG, "xG: Base point");
         test_print_bignum(yG, "yG: Base point");
@@ -9454,12 +9494,17 @@ void test_SECP256K1_scalarMul_WNAF(void)
         intentional_invalid = false;
         memcpy(scalar_d->nums, TV_SECP256K1_scalarMul_d_LIST[i], scalar_d->size);
 
+        TICK_TIME_START(test_fn_name);
         ec_scalarMul_WNAF(xP, yP, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, w, ign_sign);
-        printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(xP, "xNG");
-        printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(yP, "yNG");
+        TICK_TIME_END;
 
         cmp_result &= (memcmp(xP->nums, TV_SECP256K1_scalarMul_xNG_LIST[i], xP->size) == 0);
         cmp_result &= (memcmp(yP->nums, TV_SECP256K1_scalarMul_yNG_LIST[i], yP->size) == 0);
+
+        if(!cmp_result) {
+            printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(xP, "xNG");
+            printf("N=%s, ", TV_SECP256K1_scalarMul_d_string_LIST[i]); test_print_bignum(yP, "yNG");
+        }
 
         printf("%s is %s\r\n", test_fn_name, ((cmp_result)?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
 #if(TEST_MANUAL_CHECK == 0)
@@ -9580,7 +9625,10 @@ void test_SECP256K1_ECDH(void)
         intentional_invalid = false;
         memcpy(scalar_d->nums, SECP256K1_ECDH_d_alice, scalar_d->size);
 
+        TICK_TIME_START("eckey_getPublicKey");
         eckey_getPublicKey(xPublic, yPublic, scalar_d, xG, yG, _EC_BITS_, coef_a, prime);
+        TICK_TIME_END;
+
         test_print_bignum(xPublic, "Alice's xPublic");
         test_print_bignum(yPublic, "Alice's yPublic");
 
@@ -9602,7 +9650,10 @@ void test_SECP256K1_ECDH(void)
         intentional_invalid = false;
         memcpy(scalar_d->nums, SECP256K1_ECDH_d_bob, scalar_d->size);
 
+        TICK_TIME_START("eckey_getPublicKey");
         eckey_getPublicKey(xPublic, yPublic, scalar_d, xG, yG, _EC_BITS_, coef_a, prime);
+        TICK_TIME_END;
+
         test_print_bignum(xPublic, "Bob's xPublic");
         test_print_bignum(yPublic, "Bob's yPublic");
 
@@ -9627,7 +9678,10 @@ void test_SECP256K1_ECDH(void)
         memcpy(xPublic->nums, SECP256K1_ECDH_xP_bob, xPublic->size);
         memcpy(yPublic->nums, SECP256K1_ECDH_yP_bob, yPublic->size);
 
+        TICK_TIME_START("eckey_getPublicKey");
         ecdh_getSharedKey(xShared, yShared, scalar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime);
+        TICK_TIME_END;
+
         test_print_bignum(xShared, "xShared");
         test_print_bignum(yShared, "yShared");
 
@@ -9652,7 +9706,10 @@ void test_SECP256K1_ECDH(void)
         memcpy(xPublic->nums, SECP256K1_ECDH_xP_alice, xPublic->size);
         memcpy(yPublic->nums, SECP256K1_ECDH_yP_alice, yPublic->size);
 
+        TICK_TIME_START("eckey_getPublicKey");
         ecdh_getSharedKey(xShared, yShared, scalar_d, xPublic, yPublic, _EC_BITS_, coef_a, prime);
+        TICK_TIME_END;
+
         test_print_bignum(xShared, "xShared");
         test_print_bignum(yShared, "yShared");
 
@@ -9896,7 +9953,9 @@ void test_SECP256K1_ECDSA(void)
             memcpy(scalar_d->nums, SECP256K1_ECDSA_d_alice, scalar_d->size);
             memset(scalar_z->nums, 0, scalar_z->size);
 
+            TICK_TIME_START("ecdsa_sign");
             ecdsa_sign(sign_r, sign_s, scalar_z, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+            TICK_TIME_END;
 
             rmBigNum(&scalar_d);
             rmBigNum(&scalar_z);
@@ -9930,7 +9989,9 @@ void test_SECP256K1_ECDSA(void)
             memset(scalar_z->nums, 0, scalar_z->size);
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
+            TICK_TIME_START("ecdsa_veri_calc_r");
             cmp_result &= ecdsa_veri_calc_r(veri_r, sign_r, sign_s, scalar_z, xPublic, yPublic, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+            TICK_TIME_END;
             printf("ecdsa_veri_calc_r = %u\r\n", cmp_result);
 
             rmBigNum(&scalar_z);
@@ -10031,7 +10092,9 @@ void test_SECP256K1_ECDSA(void)
         memcpy(scalar_z->nums, SECP256K1_ECDSA_m_sha256_example2, scalar_z->size);
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
+        TICK_TIME_START("ecdsa_veri_calc_r");
         cmp_result &= ecdsa_veri_calc_r(veri_r, sign_r, sign_s, scalar_z, xPublic, yPublic, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+        TICK_TIME_END;
         printf("ecdsa_veri_calc_r = %u\r\n", cmp_result);
 
         printf("@%s:%u, ", __func__, __LINE__); test_print_bignum(veri_r, "veri r");
@@ -10054,7 +10117,7 @@ void test_SECP256K1_ECDSA(void)
 #endif/* TEST_MANUAL_CHECK */
     }
 
-    for(size_t i = 0; i < 1000UL; i++)
+    for(size_t i = 0; i < 0x10; i++)
     // Alice's Public key = Alice's Private Key * Base Point
     {
         cmp_result = true;
@@ -10080,7 +10143,9 @@ void test_SECP256K1_ECDSA(void)
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_d, "scalar_d");
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
+            TICK_TIME_START("ecdsa_sign");
             ecdsa_sign(sign_r, sign_s, scalar_z, scalar_d, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+            TICK_TIME_END;
 
             rmBigNum(&scalar_d);
             rmBigNum(&scalar_z);
@@ -10113,7 +10178,9 @@ void test_SECP256K1_ECDSA(void)
             memcpy(scalar_z->nums, SECP256K1_ECDSA_m_sha1_digest, scalar_z->size);
             _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
+            TICK_TIME_START("ecdsa_veri_calc_r");
             cmp_result &= ecdsa_veri_calc_r(veri_r, sign_r, sign_s, scalar_z, xPublic, yPublic, xG, yG, _EC_BITS_, coef_a, prime, order_n);
+            TICK_TIME_END;
             printf("ecdsa_veri_calc_r = %u\r\n", cmp_result);
 
             rmBigNum(&scalar_z);
@@ -10337,19 +10404,19 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_signed)]\r\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_nbsR2L_safe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_signed_1024b("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
-    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_signed)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_signed_nbsR2L_safe", mul_bignum_signed_nbsR2L_safe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_nbsR2L_safe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_unsigned)]\r\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_unsigned_nbsR2L_safe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_signed_1024b("mul_bignum_nbsR2L_unsigned", mul_bignum_nbsR2L_unsigned);
-    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_nbsR2L_unsigned)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_unsigned_nbsR2L_safe", mul_bignum_unsigned_nbsR2L_safe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_unsigned_nbsR2L_safe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -10401,19 +10468,19 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_unsigned)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_nbsR2L_safe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_nbsR2L_unsigned", mul_bignum_nbsR2L_unsigned);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_unsigned)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_unsigned_nbsR2L_safe", mul_bignum_unsigned_nbsR2L_safe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_unsigned_nbsR2L_safe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_signed)]\r\n");
+    printf("[test start: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_nbsR2L_safe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_1024b_sameBignumLength");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_1024b_sameBignumLength("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
-    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_nbsR2L_signed)]\r\n");
+    test_mul_bignum_1024b_sameBignumLength("mul_bignum_signed_nbsR2L_safe", mul_bignum_signed_nbsR2L_safe);
+    printf("[test   end: test_mul_bignum_1024b_sameBignumLength(mul_bignum_signed_nbsR2L_safe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
@@ -10522,11 +10589,11 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_nbsR2L_signed)]\r\n");
+    printf("[test start: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_nbsR2L_safe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_sameBignumLength_with_mod_value");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_nbsR2L_signed", mul_bignum_nbsR2L_signed);
-    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_nbsR2L_signed)]\r\n");
+    test_mul_bignum_sameBignumLength_with_mod_value("mul_bignum_signed_nbsR2L_safe", mul_bignum_signed_nbsR2L_safe);
+    printf("[test   end: test_mul_bignum_sameBignumLength_with_mod_value(mul_bignum_signed_nbsR2L_safe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
