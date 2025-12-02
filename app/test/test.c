@@ -2272,7 +2272,7 @@ void test_mul_bignum_1024b_sameBitLength_time_measuring(const size_t iter)
                 {"mul_bignum_nbsR2L_unsigned",             mul_bignum_nbsR2L_unsigned             },
                 {"mul_bignum_signed_nbsR2L_unsafe",        mul_bignum_signed_nbsR2L_unsafe        },
                 {"mul_bignum_unsigned_nbsR2L_unsafe",      mul_bignum_unsigned_nbsR2L_unsafe      },
-                {"mul_bignum_signed_x2w_safe",      mul_bignum_signed_x2w_safe      },
+                {"mul_bignum_signed_x2wMul_safe",      mul_bignum_signed_x2wMul_safe      },
                 {"mul_bignum_unsigned_x2wMul_safe",    mul_bignum_unsigned_x2wMul_safe    },
                 {"mul_bignum_signed_x2wMul_unsafe",    mul_bignum_signed_x2wMul_unsafe    },
                 {"mul_bignum_unsigned_x2wMul_unsafe",  mul_bignum_unsigned_x2wMul_unsafe  },
@@ -10369,11 +10369,11 @@ void test_sequence_bignum(void) {
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");
-    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_x2w_safe)]\r\n");
+    printf("[test start: test_mul_bignum_signed_1024b(mul_bignum_signed_x2wMul_safe)]\r\n");
     _KEYIN_DO_TEST_(keyin, "test_mul_bignum_signed_1024b");
     _COND_DO_TEST_(keyin)
-    test_mul_bignum_signed_1024b("mul_bignum_signed_x2w_safe", mul_bignum_signed_x2w_safe);
-    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_x2w_safe)]\r\n");
+    test_mul_bignum_signed_1024b("mul_bignum_signed_x2wMul_safe", mul_bignum_signed_x2wMul_safe);
+    printf("[test   end: test_mul_bignum_signed_1024b(mul_bignum_signed_x2wMul_safe)]\r\n");
     printf("================================================================================\n");
 
     printf("--------------------------------------------------------------------------------\n");

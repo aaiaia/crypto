@@ -355,7 +355,7 @@ static inline ReturnType mul_bignum_unsigned_nbsR2L_unsafe(bignum_s* d, const bi
 }
 
 ReturnType mul_bignum_x2wMul_ext(bignum_s* d, const bignum_s* s1, const bignum_s* s0, const bool ign_sign, const bool ign_len);
-static inline ReturnType mul_bignum_signed_x2w_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
+static inline ReturnType mul_bignum_signed_x2wMul_safe(bignum_s* d, const bignum_s* s1, const bignum_s* s0)
 {
     const bool ign_sign = false, ign_len = false;
     return mul_bignum_x2wMul_ext(d, s1, s0, ign_sign, ign_len);
@@ -469,6 +469,12 @@ static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const
 {
     return mim_bignum_ext(t, NULL, a, n, true);
 }
+
+/* with modulo */
+ReturnType add_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p);
+ReturnType sub_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p);
+
+ReturnType mul_bignum_unsigned_with_mod_x2Mul_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p);
 
 /*
  * Mongomery Reduction and Multiplication

@@ -1780,6 +1780,63 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
     else            return E_OK;
 }
 
+ReturnType add_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p)
+{
+    ReturnType fr = E_NOT_OK;
+
+    bignum_t co;
+    const bignum_t ci = BIGNUM_ZERO;
+    const size_t wloc = 0UL;
+    const bool ign_len = false, ign_sign = true;
+
+    fr = add_bignum_wloc_ext(&co, d, s0, s1, ci, wloc, ign_len, ign_sign);
+    if(co != BIGNUM_ZERO)
+    {
+        fr = sub_bignum_wloc_ext(NULL, d, d, p, ci, wloc, ign_len, ign_sign);
+    }
+    else
+    {
+        fr = aim_bignum_ext(d, d, p, ign_len, ign_sign);
+    }
+    return fr;
+}
+ReturnType sub_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p)
+{
+    ReturnType fr = E_NOT_OK;
+
+    bignum_t co;
+    const bignum_t ci = BIGNUM_ZERO;
+    const size_t wloc = 0UL;
+    const bool ign_len = false, ign_sign = true;
+
+    fr = sub_bignum_wloc_ext(&co, d, s0, s1, ci, wloc, ign_len, ign_sign);
+    if(co != BIGNUM_ZERO)
+    {
+        fr = add_bignum_wloc_ext(NULL, d, d, p, ci, wloc, ign_len, ign_sign);
+    }
+    else
+    {
+        fr = aim_bignum_ext(d, d, p, ign_len, ign_sign);
+    }
+    return fr;
+}
+
+ReturnType mul_bignum_unsigned_with_mod_x2Mul_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p)
+{
+    ReturnType fr = E_NOT_OK;
+
+    const bool ign_sign = true, ign_len = false;
+
+    bignum_s* buf = mkBigNum(s0->bits + s1->bits);
+
+    fr = mul_bignum_unsigned_x2wMul_safe(buf, s1, s0);
+    fr = div_bignum_unsafe(d, buf, p);
+
+    rmBigNum(&buf);
+
+    return fr;
+}
+
 ReturnType swapMontToBignum_unsigned_safe(bignum_s* dst, const bignum_s* src, const mont_conf_s* conf)
 {
 #define BIT_X2(BITS)    ((BITS)<<1UL)
