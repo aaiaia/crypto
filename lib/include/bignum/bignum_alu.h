@@ -487,6 +487,7 @@ static inline ReturnType mim_bignum_unsafe(bignum_s* t, const bignum_s* a, const
 }
 
 /* with modulo */
+ReturnType tws_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s, const bignum_s* p);
 ReturnType add_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p);
 ReturnType sub_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p);
 

@@ -78,213 +78,153 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
         bignum_cmp_e cmp_y = cmp_bignum_logical_safe_ext(yP, yQ, ign_sign);
         _DPRINTF_("[INFO] Point P and Q are %s\r\n", ((cmp_x == BIGNUM_CMP_EQ) && (cmp_y == BIGNUM_CMP_EQ))?"Same":"Diff");
 
-        bignum_s* bitEx_p1_m = mkBigNum(EC_BIT_P1(ec_bits));
-        bignum_s* bitEx_p1_x = mkBigNum(EC_BIT_P1(ec_bits));
-        bignum_s* bitEx_p1_y = mkBigNum(EC_BIT_P1(ec_bits));
+        bignum_s* m = mkBigNum(ec_bits);
+        bignum_s* x = mkBigNum(ec_bits);
+        bignum_s* y = mkBigNum(ec_bits);
 
-        bignum_s* bitEx_p1_p = mkBigNum(EC_BIT_P1(ec_bits));
-        cpy_bignum_unsigned_unsafe(bitEx_p1_p, p);
-        _PRINT_BIGNUM_(bitEx_p1_p, "| | | | | bitEx_p1_p | | | | |");
+        _PRINT_BIGNUM_(p, "| | | | | p | | | | |");
 
         if(!((cmp_x == BIGNUM_CMP_EQ) && (cmp_y == BIGNUM_CMP_EQ)))
         {
             /* P != Q */
             _DPRINTF_("P != Q\n");
 
-            bignum_s* bitEx_x2_mul = mkBigNum(EC_BIT_X2(ec_bits)); // bit extended m
-
-            bignum_s* bitEx_p1_dy  = mkBigNum(EC_BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
-            bignum_s* bitEx_p1_dx  = mkBigNum(EC_BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
-            bignum_s* bitEx_p1_dxi = mkBigNum(EC_BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
+            bignum_s* dy = mkBigNum(ec_bits);// by bit expension, unsigned to signed on addtion
+            bignum_s* dx = mkBigNum(ec_bits);// by bit expension, unsigned to signed on addtion
+            bignum_s* dxInv = mkBigNum(ec_bits);// by bit expension, unsigned to signed on addtion
 
             if(!nQ) {
-                _EC_FN_(fr, sub_bignum_unsigned_unsafe(bitEx_p1_dy, yP, yQ));// bit expended, unsigned to sign
+                _EC_FN_(fr, sub_bignum_unsigned_with_mod_safe(dy, yP, yQ, p));// bit expended, unsigned to sign
             } else {
-                _EC_FN_(fr, add_bignum_unsigned_unsafe(bitEx_p1_dy, yP, yQ));// bit expended, unsigned to sign
+                _EC_FN_(fr, add_bignum_unsigned_with_mod_safe(dy, yP, yQ, p));// bit expended, unsigned to sign
             }
-                _PRINT_BIGNUM_(bitEx_p1_dy, "| | | | | bitEx_p1_dy = yP - yQ | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_dy, bitEx_p1_dy, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_dy, "| | | | | bitEx_p1_dy = (yP - yQ) mod bitEx_p1_p | | | | |");
-            _EC_FN_(fr, sub_bignum_unsigned_unsafe(bitEx_p1_dx, xP, xQ));// bit expended, unsigned to sign
-            _PRINT_BIGNUM_(bitEx_p1_dx, "| | | | | bitEx_p1_dx = xP - xQ | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_dx, bitEx_p1_dx, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_dx, "| | | | | bitEx_p1_dx = (xP - xQ) mod bitEx_p1_p | | | | |");
+            _PRINT_BIGNUM_(dy, "| | | | | dy = (yP - yQ) mod p | | | | |");
+            _EC_FN_(fr, sub_bignum_unsigned_with_mod_safe(dx, xP, xQ, p));// bit expended, unsigned to sign
+            _PRINT_BIGNUM_(dx, "| | | | | dx = (xP - xQ) mod p | | | | |");
 
-            _EC_FN_(fr, mim_bignum_unsafe(bitEx_p1_dxi, bitEx_p1_dx, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_dxi, "| | | | | bitEx_p1_dx^(-1) = (xP - xQ)^(-1) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, mim_bignum_unsafe(dxInv, dx, p));
+            _PRINT_BIGNUM_(dxInv, "| | | | | dx^(-1) = (xP - xQ)^(-1) mod p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
                 _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
                 slope_is_INFINITE |= true;
             }
 
             if(!slope_is_INFINITE) {
-                _EC_FN_(fr, ec_mul_bignum_unsigned_unsafe(bitEx_x2_mul, bitEx_p1_dy, bitEx_p1_dxi));
-                _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) | | | | |");
-                _EC_FN_(fr, mod_bignum_unsafe(bitEx_p1_m, bitEx_x2_mul, p));
-                _PRINT_BIGNUM_(bitEx_p1_m, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) mod p | | | | |");
+                _EC_FN_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(m, dy, dxInv, p));
+                _PRINT_BIGNUM_(m, "| | | | | m = (yP - yQ)(xP - xQ)^(-1) mod p | | | | |");
             }
 
-            rmBigNum(&bitEx_x2_mul);
-
-            rmBigNum(&bitEx_p1_dy);
-            rmBigNum(&bitEx_p1_dx);
-            rmBigNum(&bitEx_p1_dxi);
+            rmBigNum(&dy);
+            rmBigNum(&dx);
+            rmBigNum(&dxInv);
         }
         else
         {
             /* P == Q, xP == xQ, yP == yQ*/
             _DPRINTF_("P == Q\n");
 
-            bignum_s* bitEx_x2_mul = mkBigNum(EC_BIT_X2(ec_bits));
-
-            bignum_s* bitEx_p1_pow_x = mkBigNum(EC_BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
-            bignum_s* bitEx_p1_numer = mkBigNum(EC_BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
-            bignum_s* bitEx_p1_denom = mkBigNum(EC_BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
+            bignum_s* pow_x = mkBigNum(ec_bits);// by bit expension, unsigned to signed on addtion
+            bignum_s* numer = mkBigNum(ec_bits);// by bit expension, unsigned to signed on addtion
+            bignum_s* denom = mkBigNum(ec_bits);// by bit expension, unsigned to signed on addtion
 
             // x^2
-            _EC_FN_(fr, ec_mul_bignum_unsigned_safe(bitEx_x2_mul, xP, xP));
-            _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | xP^2 | | | | |");
-            _EC_FN_(fr, mod_bignum_unsafe(bitEx_p1_pow_x, bitEx_x2_mul, p));
-            _PRINT_BIGNUM_(bitEx_p1_pow_x, "| | | | | (xP^2) mod p  | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(pow_x, xP, xP, p));
+            _PRINT_BIGNUM_(pow_x, "| | | | | (xP^2) mod p  | | | | |");
 
             // x^2 + a
-            _EC_FN_(fr, add_bignum_unsigned_unsafe(bitEx_p1_numer, bitEx_p1_pow_x, a));
-            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | xP^2 + a | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_numer, bitEx_p1_numer, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | (xP^2 + a) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, add_bignum_unsigned_with_mod_safe(numer, pow_x, a, p));
+            _PRINT_BIGNUM_(numer, "| | | | | (xP^2 + a) mod p | | | | |");
             // 2 * x^2
-            _EC_FN_(fr, asl1b_bignum_self(bitEx_p1_pow_x, NULL, 0U));
-            _PRINT_BIGNUM_(bitEx_p1_pow_x, "| | | | | 2 * xP^2 | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_pow_x, bitEx_p1_pow_x, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_pow_x, "| | | | | (2 * xP^2) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, add_bignum_unsigned_with_mod_safe(pow_x, pow_x, pow_x, p));
+            _PRINT_BIGNUM_(pow_x, "| | | | | (2 * xP^2) mod p | | | | |");
             // (x^2 + a) += (2 * x^2)
-            _EC_FN_(fr, add_bignum_signed_unsafe(bitEx_p1_numer, bitEx_p1_numer, bitEx_p1_pow_x));
-            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | (3 * xP^2) + a | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_numer, bitEx_p1_numer, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_numer, "| | | | | ((3 * xP^2) + a) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, add_bignum_unsigned_with_mod_safe(numer, numer, pow_x, p));
+            _PRINT_BIGNUM_(numer, "| | | | | ((3 * xP^2) + a) mod p | | | | |");
 
             // 2 * y
 #if 0 /* P_IS_Q_AND_Q_IS_NEGATIVE_DOUBLING */
-            _EC_FN_(fr, add_bignum_unsigned_unsafe(bitEx_p1_denom, yP, yP));
+            _EC_FN_(fr, add_bignum_unsigned_unsafe(denom, yP, yP));
 #else
             if(!nQ) {
-                cpy_bignum_unsigned_unsafe(bitEx_p1_denom, yP);
-                _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | bitEx_p1_denom(yP, 1bit extention) | | | | |");
+                cpy_bignum_unsigned_unsafe(denom, yP);
+                _PRINT_BIGNUM_(denom, "| | | | | denom(yP, 1bit extention) | | | | |");
             } else {
-                cpy_bignum_twos_signed_unsafe(bitEx_p1_denom, yP);
-                _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | -bitEx_p1_denom(-yP, 1bit extention) | | | | |");
+                cpy_bignum_twos_signed_unsafe(denom, yP);
+                _PRINT_BIGNUM_(denom, "| | | | | -denom(-yP, 1bit extention) | | | | |");
             }
-            _EC_FN_(fr, asl1b_bignum_self(bitEx_p1_denom, NULL, 0U));
+            _EC_FN_(fr, add_bignum_unsigned_with_mod_safe(denom, denom, denom, p));
 #endif/* P_IS_Q_AND_Q_IS_NEGATIVE_DOUBLING */
-            _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | 2 * yP | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_denom, bitEx_p1_denom, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | (2 * yP) mod bitEx_p1_p | | | | |");
+            _PRINT_BIGNUM_(denom, "| | | | | (2 * yP) mod p | | | | |");
 
-            _EC_FN_(fr, mim_bignum_unsafe(bitEx_p1_denom, bitEx_p1_denom, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_denom, "| | | | | (2 * yP)^(-1) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, mim_bignum_unsafe(denom, denom, p));
+            _PRINT_BIGNUM_(denom, "| | | | | (2 * yP)^(-1) mod p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
                 _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
                 slope_is_INFINITE |= true;
             }
 
             if(!slope_is_INFINITE) {
-                _EC_FN_(fr, ec_mul_bignum_unsigned_safe(bitEx_x2_mul, bitEx_p1_numer, bitEx_p1_denom));
-                _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | ((3 * xP^2) + a) * (2 * yP)^(-1) | | | | |");
-                _EC_FN_(fr, mod_bignum_unsafe(bitEx_p1_m, bitEx_x2_mul, p));
-                _PRINT_BIGNUM_(bitEx_p1_m, "| | | | | (((3 * xP^2) + a) * (2 * yP)^(-1)) mod p | | | | |");
+                _EC_FN_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(m, numer, denom, p));
+                _PRINT_BIGNUM_(m, "| | | | | (((3 * xP^2) + a) * (2 * yP)^(-1)) mod p | | | | |");
             }
 
-            rmBigNum(&bitEx_x2_mul);
-
-            rmBigNum(&bitEx_p1_pow_x);
-            rmBigNum(&bitEx_p1_numer);
-            rmBigNum(&bitEx_p1_denom);
+            rmBigNum(&pow_x);
+            rmBigNum(&numer);
+            rmBigNum(&denom);
         }
-        _PRINT_BIGNUM_(bitEx_p1_m, "| | | | | m | | | | |");
+        _PRINT_BIGNUM_(m, "| | | | | m | | | | |");
 
         /* Get xR */
         {
-            bignum_s* bitEx_x2_mul = mkBigNum(EC_BIT_X2(ec_bits));
-
-            bignum_s* bitEx_p1_pow_m = mkBigNum(EC_BIT_P1(ec_bits));// by bit expension, unsigned to signed on addtion
+            bignum_s* pow_m = mkBigNum(ec_bits);// by bit expension, unsigned to signed on addtion
 
             // m^2
-            _EC_FN_(fr, ec_mul_bignum_unsigned_safe(bitEx_x2_mul, bitEx_p1_m, bitEx_p1_m));
-            _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | m^2 | | | | |");
-            _EC_FN_(fr, mod_bignum_unsafe(bitEx_p1_pow_m, bitEx_x2_mul, p));
-            _PRINT_BIGNUM_(bitEx_p1_pow_m, "| | | | | m^2 mod p | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(pow_m, m, m, p));
+            _PRINT_BIGNUM_(pow_m, "| | | | | m^2 mod p | | | | |");
 
             // m^2 - xP
-            _EC_FN_(fr, sub_bignum_unsigned_unsafe(bitEx_p1_x, bitEx_p1_pow_m, xP));
-            _PRINT_BIGNUM_(xP, "| | | | | xP | | | | |");
-            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | m^2 - xP | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_x, bitEx_p1_x, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | (m^2 - xP) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, sub_bignum_unsigned_with_mod_safe(x, pow_m, xP, p));
+            _PRINT_BIGNUM_(x, "| | | | | (m^2 - xP) mod p | | | | |");
             // m(^2 - xP) - xQ
-            _EC_FN_(fr, sub_bignum_unsigned_unsafe(bitEx_p1_x, bitEx_p1_x, xQ));
-            _PRINT_BIGNUM_(xQ, "| | | | | xQ | | | | |");
-            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | m^2 - xP - xQ | | | | |");
-            // ( m(^2 - xP) - xQ ) mod bitEx_p1_p
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_x, bitEx_p1_x, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | (m^2 - xP - xQ) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, sub_bignum_unsigned_with_mod_safe(x, x, xQ, p));
+            _PRINT_BIGNUM_(x, "| | | | | (m^2 - xP - xQ) mod p | | | | |");
 
-            rmBigNum(&bitEx_x2_mul);
+            rmBigNum(&pow_m);
 
-            rmBigNum(&bitEx_p1_pow_m);
-
-            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | xR(bitEx_p1_x) | | | | |");
+            _PRINT_BIGNUM_(x, "| | | | | xR(x) | | | | |");
         }
 
         /* Get yR */
         {
-            bignum_s* bitEx_x2_mul = mkBigNum(EC_BIT_X2(ec_bits));
+            _EC_FN_(fr, sub_bignum_unsigned_with_mod_safe(y, x, xP, p));
+            _PRINT_BIGNUM_(y, "| | | | | (xR - xP) mod p | | | | |");
+            _EC_FN_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(y, m, y, p));
+            _PRINT_BIGNUM_(y, "| | | | | m(xR - xP) mod p | | | | |");
 
-            _EC_FN_(fr, sub_bignum_unsigned_unsafe(bitEx_p1_y, bitEx_p1_x, xP));
-            _PRINT_BIGNUM_(xP, "| | | | | xP | | | | |");
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | xR - xP | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (xR - xP) mod bitEx_p1_p | | | | |");
-            _EC_FN_(fr, ec_mul_bignum_unsigned_safe(bitEx_x2_mul, bitEx_p1_m, bitEx_p1_y));
-            _PRINT_BIGNUM_(bitEx_x2_mul, "| | | | | m(xR - xP) | | | | |");
+            _EC_FN_(fr, add_bignum_unsigned_with_mod_safe(y, yP, y, p));
+            _PRINT_BIGNUM_(y, "| | | | | ( yP + m(xR - xP) ) mod p | | | | |");
 
-            _EC_FN_(fr, mod_bignum_unsafe(bitEx_p1_y, bitEx_x2_mul, p));
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | m(xR - xP) mod p | | | | |");
-
-            _EC_FN_(fr, add_bignum_unsigned_unsafe(bitEx_p1_y, yP, bitEx_p1_y));
-            _PRINT_BIGNUM_(yP, "| | | | | yP | | | | |");
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | yP + m(xR - xP) | | | | |");
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | ( yP + m(xR - xP) ) mod bitEx_p1_p | | | | |");
-
-            rmBigNum(&bitEx_x2_mul);
-
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | yR | | | | |");
+            _PRINT_BIGNUM_(y, "| | | | | yR | | | | |");
 
             // -yR
-            _EC_FN_(fr, cpy_bignum_twos_signed_safe(bitEx_p1_y, bitEx_p1_y));
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) | | | | |");
-
-            // (-yR) mod bitEx_p1_p
-            _EC_FN_(fr, aim_bignum_signed_unsafe(bitEx_p1_y, bitEx_p1_y, bitEx_p1_p));
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | (-yR) mod bitEx_p1_p | | | | |");
+            _EC_FN_(fr, tws_bignum_unsigned_with_mod_safe(y, y, p));
+            _PRINT_BIGNUM_(y, "| | | | | (-yR) mod p | | | | |");
         }
 
         if(!slope_is_INFINITE) {
-            _EC_FN_(fr, cpy_bignum_unsigned_unsafe(xR, bitEx_p1_x));
-            _EC_FN_(fr, cpy_bignum_unsigned_unsafe(yR, bitEx_p1_y));
+            _EC_FN_(fr, cpy_bignum_unsigned_unsafe(xR, x));
+            _EC_FN_(fr, cpy_bignum_unsigned_unsafe(yR, y));
         } else {
             _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
-            _PRINT_BIGNUM_(bitEx_p1_x, "| | | | | x (INFINITE, clear to 0) | | | | |");
-            _PRINT_BIGNUM_(bitEx_p1_y, "| | | | | y (INFINITE, clear to 0) | | | | |");
+            _PRINT_BIGNUM_(x, "| | | | | x (INFINITE, clear to 0) | | | | |");
+            _PRINT_BIGNUM_(y, "| | | | | y (INFINITE, clear to 0) | | | | |");
             _EC_FN_(fr, clr_bignum(xR));
             _EC_FN_(fr, clr_bignum(yR));
         }
 
-        rmBigNum(&bitEx_p1_m);
-        rmBigNum(&bitEx_p1_x);
-        rmBigNum(&bitEx_p1_y);
-
-        rmBigNum(&bitEx_p1_p);
+        rmBigNum(&m);
+        rmBigNum(&x);
+        rmBigNum(&y);
     } else {
         _DPRINTF_("[INFO] Point P or Q was Identity Elements, just adding two points\r\n");
         _EC_FN_(fr, add_bignum_unsigned_unsafe(xR, xP, xQ));
