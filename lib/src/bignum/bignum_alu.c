@@ -587,7 +587,7 @@ ReturnType cpy_bignum_twos_ext(bignum_s* d, const bignum_s* s, const bool ign_si
     ret = cpy_bignum_inverse_ext(d, s, ign_sign, ign_len);
     if(ret != E_OK) return ret;
 
-    (void)add1w_bignum_loc_unsigned(d, 1UL, 0UL);
+    if(add1w_bignum_loc_ext(d, 1U, 0, ign_sign) != BIGNUM_ZERO)
 
     ret = E_OK;
 
@@ -1821,6 +1821,19 @@ ReturnType mim_bignum_ext(bignum_s* t, bignum_s* r, const bignum_s* a, const big
     else            return E_OK;
 }
 
+ReturnType tws_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s, const bignum_s* p)
+{
+    ReturnType fr = E_NOT_OK;
+
+    const bignum_t ci = 1U;
+    const size_t wloc = 0UL;
+    const bool ign_sign = false, ign_len = false;
+
+    _FUNC_WRAP_(fr, cpy_bignum_inverse_ext(d, s, ign_sign, ign_len));
+    _FUNC_WRAP_(fr, add_bignum_wloc_ext(NULL, d, d, p, ci, wloc, ign_len, ign_sign));
+
+    return fr;
+}
 ReturnType add_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, const bignum_s* s1, const bignum_s* p)
 {
     ReturnType fr = E_NOT_OK;
@@ -1830,14 +1843,14 @@ ReturnType add_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, co
     const size_t wloc = 0UL;
     const bool ign_len = false, ign_sign = true;
 
-    fr = add_bignum_wloc_ext(&co, d, s0, s1, ci, wloc, ign_len, ign_sign);
+    _FUNC_WRAP_(fr, add_bignum_wloc_ext(&co, d, s0, s1, ci, wloc, ign_len, ign_sign));
     if(co != BIGNUM_ZERO)
     {
-        fr = sub_bignum_wloc_ext(NULL, d, d, p, ci, wloc, ign_len, ign_sign);
+        _FUNC_WRAP_(fr, sub_bignum_wloc_ext(NULL, d, d, p, ci, wloc, ign_len, ign_sign));
     }
     else
     {
-        fr = aim_bignum_ext(d, d, p, ign_len, ign_sign);
+        _FUNC_WRAP_(fr, aim_bignum_ext(d, d, p, ign_len, ign_sign));
     }
     return fr;
 }
@@ -1850,14 +1863,14 @@ ReturnType sub_bignum_unsigned_with_mod_safe(bignum_s* d, const bignum_s* s0, co
     const size_t wloc = 0UL;
     const bool ign_len = false, ign_sign = true;
 
-    fr = sub_bignum_wloc_ext(&co, d, s0, s1, ci, wloc, ign_len, ign_sign);
+    _FUNC_WRAP_(fr, sub_bignum_wloc_ext(&co, d, s0, s1, ci, wloc, ign_len, ign_sign));
     if(co != BIGNUM_ZERO)
     {
-        fr = add_bignum_wloc_ext(NULL, d, d, p, ci, wloc, ign_len, ign_sign);
+        _FUNC_WRAP_(fr, add_bignum_wloc_ext(NULL, d, d, p, ci, wloc, ign_len, ign_sign));
     }
     else
     {
-        fr = aim_bignum_ext(d, d, p, ign_len, ign_sign);
+        _FUNC_WRAP_(fr, aim_bignum_ext(d, d, p, ign_len, ign_sign));
     }
     return fr;
 }
@@ -1870,8 +1883,8 @@ ReturnType mul_bignum_unsigned_with_mod_x2Mul_safe(bignum_s* d, const bignum_s* 
 
     bignum_s* buf = mkBigNum(s0->bits + s1->bits);
 
-    fr = mul_bignum_unsigned_x2wMul_safe(buf, s1, s0);
-    fr = div_bignum_unsafe(d, buf, p);
+    _FUNC_WRAP_(fr, mul_bignum_unsigned_x2wMul_safe(buf, s1, s0));
+    _FUNC_WRAP_(fr, mod_bignum_unsafe(d, buf, p));
 
     rmBigNum(&buf);
 
