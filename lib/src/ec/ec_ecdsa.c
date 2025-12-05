@@ -45,9 +45,6 @@ void ecdsa_sign_ext(bignum_s* sign_r, bignum_s* sign_s, \
     const bignum_s* scalar_z = hash;
     const bignum_s* scalar_d = privateKey;
 
-    bignum_s* scalar_add =  mkBigNum(ec_bits+1U);
-    bignum_s* scalar_mul =  mkBigNum(ec_bits<<1U);
-
     bignum_s* scalar_k = mkBigNum(ec_bits);
 
     bignum_s* scalar_r = mkBigNum(ec_bits);
@@ -109,19 +106,13 @@ void ecdsa_sign_ext(bignum_s* sign_r, bignum_s* sign_s, \
         else                                    /* HAS_ERROR */;
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_k, "scalar_k, k^(-1)");
 
-        _ECDSA_FN_CALL_(fr, ec_mul_bignum_unsigned_unsafe(scalar_mul, scalar_r, scalar_d));
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, r * d");
-        _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_s, scalar_mul, n));
+        _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(scalar_s, scalar_r, scalar_d, n));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (r * d) mod n");
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
-        _ECDSA_FN_CALL_(fr, add_bignum_unsigned_unsafe(scalar_add, scalar_z, scalar_s));
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_add, "scalar_add, z + (r * d)");
-        _ECDSA_FN_CALL_(fr, aim_bignum_unsigned_unsafe(scalar_s, scalar_add, n));
+        _ECDSA_FN_CALL_(fr, add_bignum_unsigned_with_mod_safe(scalar_s, scalar_z, scalar_s, n));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, (z + (r * d)) mod n");
 
-        _ECDSA_FN_CALL_(fr, ec_mul_bignum_unsigned_unsafe(scalar_mul, scalar_k, scalar_s));
-        _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_mul, "scalar_mul, (k^(-1)) * (z + (r * d))");
-        _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_s, scalar_mul, n));
+        _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(scalar_s, scalar_k, scalar_s, n));
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_s, "scalar_s, s = ((k^(-1)) * (z + (r * d))) mod n");
 
         /* s = 0: retry */
@@ -138,9 +129,6 @@ void ecdsa_sign_ext(bignum_s* sign_r, bignum_s* sign_s, \
     _ECDSA_FN_CALL_(fr, cpy_bignum_unsigned_safe(sign_s, scalar_s));
     _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(sign_r, "signature r");
     _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(sign_s, "signature s");
-
-    rmBigNum(&scalar_add);
-    rmBigNum(&scalar_mul);
 
     rmBigNum(&scalar_k);
 
@@ -169,8 +157,6 @@ bool ecdsa_veri_ext(bignum_s* calc_r, const bignum_s* sign_r, const bignum_s* si
     bignum_s* scalar_s = mkBigNum(ec_bits);
     bignum_s* scalar_u = mkBigNum(ec_bits);
 
-    bignum_s* scalar_mul =  mkBigNum(ec_bits<<1U);
-
     bignum_s* xT = mkBigNum(ec_bits);
     bignum_s* yT = mkBigNum(ec_bits);
 
@@ -194,8 +180,7 @@ bool ecdsa_veri_ext(bignum_s* calc_r, const bignum_s* sign_r, const bignum_s* si
     _ECDSA_FN_CALL_(fr, mim_bignum(scalar_s, sign_s, n));
 
     // (s^(-1) * z) mod n
-    _ECDSA_FN_CALL_(fr, ec_mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, scalar_z));
-    _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_u, scalar_mul, n));
+    _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(scalar_u, scalar_s, scalar_z, n));
     // u1 * G
     ec_scalarMul_WNAF(xT, yT, scalar_u, xG, yG, ec_bits, a, p, w, ign_sign);
     _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNG, "xNG");
@@ -206,8 +191,7 @@ bool ecdsa_veri_ext(bignum_s* calc_r, const bignum_s* sign_r, const bignum_s* si
     _ECDSA_FN_CALL_(fr, cpy_bignum_unsigned_safe(yP, yT));
 
     // (s^(-1) * r) mod n
-    _ECDSA_FN_CALL_(fr, ec_mul_bignum_unsigned_unsafe(scalar_mul, scalar_s, sign_r));
-    _ECDSA_FN_CALL_(fr, mod_bignum_unsafe(scalar_u, scalar_mul, n));
+    _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(scalar_u, scalar_s, sign_r, n));
     // u_2 * H_a
     ec_scalarMul_WNAF(xT, yT, scalar_u, xPublic, yPublic, ec_bits, a, p, w, ign_sign);
     _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(xNPublic, "xNPublic");
@@ -227,8 +211,6 @@ bool ecdsa_veri_ext(bignum_s* calc_r, const bignum_s* sign_r, const bignum_s* si
 
     rmBigNum(&scalar_s);
     rmBigNum(&scalar_u);
-
-    rmBigNum(&scalar_mul);
 
     rmBigNum(&xT);
     rmBigNum(&yT);

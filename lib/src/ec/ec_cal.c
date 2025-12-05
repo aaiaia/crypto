@@ -33,11 +33,6 @@
 #define EC_BIT_P1(ec_bits)  (ec_bits+1UL)
 #define EC_BIT_X2(ec_bits)  (ec_bits<<1U)
 
-const ec_mul_bignum_t ec_mul_bignum_signed_safe     = mul_bignum_signed_x2wMul_safe;
-const ec_mul_bignum_t ec_mul_bignum_unsigned_safe   = mul_bignum_unsigned_x2wMul_safe;
-const ec_mul_bignum_t ec_mul_bignum_signed_unsafe   = mul_bignum_signed_x2wMul_unsafe;
-const ec_mul_bignum_t ec_mul_bignum_unsigned_unsafe = mul_bignum_unsigned_x2wMul_unsafe;
-
 bool ec_isIndentityPoint(const bignum_s* x, const bignum_s* y)
 {
     return ((cmp0_bignum(x) == BIGNUM_CMP_ZO) && (cmp0_bignum(y) == BIGNUM_CMP_ZO));

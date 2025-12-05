@@ -9,12 +9,6 @@
 
 #include "bignum/bignum_wnaf.h"
 
-typedef ReturnType (*ec_mul_bignum_t)(bignum_s*, const bignum_s*, const bignum_s*);
-extern const ec_mul_bignum_t ec_mul_bignum_signed_safe;
-extern const ec_mul_bignum_t ec_mul_bignum_unsigned_safe;
-extern const ec_mul_bignum_t ec_mul_bignum_signed_unsafe;
-extern const ec_mul_bignum_t ec_mul_bignum_unsigned_unsafe;
-
 bool ec_isIndentityPoint(const bignum_s* x, const bignum_s* y);
 
 void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
