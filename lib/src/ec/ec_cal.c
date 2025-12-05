@@ -858,8 +858,6 @@ void ec_calPoint_AffineIntoJacobi_ext(bignum_s* jXR, bignum_s* jYR, bignum_s* jZ
         {
             ec_convAffineToJacobi(jXR, jYR, jZR, axQ, ayQ);
             ec_doublingPoint_inJacobi_ext(jXR, jYR, jZR, nQ, ec_bits, a, p);
-            ec_convAffineToJacobi(jXR, jYR, jZR, axQ, ayQ);
-            ec_doublingPoint_inJacobi_ext(jXR, jYR, jZR, nQ, ec_bits, a, p);
         }
     }
 }
