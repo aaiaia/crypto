@@ -97,7 +97,7 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
             _EC_FN_(fr, sub_bignum_unsigned_with_mod_safe(dx, xP, xQ, p));// bit expended, unsigned to sign
             _PRINT_BIGNUM_(dx, "| | | | | dx = (xP - xQ) mod p | | | | |");
 
-            _EC_FN_(fr, mim_bignum_unsafe(dxInv, dx, p));
+            _EC_FN_(fr, mim_bignum_unsigned_unsafe(dxInv, dx, p));
             _PRINT_BIGNUM_(dxInv, "| | | | | dx^(-1) = (xP - xQ)^(-1) mod p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
                 _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
@@ -151,7 +151,7 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
 #endif/* P_IS_Q_AND_Q_IS_NEGATIVE_DOUBLING */
             _PRINT_BIGNUM_(denom, "| | | | | (2 * yP) mod p | | | | |");
 
-            _EC_FN_(fr, mim_bignum_unsafe(denom, denom, p));
+            _EC_FN_(fr, mim_bignum_unsigned_unsafe(denom, denom, p));
             _PRINT_BIGNUM_(denom, "| | | | | (2 * yP)^(-1) mod p | | | | |");
             if(fr == E_HAS_NO_VALUE) {
                 _DPRINTF_("[WARNING] slope(m) is INFINITE, coordinates have to be set (0, 0)\r\n");
@@ -202,7 +202,7 @@ void ec_calPoints_ext(bignum_s* xR, bignum_s* yR, \
             _PRINT_BIGNUM_(y, "| | | | | yR | | | | |");
 
             // -yR
-            _EC_FN_(fr, tws_bignum_unsigned_with_mod_safe(y, y, p));
+            _EC_FN_(fr, aim_bignum_unsigned_safe(y, y, p));
             _PRINT_BIGNUM_(y, "| | | | | (-yR) mod p | | | | |");
         }
 
@@ -412,7 +412,7 @@ void ec_convJacobiToAffine(bignum_s* xP, bignum_s* yP, \
     bignum_s* tmp_mul = mkBigNum(EC_BIT_X2(ec_bits));
 
     // Z^(-1)
-    _EC_FN_(fr, mim_bignum(tmp_iZ1, jZP, p));
+    _EC_FN_(fr, mim_bignum_unsigned_safe(tmp_iZ1, jZP, p));
 
     // Z^(-2)
     mul_bignum_unsigned_with_mod_x2Mul_safe(tmp_iZ2, tmp_iZ1, tmp_iZ1, p);
@@ -573,12 +573,12 @@ void ec_doublingPoint_inJacobi_ext(bignum_s* jXP, bignum_s* jYP, bignum_s* jZP, 
         if(!nP) {
             // positive P(+P)
             _EC_FN_(fr, cpy_bignum_unsigned_safe(t_buf0, Y_1));
-            _EC_FN_(fr, aim_bignum_unsigned_safe(t_buf0, t_buf0, p));
+            _EC_FN_(fr, mod_bignum_unsigned_addSub_safe(t_buf0, t_buf0, p));
             _PRINT_BIGNUM_(t_buf0, "| | | | | t_buf0 = Y_1 mod p | | | | |");
         }
         else {
             // negative P(-P)
-            _EC_FN_(fr, tws_bignum_unsigned_with_mod_safe(t_buf0, Y_1, p));
+            _EC_FN_(fr, aim_bignum_unsigned_safe(t_buf0, Y_1, p));
             _PRINT_BIGNUM_(t_buf0, "| | | | | t_buf0 = -Y_1 mod p | | | | |");
         }
         _EC_FN_(fr, add_bignum_unsigned_with_mod_safe(t_buf0, t_buf0, t_buf0, p));
@@ -701,11 +701,11 @@ void ec_calPoint_AffineIntoJacobi_ext(bignum_s* jXR, bignum_s* jYR, bignum_s* jZ
         _PRINT_BIGNUM_(Y_2, "| | | | | Y_2 | | | | |");
         if(!nQ) { // add
             _EC_FN_(fr, cpy_bignum_unsigned_safe(t_buf0, Y_2));
-            _EC_FN_(fr, aim_bignum_unsigned_safe(t_buf0, t_buf0, p));
+            _EC_FN_(fr, mod_bignum_unsigned_addSub_safe(t_buf0, t_buf0, p));
             _PRINT_BIGNUM_(t_buf0, "| | | | | t_buf0 = Y_2 | | | | |");
         }
         else { // sub
-            _EC_FN_(fr, tws_bignum_unsigned_with_mod_safe(t_buf0, Y_2, p));
+            _EC_FN_(fr, aim_bignum_unsigned_safe(t_buf0, Y_2, p));
             _PRINT_BIGNUM_(t_buf0, "| | | | | t_buf0 = -Y_2 | | | | |");
         }
         _PRINT_BIGNUM_(tmp_B, "| | | | | tmp_B | | | | |");

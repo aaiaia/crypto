@@ -90,7 +90,7 @@ void ecdsa_sign_ext(bignum_s* sign_r, bignum_s* sign_s, \
 
         /* xP of k*G is scalar r */
         /* r mod n(curve order) */
-        _ECDSA_FN_CALL_(fr, aim_bignum_unsigned_unsafe(scalar_r, xkG, n));
+        _ECDSA_FN_CALL_(fr, mod_bignum_unsigned_addSub_unsafe(scalar_r, xkG, n));
 
         /* r = 0: retry */
         cmp_non_zero = cmp0_bignum(scalar_r);
@@ -100,7 +100,7 @@ void ecdsa_sign_ext(bignum_s* sign_r, bignum_s* sign_s, \
         else                                    /* HAS_ERROR */;
         _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_r, "scalar_r");
 
-        _ECDSA_FN_CALL_(fr, mim_bignum(scalar_k, scalar_k, n));
+        _ECDSA_FN_CALL_(fr, mim_bignum_unsigned_safe(scalar_k, scalar_k, n));
         if(fr == E_OK)                          /* Acceptable Cases */;
         else if(fr == E_HAS_NO_VALUE)           if(nonce == NULL)   continue;
         else                                    /* HAS_ERROR */;
@@ -177,7 +177,7 @@ bool ecdsa_veri_ext(bignum_s* calc_r, const bignum_s* sign_r, const bignum_s* si
     _ECDSA_DPRINTF_("@%s:%u, ", __func__, __LINE__); _ECDSA_PRINT_BIGNUM_(scalar_z, "scalar_z");
 
     // s^(-1)
-    _ECDSA_FN_CALL_(fr, mim_bignum(scalar_s, sign_s, n));
+    _ECDSA_FN_CALL_(fr, mim_bignum_unsigned_safe(scalar_s, sign_s, n));
 
     // (s^(-1) * z) mod n
     _ECDSA_FN_CALL_(fr, mul_bignum_unsigned_with_mod_x2Mul_safe(scalar_u, scalar_s, scalar_z, n));

@@ -44,7 +44,7 @@ mont_conf_s* mkMontConf(const bignum_s* modulus)
     conf->nModInv = mkBigNum(modulus->bits);
     (void)cpy_bignum_twos_signed_safe(nModInv, modulus);
      _PRINT_BIGNUM_(nModInv, "nModInv(=2's of modulus)");
-    (void)mim_bignum(nModInv, nModInv, baseRadix);  // nModInv = m' = -m^-1 mod b
+    (void)mim_bignum_unsigned_safe(nModInv, nModInv, baseRadix);  // nModInv = m' = -m^-1 mod b
      _PRINT_BIGNUM_(nModInv, "nModInv(Multiplicative inverse modulo");
     (void)cpy_bignum_unsigned_safe(conf->nModInv, nModInv);
      _PRINT_BIGNUM_(conf->nModInv, "conf->nModInv");
@@ -94,7 +94,7 @@ ReturnType swapMontToBignum_unsigned_safe(bignum_s* dst, const bignum_s* src, co
     // x' = xR mod m, R = 2^256
     _PRINT_BIGNUM_(t_x2, "t_x2");
     _PRINT_BIGNUM_(conf->modulus, "conf->modulus");
-    _FUNC_WRAP_(fr, mod_bignum_unsafe(dst, t_x2, conf->modulus));
+    _FUNC_WRAP_(fr, mod_bignum_nbsDiv_unsafe(dst, t_x2, conf->modulus));
     _PRINT_BIGNUM_(dst, "dst");
 
     rmBigNum(&t_x2);
