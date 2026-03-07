@@ -8,7 +8,7 @@ bignum_s* mkBigNum(const size_t bits) {
     bignum_s* p = (bignum_s*)malloc(sizeof(bignum_s));
     p->bits = bits;
     p->size = BITS2SIZE(bits);
-    p->nlen = BIT2U32L(bits);
+    p->nlen = BIGNUM_BITS_LEN(bits);
     p->lmsk = LASTBITMASK(bits, bignum_t);
     p->nums = (bignum_t*)calloc(p->nlen, sizeof(bignum_t));
     return p;

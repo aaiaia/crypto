@@ -9,7 +9,11 @@
 #ifdef SET_BIGNUM_TYPE
 #if(SET_BIGNUM_TYPE == 64)
 typedef uint64_t    bignum_t;
+typedef uint128_t   bignumX2b_t;
 #define BIGNUM_MAX              UINT64_MAX
+#define BIGNUM_MIN              0UL
+#define BIGNUM_MIN              0UL
+#define BIGNUM_ZERO             0UL
 #define BIGNUM_BITS 64U
 #define BIGNUM_SIZE 8U
 #define BIGNUM_LEN_BITS(idx)    U64L2BIT(idx)
@@ -18,7 +22,10 @@ typedef uint64_t    bignum_t;
 #define BIGNUM_BITS_REM(bits)   REMBITU64(bits)
 #elif(SET_BIGNUM_TYPE == 32)
 typedef uint32_t    bignum_t;
+typedef uint64_t    bignumX2b_t;
 #define BIGNUM_MAX              UINT32_MAX
+#define BIGNUM_MIN              0U
+#define BIGNUM_ZERO             0U
 #define BIGNUM_BITS 32U
 #define BIGNUM_SIZE 4U
 #define BIGNUM_LEN_BITS(idx)    U32L2BIT(idx)
