@@ -1,4 +1,5 @@
 #include "common/bitwise.h"
+#include "common/util.h"
 #include "ghash/gf128.h"
 #include "aes/aes.h"
 #include "aead/cal_aes_gcm.h"
@@ -30,21 +31,72 @@ static inline int calGhash(uint8_t* ghash, uint8_t* H, uint8_t* data, size_t siz
     return gf128_ghash(ghash, H, data, size);
 }
 
-int calJ0(uint8_t* j0, uint8_t* iv, size_t ivSize)
+static inline int calJ0_ivNone(uint8_t* j0)
+{
+    int fs = 0;
+
+    if(j0 != NULL)
+    {
+        memset(j0, 0, AES_S_SIZE);
+    }
+    else
+    {
+        fs = -1;
+    }
+
+    return fs;
+}
+static inline int calJ0_iv96b(uint8_t* j0, const uint8_t* iv)
 {
     int fs = 0;
 
     if((j0 != NULL) && (iv != NULL))
     {
-        if(ivSize == AEAD_AES_GCM_IV_SIZE)
+        memcpy(j0, iv, AEAD_IV_SIZE);
+        memset((j0 + AEAD_IV_SIZE), 0, (AES_S_SIZE - AEAD_IV_SIZE));
+        j0[AES_S_SIZE - 1U] = 0x1U;
+    }
+    else
+    {
+        fs = -1;
+    }
+
+    return fs;
+}
+static inline int calJ0_ivElse(uint8_t* j0, const uint8_t* iv, const size_t ivSize, const uint8_t* H)
+{
+    int fs = 0;
+
+    if((j0 != NULL) && (iv != NULL) && (H != NULL))
+    {
+        if((ivSize >> (64U - 3U)) == 0U)
         {
-            /* Support IV Size is only 96bits */
-            memcpy(&j0[0], iv, AEAD_AES_GCM_IV_SIZE);
-            memset(&j0[AEAD_AES_GCM_IV_SIZE], 0, (AES_S_SIZE - AEAD_AES_GCM_IV_SIZE));
-            j0[AES_S_SIZE - 1U] = 0x1U;
+            uint8_t ghash[AES_S_SIZE];
+            const size_t remSize = (ivSize & (AES_S_SIZE - 1U));
+            const size_t remOfs = (ivSize & (~((size_t)(AES_S_SIZE - 1U))));
+            const uint64_t ivblen_u64b = BYTE2BITS(ivSize);
+            /* s = AES_S_SIZE - remSize */
+
+            memset(ghash, 0, AES_S_SIZE);
+            for(size_t prcSize = 0U; prcSize < ivSize; prcSize += AES_S_SIZE)
+            {
+                fs = calGhash(ghash, H, (iv + prcSize), AES_S_SIZE);
+            }
+            if(remSize != 0U)
+            {
+                fs = calGhash(ghash, H, (iv + remOfs), remSize);
+            }
+            memset(j0, 0, AEAD_J0_IV_BLEN_PAD_SIZE);
+#define IV_BLEN_OFS_IN_J0   (j0 + AEAD_J0_IV_BLEN_PAD_SIZE)
+#define IV_BLEN_u64b_PTR    (&ivblen_u64b)
+            memcpy(IV_BLEN_OFS_IN_J0, IV_BLEN_u64b_PTR, AEAD_J0_IV_BLEN_SIZE);
+            byteSwap(IV_BLEN_OFS_IN_J0, IV_BLEN_OFS_IN_J0, AEAD_J0_IV_BLEN_SIZE);
+#undef IV_BLEN_OFS_IN_J0
+#undef IV_BLEN_u64b_PTR
         }
         else
         {
+            /* ivSize is exceed bit length(64bits) */
             fs = -2;
         }
     }
@@ -52,6 +104,28 @@ int calJ0(uint8_t* j0, uint8_t* iv, size_t ivSize)
     {
         fs = -1;
     }
+
+    return fs;
+}
+
+int calJ0(uint8_t* j0, const uint8_t* iv, const size_t ivSize, const uint8_t* H)
+{
+    int fs = 0;
+
+    if(ivSize == 0U)
+    {
+        fs = calJ0_ivNone(j0);
+    }
+    else if(ivSize == AEAD_IV_SIZE)
+    {
+        fs = calJ0_iv96b(j0, iv);
+    }
+    else
+    {
+        fs = calJ0_ivElse(j0, iv, ivSize, H);
+    }
+
+    return fs;
 }
 
 int calS(uint8_t* ghash, uint8_t* H, uint8_t* j0, size_t aSize, size_t cSize)
@@ -140,7 +214,7 @@ int inc32(uint8_t* ctrBlk)
 
     if(ctrBlk != NULL)
     {
-#define U32_PTR (&ctrBlk[AEAD_AES_GCM_IV_SIZE])
+#define U32_PTR (&ctrBlk[AEAD_IV_SIZE])
 #define INC32   ((*((uint32_t*)U32_PTR))++)
         byteSwap(U32_PTR, U32_PTR, sizeof(uint32_t));
         INC32;
@@ -198,7 +272,7 @@ int calGCTR(uint8_t* cipher, uint8_t* plain, size_t size, uint8_t* key, size_t k
                 printf("\r\n");
             }
 #endif /* SELFTEST_AEAD */
-            xor_u32((uint32_t*)(&cipher[prcSize]), (uint32_t*)(&plain[prcSize]), (uint32_t*)tmpNd, AES_S_SIZE);
+            xor_u32((uint32_t*)(&cipher[prcSize]), (uint32_t*)(&plain[prcSize]), (uint32_t*)tmpNd, BYTE2U32L(AES_S_SIZE));
 #ifdef SELFTEST_AEAD
             {
                 uint8_t* dgb_u8 = (uint8_t*)(&cipher[prcSize]);
@@ -383,10 +457,13 @@ static void test_calJ0(void)
     uint8_t ref_j0[] = {
         0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 0xb2U, 0xc2U, 0x84U, 0x65U, 0x00U, 0x00U, 0x00U, 0x01, 
     };
+    uint8_t ref_H[] = {
+        0x73U, 0xA2U, 0x3DU, 0x80U, 0x12U, 0x1DU, 0xE2U, 0xD5U, 0xA8U, 0x50U, 0x25U, 0x3FU, 0xCFU, 0x43U, 0x12U, 0x0EU,
+    };
 
     uint8_t test_j0[GHASH_SIZE];
 
-    calJ0(test_j0, ref_iv, sizeof(ref_iv));
+    calJ0(test_j0, ref_iv, sizeof(ref_iv), ref_H);
     EXAM_TEST(memcmp(test_j0, ref_j0, sizeof(ref_j0)) == 0, "2.1.1 54-byte Packet Authentication Using GCM-AES-128, Y[0]");
     printHex(test_j0, sizeof(test_j0), "Y[0]", sizeof(test_j0));
 }
