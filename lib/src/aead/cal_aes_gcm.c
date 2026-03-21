@@ -10,9 +10,12 @@
 #include <stdio.h>
 #endif /* SELFTEST_AEAD */
 /* Internal functions */
-static inline int calJ0_ivNone(const uint8_t* j0);
-static inline int calJ0_iv96b(const uint8_t* j0, const uint8_t* const iv);
-static inline int calJ0_ivElse(const uint8_t* j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H);
+#ifdef SELFTEST_AEAD
+static void printHex(void* data, size_t size, const char* title, size_t lf);
+#endif /* SELFTEST_AEAD */
+static inline int calJ0_ivNone(uint8_t* const j0);
+static inline int calJ0_iv96b(uint8_t* const j0, const uint8_t* const iv);
+static inline int calJ0_ivElse(uint8_t* const j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H);
 
 int calH(const uint8_t* H, const uint8_t* const key, const size_t keySize)
 {
@@ -36,7 +39,7 @@ static inline int calGhash(const uint8_t* ghash, const uint8_t* const H, const u
     return gf128_ghash(ghash, H, data, size);
 }
 
-static inline int calJ0_ivNone(const uint8_t* j0)
+static inline int calJ0_ivNone(uint8_t* const j0)
 {
     int fs = 0;
 
@@ -51,7 +54,7 @@ static inline int calJ0_ivNone(const uint8_t* j0)
 
     return fs;
 }
-static inline int calJ0_iv96b(const uint8_t* j0, const uint8_t* const iv)
+static inline int calJ0_iv96b(uint8_t* const j0, const uint8_t* const iv)
 {
     int fs = 0;
 
@@ -68,7 +71,7 @@ static inline int calJ0_iv96b(const uint8_t* j0, const uint8_t* const iv)
 
     return fs;
 }
-static inline int calJ0_ivElse(const uint8_t* j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H)
+static inline int calJ0_ivElse(uint8_t* const j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H)
 {
     int fs = 0;
 
@@ -325,12 +328,147 @@ int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, cons
     return fs;
 }
 
-int calT(const uint8_t* tag, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0)
+int calT(const uint8_t* msb, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0)
 {
-    const uint8_t* MSB_t = tag;
-    return calGCTR(MSB_t, ghash, AES_S_SIZE, key, keySize, j0);
+    return calGCTR(msb, ghash, AES_S_SIZE, key, keySize, j0);
 }
 
+#ifdef SELFTEST_AEAD
+#include <stdio.h>
+#endif /* SELFTEST_AEAD */
+int gcm_ae(uint8_t* const cipher, uint8_t* const tag, \
+        const uint8_t* const iv, const size_t ivSize, \
+        const uint8_t* const aad, const size_t aadSize, \
+        const uint8_t* const key, const size_t keySize, \
+        const uint8_t* const plain, const size_t size)
+{
+    int fs = 0;
+    uint8_t H[AES_S_SIZE];
+    uint8_t j0[AES_S_SIZE];
+    uint8_t ghash[AES_S_SIZE];
+    uint8_t ctrBlk[AES_S_SIZE];
+    uint8_t msb[AES_S_SIZE];
+
+    memset(ghash, 0, sizeof(ghash));
+    fs = calH(H, key, keySize);
+#ifdef SELFTEST_AEAD
+    printHex(H, sizeof(H), "H", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+    calJ0(j0, iv, ivSize, H);
+#ifdef SELFTEST_AEAD
+    printHex(j0, sizeof(j0), "j0", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    calS_head(ghash, H, aad, aadSize);
+#ifdef SELFTEST_AEAD
+    printHex(ghash, sizeof(ghash), "ghash(aad)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    /* Encrypt */
+    memcpy(ctrBlk, j0, sizeof(ctrBlk));
+    inc32(ctrBlk);
+    calGCTR(cipher, plain, size, key, keySize, ctrBlk);
+    if(fs != 0) return fs;
+
+    calS_body(ghash, H, cipher, size);
+#ifdef SELFTEST_AEAD
+    printHex(ghash, sizeof(ghash), "ghash(cipher)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    calS_tail(ghash, H, aadSize, size);
+#ifdef SELFTEST_AEAD
+    printHex(ghash, sizeof(ghash), "ghash(H,A,C)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    memcpy(ctrBlk, j0, sizeof(ctrBlk));
+    calT(msb, ghash, key, keySize, ctrBlk);
+#ifdef SELFTEST_AEAD
+    printHex(msb, sizeof(msb), "msb(ICV)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    if(fs == 0)
+    {
+        memcpy(tag, msb, sizeof(msb));
+    }
+
+    return fs;
+}
+
+#ifdef SELFTEST_AEAD
+#include <stdio.h>
+#endif /* SELFTEST_AEAD */
+int gcm_ad(uint8_t* const plain, const uint8_t* const tag, \
+        const uint8_t* const iv, const size_t ivSize, \
+        const uint8_t* const aad, const size_t aadSize, \
+        const uint8_t* const key, const size_t keySize, \
+        const uint8_t* const cipher, const size_t size)
+{
+    int fs = 0;
+    uint8_t H[AES_S_SIZE];
+    uint8_t j0[AES_S_SIZE];
+    uint8_t ghash[AES_S_SIZE];
+    uint8_t ctrBlk[AES_S_SIZE];
+    uint8_t msb[AES_S_SIZE];
+
+    memset(ghash, 0, sizeof(ghash));
+    fs = calH(H, key, keySize);
+#ifdef SELFTEST_AEAD
+    printHex(H, sizeof(H), "H", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+    calJ0(j0, iv, ivSize, H);
+#ifdef SELFTEST_AEAD
+    printHex(j0, sizeof(j0), "j0", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    calS_head(ghash, H, aad, aadSize);
+#ifdef SELFTEST_AEAD
+    printHex(ghash, sizeof(ghash), "ghash(aad)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    /* Decrypt:Verifying first */
+
+    calS_body(ghash, H, cipher, size);
+#ifdef SELFTEST_AEAD
+    printHex(ghash, sizeof(ghash), "ghash(cipher)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    calS_tail(ghash, H, aadSize, size);
+#ifdef SELFTEST_AEAD
+    printHex(ghash, sizeof(ghash), "ghash(H,A,C)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    memcpy(ctrBlk, j0, sizeof(ctrBlk));
+    calT(msb, ghash, key, keySize, ctrBlk);
+#ifdef SELFTEST_AEAD
+    printHex(msb, sizeof(msb), "msb(ICV)", AES_S_SIZE);
+#endif /* SELFTEST_AEAD */
+    if(fs != 0) return fs;
+
+    if(fs == 0)
+    {
+        if(memcmp(tag, msb, sizeof(msb)) == 0)
+        {
+            /* VERIFIED: DECRYPT */
+            memcpy(ctrBlk, j0, sizeof(ctrBlk));
+            inc32(ctrBlk);
+            calGCTR(plain, cipher, size, key, keySize, ctrBlk);
+            if(fs != 0) return fs;
+        }
+    }
+
+    return fs;
+}
 #ifdef SELFTEST_AEAD
 #define EXAM_TEST(STATEMENTS, DESCRIPTION)                      \
 {                                                               \
@@ -572,11 +710,119 @@ static void test_calT(void)
         0xf0U, 0x94U, 0x78U, 0xa9U, 0xb0U, 0x90U, 0x07U, 0xd0U, 0x6fU, 0x46U, 0xe9U, 0xb6U, 0xa1U, 0xdaU, 0x25U, 0xddU,
     };
 
+    uint8_t test_msb[AES_S_SIZE];
     uint8_t test_tag[AES_S_SIZE];
 
-    calT(test_tag, ref_ghashHAC, ref_key, sizeof(ref_key), ref_J0);
+    calT(test_msb, ref_ghashHAC, ref_key, sizeof(ref_key), ref_J0);
+    memcpy(test_tag, test_msb, sizeof(test_tag));
     EXAM_TEST(memcmp(test_tag, ref_T, sizeof(ref_T)) == 0, "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, T");
     printHex(test_tag, sizeof(test_tag), "T", AES_S_SIZE);
+}
+
+static void test_gcm_ae(void)
+{
+    /* 
+     * MACsec GCM-AES Test Vectors,  April 11, 2011, 
+     * Provided for IEEE P802.1 Security Task Group 
+     * consideration by Karen Randall 
+     */
+    /* 2.2.1 60-Byte Packet Encryption Using GCM-AES-128 */
+    uint8_t ref_T[] = {
+        0x4fU, 0x8dU, 0x55U, 0xe7U, 0xd3U, 0xf0U, 0x6fU, 0xd5U, 0xa1U, 0x3cU, 0x0cU, 0x29U, 0xb9U, 0xd5U, 0xb8U, 0x80U,
+    };
+    uint8_t ref_iv[] = {
+        0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 0xb2U, 0xc2U, 0x84U, 0x65U, 
+    };
+    uint8_t ref_aad[] = {
+        0xd6U, 0x09U, 0xb1U, 0xf0U, 0x56U, 0x63U, 0x7aU, 0x0dU, 0x46U, 0xdfU, 0x99U, 0x8dU, 0x88U, 0xe5U, 0x2eU, 0x00U, 
+        0xb2U, 0xc2U, 0x84U, 0x65U, 0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 
+    };
+    uint8_t ref_key[] = { 
+        0xadU, 0x7aU, 0x2bU, 0xd0U, 0x3eU, 0xacU, 0x83U, 0x5aU, 0x6fU, 0x62U, 0x0fU, 0xdcU, 0xb5U, 0x06U, 0xb3U, 0x45U, 
+    };
+    uint8_t ref_plain[] = {
+        0x08U, 0x00U, 0x0fU, 0x10U, 0x11U, 0x12U, 0x13U, 0x14U, 0x15U, 0x16U, 0x17U, 0x18U, 0x19U, 0x1aU, 0x1bU, 0x1cU, 
+        0x1dU, 0x1eU, 0x1fU, 0x20U, 0x21U, 0x22U, 0x23U, 0x24U, 0x25U, 0x26U, 0x27U, 0x28U, 0x29U, 0x2aU, 0x2bU, 0x2cU, 
+        0x2dU, 0x2eU, 0x2fU, 0x30U, 0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U, 0x3aU, 0x00U, 0x02U,
+    };
+    uint8_t ref_cipher[] = {
+        0x70U, 0x1aU, 0xfaU, 0x1cU, 0xc0U, 0x39U, 0xc0U, 0xd7U, 0x65U, 0x12U, 0x8aU, 0x66U, 0x5dU, 0xabU, 0x69U, 0x24U, 
+        0x38U, 0x99U, 0xbfU, 0x73U, 0x18U, 0xccU, 0xdcU, 0x81U, 0xc9U, 0x93U, 0x1dU, 0xa1U, 0x7fU, 0xbeU, 0x8eU, 0xddU, 
+        0x7dU, 0x17U, 0xcbU, 0x8bU, 0x4cU, 0x26U, 0xfcU, 0x81U, 0xe3U, 0x28U, 0x4fU, 0x2bU, 0x7fU, 0xbaU, 0x71U, 0x3dU, 
+    };
+
+    uint8_t test_cipher[AES_S_SIZE * 3];
+    uint8_t test_tag[AES_S_SIZE];
+
+    printf("Authenticated Encryption\n2.2.1 60-Byte Packet Encryption Using GCM-AES-128\n");
+    printHex(ref_T,         sizeof(ref_T),      "T", AES_S_SIZE);
+    printHex(ref_iv,        sizeof(ref_iv),     "IV", AES_S_SIZE);
+    printHex(ref_aad,       sizeof(ref_aad),    "A", AES_S_SIZE);
+    printHex(ref_key,       sizeof(ref_key),    "Key", AES_S_SIZE);
+    printHex(ref_plain,     sizeof(ref_plain),  "P", AES_S_SIZE);
+    printHex(ref_cipher,    sizeof(ref_cipher), "C", AES_S_SIZE);
+
+    gcm_ae(test_cipher, test_tag, \
+            ref_iv, sizeof(ref_iv), \
+            ref_aad, sizeof(ref_aad), \
+            ref_key, sizeof(ref_key), \
+            ref_plain, sizeof(ref_plain));
+    EXAM_TEST(memcmp(test_cipher, ref_cipher, sizeof(ref_cipher)) == 0, "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, C");
+    printHex(test_cipher, sizeof(test_cipher), "C", AES_S_SIZE);
+    EXAM_TEST(memcmp(test_tag, ref_T, sizeof(ref_T)) == 0, "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, T");
+    printHex(test_tag, sizeof(test_tag), "T", AES_S_SIZE);
+}
+
+static void test_gcm_ad(void)
+{
+    /* 
+     * MACsec GCM-AES Test Vectors,  April 11, 2011, 
+     * Provided for IEEE P802.1 Security Task Group 
+     * consideration by Karen Randall 
+     */
+    /* 2.2.1 60-Byte Packet Encryption Using GCM-AES-128 */
+    uint8_t ref_T[] = {
+        0x4fU, 0x8dU, 0x55U, 0xe7U, 0xd3U, 0xf0U, 0x6fU, 0xd5U, 0xa1U, 0x3cU, 0x0cU, 0x29U, 0xb9U, 0xd5U, 0xb8U, 0x80U,
+    };
+    uint8_t ref_iv[] = {
+        0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 0xb2U, 0xc2U, 0x84U, 0x65U, 
+    };
+    uint8_t ref_aad[] = {
+        0xd6U, 0x09U, 0xb1U, 0xf0U, 0x56U, 0x63U, 0x7aU, 0x0dU, 0x46U, 0xdfU, 0x99U, 0x8dU, 0x88U, 0xe5U, 0x2eU, 0x00U, 
+        0xb2U, 0xc2U, 0x84U, 0x65U, 0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 
+    };
+    uint8_t ref_key[] = { 
+        0xadU, 0x7aU, 0x2bU, 0xd0U, 0x3eU, 0xacU, 0x83U, 0x5aU, 0x6fU, 0x62U, 0x0fU, 0xdcU, 0xb5U, 0x06U, 0xb3U, 0x45U, 
+    };
+    uint8_t ref_plain[] = {
+        0x08U, 0x00U, 0x0fU, 0x10U, 0x11U, 0x12U, 0x13U, 0x14U, 0x15U, 0x16U, 0x17U, 0x18U, 0x19U, 0x1aU, 0x1bU, 0x1cU, 
+        0x1dU, 0x1eU, 0x1fU, 0x20U, 0x21U, 0x22U, 0x23U, 0x24U, 0x25U, 0x26U, 0x27U, 0x28U, 0x29U, 0x2aU, 0x2bU, 0x2cU, 
+        0x2dU, 0x2eU, 0x2fU, 0x30U, 0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U, 0x3aU, 0x00U, 0x02U,
+    };
+    uint8_t ref_cipher[] = {
+        0x70U, 0x1aU, 0xfaU, 0x1cU, 0xc0U, 0x39U, 0xc0U, 0xd7U, 0x65U, 0x12U, 0x8aU, 0x66U, 0x5dU, 0xabU, 0x69U, 0x24U, 
+        0x38U, 0x99U, 0xbfU, 0x73U, 0x18U, 0xccU, 0xdcU, 0x81U, 0xc9U, 0x93U, 0x1dU, 0xa1U, 0x7fU, 0xbeU, 0x8eU, 0xddU, 
+        0x7dU, 0x17U, 0xcbU, 0x8bU, 0x4cU, 0x26U, 0xfcU, 0x81U, 0xe3U, 0x28U, 0x4fU, 0x2bU, 0x7fU, 0xbaU, 0x71U, 0x3dU, 
+    };
+
+    uint8_t test_plain[AES_S_SIZE * 3];
+    uint8_t test_tag[AES_S_SIZE];
+
+    printf("Authenticated Decryption\n2.2.1 60-Byte Packet Encryption Using GCM-AES-128]\n");
+    printHex(ref_T,         sizeof(ref_T),      "T", AES_S_SIZE);
+    printHex(ref_iv,        sizeof(ref_iv),     "IV", AES_S_SIZE);
+    printHex(ref_aad,       sizeof(ref_aad),    "A", AES_S_SIZE);
+    printHex(ref_key,       sizeof(ref_key),    "Key", AES_S_SIZE);
+    printHex(ref_plain,     sizeof(ref_plain),  "P", AES_S_SIZE);
+    printHex(ref_cipher,    sizeof(ref_cipher), "C", AES_S_SIZE);
+
+    gcm_ad(test_plain, ref_T, \
+            ref_iv, sizeof(ref_iv), \
+            ref_aad, sizeof(ref_aad), \
+            ref_key, sizeof(ref_key), \
+            ref_cipher, sizeof(ref_cipher));
+    EXAM_TEST(memcmp(test_plain, ref_plain, sizeof(ref_plain)) == 0, "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, P");
+    printHex(test_plain, sizeof(test_plain), "P", AES_S_SIZE);
 }
 
 int main(int argc, char* argv[])
@@ -592,6 +838,10 @@ int main(int argc, char* argv[])
     test_gctr();
 
     test_calT();
+
+    test_gcm_ae();
+
+    test_gcm_ad();
 
     return 0;
 }

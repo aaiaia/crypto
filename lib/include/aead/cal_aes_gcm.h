@@ -20,7 +20,18 @@ static inline int calS_body(const uint8_t* ghash, const uint8_t* const H, const 
 int calS_tail(const uint8_t* ghash, const uint8_t* const H, const size_t aSize, const size_t cSize);
 int inc32(const uint8_t* ctrBlk);
 int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, const uint8_t* const key, const size_t keySize, const uint8_t* const ctrBlk);
-int calT(const uint8_t* tag, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0);
+int calT(const uint8_t* msb, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0);
+
+int gcm_ae(uint8_t* const cipher, uint8_t* const tag, \
+        const uint8_t* const iv, const size_t ivSize, \
+        const uint8_t* const aad, const size_t aadSize, \
+        const uint8_t* const key, const size_t keySize, \
+        const uint8_t* const plain, const size_t size);
+int gcm_ad(uint8_t* const plain, const uint8_t* const tag, \
+        const uint8_t* const iv, const size_t ivSize, \
+        const uint8_t* const aad, const size_t aadSize, \
+        const uint8_t* const key, const size_t keySize, \
+        const uint8_t* const cipher, const size_t size);
 
 #ifdef __cplusplus
 }
