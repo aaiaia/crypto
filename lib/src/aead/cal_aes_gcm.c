@@ -244,7 +244,73 @@ int inc32(const uint8_t* ctrBlk)
     }
 }
 
-int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, const uint8_t* const key, const size_t keySize, const uint8_t* const ctrBlk)
+inline static int calGCTR_blk(uint8_t* const cipher_blk, const uint8_t* const plain_blk, const size_t size, const uint8_t* const key, const size_t keySize, const uint8_t* const ctrBlk)
+{
+    int fs = 0;
+
+    if( ((cipher_blk != NULL) && (plain_blk != NULL))
+     && ((key != NULL) && (keySize != 0UL))
+     && (ctrBlk != NULL)
+    )
+    {
+        uint8_t tmpNd[AES_S_SIZE];// temp node
+                                  //
+        aesEncV1(tmpNd, ctrBlk, key, keySize);
+#ifdef SELFTEST_AEAD
+        {
+            uint8_t* dgb_u8 = (uint8_t*)tmpNd;
+            size_t dbg_max = sizeof(tmpNd);
+            printf("tmpNd: ");
+            for(size_t i = 0UL; i < dbg_max; i++)
+            {
+                printf("%02x", dgb_u8[i]);
+                if(i != (dbg_max - 1UL))    printf(":");
+            }
+            printf("\r\n");
+        }
+        {
+            uint8_t* dgb_u8 = (uint8_t*)plain_blk;
+            size_t dbg_max = AES_S_SIZE;
+            printf("plain_blk: ");
+            for(size_t i = 0UL; i < dbg_max; i++)
+            {
+                printf("%02x", dgb_u8[i]);
+                if(i != (dbg_max - 1UL))    printf(":");
+            }
+            printf("\r\n");
+        }
+#endif /* SELFTEST_AEAD */
+        if(BYTE2U32L_REM(size) == 0U)
+        {
+            xor_u32((uint32_t*)cipher_blk, (uint32_t*)plain_blk, (uint32_t*)tmpNd, BYTE2U32L_FLOOR(size));
+        }
+        else
+        {
+            xor_u8(cipher_blk, plain_blk, tmpNd, BYTE2U32L_REM(size));
+        }
+#ifdef SELFTEST_AEAD
+        {
+            uint8_t* dgb_u8 = (uint8_t*)cipher_blk;
+            size_t dbg_max = AES_S_SIZE;
+            printf("cipher_blk: ");
+            for(size_t i = 0UL; i < dbg_max; i++)
+            {
+                printf("%02x", dgb_u8[i]);
+                if(i != (dbg_max - 1UL))    printf(":");
+            }
+            printf("\r\n");
+        }
+#endif /* SELFTEST_AEAD */
+    }
+    else
+    {
+        fs = -1;
+    }
+
+    return fs;
+}
+
+int calGCTR(uint8_t* const cipher, const uint8_t* plain, const size_t size, const uint8_t* const key, const size_t keySize, uint8_t* const ctrBlk)
 {
     int fs = 0;
 
@@ -263,45 +329,13 @@ int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, cons
         iterMax = (size >> 4UL); // divide to size of aes blocks
         for(size_t iter = 0UL; iter < iterMax; iter++)
         {
-            aesEncV1(tmpNd, ctrBlk, key, keySize);
 #ifdef SELFTEST_AEAD
             {
-                uint8_t* dgb_u8 = (uint8_t*)tmpNd;
-                size_t dbg_max = sizeof(tmpNd);
-                printf("tmpNd[%lu]: ", iter);
-                for(size_t i = 0UL; i < dbg_max; i++)
-                {
-                    printf("%02x", dgb_u8[i]);
-                    if(i != (dbg_max - 1UL))    printf(":");
-                }
-                printf("\r\n");
-            }
-            {
-                uint8_t* dgb_u8 = (uint8_t*)(&plain[prcSize]);
-                size_t dbg_max = AES_S_SIZE;
-                printf("plain[%lu]: ", iter);
-                for(size_t i = 0UL; i < dbg_max; i++)
-                {
-                    printf("%02x", dgb_u8[i]);
-                    if(i != (dbg_max - 1UL))    printf(":");
-                }
-                printf("\r\n");
+                printf("iter[%lu]", iter);
             }
 #endif /* SELFTEST_AEAD */
-            xor_u32((uint32_t*)(&cipher[prcSize]), (uint32_t*)(&plain[prcSize]), (uint32_t*)tmpNd, BYTE2U32L(AES_S_SIZE));
-#ifdef SELFTEST_AEAD
-            {
-                uint8_t* dgb_u8 = (uint8_t*)(&cipher[prcSize]);
-                size_t dbg_max = AES_S_SIZE;
-                printf("cipher[%lu]: ", iter);
-                for(size_t i = 0UL; i < dbg_max; i++)
-                {
-                    printf("%02x", dgb_u8[i]);
-                    if(i != (dbg_max - 1UL))    printf(":");
-                }
-                printf("\r\n");
-            }
-#endif /* SELFTEST_AEAD */
+            fs = calGCTR_blk(&cipher[prcSize], &plain[prcSize], AES_S_SIZE, key, keySize, ctrBlk);
+
             inc32(ctrBlk);
             prcSize += AES_S_SIZE;
             remSize -= AES_S_SIZE;
@@ -309,8 +343,8 @@ int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, cons
 
         if(remSize != 0)
         {
-            aesEncV1(tmpNd, ctrBlk, key, keySize);
-            xor_u8(&cipher[prcSize], &plain[prcSize], tmpNd, remSize);
+            fs = calGCTR_blk(&cipher[prcSize], &plain[prcSize], remSize, key, keySize, ctrBlk);
+
             prcSize += remSize;
             remSize -= remSize;
         }
@@ -330,7 +364,7 @@ int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, cons
 
 int calT(const uint8_t* msb, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0)
 {
-    return calGCTR(msb, ghash, AES_S_SIZE, key, keySize, j0);
+    return calGCTR_blk(msb, ghash, AES_S_SIZE, key, keySize, j0);
 }
 
 #ifdef SELFTEST_AEAD
@@ -473,7 +507,7 @@ int gcm_ad(uint8_t* const plain, const uint8_t* const tag, \
 #define EXAM_TEST(STATEMENTS, DESCRIPTION)                      \
 {                                                               \
     bool examResult = ((STATEMENTS));                           \
-    printf("%s:%s\r\n", (examResult?"PASS":"FAIL"), (DESCRIPTION));\
+    printf("%s:\x1b[33m%s\x1b[0m\r\n", (examResult?"\x1b[32mPASS\x1b[0m":"\x1b[31mFAIL\x1b[0m"), (DESCRIPTION));\
 }
 
 static void printHex(void* data, size_t size, const char* title, size_t lf)

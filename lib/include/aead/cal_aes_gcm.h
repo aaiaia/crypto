@@ -19,7 +19,8 @@ static inline int calS_head(const uint8_t* ghash, const uint8_t* const H, const 
 static inline int calS_body(const uint8_t* ghash, const uint8_t* const H, const uint8_t* const data, const size_t size);
 int calS_tail(const uint8_t* ghash, const uint8_t* const H, const size_t aSize, const size_t cSize);
 int inc32(const uint8_t* ctrBlk);
-int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, const uint8_t* const key, const size_t keySize, const uint8_t* const ctrBlk);
+inline static int calGCTR_blk(uint8_t* const cipher_blk, const uint8_t* const plain_blk, const size_t size, const uint8_t* const key, const size_t keySize, const uint8_t* const ctrBlk);
+int calGCTR(uint8_t* const cipher, const uint8_t* plain, const size_t size, const uint8_t* const key, const size_t keySize, uint8_t* const ctrBlk);
 int calT(const uint8_t* msb, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0);
 
 int gcm_ae(uint8_t* const cipher, uint8_t* const tag, \
