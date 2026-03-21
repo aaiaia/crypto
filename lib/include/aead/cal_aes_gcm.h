@@ -11,16 +11,16 @@ extern "C"{
 #define AEAD_J0_IV_BLEN_PAD_SIZE    8U  /* USE gen J0 */
 #define AEAD_J0_IV_BLEN_SIZE        8U  /* USE gen J0 */
 
-int calH(uint8_t* H, uint8_t* key, size_t keySize);
-static inline int calGhash(uint8_t* ghash, uint8_t* H, uint8_t* data, size_t size);
+int calH(const uint8_t* H, const uint8_t* const key, const size_t keySize);
+static inline int calGhash(const uint8_t* ghash, const uint8_t* const H, const uint8_t* const data, const size_t size);
 
-int calJ0(uint8_t* j0, const uint8_t* iv, const size_t ivSize, const uint8_t* H);
-static inline int calS_head(uint8_t* ghash, uint8_t* H, uint8_t* aad, size_t aadSize);
-static inline int calS_body(uint8_t* ghash, uint8_t* H, uint8_t* aad, size_t aadSize);
-int calS_tail(uint8_t* ghash, uint8_t* H, size_t aSize, size_t cSize);
-int inc32(uint8_t* ctrBlk);
-int calGCTR(uint8_t* cipher, uint8_t* plain, size_t size, uint8_t* key, size_t keySize, uint8_t* ctrBlk);
-int calT(uint8_t* tag, uint8_t* ghash, uint8_t* key, size_t keySize, uint8_t* j0);
+int calJ0(const uint8_t* j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H);
+static inline int calS_head(const uint8_t* ghash, const uint8_t* const H, const uint8_t* const aad, const size_t size);
+static inline int calS_body(const uint8_t* ghash, const uint8_t* const H, const uint8_t* const data, const size_t size);
+int calS_tail(const uint8_t* ghash, const uint8_t* const H, const size_t aSize, const size_t cSize);
+int inc32(const uint8_t* ctrBlk);
+int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, const uint8_t* const key, const size_t keySize, const uint8_t* const ctrBlk);
+int calT(const uint8_t* tag, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0);
 
 #ifdef __cplusplus
 }

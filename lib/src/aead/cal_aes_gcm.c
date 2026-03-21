@@ -9,13 +9,18 @@
 #include <stdbool.h>
 #include <stdio.h>
 #endif /* SELFTEST_AEAD */
+/* Internal functions */
+static inline int calJ0_ivNone(const uint8_t* j0);
+static inline int calJ0_iv96b(const uint8_t* j0, const uint8_t* const iv);
+static inline int calJ0_ivElse(const uint8_t* j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H);
 
-int calH(uint8_t* H, uint8_t* key, size_t keySize)
+int calH(const uint8_t* H, const uint8_t* const key, const size_t keySize)
 {
     int fs = 0;
+
     if((H != NULL) && (key != NULL) && (keySize != 0UL))
     {
-        uint8_t zero[AES_S_SIZE] = { 0U, };
+        const uint8_t zero[AES_S_SIZE] = { 0U, };
         aesEncV1(H, zero, key, keySize);
     }
     else
@@ -26,12 +31,12 @@ int calH(uint8_t* H, uint8_t* key, size_t keySize)
     return fs;
 }
 
-static inline int calGhash(uint8_t* ghash, uint8_t* H, uint8_t* data, size_t size)
+static inline int calGhash(const uint8_t* ghash, const uint8_t* const H, const uint8_t* const data, const size_t size)
 {
     return gf128_ghash(ghash, H, data, size);
 }
 
-static inline int calJ0_ivNone(uint8_t* j0)
+static inline int calJ0_ivNone(const uint8_t* j0)
 {
     int fs = 0;
 
@@ -46,7 +51,7 @@ static inline int calJ0_ivNone(uint8_t* j0)
 
     return fs;
 }
-static inline int calJ0_iv96b(uint8_t* j0, const uint8_t* iv)
+static inline int calJ0_iv96b(const uint8_t* j0, const uint8_t* const iv)
 {
     int fs = 0;
 
@@ -63,7 +68,7 @@ static inline int calJ0_iv96b(uint8_t* j0, const uint8_t* iv)
 
     return fs;
 }
-static inline int calJ0_ivElse(uint8_t* j0, const uint8_t* iv, const size_t ivSize, const uint8_t* H)
+static inline int calJ0_ivElse(const uint8_t* j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H)
 {
     int fs = 0;
 
@@ -108,7 +113,7 @@ static inline int calJ0_ivElse(uint8_t* j0, const uint8_t* iv, const size_t ivSi
     return fs;
 }
 
-int calJ0(uint8_t* j0, const uint8_t* iv, const size_t ivSize, const uint8_t* H)
+int calJ0(const uint8_t* j0, const uint8_t* const iv, const size_t ivSize, const uint8_t* const H)
 {
     int fs = 0;
 
@@ -128,15 +133,15 @@ int calJ0(uint8_t* j0, const uint8_t* iv, const size_t ivSize, const uint8_t* H)
     return fs;
 }
 
-static inline int calS_head(uint8_t* ghash, uint8_t* H, uint8_t* aad, size_t aadSize)
+static inline int calS_head(const uint8_t* ghash, const uint8_t* const H, const uint8_t* const aad, const size_t size)
 {
-    return calGhash(ghash, H, aad, aadSize);
+    return calGhash(ghash, H, aad, size);
 }
-static inline int calS_body(uint8_t* ghash, uint8_t* H, uint8_t* data, size_t dataSize)
+static inline int calS_body(const uint8_t* ghash, const uint8_t* const H, const uint8_t* const data, const size_t size)
 {
-    return calGhash(ghash, H, data, dataSize);
+    return calGhash(ghash, H, data, size);
 }
-int calS_tail(uint8_t* ghash, uint8_t* H, size_t aSize, size_t cSize)
+int calS_tail(const uint8_t* ghash, const uint8_t* const H, const size_t aSize, const size_t cSize)
 {
     int fs = 0;
 
@@ -216,7 +221,7 @@ int calS_tail(uint8_t* ghash, uint8_t* H, size_t aSize, size_t cSize)
     return fs;
 }
 
-int inc32(uint8_t* ctrBlk)
+int inc32(const uint8_t* ctrBlk)
 {
     int fs = 0;
 
@@ -236,7 +241,7 @@ int inc32(uint8_t* ctrBlk)
     }
 }
 
-int calGCTR(uint8_t* cipher, uint8_t* plain, size_t size, uint8_t* key, size_t keySize, uint8_t* ctrBlk)
+int calGCTR(const uint8_t* cipher, const uint8_t* plain, const size_t size, const uint8_t* const key, const size_t keySize, const uint8_t* const ctrBlk)
 {
     int fs = 0;
 
@@ -320,7 +325,7 @@ int calGCTR(uint8_t* cipher, uint8_t* plain, size_t size, uint8_t* key, size_t k
     return fs;
 }
 
-int calT(uint8_t* tag, uint8_t* ghash, uint8_t* key, size_t keySize, uint8_t* j0)
+int calT(const uint8_t* tag, const uint8_t* const ghash, const uint8_t* const key, const size_t keySize, const uint8_t* const j0)
 {
     const uint8_t* MSB_t = tag;
     return calGCTR(MSB_t, ghash, AES_S_SIZE, key, keySize, j0);
