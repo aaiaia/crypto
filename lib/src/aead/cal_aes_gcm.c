@@ -128,7 +128,15 @@ int calJ0(uint8_t* j0, const uint8_t* iv, const size_t ivSize, const uint8_t* H)
     return fs;
 }
 
-int calS(uint8_t* ghash, uint8_t* H, uint8_t* j0, size_t aSize, size_t cSize)
+static inline int calS_head(uint8_t* ghash, uint8_t* H, uint8_t* aad, size_t aadSize)
+{
+    return calGhash(ghash, H, aad, aadSize);
+}
+static inline int calS_body(uint8_t* ghash, uint8_t* H, uint8_t* data, size_t dataSize)
+{
+    return calGhash(ghash, H, data, dataSize);
+}
+int calS_tail(uint8_t* ghash, uint8_t* H, size_t aSize, size_t cSize)
 {
     int fs = 0;
 
@@ -369,7 +377,7 @@ static void test_getH(void)
     //printHex(test_H, sizeof(test_H), "2.1.1. GCM, H", AES_S_SIZE);
 }
 
-static void test_aadHash(void)
+static void test_calS_head(void)
 {
     /* 
      * MACsec GCM-AES Test Vectors,  April 11, 2011, 
@@ -414,30 +422,30 @@ static void test_aadHash(void)
     printHex(test_H, sizeof(test_H), "H", AES_S_SIZE);
 
     memset(test_ghash, 0, sizeof(test_ghash));
-    calGhash(test_ghash, test_H, ref_aad, sizeof(ref_aad));
+    calS_head(test_ghash, test_H, ref_aad, sizeof(ref_aad));
     EXAM_TEST(memcmp(test_ghash, ref_X5, sizeof(ref_X5)) == 0, "AES-GCM AAD GHASH(ONESHOT)");
     //printHex(test_ghash, sizeof(test_ghash), "AAD GHASH", AES_S_SIZE);
 
     memset(test_ghash, 0, sizeof(test_ghash));
     test_prcSize = 0UL;
     test_remSize = sizeof(ref_aad);
-    calGhash(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
+    calS_head(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
     test_prcSize += AES_S_SIZE;
     test_remSize -= AES_S_SIZE;
     EXAM_TEST(memcmp(test_ghash, ref_X1, sizeof(ref_X1)) == 0, "AES-GCM AAD GHASH(X1)");
-    calGhash(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
+    calS_head(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
     test_prcSize += AES_S_SIZE;
     test_remSize -= AES_S_SIZE;
     EXAM_TEST(memcmp(test_ghash, ref_X2, sizeof(ref_X2)) == 0, "AES-GCM AAD GHASH(X2)");
-    calGhash(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
+    calS_head(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
     test_prcSize += AES_S_SIZE;
     test_remSize -= AES_S_SIZE;
     EXAM_TEST(memcmp(test_ghash, ref_X3, sizeof(ref_X3)) == 0, "AES-GCM AAD GHASH(X3)");
-    calGhash(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
+    calS_head(test_ghash, test_H, &ref_aad[test_prcSize], AES_S_SIZE);
     test_prcSize += AES_S_SIZE;
     test_remSize -= AES_S_SIZE;
     EXAM_TEST(memcmp(test_ghash, ref_X4, sizeof(ref_X4)) == 0, "AES-GCM AAD GHASH(X4)");
-    calGhash(test_ghash, test_H, &ref_aad[test_prcSize], test_remSize);
+    calS_head(test_ghash, test_H, &ref_aad[test_prcSize], test_remSize);
     test_prcSize += test_remSize;
     test_remSize -= test_remSize;
     EXAM_TEST(memcmp(test_ghash, ref_X5, sizeof(ref_X5)) == 0, "AES-GCM AAD GHASH(X5)");
@@ -468,7 +476,7 @@ static void test_calJ0(void)
     printHex(test_j0, sizeof(test_j0), "Y[0]", sizeof(test_j0));
 }
 
-static void test_calS(void)
+static void test_calS_tail(void)
 {
     /* 
      * MACsec GCM-AES Test Vectors,  April 11, 2011, 
@@ -482,34 +490,17 @@ static void test_calS(void)
     uint8_t ref_X5[] = { 
         0x18U, 0xebU, 0xf4U, 0xc6U, 0x5cU, 0xe8U, 0x9bU, 0xf6U, 0x9eU, 0xfbU, 0x49U, 0x81U, 0xceU, 0xe1U, 0x3dU, 0xb9U, 
     };
-    uint8_t ref_J0[] = { 
-        0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 0xb2U, 0xc2U, 0x84U, 0x65U, 0x00U, 0x00U, 0x00U, 0x01U, 
-    };
     uint8_t ref_ghashHAC[] = { 
         0x1bU, 0xdaU, 0x7dU, 0xb5U, 0x05U, 0xd8U, 0xa1U, 0x65U, 0x26U, 0x49U, 0x86U, 0xa7U, 0x03U, 0xa6U, 0x92U, 0x0dU, 
     };
 
     uint8_t test_ghash[GHASH_SIZE];
 
-    size_t test_aSize;
-    size_t test_cSize;
-
-    test_aSize = 1UL;
-    test_cSize = 0x1FFFFFFFFFFFFFFFUL;
-    calS(test_ghash, test_ghash, test_ghash, test_aSize, test_cSize);
-
-    test_aSize = 0x1FFFFFFFFFFFFFFFUL;
-    test_cSize = 1UL;
-    calS(test_ghash, test_ghash, test_ghash, test_aSize, test_cSize);
-
-    test_aSize = 0x1ABCDEF012345678UL;
-    test_cSize = 0x1876543210ABCDEFUL;
-    calS(test_ghash, test_ghash, test_ghash, test_aSize, test_cSize);
+    size_t test_aSize = 560UL >> 3UL;  // bit length to byte size;
+    size_t test_cSize = 0UL >> 3UL;    // bit length to byte size;
 
     memcpy(test_ghash, ref_X5, sizeof(test_ghash));
-    test_aSize = 560UL >> 3UL;  // bit length to byte size
-    test_cSize = 0UL >> 3UL;    // bit length to byte size
-    calS(test_ghash, ref_H, ref_J0, test_aSize, test_cSize);
+    calS_tail(test_ghash, ref_H, test_aSize, test_cSize);
     EXAM_TEST(memcmp(test_ghash, ref_ghashHAC, sizeof(ref_ghashHAC)) == 0, "2.1.1 54-byte Packet Authentication Using GCM-AES-128, GHASH(H,A,C)");
     printHex(test_ghash, sizeof(test_ghash), "GHASH(H,A,C)", sizeof(test_ghash));
 }
@@ -553,11 +544,11 @@ int main(int argc, char* argv[])
 {
     test_getH();
 
-    test_aadHash();
+    test_calS_head();
 
     test_calJ0();
 
-    test_calS();
+    test_calS_tail();
 
     test_gctr();
 
