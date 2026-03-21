@@ -320,6 +320,12 @@ int calGCTR(uint8_t* cipher, uint8_t* plain, size_t size, uint8_t* key, size_t k
     return fs;
 }
 
+int calT(uint8_t* tag, uint8_t* ghash, uint8_t* key, size_t keySize, uint8_t* j0)
+{
+    const uint8_t* MSB_t = tag;
+    return calGCTR(MSB_t, ghash, AES_S_SIZE, key, keySize, j0);
+}
+
 #ifdef SELFTEST_AEAD
 #define EXAM_TEST(STATEMENTS, DESCRIPTION)                      \
 {                                                               \
@@ -540,6 +546,34 @@ static void test_gctr(void)
     printHex(test_cipher, sizeof(test_cipher), "C", AES_S_SIZE);
 }
 
+static void test_calT(void)
+{
+    /* 
+     * MACsec GCM-AES Test Vectors,  April 11, 2011, 
+     * Provided for IEEE P802.1 Security Task Group 
+     * consideration by Karen Randall 
+     */
+    /* 2.2.1 60-Byte Packet Encryption Using GCM-AES-128 */
+    uint8_t ref_key[] = { 
+        0xadU, 0x7aU, 0x2bU, 0xd0U, 0x3eU, 0xacU, 0x83U, 0x5aU, 0x6fU, 0x62U, 0x0fU, 0xdcU, 0xb5U, 0x06U, 0xb3U, 0x45U, 
+    };
+    uint8_t ref_J0[] = { 
+        0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 0xb2U, 0xc2U, 0x84U, 0x65U, 0x00U, 0x00U, 0x00U, 0x01U, 
+    };
+    uint8_t ref_ghashHAC[] = { 
+        0x1bU, 0xdaU, 0x7dU, 0xb5U, 0x05U, 0xd8U, 0xa1U, 0x65U, 0x26U, 0x49U, 0x86U, 0xa7U, 0x03U, 0xa6U, 0x92U, 0x0dU, 
+    };
+    uint8_t ref_T[] = {
+        0xf0U, 0x94U, 0x78U, 0xa9U, 0xb0U, 0x90U, 0x07U, 0xd0U, 0x6fU, 0x46U, 0xe9U, 0xb6U, 0xa1U, 0xdaU, 0x25U, 0xddU,
+    };
+
+    uint8_t test_tag[AES_S_SIZE];
+
+    calT(test_tag, ref_ghashHAC, ref_key, sizeof(ref_key), ref_J0);
+    EXAM_TEST(memcmp(test_tag, ref_T, sizeof(ref_T)) == 0, "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, T");
+    printHex(test_tag, sizeof(test_tag), "T", AES_S_SIZE);
+}
+
 int main(int argc, char* argv[])
 {
     test_getH();
@@ -551,6 +585,8 @@ int main(int argc, char* argv[])
     test_calS_tail();
 
     test_gctr();
+
+    test_calT();
 
     return 0;
 }

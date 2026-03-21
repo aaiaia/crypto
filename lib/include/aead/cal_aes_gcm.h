@@ -20,6 +20,7 @@ static inline int calS_body(uint8_t* ghash, uint8_t* H, uint8_t* aad, size_t aad
 int calS_tail(uint8_t* ghash, uint8_t* H, size_t aSize, size_t cSize);
 int inc32(uint8_t* ctrBlk);
 int calGCTR(uint8_t* cipher, uint8_t* plain, size_t size, uint8_t* key, size_t keySize, uint8_t* ctrBlk);
+int calT(uint8_t* tag, uint8_t* ghash, uint8_t* key, size_t keySize, uint8_t* j0);
 
 #ifdef __cplusplus
 }
