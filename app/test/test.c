@@ -46,6 +46,12 @@ const uint8_t MES_SKIP[] = "\x1b[35mSKIP\x1b[0m";
     }                                   \
 }
 
+#define EXAM_TEST(STATEMENTS, DESCRIPTION)                      \
+{                                                               \
+    bool examResult = ((STATEMENTS));                           \
+    printf("%s:\x1b[33m%s\x1b[0m\r\n", (examResult?"\x1b[32mPASS\x1b[0m":"\x1b[31mFAIL\x1b[0m"), (DESCRIPTION));\
+}
+
 void _memChk(void) {
     struct sysinfo info;
 
@@ -5566,22 +5572,27 @@ int test_ghash(void)
     memset(tv_x, 0, sizeof(tv_x));
     memset(tv_y, 0, sizeof(tv_y));
 
+    memset(tv_ghash, 0, sizeof(tv_ghash));
     gf128_ghash(tv_ghash, tv_H, tv_A, 1U<<4U);
     printHex(tv_ghash, GHASH_SIZE, "X[1]", GHASH_SIZE);
     chkVector(&tv_ref[0UL<<4UL], tv_ghash, (size_t)GHASH_SIZE);
 
+    memset(tv_ghash, 0, sizeof(tv_ghash));
     gf128_ghash(tv_ghash, tv_H, tv_A, 2U<<4U);
     printHex(tv_ghash, GHASH_SIZE, "X[2]", GHASH_SIZE);
     chkVector(&tv_ref[1UL<<4UL], tv_ghash, (size_t)GHASH_SIZE);
 
+    memset(tv_ghash, 0, sizeof(tv_ghash));
     gf128_ghash(tv_ghash, tv_H, tv_A, 3U<<4U);
     printHex(tv_ghash, GHASH_SIZE, "X[3]", GHASH_SIZE);
     chkVector(&tv_ref[2UL<<4UL], tv_ghash, (size_t)GHASH_SIZE);
 
+    memset(tv_ghash, 0, sizeof(tv_ghash));
     gf128_ghash(tv_ghash, tv_H, tv_A, 4U<<4U);
     printHex(tv_ghash, GHASH_SIZE, "X[4]", GHASH_SIZE);
     chkVector(&tv_ref[3UL<<4UL], tv_ghash, (size_t)GHASH_SIZE);
 
+    memset(tv_ghash, 0, sizeof(tv_ghash));
     gf128_ghash(tv_ghash, tv_H, tv_A, 5U<<4U);
     printHex(tv_ghash, GHASH_SIZE, "X[5]", GHASH_SIZE);
     chkVector(&tv_ref[4UL<<4UL], tv_ghash, (size_t)GHASH_SIZE);
@@ -5916,6 +5927,149 @@ void test_aes(void)
 #undef TEST_AES_RUN
 #undef TEST_AES_EXAM
 #endif /* TEST_AES */
+
+#ifdef TEST_AEAD
+#include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+
+#include "aead/cal_aes_gcm.h"
+void test_gcm_ae(void)
+{
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
+    bool cmp_result = true;
+    bool step_result;
+
+    /* 
+     * MACsec GCM-AES Test Vectors,  April 11, 2011, 
+     * Provided for IEEE P802.1 Security Task Group 
+     * consideration by Karen Randall 
+     */
+    /* 2.2.1 60-Byte Packet Encryption Using GCM-AES-128 */
+    uint8_t ref_T[] = {
+        0x4fU, 0x8dU, 0x55U, 0xe7U, 0xd3U, 0xf0U, 0x6fU, 0xd5U, 0xa1U, 0x3cU, 0x0cU, 0x29U, 0xb9U, 0xd5U, 0xb8U, 0x80U,
+    };
+    uint8_t ref_iv[] = {
+        0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 0xb2U, 0xc2U, 0x84U, 0x65U, 
+    };
+    uint8_t ref_aad[] = {
+        0xd6U, 0x09U, 0xb1U, 0xf0U, 0x56U, 0x63U, 0x7aU, 0x0dU, 0x46U, 0xdfU, 0x99U, 0x8dU, 0x88U, 0xe5U, 0x2eU, 0x00U, 
+        0xb2U, 0xc2U, 0x84U, 0x65U, 0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 
+    };
+    uint8_t ref_key[] = { 
+        0xadU, 0x7aU, 0x2bU, 0xd0U, 0x3eU, 0xacU, 0x83U, 0x5aU, 0x6fU, 0x62U, 0x0fU, 0xdcU, 0xb5U, 0x06U, 0xb3U, 0x45U, 
+    };
+    uint8_t ref_plain[] = {
+        0x08U, 0x00U, 0x0fU, 0x10U, 0x11U, 0x12U, 0x13U, 0x14U, 0x15U, 0x16U, 0x17U, 0x18U, 0x19U, 0x1aU, 0x1bU, 0x1cU, 
+        0x1dU, 0x1eU, 0x1fU, 0x20U, 0x21U, 0x22U, 0x23U, 0x24U, 0x25U, 0x26U, 0x27U, 0x28U, 0x29U, 0x2aU, 0x2bU, 0x2cU, 
+        0x2dU, 0x2eU, 0x2fU, 0x30U, 0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U, 0x3aU, 0x00U, 0x02U,
+    };
+    uint8_t ref_cipher[] = {
+        0x70U, 0x1aU, 0xfaU, 0x1cU, 0xc0U, 0x39U, 0xc0U, 0xd7U, 0x65U, 0x12U, 0x8aU, 0x66U, 0x5dU, 0xabU, 0x69U, 0x24U, 
+        0x38U, 0x99U, 0xbfU, 0x73U, 0x18U, 0xccU, 0xdcU, 0x81U, 0xc9U, 0x93U, 0x1dU, 0xa1U, 0x7fU, 0xbeU, 0x8eU, 0xddU, 
+        0x7dU, 0x17U, 0xcbU, 0x8bU, 0x4cU, 0x26U, 0xfcU, 0x81U, 0xe3U, 0x28U, 0x4fU, 0x2bU, 0x7fU, 0xbaU, 0x71U, 0x3dU, 
+    };
+
+    uint8_t test_cipher[AES_S_SIZE * 3];
+    uint8_t test_tag[AES_S_SIZE];
+
+    printf("Authenticated Encryption\n2.2.1 60-Byte Packet Encryption Using GCM-AES-128\n");
+    printHex(ref_T,         sizeof(ref_T),      "T", AES_S_SIZE);
+    printHex(ref_iv,        sizeof(ref_iv),     "IV", AES_S_SIZE);
+    printHex(ref_aad,       sizeof(ref_aad),    "A", AES_S_SIZE);
+    printHex(ref_key,       sizeof(ref_key),    "Key", AES_S_SIZE);
+    printHex(ref_plain,     sizeof(ref_plain),  "P", AES_S_SIZE);
+    printHex(ref_cipher,    sizeof(ref_cipher), "C", AES_S_SIZE);
+
+    gcm_ae(test_cipher, test_tag, \
+            ref_iv, sizeof(ref_iv), \
+            ref_aad, sizeof(ref_aad), \
+            ref_key, sizeof(ref_key), \
+            ref_plain, sizeof(ref_plain));
+
+    step_result = (memcmp(test_cipher, ref_cipher, sizeof(ref_cipher)) == 0);
+    cmp_result &= step_result;
+    EXAM_TEST(step_result, "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, C");
+    printHex(test_cipher, sizeof(test_cipher), "C", AES_S_SIZE);
+
+    step_result = (memcmp(test_tag, ref_T, sizeof(ref_T)) == 0);
+    cmp_result &= step_result;
+    EXAM_TEST(step_result, "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, T");
+    printHex(test_tag, sizeof(test_tag), "T", AES_S_SIZE);
+
+    TEST_ASSERT(cmp_result);
+}
+
+void test_gcm_ad(void)
+{
+    printf("%s:%d:%s\r\n", __FILE__, __LINE__, __func__);
+
+    bool cmp_result = true;
+    bool step_result;
+
+    /* 
+     * MACsec GCM-AES Test Vectors,  April 11, 2011, 
+     * Provided for IEEE P802.1 Security Task Group 
+     * consideration by Karen Randall 
+     */
+    /* 2.2.1 60-Byte Packet Encryption Using GCM-AES-128 */
+    uint8_t ref_T[] = {
+        0x4fU, 0x8dU, 0x55U, 0xe7U, 0xd3U, 0xf0U, 0x6fU, 0xd5U, 0xa1U, 0x3cU, 0x0cU, 0x29U, 0xb9U, 0xd5U, 0xb8U, 0x80U,
+    };
+    uint8_t ref_iv[] = {
+        0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 0xb2U, 0xc2U, 0x84U, 0x65U, 
+    };
+    uint8_t ref_aad[] = {
+        0xd6U, 0x09U, 0xb1U, 0xf0U, 0x56U, 0x63U, 0x7aU, 0x0dU, 0x46U, 0xdfU, 0x99U, 0x8dU, 0x88U, 0xe5U, 0x2eU, 0x00U, 
+        0xb2U, 0xc2U, 0x84U, 0x65U, 0x12U, 0x15U, 0x35U, 0x24U, 0xc0U, 0x89U, 0x5eU, 0x81U, 
+    };
+    uint8_t ref_key[] = { 
+        0xadU, 0x7aU, 0x2bU, 0xd0U, 0x3eU, 0xacU, 0x83U, 0x5aU, 0x6fU, 0x62U, 0x0fU, 0xdcU, 0xb5U, 0x06U, 0xb3U, 0x45U, 
+    };
+    uint8_t ref_plain[] = {
+        0x08U, 0x00U, 0x0fU, 0x10U, 0x11U, 0x12U, 0x13U, 0x14U, 0x15U, 0x16U, 0x17U, 0x18U, 0x19U, 0x1aU, 0x1bU, 0x1cU, 
+        0x1dU, 0x1eU, 0x1fU, 0x20U, 0x21U, 0x22U, 0x23U, 0x24U, 0x25U, 0x26U, 0x27U, 0x28U, 0x29U, 0x2aU, 0x2bU, 0x2cU, 
+        0x2dU, 0x2eU, 0x2fU, 0x30U, 0x31U, 0x32U, 0x33U, 0x34U, 0x35U, 0x36U, 0x37U, 0x38U, 0x39U, 0x3aU, 0x00U, 0x02U,
+    };
+    uint8_t ref_cipher[] = {
+        0x70U, 0x1aU, 0xfaU, 0x1cU, 0xc0U, 0x39U, 0xc0U, 0xd7U, 0x65U, 0x12U, 0x8aU, 0x66U, 0x5dU, 0xabU, 0x69U, 0x24U, 
+        0x38U, 0x99U, 0xbfU, 0x73U, 0x18U, 0xccU, 0xdcU, 0x81U, 0xc9U, 0x93U, 0x1dU, 0xa1U, 0x7fU, 0xbeU, 0x8eU, 0xddU, 
+        0x7dU, 0x17U, 0xcbU, 0x8bU, 0x4cU, 0x26U, 0xfcU, 0x81U, 0xe3U, 0x28U, 0x4fU, 0x2bU, 0x7fU, 0xbaU, 0x71U, 0x3dU, 
+    };
+
+    uint8_t test_plain[AES_S_SIZE * 3];
+    uint8_t test_tag[AES_S_SIZE];
+
+    printf("Authenticated Decryption\n2.2.1 60-Byte Packet Encryption Using GCM-AES-128]\n");
+    printHex(ref_T,         sizeof(ref_T),      "T", AES_S_SIZE);
+    printHex(ref_iv,        sizeof(ref_iv),     "IV", AES_S_SIZE);
+    printHex(ref_aad,       sizeof(ref_aad),    "A", AES_S_SIZE);
+    printHex(ref_key,       sizeof(ref_key),    "Key", AES_S_SIZE);
+    printHex(ref_plain,     sizeof(ref_plain),  "P", AES_S_SIZE);
+    printHex(ref_cipher,    sizeof(ref_cipher), "C", AES_S_SIZE);
+
+    gcm_ad(test_plain, ref_T, \
+            ref_iv, sizeof(ref_iv), \
+            ref_aad, sizeof(ref_aad), \
+            ref_key, sizeof(ref_key), \
+            ref_cipher, sizeof(ref_cipher));
+
+    step_result = (memcmp(test_plain, ref_plain, sizeof(ref_plain)) == 0);
+    cmp_result &= step_result;
+    EXAM_TEST(step_result , "2.2.1 60-Byte Packet Encryption Using GCM-AES-128, P");
+    printHex(test_plain, sizeof(test_plain), "P", AES_S_SIZE);
+
+    TEST_ASSERT(cmp_result);
+}
+
+void test_aead(void)
+{
+    test_gcm_ae();
+    test_gcm_ad();
+}
+#endif /* TEST_AEAD */
 
 #ifdef TEST_ENDIAN
 #include "endian/endian.h"
@@ -10739,6 +10893,14 @@ void test_sequence_crypto(void) {
     test_aes();
     printf("================================================================================\n");
 #endif /* TEST_AES */
+
+#ifdef TEST_AEAD
+    printf("--------------------------------------------------------------------------------\n");
+    _KEYIN_DO_TEST_(keyin, "test_aead");
+    _COND_DO_TEST_(keyin)
+    test_aead();
+    printf("================================================================================\n");
+#endif /* TEST_AEAD */
 
 #ifdef TEST_ENDIAN
     printf("--------------------------------------------------------------------------------\n");
