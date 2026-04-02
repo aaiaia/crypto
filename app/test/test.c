@@ -4883,9 +4883,9 @@ void test_mim_bignum(void)
             (void)memset(num_i->nums, 0xffU, num_i->size);
             intentional_invalid = TEST_mim_bignum_set_LIST[i].invalid_case;
 
-            TICK_TIME_START("mim_bignum");
-            if(fr = mim_bignum(num_i, num_a, num_n)) {
-                printf("mim_bignum() = ");
+            TICK_TIME_START("mim_bignum_unsigned_safe");
+            if(fr = mim_bignum_unsigned_safe(num_i, num_a, num_n)) {
+                printf("mim_bignum_unsigned_safe() = ");
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
@@ -4907,7 +4907,7 @@ void test_mim_bignum(void)
                 printf("ref a^-1 mod n(inverse mod n)\r\n");
                 test_print_bignum_array(TEST_mim_bignum_set_LIST[i].ref_num_i, num_i->nlen);
             }
-            printf("[%lu] mim_bignum() is %s\r\n", i, (((cmp_result) && (cmp_fr))?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
+            printf("[%lu] mim_bignum_unsigned_safe() is %s\r\n", i, (((cmp_result) && (cmp_fr))?(MES_PASS):(intentional_invalid?MES_SKIP:MES_FAIL)));
             TEST_ASSERT(((cmp_result) && (cmp_fr)) || (intentional_invalid));
         }
     }
@@ -4930,9 +4930,9 @@ void test_mim_bignum(void)
                 ((uint8_t*)num_n->nums)[byte] = (rand()&0xFFU);
             }
 
-            TICK_TIME_START("mim_bignum");
-            if(fr = mim_bignum(num_i, num_a, num_n)) {
-                printf("mim_bignum() = ");
+            TICK_TIME_START("mim_bignum_unsigned_safe");
+            if(fr = mim_bignum_unsigned_safe(num_i, num_a, num_n)) {
+                printf("mim_bignum_unsigned_safe() = ");
                 printReturnType(fr);
             } else { /* Do nothing */ }
             TICK_TIME_END;
@@ -5132,7 +5132,7 @@ void test_montgomery(const char* test_fn_name)
 
             TICK_TIME_START("Normal Form multiply and modulus");
             fr = mul_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, multiplier, multiplicand);
-            fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+            fr = mod_bignum_nbsDiv_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
             fr = mod_mont_unsigned_safe(mont_modulo, norm_prod_x2b, mont_conf);
@@ -5190,7 +5190,7 @@ void test_montgomery(const char* test_fn_name)
             /* Classical multiply and modulus */
             TICK_TIME_START("Normal Form multiply and modulus");
             fr = mul_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, multiplier, multiplicand);
-            fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+            fr = mod_bignum_nbsDiv_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             TICK_TIME_END;
 
             fr = mod_mont_unsigned_safe(mont_modulo, norm_prod_x2b, mont_conf);
@@ -5260,7 +5260,7 @@ void test_montgomery(const char* test_fn_name)
                 memcpy(multiplicand->nums, TEST_MONTGOMERY_NORMAL_TV_LIST[i], multiplicand->size);
 
                 fr = mul_bignum_unsigned_x2wMul_unsafe(norm_prod_x2b, norm_prod_mod, multiplicand);
-                fr = mod_bignum_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
+                fr = mod_bignum_nbsDiv_unsafe(norm_prod_mod, norm_prod_x2b, modulus);
             }
         }
         TICK_TIME_END;
